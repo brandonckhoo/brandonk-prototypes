@@ -548,15 +548,15 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
           <div class="provider-meta"><span class="provider-amt" id="other-amt" style="color:#525866;">$0</span><span class="provider-pct" id="other-pct" style="color:#99A0AE;">0%</span></div>
         </div>
 
-        <!-- View all expand -->
+        <!-- Full list (replaces top + other when expanded) -->
+        <div id="provider-expanded" style="display:none;">
+          <div class="provider-list" id="provider-all"></div>
+          <button class="view-all-btn" onclick="toggleAllProviders()" style="margin-top:10px;">Collapse</button>
+        </div>
+
+        <!-- View all link (shown when collapsed and there are more) -->
         <div id="view-all-wrap" style="display:none;margin-top:10px;">
-          <button class="view-all-btn" onclick="toggleAllProviders()" id="view-all-btn">View all <span id="view-all-count">0</span> providers</button>
-          <!-- Expanded list -->
-          <div id="provider-expanded" style="display:none;margin-top:10px;max-height:220px;overflow-y:auto;border-top:1px solid #F3F4F6;padding-top:10px;">
-            <div class="provider-list" id="provider-all">
-              <!-- populated by JS -->
-            </div>
-          </div>
+          <button class="view-all-btn" onclick="toggleAllProviders()">View all <span id="view-all-count">0</span> providers</button>
         </div>
 
       </div>
@@ -641,7 +641,8 @@ function renderProviders(data) {
     document.getElementById('view-all-count').textContent = data.length;
     document.getElementById('provider-all').innerHTML = data.map(function(p){ return rowHTML(p, false); }).join('');
     document.getElementById('provider-expanded').style.display = 'none';
-    document.getElementById('view-all-btn').textContent = 'View all ' + data.length + ' providers';
+    document.getElementById('provider-top').style.display = '';
+    document.getElementById('view-all-count').textContent = data.length;
   } else {
     document.getElementById('provider-other-row').style.display = 'none';
     document.getElementById('view-all-wrap').style.display = 'none';
@@ -655,12 +656,11 @@ function toggleHeavyUsage() {
 }
 
 function toggleAllProviders() {
-  var exp = document.getElementById('provider-expanded');
-  var btn = document.getElementById('view-all-btn');
-  var isOpen = exp.style.display !== 'none';
-  exp.style.display = isOpen ? 'none' : '';
-  var count = (heavyUsageOn ? heavyProviders : normalProviders).length;
-  btn.textContent = isOpen ? 'View all ' + count + ' providers' : 'Collapse';
+  var isExpanded = document.getElementById('provider-expanded').style.display !== 'none';
+  document.getElementById('provider-top').style.display = isExpanded ? '' : 'none';
+  document.getElementById('provider-other-row').style.display = isExpanded ? '' : 'none';
+  document.getElementById('view-all-wrap').style.display = isExpanded ? '' : 'none';
+  document.getElementById('provider-expanded').style.display = isExpanded ? 'none' : '';
 }
 
 function switchTab(tab) {

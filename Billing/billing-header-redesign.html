@@ -534,7 +534,6 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
       <div class="chart-card">
         <div class="chart-card-header">
           <span class="chart-card-title">Cost by Provider</span>
-          <button class="demo-toggle-btn" onclick="toggleHeavyUsage()" id="demo-toggle">Demo: heavy usage</button>
         </div>
 
         <!-- Top 8 rows (always shown) -->
@@ -771,7 +770,7 @@ document.addEventListener('click', function(e) {
   }
 });
 
-renderProviders(normalProviders);
+renderProviders(heavyProviders);
 </script>
 
 </body>

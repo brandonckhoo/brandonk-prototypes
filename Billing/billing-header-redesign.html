@@ -179,6 +179,10 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .provider-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .provider-amt { font-size: 13px; font-weight: 500; color: #0A0A0A; width: 60px; text-align: right; }
 .provider-pct { font-size: 12px; color: #99A0AE; width: 30px; text-align: right; }
+.provider-other { margin-top: 4px; padding-top: 10px; border-top: 1px solid #F3F4F6; }
+.demo-toggle-btn { font-size: 11px; color: #3d64d7; background: #EEF3FF; border: 1px solid #c7d7f9; border-radius: 5px; padding: 3px 8px; cursor: pointer; font-family: inherit; font-weight: 500; }
+.demo-toggle-btn.active { background: #3d64d7; color: #fff; border-color: #3d64d7; }
+.view-all-btn { font-size: 12px; color: #3d64d7; background: none; border: none; cursor: pointer; font-family: inherit; padding: 0; font-weight: 500; }
 
 /* Manage dropdown */
 .manage-btn { position: relative; }
@@ -526,48 +530,36 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         </div>
       </div>
 
-      <!-- Right: Cost by Provider — redesigned with full names -->
+      <!-- Right: Cost by Provider — top 8 + Other pattern -->
       <div class="chart-card">
         <div class="chart-card-header">
           <span class="chart-card-title">Cost by Provider</span>
+          <button class="demo-toggle-btn" onclick="toggleHeavyUsage()" id="demo-toggle">Demo: heavy usage</button>
         </div>
-        <div class="provider-list">
-          <div class="provider-row">
-            <div class="provider-name">LLM Token Surcharge</div>
-            <div class="provider-bar-wrap"><div class="provider-bar" style="width:100%"></div></div>
-            <div class="provider-meta"><span class="provider-amt">$198.45</span><span class="provider-pct">43%</span></div>
-          </div>
-          <div class="provider-row">
-            <div class="provider-name">Retell Voice Engine</div>
-            <div class="provider-bar-wrap"><div class="provider-bar" style="width:56%"></div></div>
-            <div class="provider-meta"><span class="provider-amt">$112.30</span><span class="provider-pct">24%</span></div>
-          </div>
-          <div class="provider-row">
-            <div class="provider-name">LLM (gpt-4.1)</div>
-            <div class="provider-bar-wrap"><div class="provider-bar" style="width:45%"></div></div>
-            <div class="provider-meta"><span class="provider-amt">$89.60</span><span class="provider-pct">19%</span></div>
-          </div>
-          <div class="provider-row">
-            <div class="provider-name">Short Call Surcharge</div>
-            <div class="provider-bar-wrap"><div class="provider-bar" style="width:14%"></div></div>
-            <div class="provider-meta"><span class="provider-amt">$28.40</span><span class="provider-pct">6%</span></div>
-          </div>
-          <div class="provider-row">
-            <div class="provider-name">Platform TTS</div>
-            <div class="provider-bar-wrap"><div class="provider-bar" style="width:9.5%"></div></div>
-            <div class="provider-meta"><span class="provider-amt">$18.90</span><span class="provider-pct">4%</span></div>
-          </div>
-          <div class="provider-row">
-            <div class="provider-name">Background Voice Agent</div>
-            <div class="provider-bar-wrap"><div class="provider-bar" style="width:5%"></div></div>
-            <div class="provider-meta"><span class="provider-amt">$9.01</span><span class="provider-pct">2%</span></div>
-          </div>
-          <div class="provider-row">
-            <div class="provider-name">ElevenLabs TTS</div>
-            <div class="provider-bar-wrap"><div class="provider-bar" style="width:3.5%"></div></div>
-            <div class="provider-meta"><span class="provider-amt">$6.80</span><span class="provider-pct">1%</span></div>
+
+        <!-- Top 8 rows (always shown) -->
+        <div class="provider-list" id="provider-top">
+          <!-- populated by JS -->
+        </div>
+
+        <!-- Other row (shown when there are more than 8) -->
+        <div id="provider-other-row" class="provider-row provider-other" style="display:none;">
+          <div class="provider-name" style="color:#525866;">Other (<span id="other-count">0</span> more)</div>
+          <div class="provider-bar-wrap"><div class="provider-bar" id="other-bar" style="width:0%;background:#D1D5DB;"></div></div>
+          <div class="provider-meta"><span class="provider-amt" id="other-amt" style="color:#525866;">$0</span><span class="provider-pct" id="other-pct" style="color:#99A0AE;">0%</span></div>
+        </div>
+
+        <!-- View all expand -->
+        <div id="view-all-wrap" style="display:none;margin-top:10px;">
+          <button class="view-all-btn" onclick="toggleAllProviders()" id="view-all-btn">View all <span id="view-all-count">0</span> providers</button>
+          <!-- Expanded list -->
+          <div id="provider-expanded" style="display:none;margin-top:10px;max-height:220px;overflow-y:auto;border-top:1px solid #F3F4F6;padding-top:10px;">
+            <div class="provider-list" id="provider-all">
+              <!-- populated by JS -->
+            </div>
           </div>
         </div>
+
       </div>
 
     </div>
@@ -576,6 +568,102 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 </main>
 
 <script>
+// ── Provider data ──────────────────────────────────────────
+var normalProviders = [
+  { name: 'LLM Token Surcharge',   amt: 198.45 },
+  { name: 'Retell Voice Engine',   amt: 112.30 },
+  { name: 'LLM (gpt-4.1)',         amt:  89.60 },
+  { name: 'Short Call Surcharge',  amt:  28.40 },
+  { name: 'Platform TTS',          amt:  18.90 },
+  { name: 'Background Voice Agent',amt:   9.01 },
+  { name: 'ElevenLabs TTS',        amt:   6.80 }
+];
+
+var heavyProviders = [
+  { name: 'Branded Outbound Calling',      amt: 58420.12 },
+  { name: 'LLM Token Surcharge',           amt: 42310.88 },
+  { name: 'Retell Voice Engine',           amt: 31204.50 },
+  { name: 'LLM (gpt-4.1 high)',            amt: 24891.33 },
+  { name: 'ElevenLabs TTS',                amt: 12430.77 },
+  { name: 'US Twilio Telephony',           amt:  9871.40 },
+  { name: 'Short Call Surcharge',          amt:  7340.22 },
+  { name: 'Platform TTS',                  amt:  5120.65 },
+  { name: 'Knowledge Base Usage',          amt:  3890.44 },
+  { name: 'SMS Subscription',              amt:  2140.10 },
+  { name: 'Verified Phone Number',         amt:  1820.30 },
+  { name: 'Text Testing (gpt-4.1 mini)',   amt:  1640.80 },
+  { name: 'LLM (gpt-4.1 mini)',            amt:  1420.55 },
+  { name: 'LLM (claude-3.5)',              amt:  1310.20 },
+  { name: 'Australia Twilio Telephony',    amt:  1190.44 },
+  { name: 'Canada Twilio Telephony',       amt:   980.33 },
+  { name: 'UK Twilio Telephony',           amt:   870.12 },
+  { name: 'SMS Message',                   amt:   740.88 },
+  { name: 'US Toll-Free Telephony',        amt:   610.44 },
+  { name: 'Text Testing (claude-3.5)',     amt:   540.22 },
+  { name: 'LLM (gpt-4o mini)',             amt:   480.10 },
+  { name: 'Malaysia Twilio Telephony',     amt:   410.55 },
+  { name: 'India Twilio Telephony',        amt:   390.80 },
+  { name: 'Phone Number',                  amt:   340.00 }
+];
+
+var heavyUsageOn = false;
+
+function renderProviders(data) {
+  var TOP = 8;
+  var total = data.reduce(function(s, p) { return s + p.amt; }, 0);
+  var maxAmt = data[0].amt;
+  var top = data.slice(0, TOP);
+  var rest = data.slice(TOP);
+
+  function rowHTML(p, dimmed) {
+    var pct = Math.round(p.amt / total * 100);
+    var w = Math.round(p.amt / maxAmt * 100);
+    var color = dimmed ? 'color:#525866;' : '';
+    return '<div class="provider-row">' +
+      '<div class="provider-name" style="' + color + '">' + p.name + '</div>' +
+      '<div class="provider-bar-wrap"><div class="provider-bar" style="width:' + w + '%;' + (dimmed ? 'background:#D1D5DB;' : '') + '"></div></div>' +
+      '<div class="provider-meta"><span class="provider-amt" style="' + color + '">$' + p.amt.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</span>' +
+      '<span class="provider-pct">' + pct + '%</span></div>' +
+      '</div>';
+  }
+
+  document.getElementById('provider-top').innerHTML = top.map(function(p){ return rowHTML(p, false); }).join('');
+
+  if (rest.length > 0) {
+    var otherTotal = rest.reduce(function(s, p){ return s + p.amt; }, 0);
+    var otherPct = Math.round(otherTotal / total * 100);
+    var otherW = Math.round(otherTotal / maxAmt * 100);
+    document.getElementById('other-count').textContent = rest.length;
+    document.getElementById('other-amt').textContent = '$' + otherTotal.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2});
+    document.getElementById('other-pct').textContent = otherPct + '%';
+    document.getElementById('other-bar').style.width = otherW + '%';
+    document.getElementById('provider-other-row').style.display = '';
+    document.getElementById('view-all-wrap').style.display = '';
+    document.getElementById('view-all-count').textContent = data.length;
+    document.getElementById('provider-all').innerHTML = data.map(function(p){ return rowHTML(p, false); }).join('');
+    document.getElementById('provider-expanded').style.display = 'none';
+    document.getElementById('view-all-btn').textContent = 'View all ' + data.length + ' providers';
+  } else {
+    document.getElementById('provider-other-row').style.display = 'none';
+    document.getElementById('view-all-wrap').style.display = 'none';
+  }
+}
+
+function toggleHeavyUsage() {
+  heavyUsageOn = !heavyUsageOn;
+  document.getElementById('demo-toggle').classList.toggle('active', heavyUsageOn);
+  renderProviders(heavyUsageOn ? heavyProviders : normalProviders);
+}
+
+function toggleAllProviders() {
+  var exp = document.getElementById('provider-expanded');
+  var btn = document.getElementById('view-all-btn');
+  var isOpen = exp.style.display !== 'none';
+  exp.style.display = isOpen ? 'none' : '';
+  var count = (heavyUsageOn ? heavyProviders : normalProviders).length;
+  btn.textContent = isOpen ? 'View all ' + count + ' providers' : 'Collapse';
+}
+
 function switchTab(tab) {
   var isBilling = tab === 'billing';
   document.getElementById('billing-content').style.display = isBilling ? '' : 'none';
@@ -682,6 +770,8 @@ document.addEventListener('click', function(e) {
     closeFilterPanel();
   }
 });
+
+renderProviders(normalProviders);
 </script>
 
 </body>

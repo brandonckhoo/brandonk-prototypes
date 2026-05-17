@@ -643,6 +643,7 @@ function renderProviders(data) {
     document.getElementById('provider-expanded').style.display = 'none';
     document.getElementById('provider-top').style.display = '';
     document.getElementById('view-all-count').textContent = data.length;
+    providerExpanded = false;
   } else {
     document.getElementById('provider-other-row').style.display = 'none';
     document.getElementById('view-all-wrap').style.display = 'none';
@@ -655,12 +656,14 @@ function toggleHeavyUsage() {
   renderProviders(heavyUsageOn ? heavyProviders : normalProviders);
 }
 
+var providerExpanded = false;
+
 function toggleAllProviders() {
-  var isExpanded = document.getElementById('provider-expanded').style.display !== 'none';
-  document.getElementById('provider-top').style.display = isExpanded ? '' : 'none';
-  document.getElementById('provider-other-row').style.display = isExpanded ? '' : 'none';
-  document.getElementById('view-all-wrap').style.display = isExpanded ? '' : 'none';
-  document.getElementById('provider-expanded').style.display = isExpanded ? 'none' : '';
+  providerExpanded = !providerExpanded;
+  document.getElementById('provider-top').style.display        = providerExpanded ? 'none' : '';
+  document.getElementById('provider-other-row').style.display  = providerExpanded ? 'none' : '';
+  document.getElementById('view-all-wrap').style.display       = providerExpanded ? 'none' : '';
+  document.getElementById('provider-expanded').style.display   = providerExpanded ? ''     : 'none';
 }
 
 function switchTab(tab) {

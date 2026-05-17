@@ -592,38 +592,38 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
             <svg viewBox="0 0 100 100" class="donut-svg">
               <!-- Track -->
               <circle cx="50" cy="50" r="38" fill="none" stroke="#F3F4F6" stroke-width="15"/>
-              <!-- Voice Engine 44.8% — arc=107.0 offset=0 -->
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#3d64d7" stroke-width="15"
-                stroke-dasharray="107.0 238.76" stroke-dashoffset="0"
-                transform="rotate(-90 50 50)"/>
-              <!-- LLM 25.7% — arc=61.4 offset=-107.0 -->
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#E05252" stroke-width="15"
-                stroke-dasharray="61.4 238.76" stroke-dashoffset="-107.0"
-                transform="rotate(-90 50 50)"/>
-              <!-- Telephony 13.3% — arc=31.8 offset=-168.4 -->
+              <!-- Telephony 38% — Branded Outbound + Twilio + Short Call — arc=90.9 offset=0 -->
               <circle cx="50" cy="50" r="38" fill="none" stroke="#F5A623" stroke-width="15"
-                stroke-dasharray="31.8 238.76" stroke-dashoffset="-168.4"
+                stroke-dasharray="90.9 238.76" stroke-dashoffset="0"
                 transform="rotate(-90 50 50)"/>
-              <!-- TTS 10.3% — arc=24.6 offset=-200.2 -->
+              <!-- LLM 35% — Token Surcharge + all models + text testing — arc=82.4 offset=-90.9 -->
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#E05252" stroke-width="15"
+                stroke-dasharray="82.4 238.76" stroke-dashoffset="-90.9"
+                transform="rotate(-90 50 50)"/>
+              <!-- Voice Engine 15% — arc=35.4 offset=-173.3 -->
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#3d64d7" stroke-width="15"
+                stroke-dasharray="35.4 238.76" stroke-dashoffset="-173.3"
+                transform="rotate(-90 50 50)"/>
+              <!-- TTS 8% — ElevenLabs + Platform TTS — arc=19.9 offset=-208.7 -->
               <circle cx="50" cy="50" r="38" fill="none" stroke="#8B8FA8" stroke-width="15"
-                stroke-dasharray="24.6 238.76" stroke-dashoffset="-200.2"
+                stroke-dasharray="19.9 238.76" stroke-dashoffset="-208.7"
                 transform="rotate(-90 50 50)"/>
-              <!-- Other 5.9% — arc=14.1 offset=-224.8 -->
+              <!-- Platform 4% — KB + SMS + Phone Numbers — arc=10.2 offset=-228.6 -->
               <circle cx="50" cy="50" r="38" fill="none" stroke="#9B59B6" stroke-width="15"
-                stroke-dasharray="14.1 238.76" stroke-dashoffset="-224.8"
+                stroke-dasharray="10.2 238.76" stroke-dashoffset="-228.6"
                 transform="rotate(-90 50 50)"/>
             </svg>
             <div class="donut-center">
-              <span class="donut-total">$17,606</span>
+              <span class="donut-total">$210,366</span>
               <span class="donut-sublabel">total cost</span>
             </div>
           </div>
           <div class="cost-mix-legend">
-            <div class="mix-row"><span class="mix-dot" style="background:#3d64d7;"></span><span class="mix-name">Voice Engine</span><span class="mix-amt">$7,890</span><span class="mix-pct">44.8%</span></div>
-            <div class="mix-row"><span class="mix-dot" style="background:#E05252;"></span><span class="mix-name">LLM</span><span class="mix-amt">$4,523</span><span class="mix-pct">25.7%</span></div>
-            <div class="mix-row"><span class="mix-dot" style="background:#F5A623;"></span><span class="mix-name">Telephony</span><span class="mix-amt">$2,341</span><span class="mix-pct">13.3%</span></div>
-            <div class="mix-row"><span class="mix-dot" style="background:#8B8FA8;"></span><span class="mix-name">TTS</span><span class="mix-amt">$1,812</span><span class="mix-pct">10.3%</span></div>
-            <div class="mix-row"><span class="mix-dot" style="background:#9B59B6;"></span><span class="mix-name">Other</span><span class="mix-amt">$1,040</span><span class="mix-pct">&nbsp;5.9%</span></div>
+            <div class="mix-row"><span class="mix-dot" style="background:#F5A623;"></span><span class="mix-name">Telephony</span><span class="mix-amt">$80,084</span><span class="mix-pct">38%</span></div>
+            <div class="mix-row"><span class="mix-dot" style="background:#E05252;"></span><span class="mix-name">LLM</span><span class="mix-amt">$72,594</span><span class="mix-pct">35%</span></div>
+            <div class="mix-row"><span class="mix-dot" style="background:#3d64d7;"></span><span class="mix-name">Voice Engine</span><span class="mix-amt">$31,205</span><span class="mix-pct">15%</span></div>
+            <div class="mix-row"><span class="mix-dot" style="background:#8B8FA8;"></span><span class="mix-name">TTS</span><span class="mix-amt">$17,551</span><span class="mix-pct">&nbsp;8%</span></div>
+            <div class="mix-row"><span class="mix-dot" style="background:#9B59B6;"></span><span class="mix-name">Platform</span><span class="mix-amt">$8,932</span><span class="mix-pct">&nbsp;4%</span></div>
           </div>
         </div>
       </div>

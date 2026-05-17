@@ -608,7 +608,7 @@ var heavyProviders = [
 var heavyUsageOn = false;
 
 function renderProviders(data) {
-  var TOP = 8;
+  var TOP = 10;
   var total = data.reduce(function(s, p) { return s + p.amt; }, 0);
   var maxAmt = data[0].amt;
   var top = data.slice(0, TOP);

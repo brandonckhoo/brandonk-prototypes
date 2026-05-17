@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Agent Builder (Post-call Add Dropdown)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  /* Top bar */
+  .top-bar-wrap { background: #fff; flex-shrink: 0; }
+  .top-bar-row1 { display: flex; align-items: center; height: 40px; padding: 8px 16px 0; gap: 10px; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; color: #525866; flex-shrink: 0; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .agent-name-edit { color: #99A0AE; cursor: pointer; margin-left: 4px; display: inline-flex; align-items: center; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+  .top-tab { padding: 4px 8px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; }
+  .top-tab.active { font-weight: 500; color: #0E121B; }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-dots { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; cursor: pointer; color: #525866; }
+  .btn-publish { height: 32px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; }
+  .top-bar-row2 { display: flex; align-items: center; height: 20px; padding: 2px 16px 8px 50px; }
+  .agent-meta { font-size: 12px; color: #99A0AE; white-space: nowrap; }
+
+  /* Builder layout */
+  .builder-layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* Prompt panel */
+  .prompt-panel { width: 48%; display: flex; flex-direction: column; border-right: 1px solid #E1E4EA; overflow: hidden; }
+  .model-bar { display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .mb-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: 500; color: #374151; white-space: nowrap; }
+  .mb-pill .chevron { color: #99A0AE; margin-left: 2px; }
+  .mb-gear { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #99A0AE; border-radius: 6px; flex-shrink: 0; }
+  .mb-spacer { flex: 1; }
+  .mb-handbook { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; font-weight: 500; color: #374151; background: #fff; white-space: nowrap; flex-shrink: 0; }
+  .mb-clock { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #99A0AE; border-radius: 6px; flex-shrink: 0; }
+  .prompt-area { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; }
+  .prompt-box { flex: 1; border: 1px solid #d4d4d4; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+  .prompt-textarea { width: 100%; flex: 1; border: none; padding: 12px 16px; outline: none; font-size: 14px; line-height: 1.6; resize: none; font-family: inherit; color: #9CA3AF; }
+  .welcome-section { padding: 16px 16px 40px; flex-shrink: 0; }
+  .welcome-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .welcome-label { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .welcome-hint { font-size: 12px; color: #99A0AE; }
+  .welcome-select { height: 40px; padding: 0 32px 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; color: #0A0A0A; background: #fff; width: 100%; appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M10 13.75L3.75 7.5H16.25L10 13.75Z' fill='%2399A0AE'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; outline: none; font-family: inherit; }
+  .ai-toggle-row { margin-top: 12px; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #525866; }
+  .toggle-sw { width: 34px; height: 18px; background: #D1D5DB; border-radius: 9px; position: relative; flex-shrink: 0; }
+  .toggle-sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+
+  /* Functions panel */
+  .functions-panel { width: 30%; border-right: 1px solid #E1E4EA; overflow-y: auto; background: #fff; position: relative; }
+  .fn-header { display: flex; align-items: center; gap: 8px; padding: 14px 16px; border-bottom: 1px solid #E1E4EA; position: sticky; top: 0; background: #fff; z-index: 1; }
+  .fn-header-icon { width: 18px; height: 18px; color: #525866; flex-shrink: 0; }
+  .fn-header-title { font-size: 14px; font-weight: 500; color: #0E121B; flex: 1; }
+  .fn-header-chevron { color: #99A0AE; }
+  .fn-desc { padding: 10px 16px 14px; font-size: 13px; color: #6B7280; line-height: 1.45; border-bottom: 1px solid #E1E4EA; }
+  .fn-sub { padding: 12px 16px 0; }
+  .fn-sub-hdr { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .fn-sub-icon { width: 16px; height: 16px; color: #9CA3AF; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .fn-sub-label { font-size: 11px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.04em; }
+  .fn-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid #E5E7EB; border-radius: 8px; margin-bottom: 6px; background: #fff; }
+  .fn-row-icon { width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+  .fn-row-icon img { width: 16px; height: 16px; object-fit: contain; }
+  .fn-row-name { font-size: 13px; color: #0E121B; flex: 1; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
+  .fn-row-actions { display: flex; gap: 2px; flex-shrink: 0; }
+  .fn-row-actions button { width: 24px; height: 24px; border: none; background: none; cursor: pointer; color: #C5CAD3; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+  .fn-empty { font-size: 12px; color: #9CA3AF; padding: 4px 0 8px 0; }
+
+  /* Add button — matches production "+ Add" style */
+  .fn-add-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 500; color: #374151; padding: 5px 10px; border: 1px solid #E1E4EA; border-radius: 6px; background: #fff; cursor: pointer; font-family: inherit; position: relative; }
+  .fn-add-btn.open { background: #F5F7FA; }
+  .fn-add-btn-wrap { padding: 4px 0 14px; position: relative; }
+
+  /* Dropdown */
+  .fn-dropdown { position: absolute; top: calc(100% - 8px); left: 0; width: 320px; background: #fff; border: 1px solid #E1E4EA; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 50; padding: 4px 0; overflow: hidden; }
+  .dd-section-label { padding: 8px 14px 4px; font-size: 11px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.04em; }
+  .dd-item { display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13.5px; color: #0E121B; cursor: pointer; }
+  .dd-item:hover { background: #F5F7FA; }
+  .dd-item-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #525866; }
+  .dd-item-icon img { width: 16px; height: 16px; object-fit: contain; border-radius: 3px; }
+  .dd-divider { height: 1px; background: #E1E4EA; margin: 4px 0; }
+
+  .fn-divider { height: 1px; background: #E1E4EA; margin: 0 16px; }
+  .section { border-bottom: 1px solid #E1E4EA; }
+  .section-header { display: flex; align-items: center; gap: 8px; padding: 14px 16px; cursor: pointer; }
+  .section-header:hover { background: rgba(0,0,0,0.02); }
+  .section-icon { width: 18px; height: 18px; color: #525866; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .section-title { font-size: 14px; font-weight: 500; color: #0E121B; flex: 1; }
+  .section-chevron { color: #99A0AE; }
+
+  /* Test panel */
+  .test-panel { width: 22%; border-left: 1px solid #E1E4EA; display: flex; flex-direction: column; background: #FAFAFA; }
+  .test-tabs { display: flex; width: 100%; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .test-tab { flex: 1; padding: 10px; text-align: center; font-size: 13px; color: #525866; border-bottom: 2px solid transparent; }
+  .test-tab.active { font-weight: 500; color: #0E121B; border-bottom-color: #0E121B; }
+  .test-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; }
+  .run-test-btn { height: 36px; padding: 0 20px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 500; color: #0E121B; font-family: inherit; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar-wrap">
+  <div class="top-bar-row1">
+    <div class="home-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+    <span class="agent-name">Single-Prompt Agent</span>
+    <span class="agent-name-edit"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></span>
+    <span class="top-spacer"></span>
+    <div class="top-tabs">
+      <span class="top-tab active">Create</span>
+      <span class="top-tab">Simulation</span>
+    </div>
+    <div class="top-actions">
+      <button class="btn-dots"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="8" r="1.25" fill="currentColor"/><circle cx="8" cy="8" r="1.25" fill="currentColor"/><circle cx="12" cy="8" r="1.25" fill="currentColor"/></svg></button>
+      <button class="btn-dots"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+      <button class="btn-publish"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Publish</button>
+    </div>
+  </div>
+  <div class="top-bar-row2">
+    <span class="agent-meta">Agent ID: ag...cf1 &bull; Retell LLM ID: ll...3f3 &bull; $0.115/min &bull; 970-1300ms latency &bull; 575-805 tokens</span>
+  </div>
+</div>
+
+<!-- Builder layout -->
+<div class="builder-layout">
+
+  <!-- Prompt panel -->
+  <div class="prompt-panel">
+    <div class="model-bar">
+      <span class="mb-pill"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#525866" stroke-width="1.3"/><path d="M5 8h6M8 5v6" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg> GPT 4.1 <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="mb-gear"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+      <span style="color:#E1E4EA;margin:0 2px;">|</span>
+      <span class="mb-pill"><img src="https://ui-avatars.com/api/?name=C&size=20&background=E8D5C4&color=8B6F47&bold=true&rounded=true&format=svg" width="16" height="16" style="border-radius:50%;"> Cimo <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="mb-gear"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+      <span style="color:#E1E4EA;margin:0 2px;">|</span>
+      <span class="mb-pill">&#x1F1FA;&#x1F1F8; English <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="mb-spacer"></span>
+      <span class="mb-handbook"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="#525866" stroke-width="1.3"/><path d="M6 5h4M6 7.5h4M6 10h2" stroke="#525866" stroke-width="1.2" stroke-linecap="round"/></svg> Agent Handbook</span>
+      <span class="mb-clock"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+    </div>
+    <div class="prompt-area">
+      <div class="prompt-box">
+        <textarea class="prompt-textarea" placeholder="Type in a universal prompt for your agent, such as its role, conversational style, objective, etc."></textarea>
+      </div>
+    </div>
+    <div class="welcome-section">
+      <div class="welcome-header">
+        <span class="welcome-label">Welcome Message</span>
+        <span class="welcome-hint">Type {{ to add dynamic variables</span>
+      </div>
+      <select class="welcome-select"><option>User speaks first</option></select>
+      <div class="ai-toggle-row">AI starts speaking after silence <div class="toggle-sw"></div></div>
+    </div>
+  </div>
+
+  <!-- Functions panel -->
+  <div class="functions-panel">
+    <div class="fn-header">
+      <span class="fn-header-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 7h6M7 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="fn-header-title">Functions</span>
+      <span class="fn-header-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+    </div>
+    <div class="fn-desc">Enable your agent with capabilities such as calendar bookings, call termination, etc.</div>
+
+    <!-- PRE-CALL -->
+    <div class="fn-sub">
+      <div class="fn-sub-hdr">
+        <span class="fn-sub-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg></span>
+        <span class="fn-sub-label">Pre-Call Functions</span>
+      </div>
+      <div class="fn-row">
+        <span class="fn-row-icon" style="background:#EEF4FF;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#3d64d7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="fn-row-name">enrich_caller_webhook</span>
+        <div class="fn-row-actions">
+          <button><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></button>
+          <button><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+      <div class="fn-add-btn-wrap">
+        <button class="fn-add-btn"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add</button>
+      </div>
+    </div>
+    <div class="fn-divider"></div>
+
+    <!-- DURING-CALL -->
+    <div class="fn-sub" style="padding-top:12px;">
+      <div class="fn-sub-hdr">
+        <span class="fn-sub-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 3v6a4 4 0 0 0 4 4h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M10 10l3 3M10 13l3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="fn-sub-label">During-Call Functions</span>
+      </div>
+      <div class="fn-row"><span class="fn-row-icon" style="background:#F0FDF4;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="#16A34A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="fn-row-name">end_call</span><div class="fn-row-actions"><button><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></button><button><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></div></div>
+      <div class="fn-row"><span class="fn-row-icon"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=32"></span><span class="fn-row-name">get_hubspot_contact</span><div class="fn-row-actions"><button><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></button><button><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></div></div>
+      <div class="fn-row"><span class="fn-row-icon"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=32"></span><span class="fn-row-name">update_hubspot_contact</span><div class="fn-row-actions"><button><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></button><button><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></div></div>
+      <div class="fn-row"><span class="fn-row-icon"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=32"></span><span class="fn-row-name">create_hubspot_contact</span><div class="fn-row-actions"><button><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></button><button><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></div></div>
+      <div class="fn-row"><span class="fn-row-icon"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=32"></span><span class="fn-row-name">get_hubspot_deal</span><div class="fn-row-actions"><button><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></button><button><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></div></div>
+      <div class="fn-add-btn-wrap">
+        <button class="fn-add-btn"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add</button>
+      </div>
+    </div>
+    <div class="fn-divider"></div>
+
+    <!-- POST-CALL — dropdown open -->
+    <div class="fn-sub" style="padding-top:12px;">
+      <div class="fn-sub-hdr">
+        <span class="fn-sub-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="fn-sub-label">Post-Call Functions</span>
+      </div>
+      <div class="fn-empty">None yet. Runs after the call ends.</div>
+      <!-- Add button with dropdown OPEN -->
+      <div class="fn-add-btn-wrap">
+        <button class="fn-add-btn open">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add
+        </button>
+
+        <!-- Dropdown — Level 1: built-ins + Integrations drill-in -->
+        <div class="fn-dropdown">
+          <div class="dd-item">
+            <span class="dd-item-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 10a3 3 0 1 1 3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+            Custom Webhook
+          </div>
+          <div class="dd-item">
+            <span class="dd-item-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 4l-2 4 2 4M11 4l2 4-2 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+            Custom Function
+          </div>
+          <div class="dd-item">
+            <span class="dd-item-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4h10v7H7l-3 2V4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></span>
+            Send Post-call SMS
+          </div>
+          <div class="dd-divider"></div>
+          <!-- Integrations — drill-in item, highlighted as if hovered -->
+          <div class="dd-item" style="background:#F5F7FA; justify-content: space-between;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="dd-item-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/></svg></span>
+              <span style="font-size:13.5px; color:#0E121B;">Integrations</span>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="color:#9CA3AF; flex-shrink:0;"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:8px;"></div>
+    <div class="fn-divider"></div>
+    <div class="section"><div class="section-header"><span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="4" y="3" width="12" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 7h4M8 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="section-title">Knowledge Base</span><span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div></div>
+    <div class="section"><div class="section-header"><span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2v16M6 6v8M14 6v8M3 9v2M17 9v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="section-title">Speech Settings</span><span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div></div>
+    <div class="section"><div class="section-header"><span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h8M4 15h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="section-title">Realtime Transcription Settings</span><span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div></div>
+    <div class="section"><div class="section-header"><span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M4 10l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="section-title">Post-Call Data Extraction</span><span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div></div>
+    <div class="section"><div class="section-header"><span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V5l7-3z" stroke="currentColor" stroke-width="1.5"/></svg></span><span class="section-title">Security &amp; Fallback Settings</span><span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div></div>
+    <div class="section"><div class="section-header"><span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M7 10a3 3 0 1 1 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span><span class="section-title">Webhook Settings</span><span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div></div>
+    <div class="section"><div class="section-header"><span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 3l7 4v6l-7 4-7-4V7l7-4z" stroke="currentColor" stroke-width="1.5"/></svg></span><span class="section-title">MCPs</span><span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div></div>
+  </div>
+
+  <!-- Test panel -->
+  <div class="test-panel">
+    <div class="test-tabs">
+      <span class="test-tab active">Test Audio</span>
+      <span class="test-tab">Test LLM</span>
+    </div>
+    <div class="test-content">
+      <div style="color:#D1D5DB;">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M24 6a6 6 0 0 0-6 6v12a6 6 0 0 0 12 0V12a6 6 0 0 0-6-6z" stroke="currentColor" stroke-width="2"/><path d="M12 22a12 12 0 0 0 24 0M24 34v8M18 42h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <button class="run-test-btn">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M5 3l8 5-8 5V3z" fill="currentColor"/></svg>
+        Run Test
+      </button>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Add Integration (Knowledge Base)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+
+  .sidebar { width: 280px; min-width: 280px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 10px 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; height: 24px; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; color: #525866; cursor: pointer; border-radius: 6px; white-space: nowrap; }
+  .nav-item:hover { background: rgba(0,0,0,0.03); }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #FFFFFF; }
+  .footer { padding: 16px 14px; }
+  .footer-card { display: flex; align-items: center; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; box-shadow: rgba(0,0,0,0.1) 0 1px 3px 0, rgba(0,0,0,0.1) 0 1px 2px -1px; width: 100%; }
+  .footer-card.pay { padding: 16px; height: 58px; margin-bottom: 8px; }
+  .footer-card.user { padding: 10px 10px 10px 12px; height: 40px; margin-bottom: 12px; gap: 8px; }
+  .footer-badge-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px 4px 4px; background: #ecf3ff; border-radius: 6px; font-size: 12px; font-weight: 500; color: #3d64d7; }
+  .footer-card .spacer { flex: 1; }
+  .footer-user .avatar { width: 20px; height: 20px; border-radius: 50%; overflow: hidden; }
+  .footer-user .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .footer-user .name { font-size: 14px; color: #525866; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .footer-links { display: flex; align-items: center; gap: 4px; }
+  .footer-link { padding: 8px 12px; font-size: 14px; color: #525866; height: 36px; text-decoration: none; }
+  .footer-divider { width: 1px; height: 12px; background: #D1D5DB; }
+  .main { flex: 1; overflow: auto; background: #fff; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .modal { background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 1060px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
+  .modal-header { display: flex; align-items: center; gap: 10px; padding: 20px 24px 16px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .modal-title { font-size: 16px; font-weight: 600; color: #0E121B; }
+  .modal-close { margin-left: auto; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; border-radius: 6px; color: #6B7280; }
+  .modal-close:hover { background: #F3F4F6; }
+  .modal-body { display: flex; flex: 1; overflow: hidden; min-height: 520px; }
+
+  .category-sidebar { width: 210px; min-width: 210px; border-right: 1px solid #E1E4EA; padding: 16px 0; overflow-y: auto; }
+  .category-item { display: block; padding: 8px 20px; font-size: 14px; color: #525866; cursor: pointer; border: none; background: none; width: 100%; text-align: left; line-height: 1.4; }
+  .category-item:hover { background: rgba(0,0,0,0.03); }
+  .category-item.active { color: #0E121B; font-weight: 500; background: #F5F7FA; border-left: 2px solid #0E121B; padding-left: 18px; }
+
+  .card-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .card-area-header { padding: 16px 24px 0; flex-shrink: 0; }
+  .card-area-title { font-size: 15px; font-weight: 600; color: #0E121B; margin-bottom: 12px; }
+  .card-search-wrapper { position: relative; }
+  .card-search-wrapper svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+  .card-search { width: 100%; height: 36px; padding: 0 12px 0 36px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; color: #0A0A0A; background: #fff; outline: none; }
+  .card-search::placeholder { color: #99A0AE; }
+
+  .card-grid-scroll { flex: 1; overflow-y: auto; padding: 16px 24px 24px; }
+  .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+  .int-card { border: 1px solid #E1E4EA; border-radius: 10px; padding: 16px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; display: flex; flex-direction: column; gap: 6px; min-height: 96px; position: relative; }
+  .int-card:hover { border-color: #C5CAD3; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .int-card.coming-soon { opacity: 0.45; cursor: default; }
+  .int-card.coming-soon:hover { border-color: #E1E4EA; box-shadow: none; }
+  .int-card-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 6px; overflow: hidden; }
+  .int-card-icon img { width: 32px; height: 32px; object-fit: contain; }
+  .int-card-name { font-size: 14px; font-weight: 500; color: #0E121B; margin-top: 2px; }
+  .int-card-desc { font-size: 13px; color: #6B7280; line-height: 1.4; }
+  .int-card-caps { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .cap-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 10px; font-size: 10.5px; font-weight: 500; white-space: nowrap; }
+  .cap-chip.kb { background: #FEF3C7; color: #92400E; }
+  .cap-chip.tools { background: #F3E8FF; color: #6B21A8; }
+  .coming-soon-badge { display: inline-block; font-size: 11px; font-weight: 500; color: #6B7280; background: #F3F4F6; padding: 2px 8px; border-radius: 4px; margin-top: 4px; width: fit-content; }
+
+  /* Connected state chip */
+  .connected-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 6px; font-size: 11px; font-weight: 500; color: #047857; position: absolute; top: 14px; right: 14px; }
+  .connected-chip .dot { width: 5px; height: 5px; border-radius: 50%; background: #10B981; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#0A0A0A"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73Z" fill="#0A0A0A"/><path d="M255.56 34.65C238.2 34.65 226.63 47.95 226.63 66.47C226.63 84.99 242.25 98.3 256.14 98.3C270.03 98.3 279.86 90.19 283.33 78.62H269.45C267.71 82.67 264.82 87.3 256.14 87.3C247.46 87.3 239.94 81.52 239.94 69.94H283.91C283.91 49.69 272.92 34.65 255.56 34.65Z" fill="#0A0A0A"/><path d="M344.09 34.65C326.73 34.65 315.16 47.95 315.16 66.47C315.16 85.15 330.78 98.3 344.67 98.3C358.56 98.3 368.39 90.19 371.87 78.62H357.98C356.24 82.67 353.35 87.3 344.67 87.3C335.99 87.3 328.47 81.52 328.47 69.94H372.44C372.44 49.69 361.45 34.65 344.09 34.65Z" fill="#0A0A0A"/><path d="M390.96 14.97H377.65V95.92H390.96V14.97Z" fill="#0A0A0A"/><path d="M413.53 14.97H400.22V95.92H413.53V14.97Z" fill="#0A0A0A"/><path d="M304.17 17.28L290.84 17.28L290.85 34.65H282.76V45H290.85V82.82C290.85 87.58 291.8 90.43 294.66 93.29C297.51 96.14 300.37 97.09 305.13 97.09H315.14V85.67H309.88C308.16 85.67 306.96 85.37 306.13 85.11C305.27 84.84 304.61 84.16 304.4 83.29C304.17 82.33 304.17 81.09 304.17 79.9V45H315.14V34.65H304.17V17.28Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="workspace">
+    <div class="workspace-avatar">B</div>
+    <span class="workspace-name">Brandon K... Workspace</span>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14.31 7.95L10 3.64L5.69 7.95L6.67 8.93L10 5.6L13.33 8.93L14.31 7.95ZM5.69 12.05L10 16.36L14.31 12.05L13.33 11.07L10 14.4L6.67 11.07L5.69 12.05Z" fill="#99A0AE"/></svg>
+  </div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item current">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item">Integrations</li><li class="nav-item">Billing</li><li class="nav-item">Settings</li></ul></div>
+  </div>
+  <div class="footer">
+    <div class="footer-card pay"><div class="footer-badge-pill">Pay As You Go</div><span class="spacer"></span></div>
+    <div class="footer-card user footer-user"><div class="avatar"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c"></div><span class="name">brandon@retellai.com</span></div>
+    <div class="footer-links"><a class="footer-link">Help</a><div class="footer-divider"></div><a class="footer-link">Updates</a></div>
+  </div>
+</aside>
+
+<main class="main"></main>
+
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Add integration</span>
+      <button class="modal-close"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 8.586L14.95 3.636L16.364 5.05L11.414 10L16.364 14.95L14.95 16.364L10 11.414L5.05 16.364L3.636 14.95L8.586 10L3.636 5.05L5.05 3.636L10 8.586Z" fill="currentColor"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="category-sidebar">
+        <button class="category-item">All integrations</button>
+        <button class="category-item">CRM</button>
+        <button class="category-item">Calendar</button>
+        <button class="category-item">CX Platform</button>
+        <button class="category-item active">Knowledge Base</button>
+        <button class="category-item">Communication</button>
+        <button class="category-item">Payment</button>
+        <button class="category-item">CCaaS</button>
+      </div>
+
+      <div class="card-area">
+        <div class="card-area-header">
+          <div class="card-area-title">Knowledge Base</div>
+          <div class="card-search-wrapper">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.52 13.46L17.74 16.67L16.67 17.74L13.46 14.52C12.27 15.48 10.78 16 9.25 16C5.52 16 2.5 12.98 2.5 9.25C2.5 5.52 5.52 2.5 9.25 2.5C12.98 2.5 16 5.52 16 9.25C16 10.78 15.48 12.27 14.52 13.46ZM9.25 14.5C12.15 14.5 14.5 12.15 14.5 9.25C14.5 6.35 12.15 4 9.25 4C6.35 4 4 6.35 4 9.25C4 12.15 6.35 14.5 9.25 14.5Z" fill="#99A0AE"/></svg>
+            <input type="text" class="card-search" placeholder="Search integrations...">
+          </div>
+        </div>
+
+        <div class="card-grid-scroll">
+          <div class="card-grid">
+
+            <!-- Google Workspace — ALREADY CONNECTED → goes straight to Drive picker -->
+            <div class="int-card" onclick="window.location='google-drive-picker-popup.html'" style="border-color:#A7F3D0;">
+              <div class="connected-chip"><span class="dot"></span>Connected</div>
+              <div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=workspace.google.com&sz=128" alt="Google Workspace"></div>
+              <div class="int-card-name">Google Workspace</div>
+              <div class="int-card-desc">Sync Drive folders, Docs &amp; Sheets into your KB. Auto-syncs new files.</div>
+            </div>
+
+            <!-- Zendesk — coming soon -->
+            <div class="int-card coming-soon">
+              <div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=zendesk.com&sz=128" alt="Zendesk"></div>
+              <div class="int-card-name">Zendesk Help Center</div>
+              <div class="int-card-desc">Sync Help Center articles into the Knowledge Base.</div>
+              <span class="coming-soon-badge">Coming soon</span>
+            </div>
+
+            <!-- Notion — coming soon -->
+            <div class="int-card coming-soon">
+              <div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=notion.so&sz=128" alt="Notion"></div>
+              <div class="int-card-name">Notion</div>
+              <div class="int-card-desc">Sync Notion pages and databases into the Knowledge Base.</div>
+              <span class="coming-soon-badge">Coming soon</span>
+            </div>
+
+            <!-- Confluence — coming soon -->
+            <div class="int-card coming-soon">
+              <div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=atlassian.com&sz=128" alt="Confluence"></div>
+              <div class="int-card-name">Confluence</div>
+              <div class="int-card-desc">Sync Confluence spaces and pages into the Knowledge Base.</div>
+              <span class="coming-soon-badge">Coming soon</span>
+            </div>
+
+            <!-- SharePoint — coming soon -->
+            <div class="int-card coming-soon">
+              <div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=sharepoint.com&sz=128" alt="SharePoint"></div>
+              <div class="int-card-name">SharePoint</div>
+              <div class="int-card-desc">Sync SharePoint document libraries and pages.</div>
+              <span class="coming-soon-badge">Coming soon</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

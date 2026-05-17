@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Where should CRM field mappings live?</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f7f8fa;
+    color: #1a1a1a;
+    padding: 40px;
+    line-height: 1.5;
+  }
+  h1 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+  .sub { color: #6b7280; font-size: 14px; margin-bottom: 32px; }
+  h2 { font-size: 16px; font-weight: 600; margin: 40px 0 16px; }
+
+  /* The two options */
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
+  .option {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .option-a { border-top: 4px solid #f59e0b; }
+  .option-b { border-top: 4px solid #10b981; }
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .label-a { color: #f59e0b; }
+  .label-b { color: #10b981; }
+  .option h3 { font-size: 15px; margin-bottom: 16px; }
+
+  /* Fake app frame */
+  .app {
+    background: #fafbfc;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 12px;
+  }
+  .tabs {
+    display: flex;
+    background: #f3f4f6;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .tab {
+    padding: 10px 14px;
+    color: #6b7280;
+    border-right: 1px solid #e5e7eb;
+    font-weight: 500;
+  }
+  .tab.active {
+    background: white;
+    color: #1a1a1a;
+    position: relative;
+  }
+  .tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 2px;
+    background: #3b82f6;
+  }
+  .tab.highlight {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .tab.highlight-green {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  .panel {
+    background: white;
+    padding: 16px;
+    min-height: 140px;
+  }
+  .panel .field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px dashed #e5e7eb;
+    font-size: 12px;
+  }
+  .panel .field:last-child { border-bottom: none; }
+  .pill {
+    display: inline-block;
+    background: #eff6ff;
+    color: #1e40af;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .arrow { color: #9ca3af; }
+  .note {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: #f9fafb;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #4b5563;
+  }
+
+  /* Pattern comparison */
+  .pattern {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+  .pattern-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .pattern-row {
+    display: grid;
+    grid-template-columns: 180px 1fr 1fr;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+    align-items: center;
+    font-size: 13px;
+  }
+  .pattern-row:last-child { border-bottom: none; }
+  .pattern-row.header {
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .box {
+    padding: 8px 12px;
+    background: #f3f4f6;
+    border-radius: 6px;
+    display: inline-block;
+  }
+  .box.auth { background: #e0e7ff; color: #3730a3; }
+  .box.config { background: #dcfce7; color: #166534; }
+
+  /* Scale diagram */
+  .scale {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .scale-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+  .scale-col h4 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .scale-col.bad h4 { color: #dc2626; }
+  .scale-col.good h4 { color: #059669; }
+  .node {
+    padding: 8px 12px;
+    margin: 6px 0;
+    border-radius: 6px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .node.parent { background: #1f2937; color: white; font-weight: 500; }
+  .node.child { background: #f3f4f6; margin-left: 20px; }
+  .node.child-red { background: #fee2e2; color: #991b1b; margin-left: 20px; }
+  .node.child-green { background: #d1fae5; color: #065f46; margin-left: 20px; }
+
+  .takeaway {
+    margin-top: 32px;
+    background: #ecfdf5;
+    border-left: 4px solid #10b981;
+    padding: 16px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  .takeaway strong { color: #065f46; }
+</style>
+</head>
+<body>
+
+<h1>Where should CRM sync field mappings live?</h1>
+<p class="sub">Two options your teammate is comparing. Same plumbing underneath, different front door.</p>
+
+<div class="options">
+
+  <div class="option option-a">
+    <div class="label label-a">Option A</div>
+    <h3>Put mappings in the Integration tab</h3>
+    <div class="app">
+      <div class="tabs">
+        <div class="tab">Agents</div>
+        <div class="tab">CRM</div>
+        <div class="tab highlight active">Integrations</div>
+        <div class="tab">Settings</div>
+      </div>
+      <div class="panel">
+        <div style="font-weight:600; margin-bottom:8px;">HubSpot</div>
+        <div style="font-size:11px; color:#6b7280; margin-bottom:8px;">Connected as brandon@retell.ai</div>
+        <div class="field"><span class="pill">call.summary</span> <span class="arrow">&rarr;</span> <span class="pill">Contact.notes</span></div>
+        <div class="field"><span class="pill">call.outcome</span> <span class="arrow">&rarr;</span> <span class="pill">Deal.stage</span></div>
+        <div class="field"><span class="pill">call.duration</span> <span class="arrow">&rarr;</span> <span class="pill">Activity.length</span></div>
+      </div>
+    </div>
+    <div class="note">Mapping lives next to the connection. Everything HubSpot in one place.</div>
+  </div>
+
+  <div class="option option-b">
+    <div class="label label-b">Option B</div>
+    <h3>Put mappings in the CRM tab</h3>
+    <div class="app">
+      <div class="tabs">
+        <div class="tab">Agents</div>
+        <div class="tab highlight-green active">CRM</div>
+        <div class="tab">Integrations</div>
+        <div class="tab">Settings</div>
+      </div>
+      <div class="panel">
+        <div style="font-weight:600; margin-bottom:8px;">CRM Sync &rarr; HubSpot</div>
+        <div style="font-size:11px; color:#6b7280; margin-bottom:8px;">Uses connection from Integrations</div>
+        <div class="field"><span class="pill">call.summary</span> <span class="arrow">&rarr;</span> <span class="pill">Contact.notes</span></div>
+        <div class="field"><span class="pill">call.outcome</span> <span class="arrow">&rarr;</span> <span class="pill">Deal.stage</span></div>
+        <div class="field"><span class="pill">call.duration</span> <span class="arrow">&rarr;</span> <span class="pill">Activity.length</span></div>
+      </div>
+    </div>
+    <div class="note">Mapping lives next to the feature using it. Integrations just holds the connection.</div>
+  </div>
+
+</div>
+
+<h2>The pattern we already use elsewhere</h2>
+<div class="pattern">
+  <div class="pattern-title">Same idea, different features. Integrations stores the connection. The consumer owns the config.</div>
+
+  <div class="pattern-row header">
+    <div>Feature</div>
+    <div>Lives in Integrations tab</div>
+    <div>Lives in the consumer</div>
+  </div>
+  <div class="pattern-row">
+    <div>Agent tools</div>
+    <div><span class="box auth">HubSpot connection + auth</span></div>
+    <div><span class="box config">Tool config on Agent page</span></div>
+  </div>
+  <div class="pattern-row">
+    <div>CRM sync (this question)</div>
+    <div><span class="box auth">HubSpot connection + auth</span></div>
+    <div><span class="box config">Field mappings on CRM page</span></div>
+  </div>
+  <div class="pattern-row">
+    <div>Future workflow action</div>
+    <div><span class="box auth">HubSpot connection + auth</span></div>
+    <div><span class="box config">Action config on Workflow page</span></div>
+  </div>
+</div>
+
+<h2>Why Option B scales better over time</h2>
+<div class="scale">
+  <div class="scale-grid">
+
+    <div class="scale-col bad">
+      <h4>Option A in 12 months</h4>
+      <div class="node parent">Integrations &rarr; HubSpot</div>
+      <div class="node child-red">Connection + auth</div>
+      <div class="node child-red">CRM sync field mappings</div>
+      <div class="node child-red">Agent tool settings</div>
+      <div class="node child-red">Workflow action config</div>
+      <div class="node child-red">Analytics export rules</div>
+      <div style="font-size:12px; color:#6b7280; margin-top:12px;">Integrations tab becomes a junk drawer. Hard to find anything.</div>
+    </div>
+
+    <div class="scale-col good">
+      <h4>Option B in 12 months</h4>
+      <div class="node parent">Integrations &rarr; HubSpot</div>
+      <div class="node child-green">Connection + auth only</div>
+      <div class="node parent" style="margin-top:16px;">CRM</div>
+      <div class="node child-green">Field mappings</div>
+      <div class="node parent" style="margin-top:16px;">Agent</div>
+      <div class="node child-green">Tool config</div>
+      <div style="font-size:12px; color:#6b7280; margin-top:12px;">Each feature owns its own config. Integrations stays clean.</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="takeaway">
+  <strong>The analogy.</strong> Think of Integrations like the power outlet on your wall. You plug something in (auth) but you don't configure the lamp, the TV, and the toaster all at the outlet. Each appliance has its own controls. CRM sync mappings are the appliance's controls, not the outlet's.
+</div>
+
+</body>
+</html>

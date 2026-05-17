@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Agent Builder (Attach Workspace KB)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  .top-bar-row1 { display: flex; align-items: center; height: 40px; padding: 8px 16px 0; gap: 10px; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #525866; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+  .top-tab { padding: 4px 8px; font-size: 14px; color: #525866; cursor: pointer; }
+  .top-tab.active { font-weight: 500; color: #0E121B; }
+  .btn-dots { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; cursor: pointer; color: #525866; }
+  .btn-publish { height: 32px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .top-bar-row2 { display: flex; align-items: center; height: 20px; padding: 2px 16px 8px 50px; }
+  .agent-meta { font-size: 12px; color: #99A0AE; }
+  .model-bar { display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px; border-bottom: 1px solid #E1E4EA; }
+  .mb-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 6px; font-size: 13px; color: #374151; }
+
+  .builder-layout { display: flex; flex: 1; overflow: hidden; }
+  .prompt-panel { width: 48%; display: flex; flex-direction: column; border-right: 1px solid #E1E4EA; }
+  .prompt-area { flex: 1; padding: 16px; display: flex; flex-direction: column; }
+  .prompt-box { flex: 1; border: 1px solid #d4d4d4; border-radius: 8px; }
+  .prompt-textarea { width: 100%; height: 100%; border: none; padding: 12px 16px; outline: none; font-size: 14px; line-height: 1.6; resize: none; font-family: inherit; }
+
+  .settings-panel { flex: 1; overflow-y: auto; background: #fff; }
+  .section { border-bottom: 1px solid #E1E4EA; }
+  .section-header { display: flex; align-items: center; gap: 8px; padding: 14px 16px; cursor: pointer; }
+  .section-icon { width: 18px; height: 18px; color: #525866; display: flex; align-items: center; justify-content: center; }
+  .section-title { font-size: 14px; font-weight: 500; color: #0E121B; flex: 1; }
+  .section-chevron { color: #99A0AE; transition: transform .2s; }
+  .section-chevron.open { transform: rotate(180deg); }
+  .section-body { padding: 0 16px 16px; }
+  .section-desc { font-size: 13px; color: #6B7280; margin-bottom: 12px; line-height: 1.4; }
+
+  .kb-attached { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 8px; margin-bottom: 6px; }
+  .kb-attached .kb-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+  .kb-attached .kb-info { flex: 1; }
+  .kb-attached .kb-name { font-size: 13px; font-weight: 500; color: #0E121B; }
+  .kb-attached .kb-sub { font-size: 11px; color: #6B7280; }
+  .kb-attached .kb-remove { color: #99A0AE; cursor: pointer; }
+  .retrieval-toggle { display: flex; align-items: center; gap: 10px; padding: 10px 0; margin-top: 8px; }
+  .toggle { width: 34px; height: 18px; background: #3d64d7; border-radius: 9px; position: relative; flex-shrink: 0; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 18px; width: 14px; height: 14px; background: #fff; border-radius: 50%; }
+  .toggle-label { font-size: 13px; font-weight: 500; color: #0E121B; }
+  .toggle-desc { font-size: 12px; color: #6B7280; }
+
+  .add-btn-inline { display: inline-flex; align-items: center; gap: 6px; padding: 8px 0; font-size: 13px; font-weight: 500; color: #3d64d7; cursor: pointer; border: none; background: none; font-family: inherit; }
+
+  .test-panel { width: 24%; border-left: 1px solid #E1E4EA; background: #FAFAFA; display: flex; flex-direction: column; }
+  .test-tabs { display: flex; border-bottom: 1px solid #E1E4EA; }
+  .test-tab { flex: 1; padding: 10px; text-align: center; font-size: 13px; color: #525866; border-bottom: 2px solid transparent; }
+  .test-tab.active { color: #0E121B; font-weight: 500; border-bottom-color: #0E121B; }
+  .test-content { padding: 24px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; flex: 1; }
+  .test-mic { width: 48px; height: 48px; color: #D1D5DB; }
+  .run-test-btn { height: 36px; padding: 0 20px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 500; }
+
+  /* Attach KB modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .modal { background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 560px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
+  .modal-header { display: flex; align-items: center; padding: 20px 24px 0; }
+  .modal-title { font-size: 16px; font-weight: 600; color: #0E121B; }
+  .modal-sub { font-size: 13px; color: #6B7280; margin-top: 4px; padding: 0 24px; }
+  .modal-close { margin-left: auto; color: #6B7280; cursor: pointer; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
+  .modal-search { margin: 14px 24px 0; position: relative; }
+  .modal-search input { width: 100%; height: 40px; padding: 0 12px 0 36px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; outline: none; }
+  .modal-search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #99A0AE; }
+  .modal-body { padding: 14px 24px 10px; overflow-y: auto; flex: 1; }
+  .kb-group-label { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.05em; margin: 10px 0 4px; }
+  .kb-group-label:first-child { margin-top: 0; }
+  .kb-pick { display: flex; align-items: center; gap: 12px; padding: 10px 8px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; }
+  .kb-pick:hover { background: #F9FAFB; border-color: #E1E4EA; }
+  .kb-pick .cb { width: 18px; height: 18px; border: 1.5px solid #CBD5E1; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .kb-pick.checked .cb { background: #3d64d7; border-color: #3d64d7; }
+  .kb-pick.checked .cb svg { display: block; }
+  .kb-pick .cb svg { display: none; }
+  .kb-pick .k-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
+  .kb-pick .k-main { flex: 1; }
+  .kb-pick .k-name { font-size: 14px; font-weight: 500; color: #0E121B; }
+  .kb-pick .k-sub { font-size: 12px; color: #6B7280; margin-top: 1px; }
+  .badge-ok { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; background: #ECFDF5; color: #047857; border-radius: 100px; font-size: 11px; font-weight: 500; }
+  .badge-ok .dot { width: 5px; height: 5px; background: #10B981; border-radius: 50%; }
+  .modal-footer { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px 18px; border-top: 1px solid #E1E4EA; }
+  .selected-count { font-size: 13px; color: #6B7280; }
+  .btn-cancel { height: 34px; padding: 0 14px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 500; color: #525866; cursor: pointer; margin-right: 6px; }
+  .btn-primary { height: 34px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="top-bar-row1">
+  <div class="home-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+  <span class="agent-name">Enterprise Support Agent</span>
+  <span class="top-spacer"></span>
+  <div class="top-tabs"><span class="top-tab active">Create</span><span class="top-tab">Simulation</span></div>
+  <div style="display:flex;gap:8px;"><button class="btn-dots">⋯</button><button class="btn-publish">Publish</button></div>
+</div>
+<div class="top-bar-row2"><span class="agent-meta">Agent ID: ag...cf1 · Retell LLM · $0.115/min</span></div>
+<div class="model-bar"><span class="mb-pill">GPT 4.1</span><span class="mb-pill">Cimo</span><span class="mb-pill">🇺🇸 English</span></div>
+
+<div class="builder-layout">
+  <div class="prompt-panel">
+    <div class="prompt-area">
+      <div class="prompt-box">
+        <textarea class="prompt-textarea">You are a senior support specialist. Use the attached Knowledge Base to answer policy and product questions. When the caller asks about pricing, plan changes, or SOPs, the KB retrieves the answer automatically — do not invent details. If the retrieved answer is unclear, ask a clarifying question rather than guessing.</textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-panel">
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 7h6M7 10h4" stroke="currentColor" stroke-width="1.5"/></svg></span>
+        <span class="section-title">Functions</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5"/></svg></span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="4" y="3" width="12" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 7h4M8 10h4" stroke="currentColor" stroke-width="1.5"/></svg></span>
+        <span class="section-title">Knowledge Base</span>
+        <span class="section-chevron open"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5"/></svg></span>
+      </div>
+      <div class="section-body">
+        <div class="section-desc">Attached Knowledge Bases are retrieved automatically during the call via semantic search.</div>
+
+        <div class="kb-attached">
+          <div class="kb-icon"><svg width="18" height="18" viewBox="0 0 87 78" fill="none"><path d="M6.6 66.85L10.45 73.5C11.25 74.9 12.4 76 13.75 76.8L27.5 53H0C0 54.55 0.4 56.1 1.2 57.5L6.6 66.85Z" fill="#0066DA"/><path d="M43.65 25L29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L1.2 48.5C0.414 49.87 0.0003 51.4 0 52.95H27.5L43.65 25Z" fill="#00AC47"/><path d="M73.55 76.8C74.9 76 76.05 74.9 76.85 73.5L78.45 70.75L86.1 57.5C86.9 56.1 87.3 54.55 87.3 53H59.8L65.65 64.5L73.55 76.8Z" fill="#EA4335"/><path d="M43.65 25L57.4 1.2C56.05 0.4 54.5 0 52.9 0H34.4C32.8 0 31.25 0.45 29.9 1.2L43.65 25Z" fill="#00832D"/><path d="M59.8 53H27.5L13.75 76.8C15.1 77.6 16.65 78 18.25 78H69.05C70.65 78 72.2 77.55 73.55 76.8L59.8 53Z" fill="#2684FC"/><path d="M73.4 26.5L60.7 4.5C59.9 3.1 58.75 2 57.4 1.2L43.65 25L59.8 53H87.25C87.25 51.45 86.85 49.9 86.05 48.5L73.4 26.5Z" fill="#FFBA00"/></svg></div>
+          <div class="kb-info"><div class="kb-name">Sales / Knowledge</div><div class="kb-sub">Google Drive folder · 18 files · synced 12 min ago</div></div>
+          <span class="kb-remove"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+        </div>
+
+        <div class="kb-attached">
+          <div class="kb-icon"><svg width="18" height="18" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#0F9D58"/></svg></div>
+          <div class="kb-info"><div class="kb-name">Pricing 2026</div><div class="kb-sub">Google Sheet · synced 6 min ago</div></div>
+          <span class="kb-remove"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+        </div>
+
+        <div class="kb-attached">
+          <div class="kb-icon"><svg width="18" height="18" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="#525866" stroke-width="1.3"/><path d="M5 6l3 2 3-2" stroke="#525866" stroke-width="1.3"/></svg></div>
+          <div class="kb-info"><div class="kb-name">Help Center</div><div class="kb-sub">Web pages · retellai.com/help · synced 3 hr ago</div></div>
+          <span class="kb-remove"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+        </div>
+
+        <button class="add-btn-inline" onclick="document.getElementById('attach-modal').style.display='flex'"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Attach Knowledge Base</button>
+
+        <div class="retrieval-toggle">
+          <div class="toggle"></div>
+          <div style="flex:1;"><div class="toggle-label">Retrieve passively during call</div><div class="toggle-desc">Agent fetches relevant chunks on every user turn.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2v16M6 6v8M14 6v8" stroke="currentColor" stroke-width="1.5"/></svg></span>
+        <span class="section-title">Speech Settings</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5"/></svg></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-panel">
+    <div class="test-tabs"><div class="test-tab active">Test Audio</div><div class="test-tab">Test LLM</div></div>
+    <div class="test-content">
+      <svg class="test-mic" viewBox="0 0 48 48" fill="none"><rect x="19" y="8" width="10" height="20" rx="5" stroke="currentColor" stroke-width="2"/><path d="M14 22a10 10 0 0 0 20 0M24 32v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <button class="run-test-btn">Test with Audio</button>
+    </div>
+  </div>
+</div>
+
+<!-- Attach KB Modal -->
+<div class="modal-overlay" id="attach-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div><div class="modal-title">Attach Knowledge Base</div></div>
+      <span class="modal-close" onclick="document.getElementById('attach-modal').style.display='none'">✕</span>
+    </div>
+    <div class="modal-sub">Select one or more KBs. Content is retrieved via semantic search during every user turn.</div>
+    <div class="modal-search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input placeholder="Search Knowledge Bases…"></div>
+
+    <div class="modal-body">
+      <div class="kb-group-label">Google Workspace · Connected</div>
+
+      <div class="kb-pick checked" onclick="this.classList.toggle('checked')">
+        <div class="cb"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="k-icon"><svg width="20" height="20" viewBox="0 0 87 78" fill="none"><path d="M6.6 66.85L10.45 73.5C11.25 74.9 12.4 76 13.75 76.8L27.5 53H0C0 54.55 0.4 56.1 1.2 57.5L6.6 66.85Z" fill="#0066DA"/><path d="M43.65 25L29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L1.2 48.5C0.414 49.87 0.0003 51.4 0 52.95H27.5L43.65 25Z" fill="#00AC47"/><path d="M73.55 76.8C74.9 76 76.05 74.9 76.85 73.5L78.45 70.75L86.1 57.5C86.9 56.1 87.3 54.55 87.3 53H59.8L65.65 64.5L73.55 76.8Z" fill="#EA4335"/><path d="M43.65 25L57.4 1.2C56.05 0.4 54.5 0 52.9 0H34.4C32.8 0 31.25 0.45 29.9 1.2L43.65 25Z" fill="#00832D"/><path d="M59.8 53H27.5L13.75 76.8C15.1 77.6 16.65 78 18.25 78H69.05C70.65 78 72.2 77.55 73.55 76.8L59.8 53Z" fill="#2684FC"/><path d="M73.4 26.5L60.7 4.5C59.9 3.1 58.75 2 57.4 1.2L43.65 25L59.8 53H87.25C87.25 51.45 86.85 49.9 86.05 48.5L73.4 26.5Z" fill="#FFBA00"/></svg></div>
+        <div class="k-main"><div class="k-name">Sales / Knowledge</div><div class="k-sub">Google Drive folder · 18 files · 12.4 MB</div></div>
+        <span class="badge-ok"><span class="dot"></span>Synced</span>
+      </div>
+
+      <div class="kb-pick checked" onclick="this.classList.toggle('checked')">
+        <div class="cb"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="k-icon"><svg width="20" height="20" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#0F9D58"/></svg></div>
+        <div class="k-main"><div class="k-name">Pricing 2026</div><div class="k-sub">Google Sheet · 28 KB</div></div>
+        <span class="badge-ok"><span class="dot"></span>Synced</span>
+      </div>
+
+      <div class="kb-pick" onclick="this.classList.toggle('checked')">
+        <div class="cb"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="k-icon"><svg width="20" height="20" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#4285F4"/></svg></div>
+        <div class="k-main"><div class="k-name">Enterprise MSA — Template v3</div><div class="k-sub">Google Doc · 42 KB</div></div>
+        <span class="badge-ok"><span class="dot"></span>Synced</span>
+      </div>
+
+      <div class="kb-group-label">Other sources</div>
+
+      <div class="kb-pick checked" onclick="this.classList.toggle('checked')">
+        <div class="cb"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="k-icon"><svg width="18" height="18" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="#525866" stroke-width="1.3"/><path d="M5 6l3 2 3-2" stroke="#525866" stroke-width="1.3"/></svg></div>
+        <div class="k-main"><div class="k-name">Help Center</div><div class="k-sub">Web pages · retellai.com/help</div></div>
+      </div>
+
+      <div class="kb-pick" onclick="this.classList.toggle('checked')">
+        <div class="cb"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="k-icon"><svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M3 4a1 1 0 0 1 1-1h3l2 2h3a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4z" stroke="#525866" stroke-width="1.3"/></svg></div>
+        <div class="k-main"><div class="k-name">Onboarding SOPs</div><div class="k-sub">Uploaded files · 12 files · 4.2 MB</div></div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <span class="selected-count">3 selected</span>
+      <div><button class="btn-cancel" onclick="document.getElementById('attach-modal').style.display='none'">Cancel</button><button class="btn-primary">Attach</button></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

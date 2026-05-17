@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Google Workspace Integration</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 280px; min-width: 280px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 10px 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .workspace-chevron { color: #99A0AE; flex-shrink: 0; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; line-height: 16px; height: 24px; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; white-space: nowrap; border-radius: 6px; }
+  .nav-item:hover { background: rgba(0,0,0,0.03); }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #FFFFFF; }
+  .nav-item.new-item::after { content: ''; display: inline-block; width: 6px; height: 6px; background: #3d64d7; border-radius: 50%; margin-left: 6px; }
+  .footer { padding: 16px 14px; }
+  .footer-card { display: flex; align-items: center; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; box-shadow: rgba(0,0,0,0.1) 0px 1px 3px 0px, rgba(0,0,0,0.1) 0px 1px 2px -1px; cursor: pointer; width: 100%; }
+  .footer-card.pay { padding: 16px; height: 58px; margin-bottom: 8px; }
+  .footer-card.user { padding: 10px 10px 10px 12px; height: 40px; margin-bottom: 12px; gap: 8px; }
+  .footer-badge-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px 4px 4px; background: #ecf3ff; border-radius: 6px; font-size: 12px; font-weight: 500; color: #3d64d7; }
+  .footer-card .spacer { flex: 1; }
+  .footer-card .dismiss { color: #646A73; display: flex; align-items: center; }
+  .footer-user .avatar { width: 20px; height: 20px; border-radius: 50%; overflow: hidden; }
+  .footer-user .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .footer-user .name { font-size: 14px; color: #525866; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .footer-user .chevron { color: #9CA3AF; display: flex; align-items: center; }
+  .footer-links { display: flex; align-items: center; gap: 4px; }
+  .footer-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; font-size: 14px; color: #525866; cursor: pointer; text-decoration: none; height: 36px; }
+  .footer-link:hover { background: rgba(0,0,0,0.03); }
+  .footer-divider { width: 1px; height: 12px; background: #D1D5DB; }
+
+  .main { flex: 1; overflow: auto; background: #fff; position: relative; }
+  .page-header { display: flex; align-items: center; gap: 10px; padding: 24px 32px 0; }
+  .page-header .dot { width: 10px; height: 10px; background: #3d64d7; border-radius: 50%; }
+  .page-header h1 { font-size: 16px; font-weight: 600; }
+
+  /* dim background content so modal pops */
+  .page-body { padding: 24px 32px; opacity: 0.35; pointer-events: none; }
+  .page-subtitle { font-size: 13px; color: #6B7280; margin-top: 4px; margin-left: 20px; }
+  .integ-card { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border: 1px solid #E5E7EB; border-radius: 10px; margin-top: 12px; }
+  .integ-logo { width: 32px; height: 32px; border-radius: 6px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+  .integ-name { font-size: 15px; font-weight: 500; flex: 1; }
+  .integ-status { font-size: 12px; color: #1FC16B; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.28); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { width: 640px; max-height: 86vh; background: #fff; border-radius: 12px; box-shadow: 0 20px 48px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; overflow: hidden; }
+  .modal-header { display: flex; align-items: center; gap: 12px; padding: 20px 24px 0; }
+  .gw-logo { width: 28px; height: 28px; }
+  .modal-title { font-size: 17px; font-weight: 600; flex: 1; }
+  .modal-close { width: 24px; height: 24px; cursor: pointer; color: #6B7280; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+  .modal-close:hover { background: #F3F4F6; }
+  .tabs { display: flex; gap: 24px; padding: 12px 24px 0; border-bottom: 1px solid #E5E7EB; }
+  .tab { padding: 8px 0 12px; font-size: 14px; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: #0A0A0A; font-weight: 500; border-bottom-color: #0A0A0A; }
+  .tab:hover:not(.active) { color: #0A0A0A; }
+  .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+  .modal-footer { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; border-top: 1px solid #E5E7EB; }
+  .btn { padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid transparent; }
+  .btn-secondary { background: #fff; color: #0A0A0A; border-color: #E1E4EA; }
+  .btn-primary { background: #0E121B; color: #fff; }
+  .btn-danger { background: #fff; color: #EF4444; border-color: #EF4444; }
+
+  /* Forms */
+  .field { margin-bottom: 16px; }
+  .field-label { display: block; font-size: 13px; font-weight: 500; color: #0E121B; margin-bottom: 6px; }
+  .field-input { width: 100%; padding: 9px 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; color: #0A0A0A; font-family: inherit; background: #fff; }
+  .field-help { font-size: 12px; color: #6B7280; margin-top: 6px; }
+  .section-header { font-size: 14px; font-weight: 600; color: #0E121B; margin-bottom: 4px; margin-top: 20px; }
+  .section-sub { font-size: 13px; color: #6B7280; margin-bottom: 12px; }
+
+  /* Auth card */
+  .auth-card { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #E1E4EA; border-radius: 10px; }
+  .auth-avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+  .auth-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .auth-info { flex: 1; min-width: 0; }
+  .auth-name { font-size: 14px; font-weight: 500; color: #0A0A0A; }
+  .auth-meta { font-size: 12px; color: #6B7280; }
+  .pill-green { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: #E8F8EF; color: #0E7C3A; border-radius: 999px; font-size: 12px; font-weight: 500; }
+  .pill-green::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #1FC16B; }
+
+  /* Source card (Data tab) */
+  .source-card { border: 1px solid #E1E4EA; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: flex; gap: 12px; align-items: flex-start; }
+  .source-card.active { border-color: #3d64d7; background: #F7FAFF; }
+  .source-check { width: 16px; height: 16px; margin-top: 2px; flex-shrink: 0; accent-color: #3d64d7; }
+  .source-icon { width: 24px; height: 24px; margin-top: -2px; flex-shrink: 0; }
+  .source-body { flex: 1; min-width: 0; }
+  .source-title { font-size: 14px; font-weight: 600; color: #0A0A0A; }
+  .source-desc { font-size: 13px; color: #6B7280; margin-top: 2px; line-height: 1.4; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 12px; color: #0E121B; }
+  .chip .x { color: #9CA3AF; cursor: pointer; }
+  .chip.add { color: #3d64d7; border-style: dashed; cursor: pointer; }
+
+  /* Tools tab */
+  .tool-row { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-bottom: 1px solid #F1F2F4; }
+  .tool-row:last-child { border-bottom: none; }
+  .tool-icon { width: 32px; height: 32px; border-radius: 8px; background: #F5F7FA; display: flex; align-items: center; justify-content: center; color: #3d64d7; flex-shrink: 0; }
+  .tool-main { flex: 1; min-width: 0; }
+  .tool-name { font-size: 14px; font-weight: 500; color: #0A0A0A; font-family: 'SF Mono', ui-monospace, Menlo, monospace; }
+  .tool-desc { font-size: 13px; color: #6B7280; margin-top: 2px; }
+  .toggle { position: relative; width: 34px; height: 20px; background: #E1E4EA; border-radius: 999px; cursor: pointer; flex-shrink: 0; margin-top: 6px; transition: background 0.15s; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: left 0.15s; }
+  .toggle.on { background: #3d64d7; }
+  .toggle.on::after { left: 16px; }
+
+  /* About tab */
+  .about-section { margin-bottom: 20px; }
+  .about-label { font-size: 12px; font-weight: 500; color: #6B7280; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
+  .about-text { font-size: 14px; color: #0E121B; line-height: 1.5; }
+  .about-perm { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; font-size: 13px; color: #0E121B; }
+  .about-perm svg { flex-shrink: 0; color: #6B7280; margin-top: 2px; }
+  .about-meta { display: flex; flex-wrap: wrap; gap: 24px; padding: 12px 14px; background: #F5F7FA; border-radius: 8px; font-size: 13px; }
+  .about-meta div span { color: #6B7280; }
+  .about-meta div strong { color: #0A0A0A; font-weight: 500; margin-left: 6px; }
+  .link { color: #3d64d7; text-decoration: none; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#0A0A0A"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73ZM205.22 49.69C202.9 52 199.43 52.58 195.38 52.58H176.28V26.54H193.64C198.85 26.54 201.74 27.12 204.64 28.86C208.11 30.59 209.85 34.64 209.85 39.27C209.85 43.9 208.11 47.38 205.22 49.69Z" fill="#0A0A0A"/><path d="M255.56 34.65C238.2 34.65 226.63 47.95 226.63 66.47C226.63 84.99 242.25 98.3 256.14 98.3C270.03 98.3 279.86 90.19 283.33 78.62H269.45C267.71 82.67 264.82 87.3 256.14 87.3C247.46 87.3 239.94 81.52 239.94 69.94H283.91C283.91 49.69 272.92 34.65 255.56 34.65ZM240.51 60.11C241.09 51.43 246.88 45.06 255.56 45.06C264.24 45.06 270.02 51.43 270.02 60.11H240.51Z" fill="#0A0A0A"/><path d="M344.09 34.65C326.73 34.65 315.16 47.95 315.16 66.47C315.16 85.15 330.78 98.3 344.67 98.3C358.56 98.3 368.39 90.19 371.87 78.62H357.98C356.24 82.67 353.35 87.3 344.67 87.3C335.99 87.3 328.47 81.52 328.47 69.94H372.44C372.44 49.69 361.45 34.65 344.09 34.65ZM329.05 60.11C329.62 51.43 335.41 45.06 344.09 45.06C352.77 45.06 358.56 51.43 358.56 60.11H329.05Z" fill="#0A0A0A"/><path d="M390.96 14.97H377.65V95.92H390.96V14.97Z" fill="#0A0A0A"/><path d="M413.53 14.97H400.22V95.92H413.53V14.97Z" fill="#0A0A0A"/><path d="M304.17 17.28L290.84 17.28L290.85 34.65H282.76V45H290.85V82.82C290.85 87.58 291.8 90.43 294.66 93.29C297.51 96.14 300.37 97.09 305.13 97.09H315.14V85.67H309.88C308.16 85.67 306.96 85.37 306.13 85.11C305.27 84.84 304.61 84.16 304.4 83.29C304.17 82.33 304.17 81.09 304.17 79.9V45H315.14V34.65H304.17V17.28Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="workspace">
+    <div class="workspace-avatar">B</div>
+    <span class="workspace-name">Brandon K... Workspace</span>
+    <span class="workspace-chevron"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14.31 7.95L10 3.64L5.69 7.95L6.67 8.93L10 5.6L13.33 8.93L14.31 7.95ZM5.69 12.05L10 16.36L14.31 12.05L13.33 11.07L10 14.4L6.67 11.07L5.69 12.05Z" fill="#99A0AE"/></svg></span>
+  </div>
+  <div class="nav-scroll">
+    <div class="section-group">
+      <div class="section-label">Build</div>
+      <ul class="nav-items">
+        <li class="nav-item">Agents</li>
+        <li class="nav-item">Knowledge Base</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Deploy</div>
+      <ul class="nav-items">
+        <li class="nav-item">Phone Numbers</li>
+        <li class="nav-item">Batch Call</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Monitor</div>
+      <ul class="nav-items">
+        <li class="nav-item">Call History</li>
+        <li class="nav-item">Chat History</li>
+        <li class="nav-item">Analytics</li>
+        <li class="nav-item">AI Quality Assurance</li>
+        <li class="nav-item">Alerting</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">System</div>
+      <ul class="nav-items">
+        <li class="nav-item current new-item">Integrations</li>
+        <li class="nav-item">Billing</li>
+        <li class="nav-item">Settings</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="footer-card pay">
+      <div class="footer-badge-pill">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 14C4.686 14 2 11.314 2 8C2 4.686 4.686 2 8 2C11.314 2 14 4.686 14 8C14 11.314 11.314 14 8 14ZM7.402 10.4L11.644 6.157L10.795 5.309L7.402 8.703L5.704 7.006L4.856 7.854L7.402 10.4Z" fill="#3d64d7"/></svg>
+        Pay As You Go
+      </div>
+      <span class="spacer"></span>
+      <span class="dismiss"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.31 7.95L10 3.64L5.69 7.95L6.67 8.93L10 5.6L13.33 8.93L14.31 7.95ZM5.69 12.05L10 16.36L14.31 12.05L13.33 11.07L10 14.4L6.67 11.07L5.69 12.05Z" fill="#9CA3AF"/></svg></span>
+    </div>
+    <div class="footer-card user footer-user">
+      <div class="avatar"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c" alt=""></div>
+      <span class="name">brandon@retellai.com</span>
+      <span class="chevron"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.31 7.95L10 3.64L5.69 7.95L6.67 8.93L10 5.6L13.33 8.93L14.31 7.95ZM5.69 12.05L10 16.36L14.31 12.05L13.33 11.07L10 14.4L6.67 11.07L5.69 12.05Z" fill="#9CA3AF"/></svg></span>
+    </div>
+    <div class="footer-links">
+      <a class="footer-link">Help</a>
+      <div class="footer-divider"></div>
+      <a class="footer-link">Updates</a>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <div class="dot"></div>
+    <h1>Integrations</h1>
+  </div>
+  <div class="page-body">
+    <div class="page-subtitle">Connect Retell to your CRM, knowledge sources, calendars, and messaging tools.</div>
+    <div class="integ-card"><div class="integ-logo">G</div><div class="integ-name">Google Workspace</div><div class="integ-status">● Connected</div></div>
+    <div class="integ-card"><div class="integ-logo">H</div><div class="integ-name">HubSpot</div><div class="integ-status">● Connected</div></div>
+    <div class="integ-card"><div class="integ-logo">S</div><div class="integ-name">Salesforce</div></div>
+    <div class="integ-card"><div class="integ-logo">#</div><div class="integ-name">Slack</div></div>
+  </div>
+</main>
+
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <svg class="gw-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      <div class="modal-title">Google Workspace</div>
+      <div class="modal-close"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M14.95 5.05L5.05 14.95M5.05 5.05l9.9 9.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" data-tab="configure">Configure</div>
+      <div class="tab" data-tab="data">Data</div>
+      <div class="tab" data-tab="tools">Tools</div>
+      <div class="tab" data-tab="about">About</div>
+    </div>
+
+    <!-- Configure -->
+    <div class="modal-body" data-panel="configure">
+      <div class="field">
+        <label class="field-label">Name</label>
+        <input class="field-input" value="Google Workspace">
+        <div class="field-help">A label for this connection. Useful if you connect multiple Google accounts.</div>
+      </div>
+      <div class="field">
+        <label class="field-label">Authorize Google account</label>
+        <div class="auth-card">
+          <div class="auth-avatar"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c" alt=""></div>
+          <div class="auth-info">
+            <div class="auth-name">Brandon Khoo</div>
+            <div class="auth-meta">brandon@retellai.com · Drive, Sheets, Docs, Calendar, Gmail</div>
+          </div>
+          <div class="pill-green">Connected</div>
+        </div>
+        <div class="field-help">Retell will only read files and folders you explicitly select under the Data tab.</div>
+      </div>
+      <div class="field">
+        <label class="field-label">Workspace scope</label>
+        <select class="field-input">
+          <option>My Google account only (brandon@retellai.com)</option>
+          <option>Entire Retell AI workspace domain</option>
+        </select>
+        <div class="field-help">Domain-wide delegation requires a Google Workspace admin.</div>
+      </div>
+    </div>
+
+    <!-- Data -->
+    <div class="modal-body" data-panel="data" style="display:none">
+      <div class="section-header">Sources to sync to Knowledge Base</div>
+      <div class="section-sub">Selected sources sync every 30 minutes. Agents retrieve content via semantic search during the call.</div>
+
+      <div class="source-card active">
+        <input type="checkbox" class="source-check" checked>
+        <svg class="source-icon" viewBox="0 0 24 24"><path fill="#FFCF48" d="M8 3h8l5 8-5 8H8L3 11z"/><path fill="#4688F4" d="M8 3l-5 8 5 8 4-8z"/><path fill="#3CBA5C" d="M16 3l5 8-5 8-4-8z"/></svg>
+        <div class="source-body">
+          <div class="source-title">Google Drive</div>
+          <div class="source-desc">Sync files from selected folders. Supports PDFs, Docs, Slides, text, and markdown.</div>
+          <div class="chips">
+            <span class="chip">📁 Sales / Knowledge <span class="x">×</span></span>
+            <span class="chip">📁 SOPs <span class="x">×</span></span>
+            <span class="chip add">+ Add folder</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="source-card active">
+        <input type="checkbox" class="source-check" checked>
+        <svg class="source-icon" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2" fill="#0F9D58"/><path fill="#fff" d="M8 8h8v2H8zM8 12h8v2H8zM8 16h5v2H8z"/></svg>
+        <div class="source-body">
+          <div class="source-title">Google Sheets</div>
+          <div class="source-desc">Sync rows from specific sheets — great for pricing tables, FAQs, or product catalogs.</div>
+          <div class="chips">
+            <span class="chip">📊 Pricing 2026 <span class="x">×</span></span>
+            <span class="chip">📊 Product FAQ <span class="x">×</span></span>
+            <span class="chip add">+ Add sheet</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="source-card">
+        <input type="checkbox" class="source-check">
+        <svg class="source-icon" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2" fill="#4688F4"/><path fill="#fff" d="M8 8h8v1.5H8zM8 11h8v1.5H8zM8 14h5v1.5H8z"/></svg>
+        <div class="source-body">
+          <div class="source-title">Google Docs</div>
+          <div class="source-desc">Sync individual Docs. Use for polished knowledge articles and SOPs.</div>
+        </div>
+      </div>
+
+      <div class="section-header">Sync schedule</div>
+      <select class="field-input">
+        <option>Every 30 minutes (recommended)</option>
+        <option>Every 6 hours</option>
+        <option>Once a day</option>
+        <option>Manual only</option>
+      </select>
+    </div>
+
+    <!-- Tools -->
+    <div class="modal-body" data-panel="tools" style="display:none">
+      <div class="section-header" style="margin-top:0">Agent tools</div>
+      <div class="section-sub">Functions your agents can call during conversations. Toggle off any you don't want exposed.</div>
+
+      <div class="tool-row">
+        <div class="tool-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.7"/><path d="M14 14l4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+        <div class="tool-main">
+          <div class="tool-name">search_knowledge_base(query)</div>
+          <div class="tool-desc">Semantic search across all synced Google Drive, Sheets, and Docs content. Returns top-matching passages.</div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+
+      <div class="tool-row">
+        <div class="tool-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 3h7l4 4v10a1 1 0 01-1 1H5a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+        <div class="tool-main">
+          <div class="tool-name">get_document(doc_id)</div>
+          <div class="tool-desc">Fetch full content of a specific Drive or Docs file by ID. Use when a passage needs full context.</div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+
+      <div class="tool-row">
+        <div class="tool-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M3 8h14M8 3v14" stroke="currentColor" stroke-width="1.5"/></svg></div>
+        <div class="tool-main">
+          <div class="tool-name">lookup_sheet_row(sheet, filters)</div>
+          <div class="tool-desc">Query a synced Google Sheet for a specific row — e.g., price by SKU, availability by region.</div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+
+      <div class="tool-row">
+        <div class="tool-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 8h14M7 3v4M13 3v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="tool-main">
+          <div class="tool-name">create_calendar_event(title, time, attendees)</div>
+          <div class="tool-desc">Book a meeting on the authorized user's Google Calendar. Sends invites to attendees.</div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+
+      <div class="tool-row">
+        <div class="tool-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M3 5l7 6 7-6M3 5v10h14V5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+        <div class="tool-main">
+          <div class="tool-name">send_gmail(to, subject, body)</div>
+          <div class="tool-desc">Send an email from the authorized Gmail account — e.g., a follow-up summary after the call.</div>
+        </div>
+        <div class="toggle"></div>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="modal-body" data-panel="about" style="display:none">
+      <div class="about-section">
+        <div class="about-label">Description</div>
+        <div class="about-text">Connect Retell to Google Workspace to sync knowledge from Drive, Sheets, and Docs into your agents' knowledge base, and to let agents read your Gmail, send email, and create calendar events during or after calls.</div>
+      </div>
+      <div class="about-section">
+        <div class="about-meta">
+          <div><span>Provider</span><strong>Google LLC</strong></div>
+          <div><span>Category</span><strong>Knowledge, Calendar, Email</strong></div>
+          <div><span>Version</span><strong>1.4.2</strong></div>
+          <div><span>Pricing</span><strong>Included</strong></div>
+        </div>
+      </div>
+      <div class="about-section">
+        <div class="about-label">Permissions requested</div>
+        <div class="about-perm"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6 9V6a4 4 0 018 0v3M4 9h12v8H4z" stroke="currentColor" stroke-width="1.5"/></svg>Read access to files and folders you explicitly select in Drive, Sheets, and Docs.</div>
+        <div class="about-perm"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6 9V6a4 4 0 018 0v3M4 9h12v8H4z" stroke="currentColor" stroke-width="1.5"/></svg>Read and send email via Gmail (only when agents call send_gmail).</div>
+        <div class="about-perm"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6 9V6a4 4 0 018 0v3M4 9h12v8H4z" stroke="currentColor" stroke-width="1.5"/></svg>Read and write events on the authorized Google Calendar.</div>
+      </div>
+      <div class="about-section">
+        <div class="about-label">Resources</div>
+        <div class="about-text">
+          <a class="link" href="#">Setup guide</a> &nbsp;·&nbsp;
+          <a class="link" href="#">API reference</a> &nbsp;·&nbsp;
+          <a class="link" href="#">Contact support</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-danger">Disconnect</button>
+      <div style="display:flex; gap:8px">
+        <button class="btn btn-secondary">Cancel</button>
+        <button class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const panel = t.dataset.tab;
+    document.querySelectorAll('[data-panel]').forEach(p => p.style.display = p.dataset.panel === panel ? 'block' : 'none');
+  }));
+</script>
+</body>
+</html>

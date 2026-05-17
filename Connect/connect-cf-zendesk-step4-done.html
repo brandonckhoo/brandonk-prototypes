@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — CF Zendesk Flow: Step 4 — Node with Tools tab</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+  .step-banner { background: #f0fdf4; border-bottom: 1px solid #bbf7d0; padding: 7px 20px; font-size: 12px; color: #15803d; font-weight: 500; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .step-badge { background: #16a34a; color: #fff; border-radius: 12px; padding: 1px 8px; font-size: 11px; font-weight: 600; }
+  .step-arrow { color: #99A0AE; margin: 0 2px; }
+  .step-dim { color: #99A0AE; }
+  .top-bar { display: flex; align-items: center; height: 44px; padding: 0 16px; gap: 10px; position: relative; flex-shrink: 0; border-bottom: 1px solid #E1E4EA; }
+  .home-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; color: #525866; }
+  .agent-name { font-size: 14px; font-weight: 600; color: #0E121B; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 2px; }
+  .top-tab { padding: 5px 12px; font-size: 14px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .top-tab.active { font-weight: 500; color: #0E121B; background: #F5F7FA; }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-secondary { height: 30px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #525866; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 5px; }
+  .btn-icon { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; cursor: pointer; color: #525866; }
+  .btn-publish { height: 30px; padding: 0 14px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 5px; }
+  .meta-bar { display: flex; align-items: center; gap: 12px; padding: 0 16px; height: 28px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .meta-item { display: flex; align-items: center; gap: 4px; font-size: 11.5px; color: #6B7280; }
+  .meta-sep { width: 1px; height: 12px; background: #E1E4EA; }
+  .main-layout { display: flex; flex: 1; overflow: hidden; }
+  .node-palette { width: 172px; min-width: 172px; border-right: 1px solid #E1E4EA; display: flex; flex-direction: column; background: #fff; overflow-y: auto; }
+  .palette-tabs { display: flex; border-bottom: 1px solid #E1E4EA; }
+  .palette-tab { flex: 1; padding: 9px 8px; text-align: center; font-size: 13px; color: #525866; cursor: pointer; }
+  .palette-tab.active { font-weight: 500; color: #0E121B; border-bottom: 2px solid #0E121B; }
+  .palette-items { padding: 6px 0; }
+  .palette-item { display: flex; align-items: center; gap: 9px; padding: 7px 14px; font-size: 13px; color: #374151; cursor: grab; }
+  .palette-item:hover { background: rgba(0,0,0,0.03); }
+  .p-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .palette-item.active-type { background: #EEF3FF; color: #3d64d7; font-weight: 500; }
+  .palette-item.active-type .p-dot { background: #3d64d7; }
+  .palette-divider { height: 1px; background: #F3F4F6; margin: 4px 0; }
+  .canvas { flex: 1; background: #FAFAFA; position: relative; overflow: hidden; }
+  .flow-wrap { position: absolute; top: 50%; left: 50%; transform: translate(-54%, -50%); }
+  .canvas-toolbar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; align-items: center; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; padding: 4px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .canvas-toolbar button { width: 28px; height: 28px; border: none; background: none; cursor: pointer; color: #525866; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .canvas-toolbar .sep { width: 1px; height: 16px; background: #E1E4EA; margin: 0 2px; }
+  .canvas-footer { position: absolute; bottom: 20px; left: 16px; font-size: 13px; font-weight: 500; color: #525866; display: flex; align-items: center; gap: 6px; }
+  .node-begin { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 28px; padding: 0 16px; background: #7C3AED; border: none; border-radius: 20px; font-size: 12px; font-weight: 600; color: #fff; position: relative; }
+  .node-begin .port-r { position: absolute; right: -7px; top: 50%; transform: translateY(-50%); width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid #C0C7D1; background: #fff; }
+  .r-node { width: 300px; border-radius: 12px; background: #fff; border: 1.5px solid #E9D5FF; box-shadow: 0 1px 4px rgba(0,0,0,0.06); position: relative; }
+  .r-node.selected { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.15), 0 2px 10px rgba(0,0,0,0.1); }
+  .r-node-header { display: flex; align-items: center; gap: 8px; padding: 9px 12px 8px; border-bottom: 1px solid #F3E8FE; position: relative; }
+  .r-node-icon { width: 18px; height: 18px; border-radius: 4px; background: #7C3AED; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; font-size: 10px; font-weight: 700; }
+  .r-node-icon.fn { background: #3d64d7; }
+  .r-node-title { font-size: 13px; font-weight: 600; color: #111827; flex: 1; }
+  .r-node-actions { display: flex; gap: 4px; }
+  .r-node-btn { width: 22px; height: 22px; border: none; background: none; cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #9CA3AF; }
+  .port-l { position: absolute; left: -7px; top: 50%; transform: translateY(-50%); width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid #C0C7D1; background: #fff; }
+  .r-node-body { padding: 10px 12px; }
+  .r-body-label { font-size: 11px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .r-body-badge { font-size: 11px; font-weight: 500; color: #525866; background: #F3F4F6; border-radius: 4px; padding: 1px 6px; text-transform: none; letter-spacing: 0; }
+  .r-body-text { font-size: 13px; color: #374151; line-height: 1.5; padding: 10px 12px; background: #FAFAFA; border: 1px solid #F3F4F6; border-radius: 8px; min-height: 48px; }
+  .r-fn-body { padding: 10px 12px; }
+  .r-fn-tool { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: #F8FAFF; border: 1px solid #E0E9FF; border-radius: 7px; margin-bottom: 6px; }
+  .r-fn-tool:last-child { margin-bottom: 0; }
+  .r-fn-tool img { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; }
+  .r-fn-tool-name { font-size: 12px; color: #374151; font-family: 'SFMono-Regular','Consolas',monospace; flex: 1; }
+  .r-fn-badge { font-size: 10px; font-weight: 600; color: #3d64d7; background: #EEF3FF; border-radius: 4px; padding: 1px 5px; flex-shrink: 0; }
+  .r-node-transition { border-top: 1px solid #F3E8FE; margin: 0 12px; padding: 8px 0 10px; }
+  .r-node-transition.fn { border-top-color: #E0E9FF; }
+  .r-transition-header { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 7px; }
+  .r-transition-header .t-add { margin-left: auto; width: 18px; height: 18px; border-radius: 4px; border: 1px solid #E1E4EA; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #525866; font-size: 13px; line-height: 1; }
+  .r-transition-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #fff; border: 1px solid #F3E8FE; border-radius: 7px; margin-bottom: 5px; font-size: 12px; color: #374151; position: relative; }
+  .r-transition-item.fn { border-color: #E0E9FF; }
+  .r-radio { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #D1D5DB; flex-shrink: 0; }
+  .r-transition-item .port { position: absolute; right: -7px; top: 50%; transform: translateY(-50%); width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid #C0C7D1; background: #fff; }
+  .conn-svg { position: absolute; top: 0; left: 0; pointer-events: none; overflow: visible; }
+  .settings-panel { width: 340px; min-width: 340px; border-left: 1px solid #E1E4EA; display: flex; flex-direction: column; background: #fff; }
+  .settings-tabs { display: flex; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; padding: 0 14px; }
+  .settings-tab { padding: 11px 10px; font-size: 13px; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .settings-tab.active { font-weight: 500; color: #0E121B; border-bottom-color: #0E121B; }
+  .settings-body { flex: 1; overflow-y: auto; }
+  .s-section { border-bottom: 1px solid #F3F4F6; }
+  .s-section-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px 11px; cursor: pointer; }
+  .s-section-title { font-size: 13px; font-weight: 600; color: #0E121B; display: flex; align-items: center; gap: 6px; }
+  .s-chevron { color: #99A0AE; }
+  .s-section-body { padding: 0 16px 14px; }
+  .s-field { margin-bottom: 10px; }
+  .s-field:last-child { margin-bottom: 0; }
+  .s-toggle-row { display: flex; align-items: center; justify-content: space-between; }
+  .s-toggle-label { font-size: 13px; color: #374151; }
+  .s-sub-text { font-size: 11.5px; color: #9CA3AF; margin-top: 2px; }
+  .s-toggle { width: 32px; height: 18px; border-radius: 9px; background: #E1E4EA; position: relative; cursor: pointer; flex-shrink: 0; }
+  .s-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; }
+  .tools-empty { font-size: 12.5px; color: #9CA3AF; margin-bottom: 12px; }
+  .tool-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 11px; border: 1px solid #E1E4EA; border-radius: 8px; margin-bottom: 7px; background: #fff; }
+  .tool-item:last-of-type { margin-bottom: 0; }
+  .tool-icon { width: 26px; height: 26px; border-radius: 5px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #F3F4F6; background: #fff; }
+  .tool-icon img { width: 16px; height: 16px; object-fit: contain; }
+  .tool-info { flex: 1; min-width: 0; }
+  .tool-name-row { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; flex-wrap: wrap; }
+  .tool-fn-name { font-size: 12px; font-weight: 500; color: #0E121B; font-family: 'SFMono-Regular','Consolas',monospace; }
+  .tool-badge { font-size: 10px; font-weight: 600; color: #3d64d7; background: #EEF3FF; border-radius: 4px; padding: 1px 6px; flex-shrink: 0; }
+  .tool-desc { font-size: 11.5px; color: #6B7280; line-height: 1.4; }
+  .tool-delete { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; color: #C4C9D4; border-radius: 4px; flex-shrink: 0; }
+  .tool-delete:hover { color: #EF4444; background: #FEF2F2; }
+</style>
+</head>
+<body>
+<div class="step-banner">
+  <span class="step-dim">Step 1: Select Function → "+ Add"</span>
+  <span class="step-arrow">→</span>
+  <span class="step-dim">Step 2: Browse integrations → Zendesk</span>
+  <span class="step-arrow">→</span>
+  <span class="step-dim">Step 3: Select tools → "Create"</span>
+  <span class="step-arrow">→</span>
+  <span class="step-badge">Done</span>
+  Click the Function node → <strong>Tools tab</strong> shows Zendesk integration tools
+</div>
+<div class="top-bar">
+  <div class="home-icon"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+  <div class="agent-name">Customer Support Agent <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="color:#99A0AE"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></div>
+  <div class="top-spacer"></div>
+  <div class="top-tabs"><span class="top-tab active">Create</span><span class="top-tab">Simulation</span></div>
+  <div class="top-actions">
+    <span style="font-size:11.5px;color:#99A0AE;">Auto saved at 05:27</span>
+    <button class="btn-secondary"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 4h10v7H7l-3 2V4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg> Give feedback</button>
+    <button class="btn-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="8" r="1.2" fill="currentColor"/><circle cx="8" cy="8" r="1.2" fill="currentColor"/><circle cx="12" cy="8" r="1.2" fill="currentColor"/></svg></button>
+    <button class="btn-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+    <button class="btn-publish"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Publish</button>
+  </div>
+</div>
+<div class="meta-bar">
+  <div class="meta-item"><span>ag_5jk…c9d</span></div>
+  <div class="meta-sep"></div>
+  <div class="meta-item"><span>Ø 815ms latency</span></div>
+  <div class="meta-sep"></div>
+  <div class="meta-item"><span>1403–3205 tokens</span></div>
+</div>
+<div class="main-layout">
+  <div class="node-palette">
+    <div class="palette-tabs"><div class="palette-tab active">Node</div><div class="palette-tab">Components</div></div>
+    <div class="palette-items">
+      <div class="palette-item"><div class="p-dot" style="background:#7C3AED;"></div> Conversation</div>
+      <div class="palette-item"><div class="p-dot" style="background:#059669;"></div> Subagent</div>
+      <div class="palette-item active-type"><div class="p-dot"></div> Function</div>
+      <div class="palette-item"><div class="p-dot" style="background:#0284C7;"></div> Call Transfer</div>
+      <div class="palette-item"><div class="p-dot" style="background:#D97706;"></div> Press Digit</div>
+      <div class="palette-item"><div class="p-dot" style="background:#DC2626;"></div> Logic Split</div>
+      <div class="palette-item"><div class="p-dot" style="background:#0E121B;"></div> Agent Transfer</div>
+      <div class="palette-divider"></div>
+      <div class="palette-item" style="font-size:12.5px;color:#6B7280;">{x} Extract Variable</div>
+      <div class="palette-item" style="font-size:12.5px;color:#6B7280;">&lt;&gt; Code</div>
+      <div class="palette-item" style="font-size:12.5px;color:#6B7280;">⬡ MCP</div>
+      <div class="palette-divider"></div>
+      <div class="palette-item"><div class="p-dot" style="background:#6B7280;"></div> Ending</div>
+      <div class="palette-item"><div class="p-dot" style="background:#D1D5DB;"></div> Note</div>
+    </div>
+  </div>
+  <div class="canvas">
+    <div class="flow-wrap" style="width:560px;height:560px;">
+      <svg class="conn-svg" width="560" height="560">
+        <path d="M 76 80 C 110 80, 108 100, 132 100" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>
+        <path d="M 282 310 C 282 340, 282 370, 282 390" stroke="#3d64d7" stroke-width="1.5" fill="none" stroke-dasharray="5,3"/>
+      </svg>
+      <div style="position:absolute;left:0;top:66px;">
+        <div class="node-begin"><svg width="10" height="10" viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9" fill="white"/></svg> Begin <div class="port-r"></div></div>
+      </div>
+      <!-- Greeting node -->
+      <div class="r-node" style="position:absolute;left:132px;top:20px;">
+        <div class="r-node-header">
+          <div class="port-l"></div>
+          <div class="r-node-icon">W</div>
+          <div class="r-node-title">Greeting</div>
+          <div class="r-node-actions">
+            <button class="r-node-btn"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></button>
+            <button class="r-node-btn"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="8" r="1.1" fill="currentColor"/><circle cx="8" cy="8" r="1.1" fill="currentColor"/><circle cx="12" cy="8" r="1.1" fill="currentColor"/></svg></button>
+          </div>
+        </div>
+        <div class="r-node-body">
+          <div class="r-body-label">Prompt <span class="r-body-badge">Static Sentence</span></div>
+          <div class="r-body-text">Hi, you've reached customer support. How can I help you today?</div>
+        </div>
+        <div class="r-node-transition">
+          <div class="r-transition-header"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7l5 5 5-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> Transition <div class="t-add">+</div></div>
+          <div class="r-transition-item"><div class="r-radio"></div> User wants to report an issue <div class="port"></div></div>
+          <div class="r-transition-item"><div class="r-radio"></div> User wants to check ticket status <div class="port"></div></div>
+        </div>
+      </div>
+      <!-- Function node — SELECTED -->
+      <div class="r-node selected" style="position:absolute;left:132px;top:390px;border-color:#3d64d7;">
+        <div class="r-node-header" style="border-bottom-color:#E0E9FF;">
+          <div class="port-l"></div>
+          <div class="r-node-icon fn">F</div>
+          <div class="r-node-title" style="color:#3d64d7;">Log Support Ticket</div>
+          <div class="r-node-actions">
+            <button class="r-node-btn"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></button>
+            <button class="r-node-btn"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="8" r="1.1" fill="currentColor"/><circle cx="8" cy="8" r="1.1" fill="currentColor"/><circle cx="12" cy="8" r="1.1" fill="currentColor"/></svg></button>
+          </div>
+        </div>
+        <div class="r-fn-body">
+          <div class="r-fn-tool">
+            <img src="https://www.google.com/s2/favicons?domain=zendesk.com&sz=64" alt="Zendesk">
+            <span class="r-fn-tool-name">zendesk_create_ticket</span>
+            <span class="r-fn-badge">Integration</span>
+          </div>
+          <div class="r-fn-tool">
+            <img src="https://www.google.com/s2/favicons?domain=zendesk.com&sz=64" alt="Zendesk">
+            <span class="r-fn-tool-name">zendesk_update_ticket</span>
+            <span class="r-fn-badge">Integration</span>
+          </div>
+        </div>
+        <div class="r-node-transition fn">
+          <div class="r-transition-header"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7l5 5 5-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> Transition <div class="t-add">+</div></div>
+          <div class="r-transition-item fn"><div class="r-radio"></div> On ticket created <div class="port"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="canvas-toolbar">
+      <button>▶</button>
+      <button><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="10" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="1" y="10" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="10" y="10" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/></svg></button>
+      <div class="sep"></div>
+      <button>−</button>
+      <span style="font-size:12px;color:#525866;padding:0 4px;">100%</span>
+      <button>+</button>
+    </div>
+    <div class="canvas-footer"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 3h10v10H3z" stroke="currentColor" stroke-width="1.3"/></svg> Main Flow</div>
+  </div>
+  <!-- Right panel -->
+  <div class="settings-panel">
+    <div class="settings-tabs">
+      <div class="settings-tab">Node Settings</div>
+      <div class="settings-tab active">Tools</div>
+      <div class="settings-tab">Test Agent</div>
+    </div>
+    <div class="settings-body">
+      <div class="s-section">
+        <div class="s-section-header">
+          <div class="s-section-title">
+            <div style="width:16px;height:16px;border-radius:4px;background:#3d64d7;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0;">F</div>
+            Log Support Ticket
+          </div>
+          <svg class="s-chevron" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+        <div class="s-section-body">
+          <div class="s-field">
+            <div class="s-toggle-row">
+              <div><div class="s-toggle-label">Global Node</div><div class="s-sub-text">Allow other nodes to jump to this node without edges</div></div>
+              <div class="s-toggle"></div>
+            </div>
+          </div>
+          <div class="s-field">
+            <div class="s-toggle-row">
+              <div><div class="s-toggle-label">Node-level overrides</div><div class="s-sub-text">Override agent defaults for this node</div></div>
+              <div class="s-toggle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="s-section">
+        <div class="s-section-header">
+          <div class="s-section-title">Built-in tools</div>
+          <svg class="s-chevron" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+        <div class="s-section-body">
+          <div class="tools-empty">No built-in tools added</div>
+          <button style="display:flex;align-items:center;gap:5px;font-size:13px;color:#525866;border:1px solid #E1E4EA;border-radius:7px;padding:6px 12px;background:#fff;cursor:pointer;font-family:inherit;">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> Add tool
+          </button>
+        </div>
+      </div>
+      <div class="s-section" style="border-bottom:none;">
+        <div class="s-section-header">
+          <div class="s-section-title">Integration tools</div>
+          <button style="height:26px;padding:0 10px;font-size:12px;font-weight:500;color:#0E121B;background:#fff;border:1px solid #E1E4EA;border-radius:6px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Add tool
+          </button>
+        </div>
+        <div class="s-section-body">
+          <div class="tool-item">
+            <div class="tool-icon"><img src="https://www.google.com/s2/favicons?domain=zendesk.com&sz=64" alt="Zendesk"></div>
+            <div class="tool-info">
+              <div class="tool-name-row"><span class="tool-fn-name">zendesk_create_ticket</span><span class="tool-badge">Integration</span></div>
+              <div class="tool-desc">Create a new support ticket in Zendesk</div>
+            </div>
+            <button class="tool-delete"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V2h4v2M5 4v8h6V4H5z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+          <div class="tool-item">
+            <div class="tool-icon"><img src="https://www.google.com/s2/favicons?domain=zendesk.com&sz=64" alt="Zendesk"></div>
+            <div class="tool-info">
+              <div class="tool-name-row"><span class="tool-fn-name">zendesk_update_ticket</span><span class="tool-badge">Integration</span></div>
+              <div class="tool-desc">Update status, priority, or add a comment to a ticket</div>
+            </div>
+            <button class="tool-delete"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V2h4v2M5 4v8h6V4H5z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

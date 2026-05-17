@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Call History (WhatsApp + Voice)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 280px; background: #F5F7FA; display: flex; flex-direction: column; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .nav-scroll { padding: 4px 0; flex: 1; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { padding: 8px; height: 36px; font-size: 14px; color: #525866; border-radius: 6px; display: flex; align-items: center; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+  .main { flex: 1; overflow: auto; background: #fff; }
+  .page-content { padding: 32px 32px 48px; max-width: 1400px; margin: 0 auto; }
+  .page-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+  .page-desc { font-size: 13px; color: #6B7280; margin-bottom: 24px; }
+
+  .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .chip { height: 32px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #525866; background: #fff; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .chip.active { background: #0E121B; color: #fff; border-color: #0E121B; }
+  .chip .count { font-size: 11px; color: #99A0AE; }
+  .chip.active .count { color: rgba(255,255,255,0.6); }
+  .spacer { flex: 1; }
+  .btn-export { height: 32px; padding: 0 14px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0E121B; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+
+  .channel-strip { display: flex; gap: 8px; margin-bottom: 18px; padding: 12px 14px; background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 10px; font-size: 12px; color: #525866; align-items: center; }
+  .channel-strip svg { flex-shrink: 0; color: #3d64d7; }
+  .channel-strip strong { color: #0E121B; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th { padding: 10px 14px; font-size: 12px; font-weight: 500; color: #6B7280; text-align: left; border-bottom: 1px solid #E1E4EA; text-transform: uppercase; letter-spacing: 0.03em; }
+  tbody tr { cursor: pointer; transition: background 0.1s; }
+  tbody tr:hover { background: #FAFBFC; }
+  tbody td { padding: 14px; font-size: 13px; color: #0E121B; border-bottom: 1px solid #F3F4F6; vertical-align: middle; }
+
+  .cell-channel { display: flex; align-items: center; gap: 8px; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+  .badge.whatsapp { background: #ECFDF5; color: #067647; border: 1px solid #BBF7D0; }
+  .badge.voice { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+  .badge.sms { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+  .badge.chained { background: #F3E8FF; color: #6B21A8; border: 1px solid #D8B4FE; }
+
+  .cell-caller { display: flex; align-items: center; gap: 10px; }
+  .cell-avatar { width: 32px; height: 32px; border-radius: 50%; color: #fff; font-weight: 600; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .cell-name { font-weight: 600; font-size: 13px; }
+  .cell-phone { font-size: 11px; color: #6B7280; }
+
+  .cell-preview { font-size: 12px; color: #525866; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .cell-outcome { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .dot.green { background: #17B26A; }
+  .dot.yellow { background: #F59E0B; }
+  .dot.red { background: #EF4444; }
+
+  .cell-duration { font-variant-numeric: tabular-nums; color: #525866; }
+  .cell-date { font-size: 12px; color: #6B7280; }
+
+  .chain-indicator { font-size: 11px; color: #6B21A8; margin-top: 2px; display: flex; align-items: center; gap: 3px; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo"><svg width="73" height="20" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg></div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item current">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item">Integrations</li><li class="nav-item">Billing</li><li class="nav-item">Settings</li></ul></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-content">
+    <h1 class="page-title">Call History</h1>
+    <div class="page-desc">Unified view — every voice call, WhatsApp thread and SMS conversation tied to one record per caller. Cross-channel escalations appear as a single row.</div>
+
+    <div class="toolbar">
+      <span class="chip active">All <span class="count">847</span></span>
+      <span class="chip"><span class="dot green"></span>WhatsApp <span class="count">312</span></span>
+      <span class="chip"><span class="dot" style="background:#3d64d7;"></span>Voice <span class="count">489</span></span>
+      <span class="chip"><span class="dot yellow"></span>SMS <span class="count">46</span></span>
+      <span class="chip">Last 24h ▾</span>
+      <span class="chip">All agents ▾</span>
+      <span class="spacer"></span>
+      <button class="btn-export">↓ Export CSV</button>
+    </div>
+
+    <div class="channel-strip">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 17.5C14.142 17.5 17.5 14.142 17.5 10C17.5 5.858 14.142 2.5 10 2.5C5.858 2.5 2.5 5.858 2.5 10C2.5 14.142 5.858 17.5 10 17.5ZM10.83 13.33H9.17V9.17H10.83V13.33ZM10 8.08C9.42 8.08 8.96 7.62 8.96 7.05C8.96 6.48 9.42 6.02 10 6.02C10.58 6.02 11.04 6.48 11.04 7.05C11.04 7.62 10.58 8.08 10 8.08Z" fill="currentColor"/></svg>
+      <div>Rows with the <strong style="color:#6B21A8;">Chained</strong> badge represent conversations that crossed channels — e.g. a WhatsApp thread that escalated to a voice call. Click to see the full unified timeline.</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:130px">Channel</th>
+          <th>Caller</th>
+          <th>Last message / summary</th>
+          <th>Agent</th>
+          <th>Outcome</th>
+          <th style="width:90px">Duration</th>
+          <th style="width:120px">When</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr onclick="window.location='connect-integration-library-3.1.6-call-history-whatsapp-detail.html'">
+          <td>
+            <div class="cell-channel">
+              <span class="badge chained">🔗 Chained</span>
+            </div>
+            <div class="chain-indicator" style="margin-left:2px;">WhatsApp → Voice</div>
+          </td>
+          <td>
+            <div class="cell-caller">
+              <div class="cell-avatar" style="background:#25D366">MS</div>
+              <div>
+                <div class="cell-name">Maria Santos</div>
+                <div class="cell-phone">+55 11 98732-4411</div>
+              </div>
+            </div>
+          </td>
+          <td><div class="cell-preview">Policy summary sent — copay clarified on call, booking confirmed for Thu 10am</div></td>
+          <td>Clinic Front Desk Agent</td>
+          <td><div class="cell-outcome"><span class="dot green"></span>Successful</div></td>
+          <td class="cell-duration">8m 42s</td>
+          <td class="cell-date">2 min ago</td>
+        </tr>
+        <tr>
+          <td><div class="cell-channel"><span class="badge whatsapp">● WhatsApp</span></div></td>
+          <td>
+            <div class="cell-caller">
+              <div class="cell-avatar" style="background:#F59E0B">CA</div>
+              <div>
+                <div class="cell-name">Carlos Ayala</div>
+                <div class="cell-phone">+52 55 8472-9023</div>
+              </div>
+            </div>
+          </td>
+          <td><div class="cell-preview">Sales rep took over — volume add-on discussed, call scheduled 10:30</div></td>
+          <td>Clinic Front Desk Agent → Maya O.</td>
+          <td><div class="cell-outcome"><span class="dot green"></span>Handed off</div></td>
+          <td class="cell-duration">11 msgs</td>
+          <td class="cell-date">8 min ago</td>
+        </tr>
+        <tr>
+          <td><div class="cell-channel"><span class="badge voice">📞 Voice</span></div></td>
+          <td>
+            <div class="cell-caller">
+              <div class="cell-avatar" style="background:#3d64d7">JR</div>
+              <div>
+                <div class="cell-name">João Ribeiro</div>
+                <div class="cell-phone">+55 11 91122-0384</div>
+              </div>
+            </div>
+          </td>
+          <td><div class="cell-preview">Booked consultation for Thu 10am, no follow-up needed</div></td>
+          <td>Clinic Front Desk Agent</td>
+          <td><div class="cell-outcome"><span class="dot green"></span>Successful</div></td>
+          <td class="cell-duration">6m 14s</td>
+          <td class="cell-date">14 min ago</td>
+        </tr>
+        <tr>
+          <td><div class="cell-channel"><span class="badge whatsapp">● WhatsApp</span></div></td>
+          <td>
+            <div class="cell-caller">
+              <div class="cell-avatar" style="background:#A855F7">LO</div>
+              <div>
+                <div class="cell-name">Lucia Oliveira</div>
+                <div class="cell-phone">+55 21 99921-7732</div>
+              </div>
+            </div>
+          </td>
+          <td><div class="cell-preview">Sent prescription.pdf — stored on record, flagged for OCR backlog</div></td>
+          <td>Clinic Front Desk Agent</td>
+          <td><div class="cell-outcome"><span class="dot green"></span>Resolved</div></td>
+          <td class="cell-duration">7 msgs</td>
+          <td class="cell-date">28 min ago</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="cell-channel"><span class="badge chained">🔗 Chained</span></div>
+            <div class="chain-indicator">Voice → WhatsApp</div>
+          </td>
+          <td>
+            <div class="cell-caller">
+              <div class="cell-avatar" style="background:#EF4444">ED</div>
+              <div>
+                <div class="cell-name">Eduardo Diaz</div>
+                <div class="cell-phone">+34 611 220-881</div>
+              </div>
+            </div>
+          </td>
+          <td><div class="cell-preview">Voicemail → agent followed up with booking link in WhatsApp → booked</div></td>
+          <td>Clinic Front Desk Agent</td>
+          <td><div class="cell-outcome"><span class="dot green"></span>Successful</div></td>
+          <td class="cell-duration">2m 08s + 4 msgs</td>
+          <td class="cell-date">43 min ago</td>
+        </tr>
+        <tr>
+          <td><div class="cell-channel"><span class="badge whatsapp">● WhatsApp</span></div></td>
+          <td>
+            <div class="cell-caller">
+              <div class="cell-avatar" style="background:#0891B2">PM</div>
+              <div>
+                <div class="cell-name">Pedro Mendes</div>
+                <div class="cell-phone">+55 11 94801-2239</div>
+              </div>
+            </div>
+          </td>
+          <td><div class="cell-preview">Booked consultation via quick reply, confirmation sent</div></td>
+          <td>Clinic Front Desk Agent</td>
+          <td><div class="cell-outcome"><span class="dot green"></span>Successful</div></td>
+          <td class="cell-duration">5 msgs</td>
+          <td class="cell-date">1h ago</td>
+        </tr>
+        <tr>
+          <td><div class="cell-channel"><span class="badge voice">📞 Voice</span></div></td>
+          <td>
+            <div class="cell-caller">
+              <div class="cell-avatar" style="background:#84CC16">SF</div>
+              <div>
+                <div class="cell-name">Sofia Ferreira</div>
+                <div class="cell-phone">+55 41 97550-1188</div>
+              </div>
+            </div>
+          </td>
+          <td><div class="cell-preview">Asked for human — transferred to reception</div></td>
+          <td>Clinic Front Desk Agent</td>
+          <td><div class="cell-outcome"><span class="dot yellow"></span>Transferred</div></td>
+          <td class="cell-duration">1m 52s</td>
+          <td class="cell-date">2h ago</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="cell-channel"><span class="badge chained">🔗 Chained</span></div>
+            <div class="chain-indicator">WhatsApp → Voice → WhatsApp</div>
+          </td>
+          <td>
+            <div class="cell-caller">
+              <div class="cell-avatar" style="background:#DB2777">IS</div>
+              <div>
+                <div class="cell-name">Isabela Souza</div>
+                <div class="cell-phone">+55 11 98112-4420</div>
+              </div>
+            </div>
+          </td>
+          <td><div class="cell-preview">Document checklist sent → call booked → receipt WhatsApp'd back</div></td>
+          <td>Clinic Front Desk Agent</td>
+          <td><div class="cell-outcome"><span class="dot green"></span>Successful</div></td>
+          <td class="cell-duration">12m 40s total</td>
+          <td class="cell-date">3h ago</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+</body>
+</html>

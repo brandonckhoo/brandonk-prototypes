@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Request an Integration</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+
+  .sidebar { width: 280px; min-width: 280px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; padding: 0; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .sidebar-logo svg { display: block; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 10px 10px 12px; margin: 0 14px; width: auto; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; flex-shrink: 0; }
+  .workspace-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; line-height: 16px; height: 24px; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; position: relative; white-space: nowrap; border-radius: 6px; }
+  .nav-item:hover { background: rgba(0,0,0,0.03); }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #FFFFFF; }
+  .nav-item svg { flex-shrink: 0; }
+  .spacer { flex: 1; }
+  .footer { padding: 16px 14px; overflow: hidden; }
+  .footer-card { display: flex; align-items: center; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; box-shadow: rgba(0,0,0,0.1) 0px 1px 3px 0px, rgba(0,0,0,0.1) 0px 1px 2px -1px; cursor: pointer; width: 100%; }
+  .footer-card.pay { padding: 16px; height: 58px; margin-bottom: 8px; }
+  .footer-card.user { padding: 10px 10px 10px 12px; height: 40px; margin-bottom: 12px; gap: 8px; }
+  .footer-badge-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px 4px 4px; background: #ecf3ff; border-radius: 6px; font-size: 12px; font-weight: 500; color: #3d64d7; }
+  .footer-badge-pill svg { flex-shrink: 0; }
+  .footer-card .spacer { flex: 1; }
+  .footer-card .dismiss { color: #646A73; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; }
+  .footer-user .avatar { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; overflow: hidden; }
+  .footer-user .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .footer-user .name { font-size: 14px; color: #525866; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .footer-user .chevron { color: #9CA3AF; flex-shrink: 0; display: flex; align-items: center; }
+  .footer-links { display: flex; align-items: center; gap: 4px; }
+  .footer-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; font-size: 14px; color: #525866; cursor: pointer; text-decoration: none; height: 36px; }
+  .footer-link:hover { background: rgba(0,0,0,0.03); }
+  .footer-divider { width: 1px; height: 12px; background: #D1D5DB; flex-shrink: 0; }
+  .main { flex: 1; overflow: auto; background: #fff; }
+
+  /* Layer 1: Add integration modal (blurred behind) */
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .modal { background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 1060px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
+  .modal-header { display: flex; align-items: center; gap: 10px; padding: 20px 24px 16px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .modal-title { font-size: 16px; font-weight: 600; color: #0E121B; }
+  .modal-close { margin-left: auto; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; border-radius: 6px; color: #6B7280; }
+  .modal-body { display: flex; flex: 1; overflow: hidden; min-height: 520px; }
+  .category-sidebar { width: 210px; min-width: 210px; border-right: 1px solid #E1E4EA; padding: 16px 0; overflow-y: auto; }
+  .category-item { display: block; padding: 8px 20px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; border: none; background: none; width: 100%; text-align: left; border-radius: 0; line-height: 1.4; }
+  .category-item.active { color: #0E121B; font-weight: 500; background: #F5F7FA; border-left: 2px solid #0E121B; padding-left: 18px; }
+  .card-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .card-area-header { padding: 16px 24px 0; flex-shrink: 0; }
+  .card-area-title { font-size: 15px; font-weight: 600; color: #0E121B; margin-bottom: 12px; }
+  .card-search { width: 100%; height: 36px; padding: 0 12px 0 36px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; color: #0A0A0A; background: #fff; outline: none; }
+  .card-search::placeholder { color: #99A0AE; }
+  .card-search-wrapper { position: relative; }
+  .card-search-wrapper svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+  .card-grid-scroll { flex: 1; overflow-y: auto; padding: 16px 24px 24px; }
+  .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .int-card { border: 1px solid #E1E4EA; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 6px; min-height: 96px; }
+  .int-card-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 6px; overflow: hidden; }
+  .int-card-icon img { width: 32px; height: 32px; object-fit: contain; border-radius: 6px; }
+  .int-card-name { font-size: 14px; font-weight: 500; color: #0E121B; margin-top: 2px; }
+  .int-card-desc { font-size: 13px; font-weight: 400; color: #6B7280; line-height: 1.4; }
+  .int-card.coming-soon { opacity: 0.45; }
+  .coming-soon-badge { display: inline-block; font-size: 11px; font-weight: 500; color: #6B7280; background: #F3F4F6; padding: 2px 8px; border-radius: 4px; margin-top: 2px; width: fit-content; }
+  .int-card.request { border-style: dashed; }
+  .request-icon { width: 32px; height: 32px; border-radius: 8px; background: #F5F7FA; display: flex; align-items: center; justify-content: center; }
+
+  /* Layer 2: Request modal overlay — sits ON TOP of the Add Integration modal */
+  .request-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.25); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 200; display: flex; align-items: center; justify-content: center; }
+
+  .request-modal { background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 480px; display: flex; flex-direction: column; }
+
+  .request-header { display: flex; align-items: center; padding: 20px 24px 0; }
+  .request-title { font-size: 16px; font-weight: 600; color: #0E121B; }
+  .request-close { margin-left: auto; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; border-radius: 6px; color: #6B7280; }
+  .request-close:hover { background: #F3F4F6; color: #0A0A0A; }
+
+  .request-body { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 20px; }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 14px; font-weight: 500; color: #0E121B; }
+  .form-input { width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; color: #0A0A0A; background: #fff; outline: none; font-family: inherit; }
+  .form-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.1); }
+  .form-input::placeholder { color: #99A0AE; }
+  .form-textarea { width: 100%; min-height: 120px; padding: 10px 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; color: #0A0A0A; background: #fff; outline: none; font-family: inherit; resize: vertical; line-height: 1.5; }
+  .form-textarea:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.1); }
+  .form-textarea::placeholder { color: #99A0AE; }
+
+  .request-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 0 24px 20px; }
+  .btn-cancel { height: 36px; padding: 0 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 500; color: #525866; cursor: pointer; font-family: inherit; }
+  .btn-cancel:hover { background: #F9FAFB; }
+  .btn-submit { height: 36px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; font-family: inherit; }
+  .btn-submit:hover { background: #1a1f2e; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#0A0A0A"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73ZM205.22 49.69C202.9 52 199.43 52.58 195.38 52.58H176.28V26.54H193.64C198.85 26.54 201.74 27.12 204.64 28.86C208.11 30.59 209.85 34.64 209.85 39.27C209.85 43.9 208.11 47.38 205.22 49.69Z" fill="#0A0A0A"/><path d="M255.56 34.65C238.2 34.65 226.63 47.95 226.63 66.47C226.63 84.99 242.25 98.3 256.14 98.3C270.03 98.3 279.86 90.19 283.33 78.62H269.45C267.71 82.67 264.82 87.3 256.14 87.3C247.46 87.3 239.94 81.52 239.94 69.94H283.91C283.91 49.69 272.92 34.65 255.56 34.65ZM240.51 60.11C241.09 51.43 246.88 45.06 255.56 45.06C264.24 45.06 270.02 51.43 270.02 60.11H240.51Z" fill="#0A0A0A"/><path d="M344.09 34.65C326.73 34.65 315.16 47.95 315.16 66.47C315.16 85.15 330.78 98.3 344.67 98.3C358.56 98.3 368.39 90.19 371.87 78.62H357.98C356.24 82.67 353.35 87.3 344.67 87.3C335.99 87.3 328.47 81.52 328.47 69.94H372.44C372.44 49.69 361.45 34.65 344.09 34.65ZM329.05 60.11C329.62 51.43 335.41 45.06 344.09 45.06C352.77 45.06 358.56 51.43 358.56 60.11H329.05Z" fill="#0A0A0A"/><path d="M390.96 14.97H377.65V95.92H390.96V14.97Z" fill="#0A0A0A"/><path d="M413.53 14.97H400.22V95.92H413.53V14.97Z" fill="#0A0A0A"/><path d="M304.17 17.28L290.84 17.28L290.85 34.65H282.76V45H290.85V82.82C290.85 87.58 291.8 90.43 294.66 93.29C297.51 96.14 300.37 97.09 305.13 97.09H315.14V85.67H309.88C308.16 85.67 306.96 85.37 306.13 85.11C305.27 84.84 304.61 84.16 304.4 83.29C304.17 82.33 304.17 81.09 304.17 79.9V45H315.14V34.65H304.17V17.28Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="workspace">
+    <div class="workspace-avatar">B</div>
+    <span class="workspace-name">Brandon K... Workspace</span>
+    <span class="workspace-chevron"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14.3105 7.94623L10 3.63574L5.68956 7.94623L6.67165 8.92835L10 5.59992L13.3284 8.92835L14.3105 7.94623ZM5.68945 12.0534L9.99996 16.364L14.3104 12.0534L13.3284 11.0713L9.99996 14.3997L6.67154 11.0713L5.68945 12.0534Z" fill="#99A0AE"/></svg></span>
+  </div>
+  <div class="nav-scroll">
+  <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+  <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+  <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+  <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item current"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.75 2.5V5.268C11.636 5.446 12.43 5.88 13.042 6.504L15.238 5.237L15.988 6.537L13.798 7.8C14.068 8.472 14.168 9.212 14.068 9.974L16.75 10.75V12.25L14.068 13.026C13.928 13.55 13.694 14.034 13.388 14.462L14.988 16.762L13.762 17.688L12.164 15.388C11.73 15.594 11.254 15.728 10.75 15.776V18.25H9.25V15.776C8.746 15.728 8.27 15.594 7.836 15.388L6.238 17.688L5.012 16.762L6.612 14.462C6.306 14.034 6.072 13.55 5.932 13.026L3.25 12.25V10.75L5.932 9.974C5.872 9.522 5.882 9.064 5.964 8.616L3.25 7.75V6.25L5.932 6.974C6.072 6.45 6.306 5.966 6.612 5.538L5.012 3.238L6.238 2.312L7.836 4.612C8.27 4.406 8.746 4.272 9.25 4.224V2.5H10.75ZM10 7.5C8.619 7.5 7.5 8.619 7.5 10C7.5 11.381 8.619 12.5 10 12.5C11.381 12.5 12.5 11.381 12.5 10C12.5 8.619 11.381 7.5 10 7.5ZM10 9C10.552 9 11 9.448 11 10C11 10.552 10.552 11 10 11C9.448 11 9 10.552 9 10C9 9.448 9.448 9 10 9Z" fill="#3d64d7"/></svg>Integrations</li><li class="nav-item">Billing</li><li class="nav-item">Settings</li></ul></div>
+  </div>
+  <div class="footer">
+    <div class="footer-card pay"><div class="footer-badge-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 14C4.686 14 2 11.314 2 8C2 4.686 4.686 2 8 2C11.314 2 14 4.686 14 8C14 11.314 11.314 14 8 14ZM7.402 10.4L11.644 6.157L10.795 5.309L7.402 8.703L5.704 7.006L4.856 7.854L7.402 10.4Z" fill="#3d64d7"/></svg>Pay As You Go</div><span class="spacer"></span><span class="dismiss"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.31 7.95L10 3.64L5.69 7.95L6.67 8.93L10 5.6L13.33 8.93L14.31 7.95ZM5.69 12.05L10 16.36L14.31 12.05L13.33 11.07L10 14.4L6.67 11.07L5.69 12.05Z" fill="#9CA3AF"/></svg></span></div>
+    <div class="footer-card user footer-user"><div class="avatar"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c" alt=""></div><span class="name">brandon@retellai.com</span><span class="chevron"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.31 7.95L10 3.64L5.69 7.95L6.67 8.93L10 5.6L13.33 8.93L14.31 7.95ZM5.69 12.05L10 16.36L14.31 12.05L13.33 11.07L10 14.4L6.67 11.07L5.69 12.05Z" fill="#9CA3AF"/></svg></span></div>
+    <div class="footer-links"><a class="footer-link">Help</a><div class="footer-divider"></div><a class="footer-link">Updates</a></div>
+  </div>
+</aside>
+
+<main class="main"></main>
+
+<!-- Layer 1: Add Integration modal (visible behind) -->
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Add integration</span>
+      <button class="modal-close"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 8.586L14.95 3.636L16.364 5.05L11.414 10L16.364 14.95L14.95 16.364L10 11.414L5.05 16.364L3.636 14.95L8.586 10L3.636 5.05L5.05 3.636L10 8.586Z" fill="currentColor"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="category-sidebar">
+        <button class="category-item active">All integrations</button>
+        <button class="category-item">CRM</button>
+        <button class="category-item">Calendar</button>
+        <button class="category-item">CX Platform</button>
+        <button class="category-item">Knowledge Base</button>
+        <button class="category-item">Communication</button>
+        <button class="category-item">Payment</button>
+        <button class="category-item">CCaaS</button>
+      </div>
+      <div class="card-area">
+        <div class="card-area-header">
+          <div class="card-area-title">All integrations</div>
+          <div class="card-search-wrapper">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.5232 13.4627L17.7355 16.6742L16.6742 17.7355L13.4627 14.5232C12.2678 15.4812 10.7815 16.0022 9.25 16C5.524 16 2.5 12.976 2.5 9.25C2.5 5.524 5.524 2.5 9.25 2.5C12.976 2.5 16 5.524 16 9.25C16.0022 10.7815 15.4812 12.2678 14.5232 13.4627ZM13.0187 12.9062C13.9706 11.9274 14.5021 10.6153 14.5 9.25C14.5 6.349 12.1502 4 9.25 4C6.349 4 4 6.349 4 9.25C4 12.1502 6.349 14.5 9.25 14.5C10.6153 14.5021 11.9274 13.9706 12.9062 13.0187L13.0187 12.9062Z" fill="#99A0AE"/></svg>
+            <input type="text" class="card-search" placeholder="Search integrations...">
+          </div>
+        </div>
+        <div class="card-grid-scroll">
+          <div class="card-grid">
+            <div class="int-card"><div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=128" alt=""></div><div class="int-card-name">Salesforce</div><div class="int-card-desc">CRM and customer success platform</div></div>
+            <div class="int-card"><div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=128" alt=""></div><div class="int-card-name">HubSpot</div><div class="int-card-desc">Marketing, sales, and service platform</div></div>
+            <div class="int-card"><div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=gohighlevel.com&sz=128" alt=""></div><div class="int-card-name">GoHighLevel</div><div class="int-card-desc">All-in-one CRM and marketing platform</div></div>
+            <div class="int-card"><div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=cal.com&sz=128" alt=""></div><div class="int-card-name">Cal.com</div><div class="int-card-desc">Open-source scheduling platform</div></div>
+            <div class="int-card"><div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=zendesk.com&sz=128" alt=""></div><div class="int-card-name">Zendesk</div><div class="int-card-desc">Customer support platform</div></div>
+            <div class="int-card"><div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=google.com&sz=128" alt=""></div><div class="int-card-name">Google Sheets</div><div class="int-card-desc">Spreadsheet data sync and knowledge base</div></div>
+            <div class="int-card"><div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=slack.com&sz=128" alt=""></div><div class="int-card-name">Slack</div><div class="int-card-desc">Team communication and notifications</div></div>
+            <div class="int-card coming-soon"><div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=zoho.com&sz=128" alt=""></div><div class="int-card-name">Zoho</div><div class="int-card-desc">Business apps suite and CRM</div><span class="coming-soon-badge">Coming soon</span></div>
+            <div class="int-card coming-soon"><div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=calendly.com&sz=128" alt=""></div><div class="int-card-name">Calendly</div><div class="int-card-desc">Scheduling and appointment booking</div><span class="coming-soon-badge">Coming soon</span></div>
+            <div class="int-card coming-soon"><div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=stripe.com&sz=128" alt=""></div><div class="int-card-name">Stripe</div><div class="int-card-desc">Payment processing platform</div><span class="coming-soon-badge">Coming soon</span></div>
+            <div class="int-card coming-soon"><div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=nice.com&sz=128" alt=""></div><div class="int-card-name">NICE</div><div class="int-card-desc">Cloud contact center platform</div><span class="coming-soon-badge">Coming soon</span></div>
+            <div class="int-card coming-soon"><div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=five9.com&sz=128" alt=""></div><div class="int-card-name">Five9</div><div class="int-card-desc">Intelligent cloud contact center</div><span class="coming-soon-badge">Coming soon</span></div>
+            <div class="int-card coming-soon"><div class="int-card-icon"><img src="https://www.google.com/s2/favicons?domain=drive.google.com&sz=128" alt=""></div><div class="int-card-name">Google Drive</div><div class="int-card-desc">Cloud file storage and knowledge base</div><span class="coming-soon-badge">Coming soon</span></div>
+            <div class="int-card request"><div class="request-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="int-card-name">Request an integration</div><div class="int-card-desc">Don't see what you need? Let us know what integration you'd like.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Layer 2: Request an integration modal (on top) -->
+<div class="request-overlay">
+  <div class="request-modal">
+    <div class="request-header">
+      <span class="request-title">Request an integration</span>
+      <button class="request-close"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 8.586L14.95 3.636L16.364 5.05L11.414 10L16.364 14.95L14.95 16.364L10 11.414L5.05 16.364L3.636 14.95L8.586 10L3.636 5.05L5.05 3.636L10 8.586Z" fill="currentColor"/></svg></button>
+    </div>
+    <div class="request-body">
+      <div class="form-group">
+        <label class="form-label">Integration name</label>
+        <input type="text" class="form-input" placeholder="e.g., Notion, Linear, Google Drive...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Use case / Why you need it</label>
+        <textarea class="form-textarea" placeholder="Describe what you'd use this integration for and why it's important..."></textarea>
+      </div>
+    </div>
+    <div class="request-footer">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-submit">Submit request</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Pre-call: Multi-dependency modal</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; min-width: 1280px; position: relative; }
+
+/* Blurred background */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff; filter: blur(1.5px); pointer-events: none; }
+.agent-header { display: flex; align-items: center; padding: 10px 16px 6px; gap: 10px; position: relative; flex-shrink: 0; }
+.agent-title { font-size: 15px; font-weight: 600; color: #0E121B; }
+.top-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; }
+.top-tab { padding: 6px 14px; font-size: 14px; color: #525866; border-radius: 6px; }
+.top-tab.active { font-weight: 600; color: #0E121B; }
+.top-spacer { flex: 1; }
+.btn-publish { height: 30px; padding: 0 14px; border: 1px solid #0E121B; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.agent-meta { display: flex; align-items: center; gap: 6px; padding: 0 16px 10px 52px; font-size: 12px; color: #99A0AE; flex-shrink: 0; }
+.agent-meta .dot { width: 3px; height: 3px; background: #99A0AE; border-radius: 50%; }
+.agent-body { display: flex; flex: 1; overflow: hidden; border-top: 1px solid #E1E4EA; }
+.prompt-area { flex: 1; background: #fff; padding: 24px; font-size: 14px; color: #99A0AE; }
+.functions-panel { width: 452px; border-left: 1px solid #E1E4EA; background: #fff; }
+.test-rail { width: 64px; border-left: 1px solid #E1E4EA; background: #fff; }
+
+/* Modal overlay */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.modal { width: 680px; max-height: 88vh; background: #fff; border-radius: 14px; box-shadow: 0 24px 60px rgba(15,23,42,0.25); display: flex; flex-direction: column; overflow: hidden; }
+
+/* Header */
+.modal-header { padding: 18px 20px 16px; border-bottom: 1px solid #E1E4EA; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.modal-logo { width: 32px; height: 32px; border-radius: 8px; background: #FF7A59; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.modal-titles { flex: 1; min-width: 0; }
+.modal-titles h2 { font-size: 15px; font-weight: 600; color: #0E121B; }
+.modal-titles .sub { font-size: 12px; color: #99A0AE; margin-top: 2px; }
+.modal-close { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #525866; border: none; background: transparent; }
+.modal-close:hover { background: #F3F4F6; }
+
+/* Connected banner */
+.conn-banner { margin: 14px 20px 0; padding: 8px 12px; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #065F46; }
+.conn-dot { width: 7px; height: 7px; background: #10B981; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(16,185,129,0.2); }
+
+/* Modal body */
+.modal-body { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 20px; }
+
+/* Field blocks */
+.field-block { display: flex; flex-direction: column; gap: 6px; }
+.field-label { font-size: 13px; font-weight: 600; color: #0E121B; }
+.field-hint { font-size: 12px; color: #99A0AE; line-height: 1.5; }
+.field-hint code { font-family: 'SF Mono', 'Menlo', monospace; font-size: 11.5px; color: #374151; background: #F3F4F6; border-radius: 3px; padding: 0 3px; }
+
+/* Section divider */
+.section-divider { height: 1px; background: #F0F2F5; margin: 0 -20px; }
+
+/* ── Multi-select Depends on ── */
+.depends-wrap { position: relative; }
+
+/* Trigger: shows selected pills */
+.depends-trigger {
+  width: 100%;
+  min-height: 38px;
+  padding: 5px 36px 5px 8px;
+  border: 1px solid #3d64d7;
+  border-radius: 8px 8px 0 0;
+  background: #fff;
+  box-shadow: 0 0 0 3px #ECF3FF;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  cursor: pointer;
+  position: relative;
+}
+.depends-chev {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%) rotate(180deg);
+  color: #3d64d7;
+  pointer-events: none;
+}
+
+/* Selected function pills inside trigger */
+.dep-selected-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px 2px 8px;
+  background: #EEF3FF;
+  border: 1px solid #C7D7F8;
+  border-radius: 5px;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  font-size: 11.5px;
+  color: #3d64d7;
+  white-space: nowrap;
+}
+.dep-selected-pill .remove { color: #A0B4E8; cursor: pointer; line-height: 1; font-size: 13px; font-family: sans-serif; }
+.dep-selected-pill .remove:hover { color: #3d64d7; }
+
+/* Dropdown panel */
+.depends-dropdown {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #3d64d7;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(61,100,215,0.12);
+}
+.dep-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+  font-size: 13px;
+  color: #374151;
+  border-bottom: 1px solid #F3F4F6;
+}
+.dep-option:last-child { border-bottom: none; }
+.dep-option:hover { background: #F9FAFB; }
+.dep-option.selected { background: #F0F5FF; }
+.dep-option.selected:hover { background: #E8F0FF; }
+.dep-option .fn-label { font-family: 'SF Mono', 'Menlo', monospace; font-size: 12.5px; color: #0E121B; }
+.dep-option.selected .fn-label { color: #3d64d7; }
+.dep-option .none-label { font-size: 13px; color: #525866; font-style: italic; }
+.dep-divider { height: 1px; background: #E8EAED; margin: 0; }
+
+/* Checkbox icon */
+.dep-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid #D1D5DB;
+  background: #fff;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dep-check.checked {
+  background: #3d64d7;
+  border-color: #3d64d7;
+}
+
+/* Inputs / Outputs tables */
+.input-table, .output-table { border: 1px solid #E1E4EA; border-radius: 8px; overflow: hidden; }
+.input-thead, .output-thead { display: grid; grid-template-columns: 1fr 24px 1fr; gap: 10px; padding: 7px 12px; background: #F9FAFB; border-bottom: 1px solid #E8EAED; font-size: 10.5px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.4px; }
+.input-row, .output-row { display: grid; grid-template-columns: 1fr 24px 1fr; gap: 10px; align-items: center; padding: 8px 12px; border-bottom: 1px solid #F3F4F6; }
+.input-row:last-child, .output-row:last-child { border-bottom: none; }
+.input-row:hover, .output-row:hover { background: #FAFBFC; }
+.input-param, .output-field { font-family: 'SF Mono', monospace; font-size: 12.5px; color: #374151; }
+.input-required { color: #EF4444; font-size: 11px; margin-left: 3px; }
+.input-arrow, .output-arrow { color: #D1D5DB; display: flex; align-items: center; justify-content: center; }
+.input-val { font-family: 'SF Mono', monospace; font-size: 12px; color: #3d64d7; background: #EEF3FF; border: 1px solid #DBEAFE; border-radius: 5px; padding: 4px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.output-var-input { width: 100%; padding: 4px 8px; border: 1px solid #E1E4EA; border-radius: 5px; font-family: 'SF Mono', monospace; font-size: 12px; color: #3d64d7; outline: none; background: #FAFBFC; }
+.output-var-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px #ECF3FF; background: #fff; }
+
+/* Advanced settings (collapsed) */
+.adv-section { border-top: 1px solid #E1E4EA; margin: 0 -20px; padding: 0 20px; }
+.adv-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 14px 0; user-select: none; }
+.adv-toggle-label { font-size: 14px; font-weight: 600; color: #0E121B; }
+.adv-chev { color: #99A0AE; }
+
+/* Footer */
+.modal-footer { padding: 12px 20px; border-top: 1px solid #E1E4EA; display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
+.btn-cancel { padding: 8px 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #525866; cursor: pointer; font-weight: 500; font-family: inherit; }
+.btn-cancel:hover { background: #F9FAFB; }
+.btn-save { padding: 8px 16px; border: 1px solid #0E121B; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; cursor: pointer; font-weight: 500; font-family: inherit; }
+.btn-save:hover { background: #1a1a2e; }
+</style>
+</head>
+<body>
+
+<!-- Blurred background -->
+<main class="main">
+  <div class="agent-header">
+    <span style="color:#525866;"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3.5 8.5L10 3l6.5 5.5V16a1 1 0 0 1-1 1h-3v-5h-5v5h-3a1 1 0 0 1-1-1V8.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+    <span class="agent-title">Outreach Dialer</span>
+    <div class="top-center"><span class="top-tab active">Create</span><span class="top-tab">Simulation</span></div>
+    <span class="top-spacer"></span>
+    <button class="btn-publish"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M5 10l3 3 7-7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Publish</button>
+  </div>
+  <div class="agent-meta"><span>Agent ID: ag...7b2</span><span class="dot"></span><span>$0.115/min</span><span class="dot"></span><span>970–1300ms latency</span></div>
+  <div class="agent-body">
+    <div class="prompt-area">Type in a universal prompt for your agent…</div>
+    <div class="functions-panel"></div>
+    <div class="test-rail"></div>
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="modal-backdrop">
+  <div class="modal">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 9.5V6.75A2.25 2.25 0 1 0 12.75 9H15M15 9.5H12.75M15 9.5v3m-2.25-3a2.25 2.25 0 0 0 0 4.5A2.25 2.25 0 0 0 15 12.5m0 0v3M9 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="modal-titles">
+        <h2>get_hubspot_account</h2>
+        <div class="sub">Looks up a HubSpot account record before the call connects.</div>
+      </div>
+      <button class="modal-close"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    </div>
+
+    <!-- Connected banner -->
+    <div class="conn-banner">
+      <span class="conn-dot"></span>
+      HubSpot connected
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Depends on: multi-select (open state) -->
+      <div class="field-block">
+        <div class="field-label">Depends on</div>
+        <div class="depends-wrap">
+
+          <!-- Trigger showing selected pills -->
+          <div class="depends-trigger">
+            <span class="dep-selected-pill">
+              get_hubspot_contact
+              <span class="remove">×</span>
+            </span>
+            <span class="dep-selected-pill">
+              get_hubspot_deal
+              <span class="remove">×</span>
+            </span>
+            <svg class="depends-chev" width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+
+          <!-- Open dropdown -->
+          <div class="depends-dropdown">
+            <!-- None option (not selected) -->
+            <div class="dep-option">
+              <div class="dep-check"></div>
+              <span class="none-label">None — run in parallel</span>
+            </div>
+            <div class="dep-divider"></div>
+            <!-- get_hubspot_contact: checked -->
+            <div class="dep-option selected">
+              <div class="dep-check checked">
+                <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <span class="fn-label">get_hubspot_contact</span>
+            </div>
+            <!-- get_hubspot_deal: checked -->
+            <div class="dep-option selected">
+              <div class="dep-check checked">
+                <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <span class="fn-label">get_hubspot_deal</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-hint" style="margin-top: 8px;">
+          Runs after all selected functions finish. Their output variables are available as inputs below.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Inputs -->
+      <div class="field-block">
+        <div class="field-label">Inputs</div>
+        <div class="field-hint">Map each parameter to a hard-coded value or a variable from a previous step.</div>
+        <div style="margin-top:8px;">
+          <div class="input-table">
+            <div class="input-thead">
+              <span>Parameter</span>
+              <span></span>
+              <span>Value</span>
+            </div>
+            <div class="input-row">
+              <span class="input-param">company_id<span class="input-required">*</span></span>
+              <span class="input-arrow"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8h8M8 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="input-val">{{contact_company_id}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Outputs -->
+      <div class="field-block">
+        <div class="field-label">Outputs</div>
+        <div class="field-hint">These fields are saved as variables and available in the agent prompt. Rename any variable to match your prompt.</div>
+        <div style="margin-top:8px;">
+          <div class="output-table">
+            <div class="output-thead">
+              <span>HubSpot field</span>
+              <span></span>
+              <span>Variable name</span>
+            </div>
+            <div class="output-row">
+              <span class="output-field">name</span>
+              <span class="output-arrow"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8h8M8 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <input class="output-var-input" value="account_name" />
+            </div>
+            <div class="output-row">
+              <span class="output-field">industry</span>
+              <span class="output-arrow"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8h8M8 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <input class="output-var-input" value="account_industry" />
+            </div>
+            <div class="output-row">
+              <span class="output-field">annualrevenue</span>
+              <span class="output-arrow"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8h8M8 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <input class="output-var-input" value="account_revenue" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-save">Save</button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

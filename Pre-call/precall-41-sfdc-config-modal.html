@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — §4.1 Load CRM Context: Salesforce Config Modal (Configured)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1280px; }
+
+  /* ── Agent builder chrome ── */
+  .top-bar { display: flex; align-items: center; height: 44px; padding: 0 16px; gap: 10px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #525866; flex-shrink: 0; }
+  .agent-title { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .agent-edit { color: #99A0AE; cursor: pointer; margin-left: 4px; display: inline-flex; align-items: center; }
+  .top-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; }
+  .top-tab { padding: 5px 12px; font-size: 14px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .top-tab.active { font-weight: 600; color: #0E121B; }
+  .top-spacer { flex: 1; }
+  .top-right { display: flex; align-items: center; gap: 8px; }
+  .autosave { font-size: 12px; color: #99A0AE; }
+  .icon-btn { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; color: #525866; border: none; background: transparent; }
+  .btn-publish { height: 30px; padding: 0 14px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: inherit; }
+
+  .settings-bar { display: flex; align-items: center; gap: 8px; padding: 6px 16px 8px; flex-shrink: 0; border-bottom: 1px solid #E1E4EA; }
+  .settings-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0E121B; background: #fff; height: 30px; white-space: nowrap; }
+  .settings-pill .chev { color: #99A0AE; font-size: 10px; }
+  .settings-bar .divider { width: 1px; height: 16px; background: #E1E4EA; }
+  .bar-spacer { flex: 1; }
+
+  /* ── Builder body ── */
+  .builder-body { display: flex; flex: 1; overflow: hidden; }
+  .prompt-col { flex: 1; padding: 20px 24px 20px 28px; display: flex; flex-direction: column; border-right: 1px solid #E1E4EA; overflow: hidden; }
+  .prompt-label { font-size: 13px; font-weight: 500; color: #525866; margin-bottom: 8px; }
+  .prompt-text { flex: 1; font-size: 13.5px; color: #0A0A0A; line-height: 1.6; overflow-y: auto; }
+  .prompt-text .var { color: #3d64d7; background: #ECF3FF; padding: 1px 5px; border-radius: 4px; font-family: 'SF Mono', 'Menlo', monospace; font-size: 12.5px; }
+
+  .fn-col { width: 380px; min-width: 380px; border-right: 1px solid #E1E4EA; display: flex; flex-direction: column; overflow: hidden; }
+  .fn-col-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px 10px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .fn-col-title { font-size: 14px; font-weight: 600; color: #0E121B; flex: 1; }
+  .fn-col-body { flex: 1; overflow-y: auto; padding: 12px 16px; }
+
+  .fn-subsection { margin-bottom: 16px; }
+  .fn-sub-hdr { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .fn-sub-label { font-size: 12px; font-weight: 600; color: #525866; text-transform: uppercase; letter-spacing: 0.4px; }
+  .fn-sub-desc { font-size: 12px; color: #99A0AE; margin-bottom: 8px; line-height: 1.5; }
+  .fn-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid #E1E4EA; border-radius: 8px; margin-bottom: 6px; background: #fff; }
+  .fn-row-ico { width: 20px; height: 20px; border-radius: 4px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .fn-row-name { font-size: 13px; color: #0E121B; flex: 1; font-family: 'SF Mono', monospace; }
+  .fn-row-acts { display: flex; gap: 4px; }
+  .fn-row-acts button { width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; color: #99A0AE; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+  .fn-row-acts button:hover { background: #F3F4F6; color: #525866; }
+  .fn-add-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border: 1px dashed #D1D5DB; border-radius: 7px; font-size: 12.5px; color: #525866; cursor: pointer; background: transparent; font-family: inherit; }
+  .fn-add-btn:hover { background: #F5F7FA; border-color: #99A0AE; }
+
+  .test-col { width: 240px; min-width: 240px; display: flex; flex-direction: column; }
+  .test-col-header { padding: 12px 16px 10px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .test-col-title { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .test-col-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 20px; }
+
+  /* ── Modal overlay ── */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.35); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 100; }
+
+  .modal { width: 640px; max-height: 90vh; background: #fff; border-radius: 14px; box-shadow: 0 20px 50px rgba(15,23,42,0.22), 0 4px 12px rgba(15,23,42,0.08); display: flex; flex-direction: column; overflow: hidden; }
+
+  .modal-header { padding: 16px 20px 14px; border-bottom: 1px solid #E1E4EA; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .sfdc-icon { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #E1E4EA; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .modal-titles { flex: 1; min-width: 0; }
+  .modal-titles h2 { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .modal-titles .sub { font-size: 12px; color: #99A0AE; margin-top: 1px; }
+  .modal-close { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #525866; border: none; background: transparent; }
+  .modal-close:hover { background: #F3F4F6; }
+
+  .modal-body { flex: 1; overflow-y: auto; padding: 0; }
+
+  /* ── Section blocks ── */
+  .msec { padding: 16px 20px; border-bottom: 1px solid #E1E4EA; }
+  .msec:last-child { border-bottom: none; }
+  .msec-label { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .msec-helper { font-size: 12.5px; color: #525866; line-height: 1.5; margin-bottom: 10px; }
+
+  /* ── Action dropdown (closed, value selected) ── */
+  .action-select-wrap { position: relative; }
+  .action-select { width: 100%; padding: 9px 36px 9px 12px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; cursor: pointer; font-size: 13.5px; font-weight: 500; color: #0E121B; font-family: inherit; outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%2399A0AE' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+  .action-select:focus { border-color: #3d64d7; box-shadow: 0 0 0 3px #ECF3FF; }
+
+  /* ── Lookup ── */
+  .lookup-grid { display: grid; grid-template-columns: 1fr 32px 1fr; gap: 0; align-items: end; }
+  .lookup-col-header { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+  .lookup-arrow { display: flex; align-items: center; justify-content: center; padding-bottom: 10px; color: #C5CAD3; }
+  .lookup-input { width: 100%; padding: 8px 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13.5px; color: #525866; background: #F5F7FA; font-family: inherit; outline: none; }
+  .lookup-value-wrap { position: relative; }
+  .lookup-value { width: 100%; padding: 8px 32px 8px 12px; border: 1px solid #D1E4FF; border-radius: 8px; font-size: 13px; color: #3d64d7; background: #F7FAFF; font-family: 'SF Mono', monospace; outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%233d64d7' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+  .lookup-value:focus { border-color: #3d64d7; box-shadow: 0 0 0 3px #ECF3FF; }
+
+  /* ── Output fields ── */
+  .output-header-row { display: grid; grid-template-columns: 1fr 28px 1fr 24px; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .output-col-label { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.4px; }
+  .output-row { display: grid; grid-template-columns: 1fr 28px 1fr 24px; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .output-field { padding: 7px 10px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 13px; color: #525866; background: #F5F7FA; font-family: 'SF Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .output-arrow { display: flex; align-items: center; justify-content: center; color: #D1D5DB; }
+  .output-var { padding: 7px 10px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 13px; color: #0E121B; background: #fff; font-family: 'SF Mono', monospace; outline: none; width: 100%; }
+  .output-var:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px #ECF3FF; }
+  .output-x { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: #C5CAD3; cursor: pointer; border-radius: 4px; border: none; background: transparent; flex-shrink: 0; }
+  .output-x:hover { background: #F3F4F6; color: #525866; }
+  .add-field-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border: 1px dashed #D1D5DB; border-radius: 6px; font-size: 12px; color: #525866; cursor: pointer; background: transparent; font-family: inherit; margin-top: 4px; }
+  .add-field-btn:hover { border-color: #3d64d7; color: #3d64d7; background: #F7FAFF; }
+
+  /* ── Advanced settings ── */
+  .advanced-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: #525866; user-select: none; }
+  .advanced-toggle .adv-chev { color: #99A0AE; transition: transform 0.15s; }
+
+  /* ── Modal footer ── */
+  .modal-footer { padding: 12px 20px; border-top: 1px solid #E1E4EA; display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
+  .btn-cancel { padding: 7px 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #525866; cursor: pointer; font-weight: 500; font-family: inherit; }
+  .btn-save { padding: 7px 16px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; cursor: pointer; font-weight: 500; font-family: inherit; }
+</style>
+</head>
+<body>
+
+<!-- Agent builder background -->
+<div class="top-bar">
+  <span class="home-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3.5 8.5L10 3l6.5 5.5V17a1 1 0 0 1-1 1H4.5a1 1 0 0 1-1-1V8.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+  <span class="agent-title">Sunrun Lead Qualification</span>
+  <span class="agent-edit"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2-8.5 8.5H3v-2z" stroke="currentColor" stroke-width="1.2"/></svg></span>
+  <span class="top-spacer"></span>
+  <div class="top-center">
+    <span class="top-tab active">Create</span>
+    <span class="top-tab">Simulation</span>
+  </div>
+  <div class="top-right">
+    <span class="autosave">Auto saved at 11:14 AM</span>
+    <span class="icon-btn"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="4" cy="10" r="1.4" fill="#525866"/><circle cx="10" cy="10" r="1.4" fill="#525866"/><circle cx="16" cy="10" r="1.4" fill="#525866"/></svg></span>
+    <button class="btn-publish"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>Publish</button>
+  </div>
+</div>
+<div class="settings-bar">
+  <span class="settings-pill"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="4.5" stroke="#3d64d7" stroke-width="1.2"/><path d="M7 4v3l2 1.5" stroke="#3d64d7" stroke-width="1.2" stroke-linecap="round"/></svg> GPT 4.1 <span class="chev">▾</span></span>
+  <span class="divider"></span>
+  <span class="settings-pill"><span style="width:14px;height:14px;background:#16A34A;color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;">M</span> Maya <span class="chev">▾</span></span>
+  <span class="divider"></span>
+  <span class="settings-pill">🇺🇸 English <span class="chev">▾</span></span>
+  <span class="bar-spacer"></span>
+  <span class="settings-pill"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2.5" y="2" width="11" height="12" rx="1.5" stroke="#525866" stroke-width="1.2"/><path d="M5 5.5h6M5 7.5h6M5 9.5h3" stroke="#525866" stroke-width="1.2" stroke-linecap="round"/></svg> Agent Handbook</span>
+</div>
+
+<div class="builder-body">
+  <div class="prompt-col">
+    <div class="prompt-label">System Prompt</div>
+    <div class="prompt-text">
+      ## Identity<br><br>
+      You are Maya, a qualification agent for Sunrun. You call homeowners who submitted a solar inquiry and determine if they're a good fit for the sales team.<br><br>
+      ## Tasks<br><br>
+      - Greet the homeowner using <span class="var">{{first_name}}</span>.<br>
+      - Confirm they own their home and have a south-facing roof.<br>
+      - Ask about their average monthly electricity bill.<br>
+      - Mark them qualified if bill is over $150 and they own the home.<br><br>
+      ## Fallback Instructions<br><br>
+      If <span class="var">{{first_name}}</span> is missing, greet the caller generically and continue.
+    </div>
+  </div>
+
+  <div class="fn-col">
+    <div class="fn-col-header">
+      <span class="fn-col-title">Functions</span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 10l4-4 4 4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+    <div class="fn-col-body">
+      <div class="fn-subsection">
+        <div class="fn-sub-hdr">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#525866" stroke-width="1.3"/><path d="M8 5v3l2 1.5" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <span class="fn-sub-label">Pre-Call Functions</span>
+        </div>
+        <div class="fn-sub-desc">Runs before the call connects. Returned variables are available in the agent prompt.</div>
+        <div class="fn-row">
+          <div class="fn-row-ico">
+            <svg width="16" height="11" viewBox="0 0 60 42" fill="none"><path d="M24.9 5.6a13.3 13.3 0 0 1 9.5-4c4.9 0 9.1 2.7 11.4 6.7a16.4 16.4 0 0 1 6.7-1.4c9.1 0 16.5 7.4 16.5 16.6S61.6 40 52.5 40c-1.2 0-2.4-.1-3.6-.4a12.2 12.2 0 0 1-10.7 6.2c-1.8 0-3.5-.4-5-.9A13.9 13.9 0 0 1 20.3 54C14.3 54 9 50.5 6.4 45.4a12.8 12.8 0 0 1-2.6.3A13 13 0 0 1 3.8 19a15.2 15.2 0 0 1-.8-4.8C3 7.4 8.9 1.5 16.2 1.5c3.4 0 6.5 1.3 8.8 3.4" fill="#00A1E0" transform="scale(0.55) translate(-2,-3)"/></svg>
+          </div>
+          <span class="fn-row-name">get_salesforce_lead</span>
+          <div class="fn-row-acts">
+            <button title="Edit"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M9 2l3 3-7 7H2v-3z" stroke="currentColor" stroke-width="1.2"/></svg></button>
+            <button title="Remove"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2L2 10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+          </div>
+        </div>
+        <button class="fn-add-btn">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add
+        </button>
+      </div>
+      <div class="fn-subsection" style="opacity:0.5;">
+        <div class="fn-sub-hdr">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#525866" stroke-width="1.3"/><path d="M5 8l2 2 4-4" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <span class="fn-sub-label">Mid-Call Functions</span>
+        </div>
+        <div class="fn-sub-desc">Invoked by the agent during the live conversation.</div>
+        <button class="fn-add-btn">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add
+        </button>
+      </div>
+      <div class="fn-subsection" style="opacity:0.5;">
+        <div class="fn-sub-hdr">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1v14M3 6l5-5 5 5M3 10l5 5 5-5" stroke="#525866" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="fn-sub-label">Post-Call Functions</span>
+        </div>
+        <div class="fn-sub-desc">Runs after the call ends. Write outcomes back to your CRM.</div>
+        <button class="fn-add-btn">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-col">
+    <div class="test-col-header"><div class="test-col-title">Test Agent</div></div>
+    <div class="test-col-body">
+      <div style="opacity:0.3;">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="18" y="10" width="12" height="20" rx="6" stroke="#99A0AE" stroke-width="2"/><path d="M12 26c0 6.6 5.4 12 12 12s12-5.4 12-12M24 38v6M18 44h12" stroke="#99A0AE" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <button style="padding:7px 18px;border:1px solid #E1E4EA;border-radius:8px;font-size:13px;font-weight:500;color:#0E121B;background:#fff;cursor:pointer;font-family:inherit;">Run Test</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal overlay -->
+<div class="modal-backdrop">
+  <div class="modal">
+
+    <div class="modal-header">
+      <div class="sfdc-icon">
+        <svg width="20" height="14" viewBox="0 0 60 42" fill="none">
+          <path d="M24.9 5.6a13.3 13.3 0 0 1 9.5-4c4.9 0 9.1 2.7 11.4 6.7a16.4 16.4 0 0 1 6.7-1.4c9.1 0 16.5 7.4 16.5 16.6S61.6 40 52.5 40c-1.2 0-2.4-.1-3.6-.4a12.2 12.2 0 0 1-10.7 6.2c-1.8 0-3.5-.4-5-.9A13.9 13.9 0 0 1 20.3 54C14.3 54 9 50.5 6.4 45.4a12.8 12.8 0 0 1-2.6.3A13 13 0 0 1 3.8 19a15.2 15.2 0 0 1-.8-4.8C3 7.4 8.9 1.5 16.2 1.5c3.4 0 6.5 1.3 8.8 3.4" fill="#00A1E0" transform="scale(0.55) translate(-2,-3)"/>
+        </svg>
+      </div>
+      <div class="modal-titles">
+        <h2>Salesforce</h2>
+        <div class="sub">Native Integration</div>
+      </div>
+      <button class="modal-close">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Action -->
+      <div class="msec">
+        <div class="msec-label">Action</div>
+        <div class="msec-helper">Choose what this function fetches from Salesforce before the agent speaks.</div>
+        <div class="action-select-wrap">
+          <select class="action-select">
+            <option selected>Get Lead</option>
+            <option>Get Contact</option>
+            <option>Get Opportunity</option>
+            <option>Get Account</option>
+            <option>Get Case</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Lookup -->
+      <div class="msec">
+        <div class="msec-label">Lookup</div>
+        <div class="msec-helper">Map a Salesforce identifier field to the value Retell will use to find the record. Inbound webhook fields are always available since the webhook resolves before any pre-call function runs.</div>
+        <div class="lookup-grid">
+          <div>
+            <div class="lookup-col-header">Salesforce Field</div>
+            <input class="lookup-input" value="Id" readonly />
+          </div>
+          <div class="lookup-arrow">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#C5CAD3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div class="lookup-col-header">Value</div>
+            <select class="lookup-value">
+              <option selected>{{inbound.record_id}}</option>
+              <option>{{inbound.lead_id}}</option>
+              <option>{{inbound.contact_id}}</option>
+              <option>{{from_number}}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Output fields -->
+      <div class="msec">
+        <div class="msec-label">Output fields</div>
+        <div class="msec-helper">Pre-populated from the Salesforce Lead schema. Delete fields you don't need, or rename the variable used in the agent prompt.</div>
+
+        <div class="output-header-row">
+          <span class="output-col-label">Salesforce Field</span>
+          <span></span>
+          <span class="output-col-label">Variable Name</span>
+          <span></span>
+        </div>
+
+        <div class="output-row">
+          <div class="output-field">FirstName</div>
+          <div class="output-arrow"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <input class="output-var" value="first_name" />
+          <button class="output-x"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2L2 10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+        </div>
+
+        <div class="output-row">
+          <div class="output-field">LastName</div>
+          <div class="output-arrow"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <input class="output-var" value="last_name" />
+          <button class="output-x"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2L2 10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+        </div>
+
+        <div class="output-row">
+          <div class="output-field">LeadSource</div>
+          <div class="output-arrow"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <input class="output-var" value="lead_source" />
+          <button class="output-x"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2L2 10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+        </div>
+
+        <div class="output-row">
+          <div class="output-field">AnnualRevenue</div>
+          <div class="output-arrow"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <input class="output-var" value="annual_revenue" />
+          <button class="output-x"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2L2 10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+        </div>
+
+        <div class="output-row">
+          <div class="output-field">MobilePhone</div>
+          <div class="output-arrow"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <input class="output-var" value="lead_phone" />
+          <button class="output-x"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2L2 10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+        </div>
+
+        <button class="add-field-btn">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          + Add field
+        </button>
+      </div>
+
+      <!-- Advanced settings -->
+      <div class="msec">
+        <div class="advanced-toggle">
+          <svg class="adv-chev" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>Advanced Settings</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-save">Save</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Maria Santos · Inbound WhatsApp</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 240px; background: #F5F7FA; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .nav-scroll { padding: 4px 0; flex: 1; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { padding: 8px; height: 36px; font-size: 14px; color: #525866; border-radius: 6px; display: flex; align-items: center; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+
+  /* Three-panel layout */
+  .app { flex: 1; display: flex; min-width: 0; }
+  .thread-list { width: 300px; border-right: 1px solid #E1E4EA; display: flex; flex-direction: column; flex-shrink: 0; background: #fff; }
+  .tl-head { padding: 16px 20px; border-bottom: 1px solid #E1E4EA; }
+  .tl-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .tl-badge { background: #ECF3FF; color: #3d64d7; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .tl-filter { margin-top: 10px; display: flex; gap: 6px; }
+  .tl-chip { padding: 4px 10px; border: 1px solid #E1E4EA; border-radius: 999px; font-size: 12px; color: #525866; cursor: pointer; }
+  .tl-chip.active { background: #0E121B; color: #fff; border-color: #0E121B; }
+  .tl-scroll { flex: 1; overflow-y: auto; }
+  .thread-row { padding: 14px 20px; border-bottom: 1px solid #F3F4F6; display: flex; gap: 12px; cursor: pointer; }
+  .thread-row:hover { background: #FAFBFC; }
+  .thread-row.active { background: #F0F9FF; border-left: 3px solid #3d64d7; padding-left: 17px; }
+  .thread-avatar { width: 36px; height: 36px; border-radius: 50%; background: #25D366; color: #fff; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .thread-body { flex: 1; min-width: 0; }
+  .thread-line1 { display: flex; justify-content: space-between; align-items: baseline; }
+  .thread-name { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .thread-time { font-size: 11px; color: #99A0AE; }
+  .thread-preview { font-size: 13px; color: #525866; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+  .thread-chan { font-size: 10px; text-transform: uppercase; color: #25D366; font-weight: 600; letter-spacing: 0.04em; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+
+  .conv { flex: 1; display: flex; flex-direction: column; background: #ECE5DD; min-width: 0; }
+  .conv-head { background: #F0F2F5; border-bottom: 1px solid #E1E4EA; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  .conv-avatar { width: 40px; height: 40px; border-radius: 50%; background: #25D366; color: #fff; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  .conv-name { font-size: 15px; font-weight: 600; }
+  .conv-sub { font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 8px; }
+  .conv-sub .dot { width: 6px; height: 6px; background: #17B26A; border-radius: 50%; }
+  .conv-actions { margin-left: auto; display: flex; gap: 6px; }
+  .icon-btn { width: 36px; height: 36px; border: 1px solid #E1E4EA; background: #fff; border-radius: 8px; cursor: pointer; color: #525866; display: flex; align-items: center; justify-content: center; }
+
+  .messages { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 10px; }
+  .msg-row { display: flex; max-width: 70%; }
+  .msg-row.in { align-self: flex-start; }
+  .msg-row.out { align-self: flex-end; }
+  .bubble { padding: 8px 12px; border-radius: 8px; font-size: 14px; line-height: 1.45; position: relative; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); }
+  .msg-row.in .bubble { background: #fff; color: #0E121B; border-top-left-radius: 2px; }
+  .msg-row.out .bubble { background: #D9FDD3; color: #0E121B; border-top-right-radius: 2px; }
+  .bubble .time { font-size: 10px; color: #6B7280; text-align: right; margin-top: 4px; display: flex; gap: 4px; justify-content: flex-end; align-items: center; }
+  .bubble .tick { color: #53BDEB; }
+  .system-row { align-self: center; padding: 4px 10px; background: rgba(255,255,255,0.7); border-radius: 6px; font-size: 11px; color: #525866; }
+
+  .quick-reply { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+  .qr-btn { background: #fff; border: 1px solid #D1D5DB; padding: 6px 12px; border-radius: 16px; font-size: 12px; color: #0693E3; font-weight: 500; }
+
+  .day-divider { align-self: center; background: rgba(255,255,255,0.8); padding: 4px 10px; border-radius: 6px; font-size: 11px; color: #525866; font-weight: 500; }
+
+  .composer { background: #F0F2F5; border-top: 1px solid #E1E4EA; padding: 10px 16px; display: flex; gap: 10px; align-items: center; }
+  .composer-input { flex: 1; height: 40px; padding: 0 14px; background: #fff; border: none; border-radius: 20px; font-size: 14px; color: #0E121B; outline: none; font-family: inherit; }
+  .composer-send { width: 40px; height: 40px; border-radius: 50%; background: #25D366; color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  /* Right context panel */
+  .context { width: 320px; border-left: 1px solid #E1E4EA; background: #FAFBFC; overflow-y: auto; flex-shrink: 0; }
+  .ctx-section { padding: 16px 20px; border-bottom: 1px solid #E1E4EA; }
+  .ctx-title { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 10px; }
+  .ctx-row { display: flex; justify-content: space-between; font-size: 13px; color: #0E121B; margin-bottom: 6px; }
+  .ctx-row .lbl { color: #6B7280; }
+  .ctx-row .val { font-weight: 500; }
+
+  .agent-card { display: flex; align-items: center; gap: 10px; padding: 10px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; }
+  .agent-avatar { width: 32px; height: 32px; border-radius: 8px; background: #0E121B; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+  .agent-name { font-size: 13px; font-weight: 600; }
+  .agent-sub { font-size: 11px; color: #6B7280; }
+
+  .shared-chan { display: flex; gap: 6px; margin-top: 10px; }
+  .chan-pill { padding: 4px 10px; border: 1px solid #E1E4EA; background: #fff; border-radius: 6px; font-size: 11px; color: #525866; display: flex; align-items: center; gap: 4px; }
+  .chan-pill.active { background: #ECFDF5; border-color: #BBF7D0; color: #067647; font-weight: 500; }
+  .chan-pill .d { width: 5px; height: 5px; border-radius: 50%; background: #17B26A; }
+
+  .toggle { width: 36px; height: 20px; background: #E1E4EA; border-radius: 12px; position: relative; cursor: pointer; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .toggle.on { background: #17B26A; }
+  .toggle.on::after { left: 18px; }
+
+  .tool-row { padding: 10px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 12px; }
+  .tool-row .tag { padding: 2px 6px; font-size: 10px; font-weight: 600; border-radius: 4px; background: #F3F4F6; color: #525866; }
+  .tool-row .tag.fired { background: #ECFDF5; color: #067647; }
+  .tool-row .name { flex: 1; font-weight: 500; color: #0E121B; }
+
+  .btn-escalate { width: 100%; height: 40px; background: #0E121B; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn-handoff { width: 100%; height: 36px; margin-top: 8px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0E121B; font-weight: 500; cursor: pointer; }
+
+  .breadcrumb { font-size: 12px; color: #6B7280; margin-bottom: 8px; }
+  .breadcrumb a { color: #3d64d7; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo"><svg width="73" height="20" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg></div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item current">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item">Integrations</li></ul></div>
+  </div>
+</aside>
+
+<div class="app">
+  <div class="thread-list">
+    <div class="tl-head">
+      <div class="tl-title">Conversations <span class="tl-badge">3 active</span></div>
+      <div class="tl-filter">
+        <span class="tl-chip active">All</span>
+        <span class="tl-chip">WhatsApp</span>
+        <span class="tl-chip">Voice</span>
+        <span class="tl-chip">SMS</span>
+      </div>
+    </div>
+    <div class="tl-scroll">
+      <div class="thread-row active">
+        <div class="thread-avatar">MS</div>
+        <div class="thread-body">
+          <div class="thread-line1"><span class="thread-name">Maria Santos</span><span class="thread-time">just now</span></div>
+          <div class="thread-preview">Yes, please call me — I have a few insurance…</div>
+          <div class="thread-chan">● WhatsApp</div>
+        </div>
+      </div>
+      <div class="thread-row">
+        <div class="thread-avatar" style="background:#3d64d7">JR</div>
+        <div class="thread-body">
+          <div class="thread-line1"><span class="thread-name">João Ribeiro</span><span class="thread-time">2 min</span></div>
+          <div class="thread-preview">Thanks! See you Thursday 10am.</div>
+          <div class="thread-chan" style="color:#3d64d7">● Voice · 6m 14s</div>
+        </div>
+      </div>
+      <div class="thread-row">
+        <div class="thread-avatar">LO</div>
+        <div class="thread-body">
+          <div class="thread-line1"><span class="thread-name">Lucia Oliveira</span><span class="thread-time">8 min</span></div>
+          <div class="thread-preview">Sent: prescription.pdf</div>
+          <div class="thread-chan">● WhatsApp</div>
+        </div>
+      </div>
+      <div class="thread-row">
+        <div class="thread-avatar">PM</div>
+        <div class="thread-body">
+          <div class="thread-line1"><span class="thread-name">Pedro Mendes</span><span class="thread-time">15 min</span></div>
+          <div class="thread-preview">Agent: Booked for 5 May, 3pm</div>
+          <div class="thread-chan">● WhatsApp</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="conv">
+    <div class="conv-head">
+      <div class="conv-avatar">MS</div>
+      <div>
+        <div class="conv-name">Maria Santos</div>
+        <div class="conv-sub"><span class="dot"></span>+55 11 98732-4411 · Patient · São Paulo</div>
+      </div>
+      <div class="conv-actions">
+        <button class="icon-btn" title="Voice call">📞</button>
+        <button class="icon-btn" title="Escalate">↗</button>
+        <button class="icon-btn" title="More">⋯</button>
+      </div>
+    </div>
+
+    <div class="messages">
+      <div class="day-divider">Today</div>
+
+      <div class="system-row">Conversation opened by Clinic Front Desk Agent · 14:02</div>
+
+      <div class="msg-row in"><div class="bubble">Hi, I need to reschedule my consultation with Dr. Chen and I have questions about copay coverage.<div class="time">14:02</div></div></div>
+
+      <div class="msg-row out"><div class="bubble">Hi Maria — I can see your Tuesday 3pm with Dr. Chen. What time works better for you?
+        <div class="quick-reply">
+          <span class="qr-btn">Thursday 10am</span>
+          <span class="qr-btn">Thursday 3pm</span>
+          <span class="qr-btn">Friday 11am</span>
+        </div>
+        <div class="time">14:02 <span class="tick">✓✓</span></div>
+      </div></div>
+
+      <div class="msg-row in"><div class="bubble">Thursday 10am works.<div class="time">14:03</div></div></div>
+
+      <div class="msg-row out"><div class="bubble">Done ✅ You're now booked with Dr. Chen on <strong>Thursday 10am</strong>. I'll text you a reminder the day before.<div class="time">14:03 <span class="tick">✓✓</span></div></div></div>
+
+      <div class="msg-row in"><div class="bubble">Thanks! Quick question — I have AMIL One. Does the consultation copay apply or is it covered?<div class="time">14:04</div></div></div>
+
+      <div class="msg-row out"><div class="bubble">Good question — the answer depends on whether this is a first visit or follow-up. It's easier to walk through verbally than in text. Want me to call you right now?
+        <div class="quick-reply">
+          <span class="qr-btn">Yes, call me</span>
+          <span class="qr-btn">Keep it in text</span>
+        </div>
+        <div class="time">14:04 <span class="tick">✓✓</span></div>
+      </div></div>
+
+      <div class="msg-row in"><div class="bubble">Yes, please call me — I have a few insurance things to check.<div class="time">14:05</div></div></div>
+
+      <div class="system-row">Agent is preparing to initiate a voice call → <a href="connect-integration-library-3.1.6-whatsapp-escalate-to-voice.html" style="color:#3d64d7;">see what happens next</a></div>
+    </div>
+
+    <div class="composer">
+      <button class="icon-btn" title="Attach">📎</button>
+      <input type="text" class="composer-input" placeholder="Type a message (sent as Clinic Front Desk Agent)">
+      <button class="composer-send">➤</button>
+    </div>
+  </div>
+
+  <div class="context">
+    <div class="ctx-section">
+      <div class="breadcrumb"><a href="connect-integration-library-3.1.3-whatsapp-app-page.html">WhatsApp</a> / Live thread</div>
+      <div class="ctx-title">This conversation</div>
+      <div class="ctx-row"><span class="lbl">Channel</span><span class="val">WhatsApp text</span></div>
+      <div class="ctx-row"><span class="lbl">Started</span><span class="val">3 min ago</span></div>
+      <div class="ctx-row"><span class="lbl">Record ID</span><span class="val"><code style="font-size:11px;">conv_e8a…22f</code></span></div>
+      <div class="ctx-row"><span class="lbl">Keyed by</span><span class="val">+55 11 98732-4411</span></div>
+    </div>
+
+    <div class="ctx-section">
+      <div class="ctx-title">Agent handling</div>
+      <div class="agent-card">
+        <div class="agent-avatar">CF</div>
+        <div>
+          <div class="agent-name">Clinic Front Desk Agent</div>
+          <div class="agent-sub">Single prompt · gpt-4o · 11labs Sofia PT-BR</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#6B7280;margin-top:10px;">Same agent config handles voice and WhatsApp text. One prompt, one tool list, one KB.</div>
+      <div class="shared-chan">
+        <span class="chan-pill active"><span class="d"></span>WhatsApp</span>
+        <span class="chan-pill"><span class="d" style="background:#99A0AE;"></span>Voice</span>
+        <span class="chan-pill"><span class="d" style="background:#99A0AE;"></span>SMS</span>
+      </div>
+    </div>
+
+    <div class="ctx-section">
+      <div class="ctx-title">Tools used this thread</div>
+      <div class="tool-row"><span class="tag fired">Fired</span><span class="name">CRM Contact Lookup</span></div>
+      <div class="tool-row"><span class="tag fired">Fired</span><span class="name">Cal.com: Reschedule Booking</span></div>
+      <div class="tool-row"><span class="tag">Available</span><span class="name">Initiate Voice Call with Chat Context</span></div>
+      <div class="tool-row"><span class="tag">Available</span><span class="name">Hand off to Human Agent</span></div>
+    </div>
+
+    <div class="ctx-section">
+      <div class="ctx-title">AI control</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:10px;"><span>AI responding</span><div class="toggle on"></div></div>
+      <button class="btn-escalate" onclick="window.location='connect-integration-library-3.1.6-whatsapp-escalate-to-voice.html'">Escalate to voice call →</button>
+      <button class="btn-handoff" onclick="window.location='connect-integration-library-3.1.6-whatsapp-human-handoff.html'">Hand off to a human rep</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

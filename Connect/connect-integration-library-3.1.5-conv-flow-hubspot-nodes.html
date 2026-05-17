@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inbound Sales — Conversation Flow</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+
+  /* === SIDEBAR (copied exactly from 3.1.1) === */
+  .sidebar { width: 280px; min-width: 280px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; padding: 0; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .sidebar-logo svg { display: block; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 10px 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; flex-shrink: 0; }
+  .workspace-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .workspace-chevron { color: #99A0AE; font-size: 10px; flex-shrink: 0; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; line-height: 16px; height: 24px; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; position: relative; white-space: nowrap; border-radius: 6px; }
+  .nav-item:hover { background: rgba(0,0,0,0.03); }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #FFFFFF; }
+  .nav-item.new-item::after { content: ''; display: inline-block; width: 6px; height: 6px; background: #3d64d7; border-radius: 50%; margin-left: 6px; flex-shrink: 0; }
+  .nav-item svg { flex-shrink: 0; }
+  .footer { padding: 16px 14px; overflow: hidden; }
+  .footer-card { display: flex; align-items: center; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; box-shadow: rgba(0,0,0,0.1) 0px 1px 3px 0px, rgba(0,0,0,0.1) 0px 1px 2px -1px; cursor: pointer; width: 100%; }
+  .footer-card.user { padding: 10px 10px 10px 12px; height: 40px; margin-bottom: 12px; gap: 8px; }
+  .footer-user .avatar { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; overflow: hidden; }
+  .footer-user .name { font-size: 14px; color: #525866; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .footer-user .chevron { color: #9CA3AF; flex-shrink: 0; display: flex; align-items: center; }
+  .footer-links { display: flex; align-items: center; gap: 4px; }
+  .footer-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; font-size: 14px; color: #525866; cursor: pointer; text-decoration: none; height: 36px; }
+  .footer-link:hover { background: rgba(0,0,0,0.03); }
+  .footer-divider { width: 1px; height: 12px; background: #D1D5DB; flex-shrink: 0; }
+
+  /* === MAIN === */
+  .main { flex: 1; display: flex; flex-direction: column; background: #fff; overflow: hidden; min-width: 0; }
+  .topbar { display: flex; align-items: center; padding: 14px 24px; border-bottom: 1px solid #EDEFF3; background: #fff; gap: 16px; flex-shrink: 0; }
+  .topbar-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .breadcrumb { font-size: 13px; color: #6B7280; }
+  .breadcrumb .sep { margin: 0 6px; color: #D1D5DB; }
+  .topbar-title { font-size: 15px; font-weight: 600; color: #0A0A0A; }
+  .topbar-meta { font-size: 12px; color: #99A0AE; display: flex; align-items: center; gap: 10px; }
+  .topbar-meta .dot-sep { width: 3px; height: 3px; background: #D1D5DB; border-radius: 50%; }
+  .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; background: #ECFDF5; color: #047857; border-radius: 999px; font-size: 11px; font-weight: 500; }
+  .status-pill .dot { width: 6px; height: 6px; background: #10B981; border-radius: 50%; }
+  .topbar-tabs { display: flex; align-items: center; gap: 4px; margin-left: 24px; }
+  .tab { padding: 6px 12px; font-size: 13px; color: #6B7280; border-radius: 6px; cursor: pointer; font-weight: 500; }
+  .tab.active { background: #F3F4F6; color: #0A0A0A; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; font-size: 13px; font-weight: 500; border-radius: 6px; cursor: pointer; border: 1px solid transparent; background: transparent; color: #374151; }
+  .btn.secondary { border-color: #E5E7EB; background: #fff; }
+  .btn.secondary:hover { background: #F9FAFB; }
+  .btn.primary { background: #0A0A0A; color: #fff; }
+  .btn.primary:hover { background: #1F2937; }
+
+  .body { display: flex; flex: 1; min-height: 0; }
+
+  .palette { width: 240px; min-width: 240px; border-right: 1px solid #EDEFF3; background: #FAFBFC; overflow-y: auto; padding: 16px 12px; }
+  .palette-section + .palette-section { margin-top: 20px; }
+  .palette-label { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 6px 8px; }
+  .palette-item { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 6px; font-size: 13px; color: #374151; cursor: grab; }
+  .palette-item:hover { background: #F3F4F6; }
+  .palette-icon { width: 22px; height: 22px; border-radius: 5px; background: #EEF0F3; display: flex; align-items: center; justify-content: center; color: #525866; flex-shrink: 0; font-size: 11px; font-weight: 600; }
+  .palette-icon.hs { background: #FFF0EA; color: #FF7A59; }
+  .palette-subhead { display: flex; align-items: center; gap: 8px; padding: 4px 6px 8px; font-size: 12px; font-weight: 600; color: #374151; }
+  .hs-logo { width: 16px; height: 16px; border-radius: 4px; background: #FF7A59; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 700; }
+
+  .canvas-wrap { flex: 1; min-width: 0; position: relative; overflow: auto; background-color: #FAFBFC; background-image: radial-gradient(#E5E7EB 1px, transparent 1px); background-size: 16px 16px; }
+  .canvas-toolbar { position: absolute; top: 16px; left: 16px; display: flex; gap: 4px; background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; padding: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); z-index: 2; }
+  .canvas-toolbar button { width: 28px; height: 28px; border: none; background: transparent; border-radius: 5px; cursor: pointer; color: #6B7280; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .canvas-toolbar button:hover { background: #F3F4F6; }
+  .zoom-indicator { position: absolute; bottom: 16px; left: 16px; background: #fff; border: 1px solid #E5E7EB; border-radius: 6px; padding: 4px 10px; font-size: 12px; color: #6B7280; box-shadow: 0 1px 2px rgba(0,0,0,0.04); z-index: 2; }
+
+  .canvas { position: relative; width: 1720px; height: 820px; padding: 40px; }
+
+  .node { position: absolute; background: #fff; border: 1px solid #E5E7EB; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03); width: 180px; padding: 10px 12px; font-size: 12px; }
+  .node .node-head { display: flex; align-items: center; gap: 8px; }
+  .node .node-icon { width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; font-weight: 700; color: #fff; }
+  .node .node-icon.logic { background: #EEF0F3; color: #525866; }
+  .node .node-icon.start { background: #10B981; color: #fff; }
+  .node .node-icon.hs { background: #FF7A59; color: #fff; }
+  .node .node-icon.end { background: #6B7280; color: #fff; }
+  .node .node-type { font-size: 10px; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; }
+  .node .node-title { font-size: 13px; font-weight: 600; color: #0A0A0A; margin-top: 1px; }
+  .node .node-sub { font-size: 11px; color: #6B7280; margin-top: 6px; line-height: 1.4; }
+  .node.focused { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.18), 0 1px 3px rgba(0,0,0,0.04); }
+  .node.end-node { width: 140px; padding: 8px 12px; background: #F9FAFB; }
+  .node.end-node .node-title { font-size: 12px; }
+  .node.begin-node { width: 120px; padding: 8px 12px; }
+  .node.begin-node .node-title { font-size: 12px; }
+
+  .branch-label { position: absolute; background: #fff; border: 1px solid #E5E7EB; border-radius: 999px; padding: 2px 8px; font-size: 10px; color: #6B7280; font-weight: 500; z-index: 3; }
+
+  svg.connectors { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+
+  .inspector { width: 360px; min-width: 360px; border-left: 1px solid #EDEFF3; background: #fff; overflow-y: auto; padding: 20px 20px 40px; }
+  .insp-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .insp-title-row .node-icon { width: 28px; height: 28px; border-radius: 7px; background: #FF7A59; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+  .insp-title { font-size: 16px; font-weight: 600; color: #0A0A0A; }
+  .insp-sub { font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 6px; margin-bottom: 18px; }
+  .insp-sub .hs-logo { width: 12px; height: 12px; font-size: 8px; }
+  .insp-section { margin-top: 18px; }
+  .insp-label { font-size: 11px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+  .insp-input, .insp-select, .insp-textarea { width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid #E5E7EB; border-radius: 6px; background: #fff; font-family: inherit; color: #0A0A0A; }
+  .insp-textarea { resize: vertical; min-height: 56px; line-height: 1.45; }
+  .insp-select { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 20 20' fill='none'><path d='M5 7.5 10 12.5 15 7.5' stroke='%236B7280' stroke-width='1.5' fill='none'/></svg>"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+  .io-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid #EEF0F3; border-radius: 6px; margin-bottom: 6px; background: #FAFBFC; }
+  .io-name { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #0A0A0A; flex: 1; }
+  .io-type { font-size: 11px; color: #6B7280; padding: 2px 6px; background: #EEF0F3; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .io-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
+  .io-tag.req { background: #FEE2E2; color: #B91C1C; }
+  .io-tag.opt { background: #F3F4F6; color: #6B7280; }
+  .insp-hint { font-size: 11px; color: #99A0AE; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#0A0A0A"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73ZM205.22 49.69C202.9 52 199.43 52.58 195.38 52.58H176.28V26.54H193.64C198.85 26.54 201.74 27.12 204.64 28.86C208.11 30.59 209.85 34.64 209.85 39.27C209.85 43.9 208.11 47.38 205.22 49.69Z" fill="#0A0A0A"/><path d="M255.56 34.65C238.2 34.65 226.63 47.95 226.63 66.47C226.63 84.99 242.25 98.3 256.14 98.3C270.03 98.3 279.86 90.19 283.33 78.62H269.45C267.71 82.67 264.82 87.3 256.14 87.3C247.46 87.3 239.94 81.52 239.94 69.94H283.91C283.91 49.69 272.92 34.65 255.56 34.65ZM240.51 60.11C241.09 51.43 246.88 45.06 255.56 45.06C264.24 45.06 270.02 51.43 270.02 60.11H240.51Z" fill="#0A0A0A"/><path d="M344.09 34.65C326.73 34.65 315.16 47.95 315.16 66.47C315.16 85.15 330.78 98.3 344.67 98.3C358.56 98.3 368.39 90.19 371.87 78.62H357.98C356.24 82.67 353.35 87.3 344.67 87.3C335.99 87.3 328.47 81.52 328.47 69.94H372.44C372.44 49.69 361.45 34.65 344.09 34.65ZM329.05 60.11C329.62 51.43 335.41 45.06 344.09 45.06C352.77 45.06 358.56 51.43 358.56 60.11H329.05Z" fill="#0A0A0A"/><path d="M390.96 14.97H377.65V95.92H390.96V14.97Z" fill="#0A0A0A"/><path d="M413.53 14.97H400.22V95.92H413.53V14.97Z" fill="#0A0A0A"/><path d="M304.17 17.28L290.84 17.28L290.85 34.65H282.76V45H290.85V82.82C290.85 87.58 291.8 90.43 294.66 93.29C297.51 96.14 300.37 97.09 305.13 97.09H315.14V85.67H309.88C308.16 85.67 306.96 85.37 306.13 85.11C305.27 84.84 304.61 84.16 304.4 83.29C304.17 82.33 304.17 81.09 304.17 79.9V45H315.14V34.65H304.17V17.28Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="workspace">
+    <div class="workspace-avatar">B</div>
+    <span class="workspace-name">Brandon K... Workspace</span>
+    <span class="workspace-chevron"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14.3105 7.94623L10 3.63574L5.68956 7.94623L6.67165 8.92835L10 5.59992L13.3284 8.92835L14.3105 7.94623ZM5.68945 12.0534L9.99996 16.364L14.3104 12.0534L13.3284 11.0713L9.99996 14.3997L6.67154 11.0713L5.68945 12.0534Z" fill="#99A0AE"/></svg></span>
+  </div>
+  <div class="nav-scroll">
+    <div class="section-group">
+      <div class="section-label">Build</div>
+      <ul class="nav-items">
+        <li class="nav-item current"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M11.125 2.5C11.125 2.833 10.98 3.133 10.75 3.339V4.75H14.5C15.743 4.75 16.75 5.757 16.75 7V14.5C16.75 15.743 15.743 16.75 14.5 16.75H5.5C4.257 16.75 3.25 15.743 3.25 14.5V7C3.25 5.757 4.257 4.75 5.5 4.75H9.25V3.339C9.02 3.133 8.875 2.833 8.875 2.5C8.875 1.879 9.379 1.375 10 1.375C10.621 1.375 11.125 1.879 11.125 2.5ZM5.5 6.25C5.086 6.25 4.75 6.586 4.75 7V14.5C4.75 14.914 5.086 15.25 5.5 15.25H14.5C14.914 15.25 15.25 14.914 15.25 14.5V7C15.25 6.586 14.914 6.25 14.5 6.25H5.5ZM2.5 8.5H1V13H2.5V8.5ZM17.5 8.5H19V13H17.5V8.5ZM7.75 11.875C8.371 11.875 8.875 11.371 8.875 10.75C8.875 10.129 8.371 9.625 7.75 9.625C7.129 9.625 6.625 10.129 6.625 10.75C6.625 11.371 7.129 11.875 7.75 11.875ZM12.25 11.875C12.871 11.875 13.375 11.371 13.375 10.75C13.375 10.129 12.871 9.625 12.25 9.625C11.629 9.625 11.125 10.129 11.125 10.75C11.125 11.371 11.629 11.875 12.25 11.875Z" fill="#3d64d7"/></svg>Agents</li>
+        <li class="nav-item">Knowledge Base</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Deploy</div>
+      <ul class="nav-items">
+        <li class="nav-item">Phone Numbers</li>
+        <li class="nav-item">Batch Call</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Monitor</div>
+      <ul class="nav-items">
+        <li class="nav-item">Call History</li>
+        <li class="nav-item">Chat History</li>
+        <li class="nav-item">Analytics</li>
+        <li class="nav-item">AI Quality Assurance</li>
+        <li class="nav-item">Alerting</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">System</div>
+      <ul class="nav-items">
+        <li class="nav-item new-item">Integrations</li>
+        <li class="nav-item">Billing</li>
+        <li class="nav-item">Settings</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="footer-card user footer-user">
+      <div class="avatar" style="background:#3d64d7;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:600;">B</div>
+      <span class="name">brandon@retellai.com</span>
+      <span class="chevron"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.31 7.95L10 3.64L5.69 7.95L6.67 8.93L10 5.6L13.33 8.93L14.31 7.95ZM5.69 12.05L10 16.36L14.31 12.05L13.33 11.07L10 14.4L6.67 11.07L5.69 12.05Z" fill="#9CA3AF"/></svg></span>
+    </div>
+    <div class="footer-links">
+      <a class="footer-link">Help</a>
+      <div class="footer-divider"></div>
+      <a class="footer-link">Updates</a>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">Agents<span class="sep">/</span></div>
+      <div class="topbar-title">Inbound Sales — Conversation Flow</div>
+      <div class="topbar-meta">
+        <span class="status-pill"><span class="dot"></span>Published</span>
+        <span class="dot-sep"></span>
+        <span>v12 · edited 2m ago by Brandon</span>
+      </div>
+    </div>
+    <div class="topbar-tabs">
+      <div class="tab active">Build</div>
+      <div class="tab">Simulation</div>
+      <div class="tab">Versions</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn secondary">Test Call</button>
+      <button class="btn secondary">Share</button>
+      <button class="btn primary">Publish</button>
+    </div>
+  </div>
+
+  <div class="body">
+    <aside class="palette">
+      <div class="palette-section">
+        <div class="palette-label">Logic</div>
+        <div class="palette-item"><span class="palette-icon">C</span>Conversation</div>
+        <div class="palette-item"><span class="palette-icon">fx</span>Function</div>
+        <div class="palette-item"><span class="palette-icon">&#8599;</span>Call Transfer</div>
+        <div class="palette-item"><span class="palette-icon">#</span>Press Digit</div>
+        <div class="palette-item"><span class="palette-icon">&#9695;</span>Logic Split</div>
+        <div class="palette-item"><span class="palette-icon">&#9993;</span>SMS</div>
+        <div class="palette-item"><span class="palette-icon">{}</span>Extract Variable</div>
+        <div class="palette-item"><span class="palette-icon">&#9632;</span>Ending</div>
+      </div>
+      <div class="palette-section">
+        <div class="palette-label">Integration</div>
+        <div class="palette-subhead"><span class="hs-logo">H</span>HubSpot</div>
+        <div class="palette-item"><span class="palette-icon hs">H</span>Get Contact</div>
+        <div class="palette-item"><span class="palette-icon hs">H</span>Create Contact</div>
+        <div class="palette-item"><span class="palette-icon hs">H</span>Update Contact</div>
+        <div class="palette-item"><span class="palette-icon hs">H</span>Search Contact</div>
+        <div class="palette-item"><span class="palette-icon hs">H</span>Get Company</div>
+        <div class="palette-item"><span class="palette-icon hs">H</span>Create Company</div>
+        <div class="palette-item"><span class="palette-icon hs">H</span>Update Deal</div>
+        <div class="palette-item"><span class="palette-icon hs">H</span>Create Deal</div>
+        <div class="palette-item"><span class="palette-icon hs">H</span>Associate Contact to Deal</div>
+        <div class="palette-item"><span class="palette-icon hs">H</span>Add Note</div>
+        <div class="palette-item"><span class="palette-icon hs">H</span>Log Call Activity</div>
+        <div class="palette-item"><span class="palette-icon hs">H</span>Update Custom Properties</div>
+        <div class="palette-item"><span class="palette-icon hs">H</span>Add to List</div>
+        <div class="palette-item"><span class="palette-icon hs">H</span>Enroll in Workflow</div>
+      </div>
+    </aside>
+
+    <div class="canvas-wrap">
+      <div class="canvas-toolbar">
+        <button title="Select">&#10140;</button>
+        <button title="Pan">&#9995;</button>
+        <button title="Fit">&#9974;</button>
+        <button title="Add">+</button>
+      </div>
+      <div class="zoom-indicator">100%</div>
+
+      <div class="canvas">
+        <svg class="connectors" viewBox="0 0 1720 820" preserveAspectRatio="none">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#9CA3AF"/>
+            </marker>
+            <marker id="arrowBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#3d64d7"/>
+            </marker>
+          </defs>
+          <!-- Begin -> Get Contact -->
+          <path d="M 180 400 L 220 400" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <!-- Get Contact -> Welcome -->
+          <path d="M 400 400 L 460 400" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <!-- Welcome -> Classify -->
+          <path d="M 640 400 L 700 400" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <!-- Classify branches -->
+          <path d="M 880 400 C 920 400, 930 200, 960 200 L 980 200" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <path d="M 880 400 L 980 400" stroke="#3d64d7" stroke-width="2" fill="none" marker-end="url(#arrowBlue)"/>
+          <path d="M 880 400 C 920 400, 930 600, 960 600 L 980 600" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <!-- Row 1 (top): Update Deal -> Log Call Activity -> End -->
+          <path d="M 1160 200 L 1220 200" stroke="#3d64d7" stroke-width="2" fill="none" marker-end="url(#arrowBlue)"/>
+          <path d="M 1400 200 L 1460 200" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <!-- Row 2: Create Contact -> Create Deal -> End -->
+          <path d="M 1160 400 L 1220 400" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <path d="M 1400 400 L 1460 400" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <!-- Row 3: Add Note -> Enroll in Workflow -> End -->
+          <path d="M 1160 600 L 1220 600" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <path d="M 1400 600 L 1460 600" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+        </svg>
+
+        <div class="branch-label" style="left:900px;top:280px;">existing deal</div>
+        <div class="branch-label" style="left:900px;top:386px;">new lead</div>
+        <div class="branch-label" style="left:900px;top:496px;">not interested</div>
+
+        <div class="node begin-node" style="left:60px;top:382px;">
+          <div class="node-head">
+            <div class="node-icon start">&#9654;</div>
+            <div><div class="node-type">Start</div><div class="node-title">Begin</div></div>
+          </div>
+        </div>
+
+        <div class="node" style="left:220px;top:360px;">
+          <div class="node-head">
+            <div class="node-icon hs">H</div>
+            <div><div class="node-type">HubSpot</div><div class="node-title">Get Contact</div></div>
+          </div>
+          <div class="node-sub">Lookup by caller phone number</div>
+        </div>
+
+        <div class="node" style="left:460px;top:360px;">
+          <div class="node-head">
+            <div class="node-icon logic">C</div>
+            <div><div class="node-type">Conversation</div><div class="node-title">Welcome</div></div>
+          </div>
+          <div class="node-sub">Greet by name if contact found</div>
+        </div>
+
+        <div class="node" style="left:700px;top:360px;">
+          <div class="node-head">
+            <div class="node-icon logic">&#9695;</div>
+            <div><div class="node-type">Logic Split</div><div class="node-title">Classify Intent</div></div>
+          </div>
+          <div class="node-sub">3 branches</div>
+        </div>
+
+        <!-- existing deal -->
+        <div class="node focused" style="left:980px;top:160px;">
+          <div class="node-head">
+            <div class="node-icon hs">H</div>
+            <div><div class="node-type">HubSpot</div><div class="node-title">Update Deal</div></div>
+          </div>
+          <div class="node-sub">Advance stage, update amount</div>
+        </div>
+        <div class="node" style="left:1220px;top:160px;">
+          <div class="node-head">
+            <div class="node-icon hs">H</div>
+            <div><div class="node-type">HubSpot</div><div class="node-title">Log Call Activity</div></div>
+          </div>
+          <div class="node-sub">Write call summary to deal</div>
+        </div>
+        <div class="node end-node" style="left:1460px;top:186px;">
+          <div class="node-head">
+            <div class="node-icon end">&#9632;</div>
+            <div><div class="node-type">Ending</div><div class="node-title">End Call</div></div>
+          </div>
+        </div>
+
+        <!-- new lead -->
+        <div class="node" style="left:980px;top:360px;">
+          <div class="node-head">
+            <div class="node-icon hs">H</div>
+            <div><div class="node-type">HubSpot</div><div class="node-title">Create Contact</div></div>
+          </div>
+          <div class="node-sub">Capture name, email, phone</div>
+        </div>
+        <div class="node" style="left:1220px;top:360px;">
+          <div class="node-head">
+            <div class="node-icon hs">H</div>
+            <div><div class="node-type">HubSpot</div><div class="node-title">Create Deal</div></div>
+          </div>
+          <div class="node-sub">New deal in Sales Pipeline</div>
+        </div>
+        <div class="node end-node" style="left:1460px;top:386px;">
+          <div class="node-head">
+            <div class="node-icon end">&#9632;</div>
+            <div><div class="node-type">Ending</div><div class="node-title">End Call</div></div>
+          </div>
+        </div>
+
+        <!-- not interested -->
+        <div class="node" style="left:980px;top:560px;">
+          <div class="node-head">
+            <div class="node-icon hs">H</div>
+            <div><div class="node-type">HubSpot</div><div class="node-title">Add Note</div></div>
+          </div>
+          <div class="node-sub">Record objection verbatim</div>
+        </div>
+        <div class="node" style="left:1220px;top:560px;">
+          <div class="node-head">
+            <div class="node-icon hs">H</div>
+            <div><div class="node-type">HubSpot</div><div class="node-title">Enroll in Workflow</div></div>
+          </div>
+          <div class="node-sub">Nurture sequence</div>
+        </div>
+        <div class="node end-node" style="left:1460px;top:586px;">
+          <div class="node-head">
+            <div class="node-icon end">&#9632;</div>
+            <div><div class="node-type">Ending</div><div class="node-title">End Call</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="inspector">
+      <div class="insp-title-row">
+        <div class="node-icon">H</div>
+        <div class="insp-title">Update Deal</div>
+      </div>
+      <div class="insp-sub">
+        <span class="hs-logo">H</span>HubSpot · Acme Sales · brandon@retellai.com
+      </div>
+
+      <div class="insp-section">
+        <div class="insp-label">Node name</div>
+        <input class="insp-input" value="Update Deal" />
+      </div>
+
+      <div class="insp-section">
+        <div class="insp-label">When to use</div>
+        <textarea class="insp-textarea">Run when the caller confirms interest in their existing deal. Advances the deal stage and updates amount if they mention a new number.</textarea>
+      </div>
+
+      <div class="insp-section">
+        <div class="insp-label">Pipeline</div>
+        <select class="insp-select"><option>Sales Pipeline</option><option>Partnerships</option><option>Renewals</option></select>
+      </div>
+
+      <div class="insp-section">
+        <div class="insp-label">Inputs</div>
+        <div class="io-row"><span class="io-name">deal_id</span><span class="io-type">string</span><span class="io-tag req">required</span></div>
+        <div class="io-row"><span class="io-name">dealstage</span><span class="io-type">enum</span><span class="io-tag req">required</span></div>
+        <div class="io-row"><span class="io-name">amount</span><span class="io-type">number</span><span class="io-tag opt">optional</span></div>
+        <div class="io-row"><span class="io-name">closedate</span><span class="io-type">date</span><span class="io-tag opt">optional</span></div>
+      </div>
+
+      <div class="insp-section">
+        <div class="insp-label">Outputs</div>
+        <div class="io-row"><span class="io-name">deal_id</span><span class="io-type">string</span></div>
+        <div class="io-row"><span class="io-name">dealstage</span><span class="io-type">string</span></div>
+        <div class="io-row"><span class="io-name">hs_lastmodifieddate</span><span class="io-type">datetime</span></div>
+      </div>
+
+      <div class="insp-section">
+        <div class="insp-label">Speak while running</div>
+        <textarea class="insp-textarea">Got it — I'm updating your deal now.</textarea>
+        <div class="insp-hint">Plays to the caller while the action executes.</div>
+      </div>
+
+      <div class="insp-section">
+        <div class="insp-label">On failure</div>
+        <select class="insp-select"><option>Log and continue</option><option>Retry once</option><option>End call with apology</option><option>Transfer to human</option></select>
+      </div>
+    </aside>
+  </div>
+</main>
+
+</body>
+</html>

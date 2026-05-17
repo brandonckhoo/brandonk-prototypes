@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Conv Flow (Send Slack Message node)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  .top-bar { display: flex; align-items: center; height: 40px; padding: 8px 16px 0; gap: 10px; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #525866; cursor: pointer; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+  .top-tab { padding: 4px 8px; font-size: 14px; color: #525866; cursor: pointer; }
+  .top-tab.active { font-weight: 500; color: #0E121B; }
+  .btn-publish { height: 30px; padding: 0 14px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .top-meta { padding: 2px 16px 8px 50px; font-size: 12px; color: #99A0AE; }
+
+  .main-layout { display: flex; flex: 1; overflow: hidden; border-top: 1px solid #E1E4EA; }
+
+  /* Left: node palette */
+  .node-palette { width: 220px; min-width: 220px; border-right: 1px solid #E1E4EA; background: #F5F7FA; overflow-y: auto; }
+  .palette-tabs { display: flex; padding: 10px; gap: 4px; background: #EFF1F5; border-radius: 10px; margin: 12px; }
+  .palette-tab { flex: 1; padding: 8px 10px; text-align: center; font-size: 14px; font-weight: 500; color: #6B7280; cursor: pointer; border-radius: 8px; }
+  .palette-tab.active { background: #fff; color: #0E121B; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+  .palette-items { padding: 4px 10px 16px; }
+  .palette-item { display: flex; align-items: center; gap: 10px; padding: 7px 10px; font-size: 14px; color: #0E121B; cursor: grab; border-radius: 6px; }
+  .palette-item:hover { background: rgba(0,0,0,0.03); }
+  .p-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 7px; flex-shrink: 0; }
+  .p-icon.c-convo { background: #FEE7E9; color: #E11D48; }
+  .p-icon.c-subagent { background: #D1FADF; color: #12B76A; }
+  .p-icon.c-function { background: #E9E5FF; color: #7C5CFC; }
+  .p-icon.c-transfer { background: #FEE4D3; color: #EF6820; }
+  .p-icon.c-digit { background: #D1E9FF; color: #1570EF; }
+  .p-icon.c-logic { background: #E0E7FF; color: #4C58E0; }
+  .p-icon.c-atransfer { background: #FEE4D3; color: #DC6803; }
+  .p-icon.c-sms { background: #FEF3C7; color: #D97706; }
+  .p-icon.c-extract { background: #F2F4F7; color: #475467; }
+  .p-icon.c-code { background: #F2F4F7; color: #475467; }
+  .p-icon.c-mcp { background: #E9E5FF; color: #7C5CFC; }
+  .p-icon.c-ending { background: #CFF9FE; color: #0BA5EC; }
+  .p-icon.c-note { background: #FEF3C7; color: #D97706; }
+  .p-icon img { width: 16px; height: 16px; }
+
+  /* Center canvas */
+  .canvas { flex: 1; background: #FAFAFA; position: relative; overflow: hidden; background-image: radial-gradient(#E5E7EB 1px, transparent 1px); background-size: 16px 16px; }
+  .canvas-content { position: absolute; top: 60px; left: 60px; }
+  .flow-node { position: absolute; border-radius: 8px; background: #fff; border: 1px solid #E1E4EA; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .node-begin { width: 80px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: #fff; background: #8B5CF6; border-radius: 16px; border: none; left: 0; top: 80px; }
+  .node-welcome { left: 140px; top: 30px; width: 240px; padding: 12px 14px; }
+  .node-welcome-title { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #0E121B; margin-bottom: 6px; }
+  .node-welcome-title .dot { width: 8px; height: 8px; background: #F59E0B; border-radius: 50%; }
+  .node-welcome-body { font-size: 12px; color: #6B7280; line-height: 1.5; }
+
+  .node-slack { left: 440px; top: 30px; width: 260px; padding: 12px 14px; border-color: #4A154B; box-shadow: 0 0 0 2px rgba(74,21,75,0.15); }
+  .node-slack-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 8px; }
+  .node-slack-title img { width: 16px; height: 16px; }
+  .node-slack-body { font-size: 12px; color: #374151; line-height: 1.5; }
+  .node-slack-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; background: #F3F4F6; border-radius: 4px; font-size: 11px; font-family: 'SF Mono', Menlo, monospace; color: #4A154B; margin-top: 6px; }
+
+  .node-endcall { left: 760px; top: 80px; width: 100px; height: 32px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; font-weight: 500; color: #525866; }
+  .conn-line { position: absolute; border-top: 1.5px solid #D1D5DB; }
+  .c1 { left: 80px; top: 96px; width: 60px; }
+  .c2 { left: 380px; top: 96px; width: 60px; }
+  .c3 { left: 700px; top: 96px; width: 60px; }
+
+  /* Right settings panel — configures the selected Slack node */
+  .settings-panel { width: 400px; min-width: 400px; border-left: 1px solid #E1E4EA; overflow-y: auto; background: #fff; display: flex; flex-direction: column; }
+  .sp-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid #E1E4EA; }
+  .sp-logo { width: 24px; height: 24px; border-radius: 4px; background: #4A154B; display: flex; align-items: center; justify-content: center; }
+  .sp-logo img { width: 16px; height: 16px; }
+  .sp-title { font-size: 14px; font-weight: 600; color: #0E121B; flex: 1; }
+  .sp-close { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #99A0AE; }
+
+  .sp-body { padding: 16px; flex: 1; }
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 13px; font-weight: 500; color: #0E121B; margin-bottom: 6px; }
+  .form-label .req { color: #FB3748; }
+  .form-label .help { font-weight: 400; color: #99A0AE; font-size: 11px; }
+  .form-input { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; color: #0A0A0A; outline: none; font-family: inherit; }
+  .form-input:focus { border-color: #3d64d7; }
+
+  .channel-picker { display: flex; align-items: center; gap: 6px; width: 100%; height: 36px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 6px; cursor: pointer; background: #fff; }
+  .channel-picker .hash { color: #6B7280; font-weight: 500; }
+  .channel-picker .name { font-size: 13px; color: #0A0A0A; flex: 1; }
+  .channel-picker .chev { color: #99A0AE; }
+
+  .msg-editor { border: 1px solid #E1E4EA; border-radius: 6px; overflow: hidden; }
+  .msg-toolbar { display: flex; gap: 2px; padding: 4px 6px; border-bottom: 1px solid #E1E4EA; background: #F9FAFB; }
+  .msg-tool { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #525866; border-radius: 4px; font-size: 12px; }
+  .msg-tool:hover { background: #E5E7EB; }
+  .msg-area { width: 100%; min-height: 120px; padding: 10px 12px; border: none; outline: none; font-size: 13px; line-height: 1.6; color: #0A0A0A; resize: vertical; font-family: inherit; }
+  .var-chip { display: inline-block; padding: 1px 6px; background: #EEF2FF; color: #3d64d7; border-radius: 3px; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; }
+
+  .preview-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: #99A0AE; margin: 18px 0 8px; }
+
+  .slack-preview { background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; padding: 12px 14px; }
+  .sp-ch-header { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6B7280; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #F1F5F9; }
+  .sp-msg { display: flex; gap: 10px; }
+  .sp-avatar { width: 32px; height: 32px; border-radius: 5px; background: #0E121B; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .sp-msg-body { flex: 1; font-size: 13px; line-height: 1.5; }
+  .sp-msg-header { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+  .sp-msg-name { font-weight: 700; color: #0E121B; font-size: 13px; }
+  .sp-msg-app { font-size: 9px; font-weight: 700; background: #E5E7EB; color: #525866; padding: 1px 4px; border-radius: 2px; }
+  .sp-msg-time { font-size: 11px; color: #99A0AE; }
+  .sp-msg-text { color: #0E121B; }
+  .sp-msg-text strong { font-weight: 700; }
+  .sp-block { margin-top: 8px; padding: 8px 10px; border-left: 3px solid #4A154B; background: #F9FAFB; border-radius: 3px; font-size: 12px; color: #374151; }
+  .sp-block-row { display: flex; gap: 16px; margin-bottom: 2px; }
+  .sp-block-row strong { min-width: 90px; color: #0E121B; }
+  .sp-button { display: inline-block; margin-top: 8px; padding: 5px 12px; background: #007A5A; color: #fff; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer; }
+
+  .toggle-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid #F3F4F6; }
+  .toggle-row:first-child { border-top: none; }
+  .toggle-switch { width: 32px; height: 18px; background: #D1D5DB; border-radius: 9px; position: relative; cursor: pointer; flex-shrink: 0; }
+  .toggle-switch.on { background: #3d64d7; }
+  .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: left 0.2s; }
+  .toggle-switch.on::after { left: 16px; }
+  .toggle-label { flex: 1; font-size: 13px; color: #0E121B; }
+  .toggle-sub { font-size: 12px; color: #6B7280; margin-top: 2px; }
+
+  /* Palette headings */
+  .palette-heading { font-size: 10px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; padding: 10px 16px 4px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="home-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+  <span class="agent-name">Enterprise Inbound Agent</span>
+  <span class="top-spacer"></span>
+  <div class="top-tabs">
+    <span class="top-tab active">Create</span>
+    <span class="top-tab">Simulation</span>
+  </div>
+  <span style="font-size:12px;color:#99A0AE;margin-right:8px;">Auto saved at 2:17 PM</span>
+  <button class="btn-publish">Publish</button>
+</div>
+<div class="top-meta">Conversational Flow · Version 7 · Last published 2 hours ago</div>
+
+<div class="main-layout">
+  <aside class="node-palette">
+    <div class="palette-tabs">
+      <div class="palette-tab active">Node</div>
+      <div class="palette-tab">Components</div>
+    </div>
+    <div class="palette-items">
+      <div class="palette-item"><span class="p-icon c-convo"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 5h8M4 8h8M4 11h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>Conversation</div>
+      <div class="palette-item"><span class="p-icon c-subagent"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="3" y="4.5" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="6" cy="8.5" r="0.9" fill="currentColor"/><circle cx="10" cy="8.5" r="0.9" fill="currentColor"/><path d="M8 2v2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Subagent</div>
+      <div class="palette-item"><span class="p-icon c-function"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="3" y="3" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="6" y="6" width="4" height="4" rx="1" fill="currentColor"/></svg></span>Function</div>
+      <div class="palette-item"><span class="p-icon c-transfer"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4.5c0-.8.7-1.5 1.5-1.5h1.2c.5 0 .9.3 1 .8l.5 1.9c.1.4 0 .8-.3 1l-.9.8c.9 1.6 2.2 2.9 3.8 3.8l.8-.9c.2-.3.6-.4 1-.3l1.9.5c.5.1.8.5.8 1V12.5c0 .8-.7 1.5-1.5 1.5C7.7 14 3 9.3 3 4.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>Call Transfer</div>
+      <div class="palette-item"><span class="p-icon c-digit"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="4" r="1" fill="currentColor"/><circle cx="8" cy="4" r="1" fill="currentColor"/><circle cx="12" cy="4" r="1" fill="currentColor"/><circle cx="4" cy="8" r="1" fill="currentColor"/><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="12" cy="8" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="8" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></span>Press Digit</div>
+      <div class="palette-item"><span class="p-icon c-logic"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="4" r="1.5" fill="currentColor"/><circle cx="12" cy="8" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><path d="M4 4c0 4 8 0 8 4" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M4 12c0-4 8 0 8-4" stroke="currentColor" stroke-width="1.4" fill="none"/></svg></span>Logic Split</div>
+      <div class="palette-item"><span class="p-icon c-atransfer"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="3" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M10 7.5h4m0 0l-2-2m2 2l-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Agent Transfer</div>
+      <div class="palette-item"><span class="p-icon c-sms"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2.5" y="3.5" width="11" height="8" rx="2" stroke="currentColor" stroke-width="1.4"/><circle cx="6" cy="7.5" r="0.7" fill="currentColor"/><circle cx="8" cy="7.5" r="0.7" fill="currentColor"/><circle cx="10" cy="7.5" r="0.7" fill="currentColor"/></svg></span>In-Call SMS</div>
+      <div class="palette-item"><span class="p-icon c-extract"><span style="font-family:'SF Mono',Menlo,monospace;font-size:12px;font-weight:700;">{ }</span></span>Extract Variable</div>
+      <div class="palette-item"><span class="p-icon c-code"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 4L2 8l4 4M10 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Code</div>
+      <div class="palette-item"><span class="p-icon c-mcp"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 6L7 10.5a2 2 0 11-2.8-2.8L9 3a3 3 0 014.2 4.2l-5 5a4 4 0 01-5.7-5.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>MCP</div>
+      <div class="palette-item"><span class="p-icon c-ending"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg></span>Ending</div>
+      <div class="palette-item"><span class="p-icon c-note"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3.5 3h6l3 3v7h-9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9.5 3v3h3" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>Note</div>
+    </div>
+  </aside>
+
+  <div class="canvas">
+    <div class="canvas-content">
+      <div class="flow-node node-begin">Begin</div>
+      <div class="conn-line c1"></div>
+      <div class="flow-node node-welcome">
+        <div class="node-welcome-title"><span class="dot"></span>Greet & Identify</div>
+        <div class="node-welcome-body">Greet the caller, identify them by phone number, check if they're a known VIP account.</div>
+      </div>
+      <div class="conn-line c2"></div>
+      <div class="flow-node node-slack">
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;color:#6B7280;margin-bottom:6px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 4l3 3-3 3M7 11h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Function</div>
+        <div class="node-slack-title"><img src="https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_256.png">Slack · Send Message</div>
+        <div class="node-slack-body">Notify sales team when VIP caller is on the line so they can monitor or jump in.</div>
+        <div class="node-slack-chip">#sales-escalations</div>
+      </div>
+      <div class="conn-line c3"></div>
+      <div class="flow-node node-endcall">
+        <span style="width:20px;height:20px;border-radius:50%;border:1.5px solid #D1D5DB;display:inline-flex;"></span>End Call
+      </div>
+    </div>
+  </div>
+
+  <aside class="settings-panel">
+    <div class="sp-header">
+      <div class="sp-logo"><img src="https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_256.png"></div>
+      <div class="sp-title">Send Slack Message</div>
+      <div class="sp-close">✕</div>
+    </div>
+    <div class="sp-body">
+      <div class="form-group">
+        <label class="form-label">Node name</label>
+        <input type="text" class="form-input" value="Notify #sales-escalations of VIP caller">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Channel <span class="req">*</span></label>
+        <div class="channel-picker"><span class="hash">#</span><span class="name">sales-escalations</span><span class="chev">▾</span></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Trigger condition <span class="help">(when to fire this node)</span></label>
+        <div class="channel-picker"><span class="name">is_vip_account == true</span><span class="chev">▾</span></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Message template</label>
+        <div class="msg-editor">
+          <div class="msg-toolbar">
+            <div class="msg-tool" title="Bold"><b>B</b></div>
+            <div class="msg-tool" title="Italic"><i>I</i></div>
+            <div class="msg-tool" title="Link">🔗</div>
+            <div class="msg-tool" title="Code">{ }</div>
+            <div class="msg-tool" title="Insert variable">{{x}}</div>
+            <div class="msg-tool" title="Mention">@</div>
+            <div style="flex:1"></div>
+            <div class="msg-tool" title="Block Kit builder">⊞</div>
+          </div>
+          <div class="msg-area" contenteditable="true">🚨 <strong>VIP caller on the line</strong> — <span class="var-chip">{{caller_name}}</span> (<span class="var-chip">{{account_name}}</span>, <span class="var-chip">{{account_arr}}</span> ARR) is speaking with <span class="var-chip">{{agent_name}}</span> right now. Intent: <span class="var-chip">{{call_intent}}</span>. <a href="#" style="color:#3d64d7;">Join call ↗</a></div>
+        </div>
+        <div style="font-size:12px;color:#6B7280;margin-top:6px;">Tip: use <code style="font-family:'SF Mono',Menlo,monospace;font-size:11px;background:#F3F4F6;padding:1px 4px;border-radius:3px;">{{variable}}</code> to insert live call data. <a href="#" style="color:#3d64d7;">See all variables</a>.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Rich formatting</label>
+        <div class="toggle-row">
+          <div class="toggle-switch on"></div>
+          <div><div class="toggle-label">Include call details block</div><div class="toggle-sub">Adds a formatted section with caller, intent, agent, and a link to the live call.</div></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-switch on"></div>
+          <div><div class="toggle-label">"Join call" action button</div><div class="toggle-sub">Lets teammates jump into the live call from Slack.</div></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-switch"></div>
+          <div><div class="toggle-label">@-mention on-call rotation</div><div class="toggle-sub">Pulls from your PagerDuty schedule (not connected).</div></div>
+        </div>
+      </div>
+
+      <div class="preview-label">Live preview</div>
+      <div class="slack-preview">
+        <div class="sp-ch-header"><span style="font-weight:600;color:#0E121B;">#</span> sales-escalations</div>
+        <div class="sp-msg">
+          <div class="sp-avatar">R</div>
+          <div class="sp-msg-body">
+            <div class="sp-msg-header">
+              <span class="sp-msg-name">Retell AI</span>
+              <span class="sp-msg-app">APP</span>
+              <span class="sp-msg-time">2:25 PM</span>
+            </div>
+            <div class="sp-msg-text">🚨 <strong>VIP caller on the line</strong> — Sarah Chen (Acme Corp, $240K ARR) is speaking with Aria right now. Intent: contract renewal question. <a href="#" style="color:#1264A3;">Join call ↗</a></div>
+            <div class="sp-block">
+              <div class="sp-block-row"><strong>Caller</strong>Sarah Chen · +1 (555) 555‑1234</div>
+              <div class="sp-block-row"><strong>Account</strong>Acme Corp · Enterprise tier</div>
+              <div class="sp-block-row"><strong>Agent</strong>Aria (Enterprise Inbound) v7</div>
+              <div class="sp-block-row"><strong>Started</strong>2:24 PM · 1m 12s ago</div>
+            </div>
+            <div class="sp-button">Join call</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+</body>
+</html>

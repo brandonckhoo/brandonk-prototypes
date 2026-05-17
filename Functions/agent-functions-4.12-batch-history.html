@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Simulation Testing: Batch History</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+/* ── Top bar ── */
+.agent-topbar { display: flex; align-items: center; padding: 0 16px; height: 48px; border-bottom: 1px solid #E1E4EA; background: #fff; flex-shrink: 0; position: relative; }
+.topbar-left { display: flex; align-items: center; gap: 6px; flex: 1; }
+.home-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; border: none; background: transparent; color: #525866; }
+.agent-name { font-size: 14px; font-weight: 600; color: #0A0A0A; }
+.edit-btn { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; border: none; background: transparent; color: #99A0AE; }
+.topbar-tabs { display: flex; align-items: center; position: absolute; left: 50%; transform: translateX(-50%); }
+.topbar-tab { padding: 0 14px; height: 48px; display: flex; align-items: center; font-size: 14px; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.topbar-tab.active { color: #0A0A0A; font-weight: 500; border-bottom-color: #0A0A0A; }
+.topbar-right { display: flex; align-items: center; gap: 6px; flex: 1; justify-content: flex-end; }
+.icon-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid #E1E4EA; background: #fff; color: #525866; cursor: pointer; }
+.publish-btn { display: flex; align-items: center; gap: 6px; padding: 0 14px; height: 32px; background: #0E121B; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+
+/* ── Metadata bar ── */
+.agent-meta-bar { display: flex; align-items: center; padding: 0 24px; height: 34px; border-bottom: 1px solid #F0F2F5; background: #fff; flex-shrink: 0; }
+.meta-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #525866; white-space: nowrap; }
+.meta-item + .meta-item::before { content: '·'; margin: 0 10px; color: #CACFD8; }
+.meta-icon { color: #99A0AE; display: inline-flex; align-items: center; }
+
+/* ── Page heading + sub-tabs ── */
+.sim-heading { padding: 20px 24px 0; font-size: 14px; font-weight: 600; color: #0A0A0A; flex-shrink: 0; }
+.sim-tab-row { display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid #E1E4EA; margin-top: 12px; flex-shrink: 0; }
+.sim-tab { padding: 8px 2px; margin-right: 20px; font-size: 14px; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.sim-tab.active { color: #0A0A0A; font-weight: 500; border-bottom-color: #0A0A0A; }
+.sim-tab-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; padding-bottom: 8px; }
+.v0-btn { display: flex; align-items: center; gap: 5px; padding: 4px 10px; border: 1px solid #E1E4EA; border-radius: 5px; background: #fff; font-size: 12.5px; font-weight: 500; color: #525866; cursor: pointer; font-family: inherit; }
+
+/* ── Three-panel layout ── */
+.batch-layout { display: flex; flex: 1; overflow: hidden; }
+
+/* ── Left run history panel ── */
+.run-panel { width: 196px; flex-shrink: 0; border-right: 1px solid #E1E4EA; overflow-y: auto; background: #fff; }
+.run-entry { padding: 11px 14px; border-bottom: 1px solid #F0F2F5; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; }
+.run-entry.active { background: #EFF6FF; border-left: 3px solid #3d64d7; padding-left: 11px; }
+.run-entry:hover:not(.active) { background: #FAFAFA; }
+.run-entry-count { font-size: 12.5px; font-weight: 500; color: #0A0A0A; grid-column: 1; }
+.run-entry-pct { font-size: 12px; font-weight: 600; grid-column: 2; grid-row: 1; align-self: center; }
+.run-entry-pct.green { color: #059669; }
+.run-entry-pct.orange { color: #D97706; }
+.run-entry-pct.muted { color: #99A0AE; }
+.run-entry-status { font-size: 11.5px; color: #99A0AE; grid-column: 1 / span 2; }
+.run-entry-ongoing { font-size: 11.5px; color: #3d64d7; font-weight: 500; grid-column: 1 / span 2; }
+
+/* ── Main batch content ── */
+.batch-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+/* ── Stats bar ── */
+.stats-bar { display: flex; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+.stat-cell { flex: 1; padding: 12px 18px; display: flex; flex-direction: column; gap: 4px; border-right: 1px solid #E1E4EA; }
+.stat-cell:last-child { border-right: none; }
+.stat-label { font-size: 12px; color: #99A0AE; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+.stat-row { display: flex; align-items: baseline; gap: 10px; }
+.stat-count { font-size: 22px; font-weight: 600; color: #0A0A0A; line-height: 1; }
+.stat-pct { font-size: 13px; font-weight: 500; }
+.stat-pct.green { color: #059669; }
+.stat-pct.red { color: #DC2626; }
+.stat-pct.muted { color: #CACFD8; }
+.stat-bar { height: 3px; border-radius: 2px; background: #F0F2F5; margin-top: 6px; overflow: hidden; }
+.stat-bar-fill { height: 100%; border-radius: 2px; }
+
+/* ── Results table ── */
+.tbl-wrap { flex: 1; overflow-y: auto; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+thead tr { border-bottom: 1px solid #E1E4EA; }
+thead th { padding: 9px 14px; text-align: left; font-size: 12px; font-weight: 500; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; background: #F5F7FA; }
+thead th:first-child { padding-left: 18px; width: 24%; }
+thead th:nth-child(2) { width: 19%; }
+thead th:nth-child(3) { width: 14%; }
+thead th:nth-child(4) { width: 31%; }
+thead th:nth-child(5) { width: 12%; }
+tbody tr { border-bottom: 1px solid #F0F2F5; cursor: pointer; }
+tbody tr:hover { background: rgba(0,0,0,0.015); }
+tbody tr.selected { background: #EFF6FF; }
+tbody td { padding: 11px 14px; font-size: 13px; color: #0A0A0A; vertical-align: top; }
+tbody td:first-child { padding-left: 18px; }
+.result-reasoning { font-size: 12.5px; color: #525866; line-height: 1.5; margin-bottom: 6px; }
+.result-bullet { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px; }
+.rdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.rdot.pass { background: #1FC16B; }
+.rdot.fail { background: #FB3748; }
+.result-bullet-text { font-size: 12.5px; color: #525866; line-height: 1.45; }
+.call-id { font-family: 'SF Mono','Menlo',monospace; font-size: 11.5px; color: #3d64d7; cursor: pointer; word-break: break-all; }
+.time-cell { font-size: 12.5px; color: #525866; white-space: nowrap; }
+.success-indicator { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.sdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sdot.pass { background: #1FC16B; }
+.sdot.fail { background: #FB3748; }
+.success-pass { color: #059669; }
+.success-fail { color: #FB3748; }
+
+/* ── Right detail panel ── */
+.detail-panel { width: 348px; flex-shrink: 0; border-left: 1px solid #E1E4EA; background: #fff; display: flex; flex-direction: column; overflow: hidden; }
+.dp-header { display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px 10px; border-bottom: 1px solid #F0F2F5; flex-shrink: 0; }
+.dp-title { font-size: 13.5px; font-weight: 600; color: #0A0A0A; flex: 1; line-height: 1.4; }
+.dp-close { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 4px; border: none; background: transparent; color: #99A0AE; font-size: 16px; cursor: pointer; flex-shrink: 0; margin-top: -1px; }
+.dp-close:hover { background: #F3F4F6; color: #525866; }
+.dp-id { padding: 6px 16px 10px; font-size: 11.5px; color: #99A0AE; border-bottom: 1px solid #F0F2F5; flex-shrink: 0; }
+.dp-body { flex: 1; overflow-y: auto; }
+
+/* Detail sections */
+.dp-section { padding: 12px 16px; border-bottom: 1px solid #F0F2F5; }
+.dp-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.dp-section-label { font-size: 12px; font-weight: 600; color: #0A0A0A; }
+.dp-badge-pass { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 500; background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; padding: 2px 8px; border-radius: 4px; }
+.dp-badge-fail { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 500; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; padding: 2px 8px; border-radius: 4px; }
+.dp-result-text { font-size: 12.5px; color: #525866; line-height: 1.6; }
+.dp-bullet { display: flex; align-items: flex-start; gap: 7px; margin-top: 7px; }
+.dp-bullet-text { font-size: 12.5px; color: #525866; line-height: 1.5; }
+
+/* Simulation history */
+.dp-playground-link { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #3d64d7; cursor: pointer; margin-bottom: 12px; }
+.dp-playground-link:hover { text-decoration: underline; }
+
+/* Transcript */
+.dp-msg { margin-bottom: 10px; }
+.dp-msg-hdr { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.dp-speaker { font-size: 11.5px; font-weight: 600; color: #525866; }
+.dp-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.dp-dot.agent { background: #3d64d7; }
+.dp-dot.user { background: #99A0AE; }
+.dp-text { font-size: 12.5px; color: #0A0A0A; line-height: 1.55; padding-left: 11px; }
+.dp-var { font-family: 'SF Mono','Menlo',monospace; font-size: 11px; background: #EEF2FF; color: #3d64d7; padding: 1px 4px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<header class="agent-topbar">
+  <div class="topbar-left">
+    <button class="home-btn"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 01-1 1H3a1 1 0 01-1-1V6.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 14V9.5h4V14" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+    <span class="agent-name">[Demo] Outreach Dialer (from template)</span>
+    <button class="edit-btn"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+  </div>
+  <div class="topbar-tabs">
+    <div class="topbar-tab">Create</div>
+    <div class="topbar-tab active">Simulation</div>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="3" cy="8" r="1.2" fill="#525866"/><circle cx="8" cy="8" r="1.2" fill="#525866"/><circle cx="13" cy="8" r="1.2" fill="#525866"/></svg></button>
+    <button class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#525866" stroke-width="1.4"/><path d="M8 5v3l2 2" stroke="#525866" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+    <button class="publish-btn"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 5l4 3-4 3" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Publish</button>
+  </div>
+</header>
+
+<!-- Metadata bar -->
+<div class="agent-meta-bar">
+  <div class="meta-item">Agent ID: ag...642 <span class="meta-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="5" y="3" width="8" height="10" rx="1.5" stroke="#99A0AE" stroke-width="1.3"/><path d="M3 5v8a1 1 0 001 1h6" stroke="#99A0AE" stroke-width="1.3" stroke-linecap="round"/></svg></span></div>
+  <div class="meta-item">Retell LLM ID: ll...806 <span class="meta-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="5" y="3" width="8" height="10" rx="1.5" stroke="#99A0AE" stroke-width="1.3"/><path d="M3 5v8a1 1 0 001 1h6" stroke="#99A0AE" stroke-width="1.3" stroke-linecap="round"/></svg></span></div>
+  <div class="meta-item"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#525866" stroke-width="1.3"/><path d="M8 5v3l2 2" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg> $0.125/min</div>
+  <div class="meta-item"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#525866" stroke-width="1.3"/><path d="M8 5v3l2 2" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg> 970–1300ms latency</div>
+  <div class="meta-item">2311–4451 tokens <span class="meta-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#99A0AE" stroke-width="1.3"/><path d="M8 7v5M8 5v.4" stroke="#99A0AE" stroke-width="1.3" stroke-linecap="round"/></svg></span></div>
+</div>
+
+<div class="sim-heading">Simulation Testing</div>
+
+<div class="sim-tab-row">
+  <div class="sim-tab">Test Cases</div>
+  <div class="sim-tab active">Batch Testing History</div>
+  <div class="sim-tab-actions">
+    <button class="v0-btn">V0 <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="#525866" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+</div>
+
+<div class="batch-layout">
+
+  <!-- Left: run history -->
+  <div class="run-panel">
+    <div class="run-entry active">
+      <span class="run-entry-count">3 Test Cases</span>
+      <span class="run-entry-pct muted"></span>
+      <span class="run-entry-ongoing">Ongoing</span>
+    </div>
+    <div class="run-entry">
+      <span class="run-entry-count">3 Test Cases</span>
+      <span class="run-entry-pct green">67%</span>
+      <span class="run-entry-status">Finish: 05/12/2026, 22:07</span>
+    </div>
+    <div class="run-entry">
+      <span class="run-entry-count">3 Test Cases</span>
+      <span class="run-entry-pct orange">33%</span>
+      <span class="run-entry-status">Finish: 05/12/2026, 21:58</span>
+    </div>
+    <div class="run-entry">
+      <span class="run-entry-count">2 Test Cases</span>
+      <span class="run-entry-pct green">100%</span>
+      <span class="run-entry-status">Finish: 05/12/2026, 21:44</span>
+    </div>
+  </div>
+
+  <!-- Center: stats + table -->
+  <div class="batch-main">
+    <div class="stats-bar">
+      <div class="stat-cell">
+        <span class="stat-label">All</span>
+        <div class="stat-row"><span class="stat-count">3</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:#E1E4EA;"></div></div>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-label">Passed</span>
+        <div class="stat-row"><span class="stat-count">2</span><span class="stat-pct green">67%</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:67%;background:#1FC16B;"></div></div>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-label">Failed</span>
+        <div class="stat-row"><span class="stat-count">1</span><span class="stat-pct red">33%</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:33%;background:#FB3748;"></div></div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Test Case</th>
+            <th>Test Call ID</th>
+            <th>Time</th>
+            <th>Test Result</th>
+            <th>Test Success</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Row 1: Pass — selected -->
+          <tr class="selected">
+            <td style="font-weight:500;">Qualified lead, full Salesforce context</td>
+            <td><span class="call-id">test_job_a3c7e4f1d9</span></td>
+            <td><span class="time-cell">05/12/2026, 22:07</span></td>
+            <td>
+              <p class="result-reasoning">The agent used the injected first_name variable to greet the caller by name and referenced company context throughout. Lead interest was qualified and a follow-up was offered before the call ended.</p>
+              <div class="result-bullet"><div class="rdot pass"></div><span class="result-bullet-text">Agent greeted caller as "Sarah" using the injected first_name variable</span></div>
+              <div class="result-bullet"><div class="rdot pass"></div><span class="result-bullet-text">Agent qualified lead interest and offered to schedule an on-site assessment</span></div>
+            </td>
+            <td><div class="success-indicator"><div class="sdot pass"></div><span class="success-pass">Passed</span></div></td>
+          </tr>
+          <!-- Row 2: Fail -->
+          <tr>
+            <td style="font-weight:500;">Missing lead data, fallback greeting</td>
+            <td><span class="call-id">test_job_e92f7821c3</span></td>
+            <td><span class="time-cell">05/12/2026, 22:08</span></td>
+            <td>
+              <p class="result-reasoning">The agent referenced "your Sunrun account" despite all pre-call variables being blank, constituting hallucinated CRM context. Fallback greeting at call open was correct, but agent deviated once the user mentioned solar.</p>
+              <div class="result-bullet"><div class="rdot pass"></div><span class="result-bullet-text">Agent opened with a generic greeting without referencing a name</span></div>
+              <div class="result-bullet"><div class="rdot fail"></div><span class="result-bullet-text">Agent said "I see your Sunrun account was flagged" — hallucinated when company variable was blank</span></div>
+            </td>
+            <td><div class="success-indicator"><div class="sdot fail"></div><span class="success-fail">Failed</span></div></td>
+          </tr>
+          <!-- Row 3: Pass -->
+          <tr>
+            <td style="font-weight:500;">Existing customer re-engagement</td>
+            <td><span class="call-id">test_job_71a0e548b2</span></td>
+            <td><span class="time-cell">05/12/2026, 22:09</span></td>
+            <td>
+              <p class="result-reasoning">Agent acknowledged the prior assessment using the injected lead_stage variable, did not fabricate additional history, and offered a follow-up appointment before the conversation ended.</p>
+              <div class="result-bullet"><div class="rdot pass"></div><span class="result-bullet-text">Agent referenced prior assessment without fabricating any additional context</span></div>
+              <div class="result-bullet"><div class="rdot pass"></div><span class="result-bullet-text">Agent offered a follow-up and confirmed caller interest before ending</span></div>
+            </td>
+            <td><div class="success-indicator"><div class="sdot pass"></div><span class="success-pass">Passed</span></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Right: detail panel (open on row 1) -->
+  <div class="detail-panel">
+    <div class="dp-header">
+      <span class="dp-title">Qualified lead, full Salesforce context</span>
+      <button class="dp-close">×</button>
+    </div>
+    <div class="dp-id">Test Case ID: test_job_a3c7e4f1d9</div>
+
+    <div class="dp-body">
+
+      <!-- Test Result -->
+      <div class="dp-section">
+        <div class="dp-section-header">
+          <span class="dp-section-label">Test Result</span>
+          <span class="dp-badge-pass">
+            <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#059669" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Passed
+          </span>
+        </div>
+        <p class="dp-result-text">The agent correctly used the injected <code style="font-size:11px;background:#F3F4F6;padding:1px 4px;border-radius:3px;">first_name</code> variable to greet the caller by name from the first word. The agent did not reference any hardcoded or hallucinated CRM data. Lead interest was qualified through targeted questions and a follow-up assessment was offered before the call ended. All success criteria are met.</p>
+        <div class="dp-bullet"><div class="rdot pass" style="margin-top:5px;"></div><span class="dp-bullet-text">Agent greeted caller as "Sarah" using the injected first_name variable — no hardcoded or hallucinated name used</span></div>
+        <div class="dp-bullet"><div class="rdot pass" style="margin-top:5px;"></div><span class="dp-bullet-text">Agent qualified solar panel interest and offered to schedule an on-site assessment before ending the call</span></div>
+      </div>
+
+      <!-- Simulation History -->
+      <div class="dp-section" style="border-bottom:none;">
+        <div class="dp-section-label" style="margin-bottom:10px;">Simulation History</div>
+        <div class="dp-playground-link">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9M9 2h5v5M8.5 7.5L14 2" stroke="#3d64d7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          View In Test Playground
+        </div>
+
+        <div class="dp-msg">
+          <div class="dp-msg-hdr"><div class="dp-dot agent"></div><span class="dp-speaker">Agent</span></div>
+          <p class="dp-text">Hi <span class="dp-var">{{first_name}}</span>! This is Jordan calling from Sunrun. We noticed your area qualifies for our current solar savings program — I'm reaching out to see if you'd be open to a quick chat. Is now an okay time?</p>
+        </div>
+
+        <div class="dp-msg">
+          <div class="dp-msg-hdr"><div class="dp-dot user"></div><span class="dp-speaker">User</span></div>
+          <p class="dp-text">Sure, I've actually been thinking about solar for a while now.</p>
+        </div>
+
+        <div class="dp-msg">
+          <div class="dp-msg-hdr"><div class="dp-dot agent"></div><span class="dp-speaker">Agent</span></div>
+          <p class="dp-text">That's great to hear, Sarah! With current incentives, most homeowners in your area are saving between fifteen hundred and two thousand dollars a year. Can I ask — do you own your home, and is your roof fairly recent?</p>
+        </div>
+
+        <div class="dp-msg">
+          <div class="dp-msg-hdr"><div class="dp-dot user"></div><span class="dp-speaker">User</span></div>
+          <p class="dp-text">Yes, I own it. Roof is about eight years old.</p>
+        </div>
+
+        <div class="dp-msg">
+          <div class="dp-msg-hdr"><div class="dp-dot agent"></div><span class="dp-speaker">Agent</span></div>
+          <p class="dp-text">Perfect, that's well within range for installation. I'd love to get you booked for a free in-home assessment — it takes about thirty minutes and there's no commitment. Would Thursday or Friday this week work for you?</p>
+        </div>
+
+        <div class="dp-msg">
+          <div class="dp-msg-hdr"><div class="dp-dot user"></div><span class="dp-speaker">User</span></div>
+          <p class="dp-text">Friday afternoon works.</p>
+        </div>
+
+        <div class="dp-msg">
+          <div class="dp-msg-hdr"><div class="dp-dot agent"></div><span class="dp-speaker">Agent</span></div>
+          <p class="dp-text">Wonderful! I've noted Friday afternoon for you, Sarah. Our team will send a confirmation to the contact on file. Thanks so much for your time — have a great day!</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

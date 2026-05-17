@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Facebook — Log in to continue to Retell AI</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1C1E21; background: #F0F2F5; min-height: 100vh; display: flex; flex-direction: column; }
+  .browser-chrome { background: #F0F0F0; border-bottom: 1px solid #D1D5DB; padding: 8px 12px; display: flex; align-items: center; gap: 8px; }
+  .browser-dots { display: flex; gap: 6px; }
+  .browser-dots span { width: 12px; height: 12px; border-radius: 50%; }
+  .browser-dots .red { background: #FF5F57; } .browser-dots .yellow { background: #FEBC2E; } .browser-dots .green { background: #28C840; }
+  .browser-url { flex: 1; background: #fff; border: 1px solid #D1D5DB; border-radius: 6px; padding: 6px 12px; font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 6px; }
+  .browser-url .lock { color: #22C55E; }
+
+  .fb-header { background: #fff; border-bottom: 1px solid #DADDE1; padding: 12px 24px; display: flex; align-items: center; gap: 12px; }
+  .fb-logo { height: 28px; }
+
+  .oauth-page { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 40px 24px; }
+  .oauth-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); width: 520px; padding: 28px 32px; border: 1px solid #DADDE1; }
+
+  .steps { display: flex; gap: 6px; margin-bottom: 24px; }
+  .step { flex: 1; height: 4px; background: #E4E6EB; border-radius: 2px; }
+  .step.done { background: #1877F2; }
+
+  .oauth-title { font-size: 20px; font-weight: 600; color: #050505; margin-bottom: 4px; }
+  .oauth-subtitle { font-size: 14px; color: #65676B; margin-bottom: 24px; }
+  .oauth-subtitle strong { color: #050505; }
+
+  .app-info { display: flex; align-items: center; gap: 12px; padding: 14px; background: #F0F2F5; border-radius: 8px; margin-bottom: 20px; }
+  .app-icon { width: 40px; height: 40px; border-radius: 8px; background: #0E121B; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+  .app-name { font-size: 15px; font-weight: 600; color: #050505; }
+  .app-domain { font-size: 12px; color: #65676B; }
+
+  .select-row { padding: 10px 14px; border: 1px solid #DADDE1; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; cursor: pointer; background: #fff; }
+  .select-row.active { border-color: #1877F2; background: #E7F0FE; }
+  .select-row-avatar { width: 32px; height: 32px; border-radius: 50%; background: #25D366; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .select-row-body { flex: 1; min-width: 0; }
+  .select-row-title { font-size: 14px; font-weight: 600; color: #050505; }
+  .select-row-sub { font-size: 12px; color: #65676B; }
+  .select-row-check { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #BEC3C9; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .select-row.active .select-row-check { border-color: #1877F2; background: #1877F2; }
+  .select-row.active .select-row-check::after { content: ''; width: 6px; height: 10px; border-right: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(45deg) translate(-1px, -1px); }
+
+  .section-label { font-size: 12px; font-weight: 600; color: #65676B; text-transform: uppercase; margin-top: 20px; margin-bottom: 10px; letter-spacing: 0.03em; }
+
+  .perms-box { padding: 14px; background: #F7F8FA; border: 1px solid #DADDE1; border-radius: 8px; margin-bottom: 20px; }
+  .perms-title { font-size: 13px; font-weight: 600; color: #050505; margin-bottom: 8px; }
+  .perm-item { display: flex; gap: 10px; padding: 6px 0; font-size: 13px; color: #1C1E21; line-height: 1.4; }
+  .perm-check { color: #1877F2; flex-shrink: 0; margin-top: 2px; }
+
+  .user-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #DADDE1; border-radius: 8px; margin-bottom: 20px; background: #fff; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #1877F2; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; }
+  .user-name { font-size: 14px; color: #050505; font-weight: 600; }
+  .user-email { font-size: 12px; color: #65676B; }
+  .user-switch { margin-left: auto; font-size: 13px; color: #1877F2; cursor: pointer; text-decoration: none; }
+
+  .actions { display: flex; flex-direction: column; gap: 8px; }
+  .btn-continue { width: 100%; height: 42px; background: #1877F2; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .btn-continue:hover { background: #166FE5; }
+  .btn-cancel { width: 100%; height: 42px; background: #E4E6EB; color: #050505; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
+
+  .oauth-footer { text-align: center; margin-top: 18px; font-size: 11px; color: #65676B; line-height: 1.5; }
+  .oauth-footer a { color: #1877F2; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="browser-chrome">
+  <div class="browser-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+  <div class="browser-url"><span class="lock">🔒</span>facebook.com/v19.0/dialog/oauth?client_id=retell_ai&scope=whatsapp_business_messaging%2Cwhatsapp_business_management%2Cbusiness_management</div>
+</div>
+
+<div class="fb-header">
+  <svg width="110" height="28" viewBox="0 0 215 48" fill="#1877F2"><path d="M0 0v48h48V28h-8V20h8V13c0-7 5-13 13-13h7v8h-7c-3 0-5 2-5 5v7h12l-1 8h-11v20h12c18 0 32-14 32-32S18 0 0 0z" fill-rule="evenodd" style="display:none"/><text x="0" y="32" font-family="-apple-system, Helvetica" font-size="36" font-weight="800" fill="#1877F2">facebook</text></svg>
+</div>
+
+<div class="oauth-page">
+  <div class="oauth-card">
+    <div class="steps">
+      <div class="step done"></div>
+      <div class="step done"></div>
+      <div class="step done"></div>
+      <div class="step"></div>
+    </div>
+
+    <h1 class="oauth-title">Continue with Retell AI</h1>
+    <p class="oauth-subtitle"><strong>Retell AI</strong> is requesting permission to manage a WhatsApp Business Account on your behalf. This is a <strong>Facebook Login for Business</strong> flow (Meta BSP grade).</p>
+
+    <div class="app-info">
+      <div class="app-icon">R</div>
+      <div>
+        <div class="app-name">Retell AI</div>
+        <div class="app-domain">app.retellai.com · Meta Tech Provider</div>
+      </div>
+    </div>
+
+    <div class="section-label">Select a Business Account</div>
+    <div class="select-row active">
+      <div class="select-row-avatar" style="background:#1877F2">CD</div>
+      <div class="select-row-body">
+        <div class="select-row-title">Cream Digital, Inc.</div>
+        <div class="select-row-sub">Business Portfolio · 3 WhatsApp assets</div>
+      </div>
+      <div class="select-row-check"></div>
+    </div>
+    <div class="select-row">
+      <div class="select-row-avatar" style="background:#65676B">AC</div>
+      <div class="select-row-body">
+        <div class="select-row-title">Acme Law Firm BR</div>
+        <div class="select-row-sub">Business Portfolio · 1 WhatsApp asset</div>
+      </div>
+      <div class="select-row-check"></div>
+    </div>
+
+    <div class="section-label">Select a WhatsApp Business Account</div>
+    <div class="select-row active">
+      <div class="select-row-avatar">CD</div>
+      <div class="select-row-body">
+        <div class="select-row-title">Cream Digital Clinics</div>
+        <div class="select-row-sub">+55 11 4040-0122 · Display name verified</div>
+      </div>
+      <div class="select-row-check"></div>
+    </div>
+    <div class="select-row">
+      <div class="select-row-avatar">CD</div>
+      <div class="select-row-body">
+        <div class="select-row-title">Cream Digital Law</div>
+        <div class="select-row-sub">+55 11 4040-8833 · Display name verified</div>
+      </div>
+      <div class="select-row-check"></div>
+    </div>
+
+    <div class="perms-box">
+      <div class="perms-title">Retell AI will be able to</div>
+      <div class="perm-item"><svg class="perm-check" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M13 4L6.5 11L3 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Send and receive WhatsApp messages, media and quick reply buttons</div>
+      <div class="perm-item"><svg class="perm-check" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M13 4L6.5 11L3 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Manage phone numbers and display name for this WhatsApp Business Account</div>
+      <div class="perm-item"><svg class="perm-check" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M13 4L6.5 11L3 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Access your Business Portfolio to list WhatsApp assets during setup</div>
+      <div class="perm-item"><svg class="perm-check" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M13 4L6.5 11L3 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Maintain the connection continuously (refresh tokens)</div>
+    </div>
+
+    <div class="user-row">
+      <div class="user-avatar">BK</div>
+      <div>
+        <div class="user-name">Brandon Khoo</div>
+        <div class="user-email">brandon@retellai.com</div>
+      </div>
+      <a class="user-switch">Not you?</a>
+    </div>
+
+    <div class="actions">
+      <button class="btn-continue" onclick="window.location='connect-integration-library-3.1.3-whatsapp-app-page.html'">Continue as Brandon</button>
+      <button class="btn-cancel" onclick="window.location='connect-integration-library-3.1.2-connect-whatsapp-preauth.html'">Cancel</button>
+    </div>
+
+    <p class="oauth-footer">By continuing, Retell AI will receive ongoing access to the information you share. To revoke access, go to your Facebook Business Settings. <a href="#">Learn more</a></p>
+  </div>
+</div>
+
+</body>
+</html>

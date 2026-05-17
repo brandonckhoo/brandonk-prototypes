@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Conversational Flow</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  /* Top bar */
+  .top-bar { display: flex; align-items: center; height: 44px; padding: 8px 16px; gap: 10px; position: relative; border-bottom: 1px solid #E1E4EA; }
+  .home-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #525866; border-radius: 6px; cursor: pointer; }
+  .home-icon:hover { background: rgba(0,0,0,0.04); }
+  .agent-name { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .agent-meta { font-size: 11.5px; color: #99A0AE; margin-left: 8px; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; background: #F5F7FA; padding: 3px; border-radius: 8px; }
+  .top-tab { padding: 5px 14px; font-size: 13px; color: #525866; border-radius: 6px; cursor: pointer; }
+  .top-tab.active { font-weight: 500; color: #0E121B; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+  .btn-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; color: #525866; cursor: pointer; }
+  .btn-publish { height: 32px; padding: 0 14px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; cursor: pointer; font-family: inherit; }
+  .btn-test { height: 32px; padding: 0 14px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; color: #374151; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; cursor: pointer; font-family: inherit; }
+
+  .main-layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* Palette */
+  .node-palette { width: 224px; min-width: 224px; border-right: 1px solid #E1E4EA; background: #fff; overflow-y: auto; }
+  .palette-search { margin: 12px; height: 32px; padding: 0 10px 0 30px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 12px; width: calc(100% - 24px); outline: none; background: #fff url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 16 16' fill='none'%3E%3Ccircle cx='7' cy='7' r='5.5' stroke='%2399A0AE' stroke-width='1.5'/%3E%3Cpath d='M11 11l3 3' stroke='%2399A0AE' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat 10px center; }
+  .palette-tabs { display: flex; border-bottom: 1px solid #E1E4EA; }
+  .palette-tab { flex: 1; padding: 10px 8px; text-align: center; font-size: 12.5px; color: #525866; border-bottom: 2px solid transparent; cursor: pointer; }
+  .palette-tab.active { font-weight: 500; color: #0E121B; border-bottom-color: #0E121B; }
+  .palette-group-label { font-size: 10.5px; font-weight: 600; color: #99A0AE; text-transform: uppercase; padding: 14px 14px 6px; letter-spacing: 0.03em; display: flex; align-items: center; gap: 6px; }
+  .palette-group-label .group-count { font-weight: 500; color: #CACFD8; }
+  .palette-item { display: flex; align-items: center; gap: 10px; padding: 7px 14px; font-size: 12.5px; color: #0E121B; cursor: grab; }
+  .palette-item:hover { background: rgba(0,0,0,0.03); }
+  .palette-item .p-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .palette-item .new-dot { width: 5px; height: 5px; background: #3d64d7; border-radius: 50%; margin-left: auto; }
+
+  /* Canvas */
+  .canvas { flex: 1; background: #FAFAFA; position: relative; overflow: auto; background-image: radial-gradient(#E5E7EB 1px, transparent 1px); background-size: 22px 22px; }
+  .canvas-content { position: relative; width: 1200px; height: 1550px; }
+
+  .flow-node { position: absolute; border-radius: 10px; background: #fff; border: 1px solid #E1E4EA; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+  .node-begin { width: 78px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: #fff; background: #8B5CF6; border-radius: 15px; }
+
+  .node-conv { padding: 12px 14px; width: 280px; }
+  .node-title { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 6px; }
+  .node-title .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .node-title .dot.conv { background: #F59E0B; }
+  .node-title .dot.fn { background: #3d64d7; }
+  .node-title .dot.logic { background: #8B5CF6; }
+  .node-title .dot.xfer { background: #22C55E; }
+  .node-body { font-size: 11.5px; color: #6B7280; line-height: 1.5; margin-bottom: 8px; }
+  .node-transition { border-top: 1px solid #F3F4F6; padding-top: 8px; }
+  .node-transition-label { font-size: 10.5px; font-weight: 500; color: #99A0AE; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .node-transition-item { display: flex; align-items: flex-start; gap: 6px; font-size: 11px; color: #525866; padding: 3px 0; line-height: 1.4; }
+  .node-transition-item .bullet { width: 5px; height: 5px; border-radius: 50%; background: #D1D5DB; margin-top: 5px; flex-shrink: 0; }
+
+  .node-fn { padding: 12px 14px; width: 260px; }
+  .node-fn.selected { border: 1.5px solid #3d64d7; box-shadow: 0 4px 12px rgba(61,100,215,0.15); }
+  .integ-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 500; color: #fff; padding: 2px 6px; border-radius: 4px; margin-left: auto; }
+  .integ-chip.sfdc { background: #00A1E0; }
+  .integ-chip.hubspot { background: #ff7a59; }
+  .integ-chip.zendesk { background: #03363D; }
+  .integ-chip.slack { background: #611f69; }
+  .integ-chip.cal { background: #292929; }
+
+  .node-arg { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-top: 1px solid #F3F4F6; font-size: 11px; }
+  .node-arg:first-of-type { border-top: none; padding-top: 0; }
+  .arg-label { color: #6B7280; }
+  .arg-value { color: #0E121B; font-weight: 500; font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; }
+  .arg-value.var { color: #3d64d7; background: #ecf3ff; padding: 1px 5px; border-radius: 3px; }
+  .output-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 4px; font-size: 10px; font-family: ui-monospace, Menlo, monospace; color: #374151; margin: 3px 3px 0 0; }
+
+  .node-logic { padding: 12px 14px; width: 220px; }
+
+  .node-end { width: 90px; height: 32px; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 12px; font-weight: 500; color: #525866; border-radius: 16px; }
+
+  .conn-svg { position: absolute; top: 0; left: 0; pointer-events: none; }
+  .edge-label { font-size: 10.5px; fill: #6B7280; font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; }
+  .edge-label-bg { fill: #FAFAFA; }
+
+  .canvas-toolbar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .canvas-toolbar button { width: 30px; height: 28px; border: none; background: none; color: #525866; border-radius: 4px; font-size: 14px; cursor: pointer; }
+  .canvas-toolbar button:hover { background: rgba(0,0,0,0.05); }
+  .canvas-toolbar .sep { width: 1px; height: 18px; background: #E1E4EA; align-self: center; margin: 0 2px; }
+  .zoom-label { font-size: 11.5px; color: #6B7280; padding: 0 6px; display: flex; align-items: center; }
+
+  .minimap { position: absolute; top: 20px; right: 20px; width: 180px; height: 110px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+
+  /* Settings panel */
+  .settings-panel { width: 360px; min-width: 360px; border-left: 1px solid #E1E4EA; background: #fff; overflow-y: auto; }
+  .sp-header { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid #E1E4EA; }
+  .sp-header .icon { width: 30px; height: 30px; border-radius: 6px; background: #ff7a59; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 700; }
+  .sp-name { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .sp-sub { font-size: 11.5px; color: #6B7280; margin-top: 1px; }
+  .sp-tabs { display: flex; border-bottom: 1px solid #E1E4EA; padding: 0 18px; }
+  .sp-tab { padding: 10px 12px; font-size: 12.5px; color: #525866; border-bottom: 2px solid transparent; cursor: pointer; }
+  .sp-tab.active { color: #0E121B; font-weight: 500; border-bottom-color: #0E121B; }
+  .sp-body { padding: 14px 18px; }
+  .sp-label { font-size: 12px; font-weight: 500; color: #0E121B; margin: 12px 0 4px; }
+  .sp-label:first-child { margin-top: 0; }
+  .sp-input { width: 100%; height: 32px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 12.5px; font-family: inherit; outline: none; }
+  .sp-select { width: 100%; height: 32px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 12.5px; background: #fff; }
+  .sp-textarea { width: 100%; min-height: 60px; padding: 8px 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 12.5px; line-height: 1.45; font-family: inherit; resize: vertical; outline: none; }
+  .sp-helper { font-size: 11.5px; color: #6B7280; margin-top: 4px; line-height: 1.4; }
+  .sp-section-title { font-size: 11px; font-weight: 600; color: #0E121B; text-transform: uppercase; letter-spacing: 0.04em; margin: 18px 0 8px; }
+  .sp-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 6px; margin-bottom: 5px; }
+  .sp-row .code { font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; color: #374151; flex: 1; }
+  .sp-row .type { font-size: 10.5px; color: #6B7280; }
+  .sp-row .required { font-size: 9.5px; color: #B91C1C; background: #FEE2E2; padding: 1px 5px; border-radius: 3px; font-weight: 500; }
+
+  .integ-callout { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #FFF6F2; border: 1px solid #FFE0D2; border-radius: 6px; margin: 10px 0 0; font-size: 12px; color: #7A3510; }
+  .integ-callout .chip { width: 16px; height: 16px; border-radius: 3px; background: #ff7a59; color: #fff; font-size: 8px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .integ-callout a { color: #3d64d7; margin-left: auto; text-decoration: none; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="home-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+  <span class="agent-name">Inbound Support — Conversation Flow</span>
+  <span class="agent-meta">Agent ag_a8f2 · CF cv_Jul3 · $0.118/min · 980ms p95</span>
+  <span class="top-spacer"></span>
+  <div class="top-tabs"><span class="top-tab active">Build</span><span class="top-tab">Simulation</span><span class="top-tab">Versions</span></div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn-test">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M5 3l8 5-8 5V3z" fill="currentColor"/></svg>
+      Test agent
+    </button>
+    <button class="btn-icon">⋯</button>
+    <button class="btn-publish">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Publish
+    </button>
+  </div>
+</div>
+
+<div class="main-layout">
+
+  <!-- Palette -->
+  <div class="node-palette">
+    <div class="palette-tabs"><span class="palette-tab active">Nodes</span><span class="palette-tab">Components</span></div>
+    <input class="palette-search" placeholder="Search nodes…">
+
+    <div class="palette-group-label">Core</div>
+    <div class="palette-item"><span class="p-icon" style="color:#F59E0B;">●</span> Conversation</div>
+    <div class="palette-item"><span class="p-icon" style="color:#3d64d7;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.3"/></svg></span> Function</div>
+    <div class="palette-item"><span class="p-icon" style="color:#22C55E;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M17 13.5c0 1-1.5 2.5-2.5 2.5s-3-1.5-5-3.5S6 8 6 6.5 7.5 4 8.5 4" stroke="currentColor" stroke-width="1.5"/></svg></span> Call Transfer</div>
+    <div class="palette-item"><span class="p-icon" style="color:#8B5CF6;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6 4v12M6 10h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span> Logic Split</div>
+    <div class="palette-item"><span class="p-icon" style="color:#6B7280;font-size:12px;font-weight:500;">{ }</span> Extract Variable</div>
+    <div class="palette-item"><span class="p-icon" style="color:#EC4899;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H7l-3 3V5z" stroke="currentColor" stroke-width="1.3"/></svg></span> SMS</div>
+    <div class="palette-item"><span class="p-icon" style="color:#525866;">#</span> Press Digit</div>
+    <div class="palette-item"><span class="p-icon" style="color:#93C5FD;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M5 8h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span> Ending</div>
+
+    <div class="palette-group-label">Integrations <span class="group-count">· 4 connected</span></div>
+    <div class="palette-item"><span class="p-icon"><img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=32" width="16" height="16"></span> Get Contact<span style="font-size:10px;color:#99A0AE;margin-left:auto;">SFDC</span></div>
+    <div class="palette-item"><span class="p-icon"><img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=32" width="16" height="16"></span> Create Case<span style="font-size:10px;color:#99A0AE;margin-left:auto;">SFDC</span></div>
+    <div class="palette-item"><span class="p-icon"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=32" width="16" height="16"></span> Upsert Contact<span style="font-size:10px;color:#99A0AE;margin-left:auto;">HubSpot</span></div>
+    <div class="palette-item"><span class="p-icon"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=32" width="16" height="16"></span> Log Call<span class="new-dot"></span></div>
+    <div class="palette-item"><span class="p-icon"><img src="https://www.google.com/s2/favicons?domain=zendesk.com&sz=32" width="16" height="16"></span> Create Ticket<span style="font-size:10px;color:#99A0AE;margin-left:auto;">Zendesk</span></div>
+    <div class="palette-item"><span class="p-icon"><img src="https://www.google.com/s2/favicons?domain=zendesk.com&sz=32" width="16" height="16"></span> Search Tickets</div>
+    <div class="palette-item"><span class="p-icon"><img src="https://www.google.com/s2/favicons?domain=slack.com&sz=32" width="16" height="16"></span> Send Slack<span class="new-dot"></span></div>
+    <div class="palette-item"><span class="p-icon"><img src="https://www.google.com/s2/favicons?domain=cal.com&sz=32" width="16" height="16"></span> Book Meeting</div>
+
+    <div class="palette-group-label">Memory &amp; Data</div>
+    <div class="palette-item"><span class="p-icon" style="color:#0E121B;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 5c0-1 2-2 5-2s5 1 5 2v6c0 1-2 2-5 2s-5-1-5-2V5z" stroke="currentColor" stroke-width="1.3"/><path d="M3 8c0 1 2 2 5 2s5-1 5-2" stroke="currentColor" stroke-width="1.3"/></svg></span> Read Memory</div>
+    <div class="palette-item"><span class="p-icon" style="color:#0E121B;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span> Write Memory</div>
+  </div>
+
+  <!-- Canvas -->
+  <div class="canvas">
+    <svg class="conn-svg" width="1200" height="1800">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#9CA3AF"/></marker>
+        <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#3d64d7"/></marker>
+      </defs>
+
+      <!-- Begin -> Get Contact -->
+      <path d="M 500 100 L 500 140" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+
+      <!-- Get Contact -> Welcome -->
+      <path d="M 500 310 L 500 360" stroke="#3d64d7" stroke-width="1.8" fill="none" marker-end="url(#arrow-blue)"/>
+
+      <!-- Welcome -> Classify -->
+      <path d="M 500 540 L 500 600" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+
+      <!-- Classify -> Search Tickets (billing) -->
+      <path d="M 420 760 C 360 800, 260 820, 220 850" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+      <rect class="edge-label-bg" x="280" y="794" width="54" height="16" rx="3"/>
+      <text class="edge-label" x="286" y="806">billing</text>
+
+      <!-- Classify -> Create Ticket (tech issue) -->
+      <path d="M 500 760 L 500 850" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+      <rect class="edge-label-bg" x="462" y="798" width="78" height="16" rx="3"/>
+      <text class="edge-label" x="468" y="810">tech issue</text>
+
+      <!-- Classify -> Transfer (agent requested) -->
+      <path d="M 580 760 C 640 800, 740 820, 780 850" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+      <rect class="edge-label-bg" x="676" y="798" width="96" height="16" rx="3"/>
+      <text class="edge-label" x="682" y="810">agent requested</text>
+
+      <!-- Create Ticket -> Send Slack -->
+      <path d="M 500 1110 L 500 1170" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+
+      <!-- Send Slack -> End -->
+      <path d="M 500 1370 L 500 1430" stroke="#9CA3AF" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+
+      <!-- Search Tickets -> End (dashed merge) -->
+      <path d="M 220 1090 C 220 1300, 400 1420, 470 1438" stroke="#9CA3AF" stroke-width="1.5" fill="none" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+
+      <!-- Transfer -> End (dashed merge) -->
+      <path d="M 780 1050 C 780 1280, 600 1420, 530 1438" stroke="#9CA3AF" stroke-width="1.5" fill="none" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+    </svg>
+
+    <div class="canvas-content">
+      <!-- Begin (centered) -->
+      <div class="flow-node node-begin" style="left:461px; top:70px;">Begin</div>
+
+      <!-- Get Contact (SFDC) -->
+      <div class="flow-node node-fn" style="left:370px; top:140px;">
+        <div class="node-title">
+          <img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=32" width="16" height="16">
+          Get Contact
+          <span class="integ-chip sfdc">Salesforce</span>
+        </div>
+        <div class="node-arg"><span class="arg-label">phone</span><span class="arg-value var">{{call.from_number}}</span></div>
+        <div class="node-arg"><span class="arg-label">fallback</span><span class="arg-value">create_lead</span></div>
+        <div style="margin-top: 8px; font-size: 10.5px; color: #99A0AE;">Returns:</div>
+        <span class="output-chip">contact.name</span>
+        <span class="output-chip">contact.account</span>
+        <span class="output-chip">contact.tier</span>
+      </div>
+
+      <!-- Welcome -->
+      <div class="flow-node node-conv" style="left:360px; top:360px;">
+        <div class="node-title"><span class="dot conv"></span>Welcome</div>
+        <div class="node-body">"Hi {{contact.name}}, thanks for calling Acme support. I can see you're a {{contact.tier}} customer — how can I help today?"</div>
+        <div class="node-transition">
+          <div class="node-transition-label">Transitions</div>
+          <div class="node-transition-item"><span class="bullet"></span>User states their reason for calling</div>
+        </div>
+      </div>
+
+      <!-- Classify (Logic Split) -->
+      <div class="flow-node node-logic" style="left:390px; top:600px;">
+        <div class="node-title"><span class="dot logic"></span>Classify intent</div>
+        <div class="node-body">Branch on <span style="font-family:ui-monospace,Menlo,monospace;color:#3d64d7;">user.intent</span></div>
+        <div class="node-transition">
+          <div class="node-transition-label">Branches</div>
+          <div class="node-transition-item"><span class="bullet" style="background:#F59E0B;"></span>billing</div>
+          <div class="node-transition-item"><span class="bullet" style="background:#EF4444;"></span>tech issue</div>
+          <div class="node-transition-item"><span class="bullet" style="background:#6B7280;"></span>agent requested</div>
+        </div>
+      </div>
+
+      <!-- Search Tickets (Zendesk) - billing branch -->
+      <div class="flow-node node-fn" style="left:90px; top:850px;">
+        <div class="node-title">
+          <img src="https://www.google.com/s2/favicons?domain=zendesk.com&sz=32" width="16" height="16">
+          Search Tickets
+          <span class="integ-chip zendesk">Zendesk</span>
+        </div>
+        <div class="node-arg"><span class="arg-label">requester_id</span><span class="arg-value var">{{contact.zendesk_id}}</span></div>
+        <div class="node-arg"><span class="arg-label">type</span><span class="arg-value">billing</span></div>
+        <div class="node-arg"><span class="arg-label">status</span><span class="arg-value">open, pending</span></div>
+      </div>
+
+      <!-- Create Ticket (HubSpot) - SELECTED - tech issue branch -->
+      <div class="flow-node node-fn selected" style="left:370px; top:850px;">
+        <div class="node-title">
+          <img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=32" width="16" height="16">
+          Create Ticket
+          <span class="integ-chip hubspot">HubSpot</span>
+        </div>
+        <div class="node-arg"><span class="arg-label">contact_id</span><span class="arg-value var">{{contact.hubspot_id}}</span></div>
+        <div class="node-arg"><span class="arg-label">subject</span><span class="arg-value var">{{user.issue_summary}}</span></div>
+        <div class="node-arg"><span class="arg-label">priority</span><span class="arg-value">auto</span></div>
+        <div class="node-arg"><span class="arg-label">pipeline</span><span class="arg-value">Support Pipeline</span></div>
+        <div style="margin-top: 8px; font-size: 10.5px; color: #99A0AE;">Returns:</div>
+        <span class="output-chip">ticket.id</span>
+        <span class="output-chip">ticket.url</span>
+      </div>
+
+      <!-- Transfer to human - agent requested branch -->
+      <div class="flow-node node-conv" style="left:650px; top:850px;">
+        <div class="node-title"><span class="dot xfer"></span>Transfer to human</div>
+        <div class="node-body">Warm transfer to Tier 2 queue with call summary.</div>
+        <div style="font-size: 10.5px; color: #99A0AE; margin-top:6px;">Queue: <b style="color:#374151;">support-tier2</b></div>
+      </div>
+
+      <!-- Send Slack (after Create Ticket) -->
+      <div class="flow-node node-fn" style="left:370px; top:1170px;">
+        <div class="node-title">
+          <img src="https://www.google.com/s2/favicons?domain=slack.com&sz=32" width="16" height="16">
+          Send Slack
+          <span class="integ-chip slack">Slack</span>
+        </div>
+        <div class="node-arg"><span class="arg-label">channel</span><span class="arg-value">#support-alerts</span></div>
+        <div class="node-arg"><span class="arg-label">message</span><span class="arg-value var">{{ticket.summary}}</span></div>
+        <div class="node-arg"><span class="arg-label">when</span><span class="arg-value">priority = high</span></div>
+      </div>
+
+      <!-- End -->
+      <div class="flow-node node-end" style="left:455px; top:1430px;">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#D1D5DB" stroke-width="1.3"/><path d="M5 8h6" stroke="#D1D5DB" stroke-width="1.3" stroke-linecap="round"/></svg>
+        End Call
+      </div>
+    </div>
+
+    <div class="canvas-toolbar">
+      <button title="Undo">↶</button>
+      <button title="Redo">↷</button>
+      <span class="sep"></span>
+      <button title="Zoom out">−</button>
+      <span class="zoom-label">72%</span>
+      <button title="Zoom in">+</button>
+      <button title="Fit">⌂</button>
+      <span class="sep"></span>
+      <button title="Auto-layout">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="5" height="4" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="3" width="5" height="4" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="9" width="12" height="4" stroke="currentColor" stroke-width="1.3"/></svg>
+      </button>
+      <button title="Minimap">◱</button>
+    </div>
+  </div>
+
+  <!-- Settings panel for the selected Create Ticket (HubSpot) node -->
+  <div class="settings-panel">
+    <div class="sp-header">
+      <div class="icon" style="background:#ff7a59;">HS</div>
+      <div style="flex:1;">
+        <div class="sp-name">Create Ticket</div>
+        <div class="sp-sub">HubSpot · Function node</div>
+      </div>
+      <span style="color:#99A0AE;cursor:pointer;">⋯</span>
+    </div>
+    <div class="sp-tabs">
+      <span class="sp-tab active">Configure</span>
+      <span class="sp-tab">Edges</span>
+      <span class="sp-tab">Test</span>
+    </div>
+    <div class="sp-body">
+      <div class="sp-label">Node name</div>
+      <input class="sp-input" value="Create Ticket">
+
+      <div class="integ-callout">
+        <span class="chip">HS</span>
+        Connected as <b>support@acme.com</b> · OAuth
+        <a href="#">Manage</a>
+      </div>
+
+      <div class="sp-label">When to run</div>
+      <textarea class="sp-textarea">Run when the user describes a technical issue that requires follow-up outside this call (broken feature, bug, access problem). Skip for billing-only questions.</textarea>
+      <div class="sp-helper">LLM uses this hint to decide whether to call this node.</div>
+
+      <div class="sp-label">Pipeline</div>
+      <select class="sp-select"><option>Support Pipeline</option><option>Sales Pipeline</option><option>Success Pipeline</option></select>
+
+      <div class="sp-section-title">Inputs</div>
+      <div class="sp-row">
+        <span class="code">contact_id</span>
+        <span class="type">string · from contact</span>
+        <span class="required">required</span>
+      </div>
+      <div class="sp-row">
+        <span class="code">subject</span>
+        <span class="type">string · from LLM</span>
+        <span class="required">required</span>
+      </div>
+      <div class="sp-row">
+        <span class="code">description</span>
+        <span class="type">string · call transcript</span>
+      </div>
+      <div class="sp-row">
+        <span class="code">priority</span>
+        <span class="type">enum · auto-classify</span>
+      </div>
+
+      <div class="sp-section-title">Outputs</div>
+      <div class="sp-row"><span class="code">ticket.id</span><span class="type">string</span></div>
+      <div class="sp-row"><span class="code">ticket.url</span><span class="type">url</span></div>
+      <div class="sp-row"><span class="code">ticket.priority</span><span class="type">enum</span></div>
+
+      <div class="sp-label">Speak while running</div>
+      <input class="sp-input" value="Got it — I'm opening a ticket for you now.">
+
+      <div class="sp-label">On failure</div>
+      <select class="sp-select"><option>Tell user + transfer to human</option><option>Retry once</option><option>Silent fail</option></select>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

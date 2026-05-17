@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Bajacheebo · Human Handoff in Thread</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 240px; background: #F5F7FA; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .nav-scroll { padding: 4px 0; flex: 1; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { padding: 8px; height: 36px; font-size: 14px; color: #525866; border-radius: 6px; display: flex; align-items: center; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+
+  .app { flex: 1; display: flex; min-width: 0; }
+
+  .conv { flex: 1; display: flex; flex-direction: column; background: #ECE5DD; min-width: 0; }
+  .conv-head { background: #F0F2F5; border-bottom: 1px solid #E1E4EA; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  .conv-avatar { width: 40px; height: 40px; border-radius: 50%; background: #25D366; color: #fff; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  .conv-name { font-size: 15px; font-weight: 600; }
+  .conv-sub { font-size: 12px; color: #6B7280; }
+
+  .handoff-banner { background: linear-gradient(90deg, #FEF3C7 0%, #FEF3C7 100%); border-bottom: 1px solid #FCD34D; padding: 10px 20px; display: flex; align-items: center; gap: 12px; font-size: 13px; color: #92400E; }
+  .handoff-banner .hb-dot { width: 8px; height: 8px; border-radius: 50%; background: #F59E0B; animation: pulse 1.5s infinite; flex-shrink: 0; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .hb-toggle-wrap { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .hb-toggle { width: 40px; height: 22px; background: #92400E; border-radius: 12px; position: relative; cursor: pointer; flex-shrink: 0; }
+  .hb-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #fff; border-radius: 50%; }
+
+  .messages { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 10px; }
+  .msg-row { display: flex; max-width: 70%; }
+  .msg-row.in { align-self: flex-start; }
+  .msg-row.out { align-self: flex-end; }
+  .bubble { padding: 8px 12px; border-radius: 8px; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); position: relative; }
+  .msg-row.in .bubble { background: #fff; border-top-left-radius: 2px; }
+  .msg-row.out .bubble { background: #D9FDD3; border-top-right-radius: 2px; }
+  .msg-row.out.human .bubble { background: #DBEAFE; }
+  .bubble .sender-tag { font-size: 10px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px; display: block; }
+  .msg-row.out .bubble .sender-tag { color: #17B26A; }
+  .msg-row.out.human .bubble .sender-tag { color: #3d64d7; }
+  .bubble .time { font-size: 10px; color: #6B7280; text-align: right; margin-top: 4px; }
+  .tick { color: #53BDEB; }
+  .system-row { align-self: center; padding: 6px 12px; background: rgba(255,255,255,0.7); border-radius: 6px; font-size: 11px; color: #525866; }
+  .system-row.takeover { background: #DBEAFE; color: #1E40AF; font-weight: 500; }
+  .day-divider { align-self: center; background: rgba(255,255,255,0.8); padding: 4px 10px; border-radius: 6px; font-size: 11px; color: #525866; font-weight: 500; }
+
+  .composer { background: #F0F2F5; border-top: 1px solid #E1E4EA; padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .composer-hint { font-size: 11px; color: #1E40AF; display: flex; align-items: center; gap: 6px; font-weight: 500; }
+  .composer-hint .h-avatar { width: 18px; height: 18px; border-radius: 50%; background: #3d64d7; color: #fff; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .composer-row { display: flex; gap: 10px; align-items: center; }
+  .composer-input { flex: 1; height: 40px; padding: 0 14px; background: #fff; border: 2px solid #3d64d7; border-radius: 20px; font-size: 14px; outline: none; font-family: inherit; }
+  .composer-send { width: 40px; height: 40px; border-radius: 50%; background: #3d64d7; color: #fff; border: none; cursor: pointer; }
+
+  .context { width: 320px; border-left: 1px solid #E1E4EA; background: #FAFBFC; overflow-y: auto; flex-shrink: 0; }
+  .ctx-section { padding: 16px 20px; border-bottom: 1px solid #E1E4EA; }
+  .ctx-title { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 10px; }
+
+  .agent-card { display: flex; align-items: center; gap: 10px; padding: 10px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; margin-bottom: 10px; }
+  .agent-avatar { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .agent-avatar.ai { background: #0E121B; }
+  .agent-avatar.human { background: #3d64d7; }
+  .agent-name { font-size: 13px; font-weight: 600; }
+  .agent-sub { font-size: 11px; color: #6B7280; }
+  .agent-status { margin-left: auto; font-size: 11px; font-weight: 600; }
+  .agent-status.on { color: #1E40AF; }
+  .agent-status.off { color: #99A0AE; }
+
+  .btn-row { display: flex; gap: 6px; margin-top: 8px; }
+  .btn { height: 34px; padding: 0 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid transparent; font-family: inherit; }
+  .btn-primary { background: #0E121B; color: #fff; width: 100%; height: 36px; }
+  .btn-secondary { background: #fff; border-color: #E1E4EA; color: #0E121B; flex: 1; }
+
+  .feedback-quote { background: #fff; border: 1px solid #E1E4EA; border-left: 3px solid #3d64d7; padding: 12px 14px; border-radius: 6px; font-size: 12px; color: #525866; line-height: 1.5; }
+  .feedback-quote strong { color: #0E121B; font-weight: 600; display: block; margin-top: 6px; }
+
+  .default-policy { display: flex; flex-direction: column; gap: 6px; }
+  .dp-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #525866; padding: 6px 8px; border-radius: 6px; }
+  .dp-item.active { background: #0E121B; color: #fff; }
+  .dp-item .radio { width: 12px; height: 12px; border: 2px solid #99A0AE; border-radius: 50%; flex-shrink: 0; }
+  .dp-item.active .radio { border-color: #fff; background: radial-gradient(circle at center, #fff 3px, transparent 3.5px); }
+
+  .breadcrumb { font-size: 12px; color: #6B7280; margin-bottom: 8px; }
+  .breadcrumb a { color: #3d64d7; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo"><svg width="73" height="20" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg></div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item current">Call History</li><li class="nav-item">Chat History</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item">Integrations</li></ul></div>
+  </div>
+</aside>
+
+<div class="app">
+  <div class="conv">
+    <div class="conv-head">
+      <div class="conv-avatar" style="background:#F59E0B">CA</div>
+      <div>
+        <div class="conv-name">Carlos Ayala</div>
+        <div class="conv-sub">+52 55 8472-9023 · Bajacheebo B2B lead · Mexico City</div>
+      </div>
+    </div>
+
+    <div class="handoff-banner">
+      <span class="hb-dot"></span>
+      <div><strong>Human rep has taken over this thread.</strong> AI is paused. Maya Ortiz (Sales rep) is typing.</div>
+      <div class="hb-toggle-wrap">
+        <span style="font-size:12px;">AI</span>
+        <div class="hb-toggle"></div>
+      </div>
+    </div>
+
+    <div class="messages">
+      <div class="day-divider">Today</div>
+
+      <div class="msg-row in"><div class="bubble">Hi, saw your post about the new pricing tier. Does the Pro plan include the bulk export feature?<div class="time">10:14</div></div></div>
+
+      <div class="msg-row out"><div class="bubble"><span class="sender-tag">🤖 Clinic Front Desk Agent</span>Hi Carlos, great question! Yes — the Pro plan includes bulk exports up to 10,000 rows per batch. Happy to walk you through pricing details.<div class="time">10:14 <span class="tick">✓✓</span></div></div></div>
+
+      <div class="msg-row in"><div class="bubble">What if I need 100k rows? Can we negotiate something? Also we're on the legacy tier so grandfathering?<div class="time">10:15</div></div></div>
+
+      <div class="msg-row out"><div class="bubble"><span class="sender-tag">🤖 Clinic Front Desk Agent</span>For custom volume and legacy grandfathering, let me bring in our sales team. One moment, Carlos.<div class="time">10:15 <span class="tick">✓✓</span></div></div></div>
+
+      <div class="system-row takeover">→ AI paused · Maya Ortiz (Sales) joined the thread at 10:16</div>
+
+      <div class="msg-row out human"><div class="bubble"><span class="sender-tag">👤 Maya Ortiz · Sales</span>Hi Carlos, Maya here from sales. Picking up from where the agent left off — yes, we can absolutely discuss 100k batch volume. For legacy tier grandfathering, I'll need to pull up your account. What's the email you signed up with?<div class="time">10:16 <span class="tick">✓✓</span></div></div></div>
+
+      <div class="msg-row in"><div class="bubble">carlos@bajacheebo.mx<div class="time">10:17</div></div></div>
+
+      <div class="msg-row out human"><div class="bubble"><span class="sender-tag">👤 Maya Ortiz · Sales</span>Found you — you're on Legacy Pro since Feb 2023. Good news: you're fully grandfathered through 2027. For 100k batches I can offer a volume add-on at $0.002 per row. Want to jump on a quick call to go through it?<div class="time">10:18 <span class="tick">✓✓</span></div></div></div>
+
+      <div class="msg-row in"><div class="bubble">Perfect, yes. Can you call me in 10 min?<div class="time">10:19</div></div></div>
+    </div>
+
+    <div class="composer">
+      <div class="composer-hint"><span class="h-avatar">M</span>You're typing as <strong>Maya Ortiz (Sales)</strong> — AI will stay paused until you toggle it back on</div>
+      <div class="composer-row">
+        <input type="text" class="composer-input" placeholder="Sounds good — I'll call you at 10:30. Meanwhile, here's the add-on one-pager…" value="Sounds good — I'll call you at 10:30. Meanwhile, here's the add-on one-pager…">
+        <button class="composer-send">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="context">
+    <div class="ctx-section">
+      <div class="breadcrumb"><a href="connect-integration-library-3.1.6-whatsapp-inbound-thread.html">← Back to active threads</a></div>
+      <div class="ctx-title">Who's in this thread</div>
+      <div class="agent-card">
+        <div class="agent-avatar ai">AI</div>
+        <div>
+          <div class="agent-name">Clinic Front Desk Agent</div>
+          <div class="agent-sub">Paused at 10:16</div>
+        </div>
+        <div class="agent-status off">Off</div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-avatar human">MO</div>
+        <div>
+          <div class="agent-name">Maya Ortiz</div>
+          <div class="agent-sub">Sales · Joined 10:16</div>
+        </div>
+        <div class="agent-status on">Typing</div>
+      </div>
+      <div style="font-size:12px;color:#6B7280;margin-top:10px;line-height:1.4;">From Carlos's phone, it looks like one continuous conversation — no seam when the human took over.</div>
+    </div>
+
+    <div class="ctx-section">
+      <div class="ctx-title">Default handoff policy</div>
+      <div class="default-policy">
+        <div class="dp-item"><span class="radio"></span>AI always on (rep injects)</div>
+        <div class="dp-item active"><span class="radio"></span>AI on until rep takes over</div>
+        <div class="dp-item"><span class="radio"></span>AI off by default (human-first)</div>
+      </div>
+      <div style="font-size:11px;color:#6B7280;margin-top:10px;">Set per WhatsApp number on the <a href="connect-integration-library-3.1.3-whatsapp-app-page.html" style="color:#3d64d7;text-decoration:none;">account page</a>.</div>
+    </div>
+
+    <div class="ctx-section">
+      <div class="ctx-title">Return control</div>
+      <button class="btn btn-primary">↻ Resume AI (Clinic Front Desk)</button>
+      <div style="font-size:11px;color:#6B7280;margin-top:8px;line-height:1.4;">AI will read the rep's messages as prior context and resume from the next customer message.</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary">Assign to teammate</button>
+        <button class="btn btn-secondary">Add internal note</button>
+      </div>
+    </div>
+
+    <div class="ctx-section">
+      <div class="ctx-title">Why this pattern</div>
+      <div class="feedback-quote">
+        "Toggle off the AI and let a human interject and respond too."
+        <strong>— Bajacheebo, feature request, community.retellai.com</strong>
+      </div>
+    </div>
+
+    <div class="ctx-section">
+      <div class="ctx-title">Same record</div>
+      <div style="font-size:12px;color:#525866;line-height:1.5;">AI messages, human messages, and any later voice calls on this number all write to one conversation record. Full history exports in <a href="connect-integration-library-3.1.6-call-history-whatsapp.html" style="color:#3d64d7;text-decoration:none;">Call History</a>.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

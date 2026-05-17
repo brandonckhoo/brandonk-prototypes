@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — PCI Compliant Payment Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: #fff; color: #0A0A0A; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 48px; }
+  .page { display: flex; gap: 56px; align-items: flex-start; max-width: 1600px; }
+  .diagram-col { flex: 0 0 auto; width: 1060px; padding-top: 40px; }
+  .steps-col { flex: 1; min-width: 320px; max-width: 400px; padding-top: 52px; }
+  .step { display: flex; gap: 14px; margin-bottom: 28px; align-items: flex-start; }
+  .step-num { flex: 0 0 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.55; color: #374151; }
+  .step-text strong { color: #0E121B; font-weight: 600; }
+  .step-text .highlight { color: #5B21B6; font-weight: 600; }
+  .caption { font-size: 13px; color: #6B7280; text-align: center; margin-top: 24px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- LEFT: Diagram -->
+<div class="diagram-col">
+<svg viewBox="0 0 1060 590" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- ===== RETELL AI BANNER ===== -->
+  <rect x="185" y="0" width="580" height="52" rx="8" fill="#0E121B"/>
+  <image href="/Users/brandonkhoo/Documents/Retell AI/Logo.png" x="430" y="14" width="91" height="24" style="filter: brightness(0) invert(1);"/>
+
+  <!-- ===== ACTOR 1: CUSTOMER ===== -->
+  <rect x="25" y="68" width="110" height="76" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="80" y="98" text-anchor="middle" font-size="24">👤</text>
+  <text x="80" y="118" text-anchor="middle" font-size="10" fill="#64748B">Caller</text>
+  <text x="80" y="162" text-anchor="middle" font-size="12" font-weight="600" fill="#0E121B">Customer</text>
+
+  <!-- ===== ACTOR 2: VOICE ENGINE ===== -->
+  <rect x="200" y="68" width="130" height="76" rx="12" fill="#0E121B"/>
+  <text x="265" y="98" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">Voice Engine</text>
+  <text x="265" y="116" text-anchor="middle" font-size="10" fill="#64748B">STT / TTS</text>
+  <text x="265" y="162" text-anchor="middle" font-size="12" font-weight="600" fill="#0E121B">Voice Engine</text>
+
+  <!-- ===== ACTOR 3: LLM AGENT ===== -->
+  <rect x="395" y="68" width="130" height="76" rx="12" fill="#0E121B"/>
+  <text x="460" y="98" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">LLM Agent</text>
+  <text x="460" y="116" text-anchor="middle" font-size="10" fill="#64748B">Conversation Logic</text>
+  <text x="460" y="162" text-anchor="middle" font-size="12" font-weight="600" fill="#0E121B">LLM Agent</text>
+
+  <!-- ===== ACTOR 4: SECURE PAYMENT MODULE ===== -->
+  <rect x="590" y="68" width="170" height="76" rx="12" fill="#0E121B" stroke="#7C3AED" stroke-width="2"/>
+  <text x="675" y="94" text-anchor="middle" font-size="12" font-weight="600" fill="#A78BFA">Secure Payment</text>
+  <text x="675" y="112" text-anchor="middle" font-size="12" font-weight="600" fill="#A78BFA">Module</text>
+  <text x="675" y="128" text-anchor="middle" font-size="10" fill="#7C3AED">Isolated Environment</text>
+  <text x="675" y="162" text-anchor="middle" font-size="12" font-weight="600" fill="#0E121B">Secure Payment</text>
+
+  <!-- ===== ACTOR 5: STRIPE ===== -->
+  <rect x="880" y="68" width="140" height="76" rx="12" fill="#635BFF"/>
+  <text x="950" y="100" text-anchor="middle" font-size="20" font-weight="700" fill="#fff">stripe</text>
+  <text x="950" y="118" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.7)">Payment API</text>
+  <text x="950" y="162" text-anchor="middle" font-size="12" font-weight="600" fill="#0E121B">Stripe API</text>
+
+  <!-- ===== LIFELINES ===== -->
+  <line x1="80" y1="180" x2="80" y2="570" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="265" y1="180" x2="265" y2="570" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="460" y1="180" x2="460" y2="570" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="675" y1="180" x2="675" y2="570" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="950" y1="180" x2="950" y2="570" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- STEP 1: Voice conversation -->
+  <line x1="80" y1="240" x2="265" y2="240" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="262,235 272,240 262,245" fill="#9CA3AF"/>
+  <polygon points="83,235 73,240 83,245" fill="#9CA3AF"/>
+  <rect x="103" y="226" width="140" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="173" y="244" text-anchor="middle" font-size="11" font-weight="500" fill="#475569">Voice conversation</text>
+
+  <!-- Voice Engine <-> LLM -->
+  <line x1="265" y1="258" x2="460" y2="258" stroke="#9CA3AF" stroke-width="1.5"/>
+  <polygon points="457,253 467,258 457,263" fill="#9CA3AF"/>
+  <text x="362" y="255" text-anchor="middle" font-size="9" fill="#9CA3AF">Transcript</text>
+
+  <line x1="460" y1="273" x2="265" y2="273" stroke="#9CA3AF" stroke-width="1.5"/>
+  <polygon points="268,268 258,273 268,278" fill="#9CA3AF"/>
+  <text x="362" y="270" text-anchor="middle" font-size="9" fill="#9CA3AF">Response text</text>
+
+  <!-- STEP 2: Enters secure payment mode -->
+  <rect x="365" y="306" width="220" height="28" rx="6" fill="#FEF3C7" stroke="#FDE68A"/>
+  <text x="475" y="325" text-anchor="middle" font-size="12" font-weight="600" fill="#92400E">Enters secure payment mode</text>
+
+  <!-- STEP 3: Cardholder data -->
+  <line x1="80" y1="370" x2="675" y2="370" stroke="#7C3AED" stroke-width="1.5"/>
+  <polygon points="672,365 682,370 672,375" fill="#7C3AED"/>
+  <rect x="265" y="356" width="220" height="26" rx="5" fill="#EDE9FE" stroke="#C4B5FD"/>
+  <text x="375" y="374" text-anchor="middle" font-size="11" font-weight="500" fill="#5B21B6">Enters cardholder data (DTMF)</text>
+
+  <!-- STEP 4: Processes payment (bidirectional) -->
+  <line x1="675" y1="420" x2="950" y2="420" stroke="#635BFF" stroke-width="1.5"/>
+  <polygon points="947,415 957,420 947,425" fill="#635BFF"/>
+  <polygon points="678,415 668,420 678,425" fill="#635BFF"/>
+  <rect x="740" y="406" width="150" height="26" rx="5" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="815" y="424" text-anchor="middle" font-size="11" font-weight="500" fill="#3730A3">Processes payment</text>
+
+  <!-- STEP 5: Exits secure payment mode -->
+  <rect x="365" y="460" width="220" height="28" rx="6" fill="#FEF3C7" stroke="#FDE68A"/>
+  <text x="475" y="479" text-anchor="middle" font-size="12" font-weight="600" fill="#92400E">Exits secure payment mode</text>
+
+  <!-- STEP 6: Payment status -->
+  <line x1="265" y1="530" x2="80" y2="530" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="83,525 73,530 83,535" fill="#9CA3AF"/>
+  <rect x="95" y="514" width="240" height="34" rx="6" fill="#16A34A"/>
+  <text x="215" y="536" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">"Payment successful or failed"</text>
+
+</svg>
+
+<div class="caption">
+  Flowchart illustrating how cardholder data flows through Retell AI's isolated Secure Payment Module directly to Stripe,<br>
+  bypassing the Voice Engine and LLM Agent. Sensitive payment data never enters the conversational AI layer.
+</div>
+</div>
+
+<!-- RIGHT: Step-by-step walkthrough -->
+<div class="steps-col">
+
+  <h3 style="font-size: 15px; font-weight: 700; color: #0E121B; margin-bottom: 24px;">Flowchart (top to bottom)</h3>
+
+  <div class="step">
+    <div class="step-num" style="background: #6B7280;">1</div>
+    <div class="step-text"><strong>Voice conversation begins.</strong> The customer calls in and speaks with the Retell AI voice agent normally. Speech is transcribed by the Voice Engine and processed by the LLM Agent.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num" style="background: #6B7280;">2</div>
+    <div class="step-text"><strong>Secure payment mode activates.</strong> When payment is needed, the agent enters a secure isolation mode. The LLM and Voice Engine are walled off from the payment data path.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num" style="background: #6B7280;">3</div>
+    <div class="step-text"><strong>Cardholder data is captured in isolation.</strong> The customer enters their card details using their phone keypad (DTMF). The tones are routed <span class="highlight">directly to the Secure Payment Module</span>, bypassing both the Voice Engine and LLM Agent entirely. Because cardholder data never touches the conversational AI layer, this architecture meets PCI DSS Level 1 certification requirements for secure voice payment processing.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num" style="background: #6B7280;">4</div>
+    <div class="step-text"><strong>Stripe processes the payment.</strong> The Secure Payment Module sends tokenized card data to Stripe's API. Stripe processes the charge and returns the result.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num" style="background: #6B7280;">5</div>
+    <div class="step-text"><strong>Secure mode exits.</strong> The isolated payment session ends. No card data was ever stored, logged, or exposed to the conversational AI layer.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num" style="background: #6B7280;">6</div>
+    <div class="step-text"><strong>Customer hears the result.</strong> The voice agent confirms whether the payment was successful or failed, and the normal conversation resumes.</div>
+  </div>
+
+</div>
+
+</div>
+</body>
+</html>

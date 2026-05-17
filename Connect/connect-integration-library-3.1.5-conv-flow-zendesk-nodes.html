@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Conversational Flow with Zendesk Nodes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  .top-bar { display: flex; align-items: center; height: 40px; padding: 8px 16px 0; gap: 10px; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; color: #525866; flex-shrink: 0; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; white-space: nowrap; }
+  .agent-name-edit { color: #99A0AE; cursor: pointer; margin-left: 4px; display: inline-flex; align-items: center; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+  .top-tab { padding: 4px 8px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; }
+  .top-tab.active { font-weight: 500; color: #0E121B; }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-secondary { height: 30px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #525866; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 5px; }
+  .btn-icon { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; cursor: pointer; color: #525866; }
+  .btn-publish { height: 30px; padding: 0 14px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 5px; }
+  .top-meta { display: flex; align-items: center; height: 20px; padding: 2px 16px 8px 50px; }
+  .top-meta span { font-size: 12px; color: #99A0AE; }
+
+  .main-layout { display: flex; flex: 1; overflow: hidden; border-top: 1px solid #E1E4EA; }
+
+  /* Node palette */
+  .node-palette { width: 180px; min-width: 180px; border-right: 1px solid #E1E4EA; display: flex; flex-direction: column; background: #fff; overflow-y: auto; }
+  .palette-tabs { display: flex; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .palette-tab { flex: 1; padding: 10px 8px; text-align: center; font-size: 13px; font-weight: 400; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; }
+  .palette-tab.active { font-weight: 500; color: #0E121B; border-bottom-color: #0E121B; }
+  .palette-items { padding: 8px 0; }
+  .palette-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 14px; color: #0E121B; cursor: grab; }
+  .palette-item:hover { background: rgba(0,0,0,0.03); }
+  .palette-item .p-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; font-weight: 600; line-height: 1; }
+
+  /* Canvas */
+  .canvas { flex: 1; background: #FAFAFA; position: relative; overflow: auto; }
+  .canvas-inner { position: relative; width: 720px; height: 920px; margin: 24px auto; }
+  .flow-node { position: absolute; border-radius: 8px; background: #fff; border: 1px solid #E1E4EA; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .flow-node.selected { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.2), 0 1px 3px rgba(0,0,0,0.06); }
+
+  .node-begin { left: 40px; top: 180px; width: 80px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: #fff; background: #8B5CF6; border: none; border-radius: 16px; }
+
+  .node-welcome { left: 170px; top: 120px; width: 240px; padding: 12px 14px; }
+  .node-welcome-title { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #0E121B; margin-bottom: 8px; }
+  .node-welcome-title .dot { width: 8px; height: 8px; background: #F59E0B; border-radius: 50%; }
+  .node-welcome-body { font-size: 12px; color: #6B7280; line-height: 1.5; margin-bottom: 8px; }
+  .node-transition { border-top: 1px solid #E1E4EA; padding-top: 8px; }
+  .node-transition-title { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; color: #0E121B; margin-bottom: 4px; }
+  .node-transition-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #6B7280; margin-bottom: 3px; padding: 2px 0; }
+  .node-transition-item .bullet { width: 5px; height: 5px; border-radius: 50%; background: #D1D5DB; flex-shrink: 0; }
+
+  /* Function node (Zendesk) */
+  .node-fn { width: 240px; padding: 10px 12px; }
+  .node-fn-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .node-fn-icon { width: 22px; height: 22px; border-radius: 5px; background: #03363D; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; letter-spacing: -0.5px; flex-shrink: 0; }
+  .node-fn-label { flex: 1; }
+  .node-fn-kind { font-size: 10px; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.03em; font-weight: 500; }
+  .node-fn-name { font-size: 13px; font-weight: 500; color: #0E121B; line-height: 1.3; }
+  .node-fn-meta { font-size: 11px; color: #6B7280; font-family: 'SF Mono', Menlo, monospace; background: #F5F7FA; padding: 4px 6px; border-radius: 4px; margin-top: 4px; word-break: break-all; line-height: 1.4; }
+  .node-fn-output { font-size: 11px; color: #525866; margin-top: 6px; padding-top: 6px; border-top: 1px solid #F1F5F9; }
+  .node-fn-output .arrow { color: #99A0AE; margin-right: 4px; }
+
+  /* Logic split node */
+  .node-split { width: 200px; padding: 10px 12px; }
+  .node-split-header { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #0E121B; margin-bottom: 8px; }
+  .node-split-header .dot { width: 8px; height: 8px; background: #8B5CF6; border-radius: 50%; }
+  .node-split-branch { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #525866; padding: 4px 0; border-top: 1px solid #F1F5F9; }
+  .node-split-branch .tag { font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 500; }
+  .node-split-branch .tag.yes { background: #DCFCE7; color: #166534; }
+  .node-split-branch .tag.no { background: #FEE2E2; color: #991B1B; }
+
+  /* End call node */
+  .node-endcall { width: 100px; height: 32px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; font-weight: 500; color: #525866; }
+  .node-endcall .circle { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #D1D5DB; display: flex; align-items: center; justify-content: center; }
+
+  /* Connection lines (SVG) */
+  .conn-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+
+  .canvas-toolbar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; align-items: center; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; padding: 4px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); z-index: 10; }
+  .canvas-toolbar button { width: 28px; height: 28px; border: none; background: none; cursor: pointer; color: #525866; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+  .canvas-toolbar button:hover { background: #F3F4F6; }
+  .canvas-toolbar .sep { width: 1px; height: 16px; background: #E1E4EA; margin: 0 4px; }
+  .canvas-footer { position: absolute; bottom: 20px; left: 16px; font-size: 13px; font-weight: 500; color: #525866; display: flex; align-items: center; gap: 6px; z-index: 10; }
+
+  /* Right: settings panel (Node Edit mode) */
+  .settings-panel { width: 380px; min-width: 380px; border-left: 1px solid #E1E4EA; display: flex; flex-direction: column; overflow-y: auto; background: #fff; }
+  .sp-header { padding: 14px 16px; border-bottom: 1px solid #E1E4EA; display: flex; align-items: center; gap: 10px; }
+  .sp-header-icon { width: 26px; height: 26px; border-radius: 5px; background: #03363D; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; letter-spacing: -0.5px; flex-shrink: 0; }
+  .sp-header-title { flex: 1; font-size: 14px; font-weight: 600; color: #0E121B; }
+  .sp-header-sub { font-size: 11px; color: #6B7280; margin-top: 2px; font-weight: 400; }
+  .sp-tabs { display: flex; border-bottom: 1px solid #E1E4EA; padding: 0 16px; }
+  .sp-tab { padding: 10px 10px; font-size: 13px; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .sp-tab.active { font-weight: 500; color: #0E121B; border-bottom-color: #0E121B; }
+  .sp-body { padding: 16px; }
+  .sp-field { margin-bottom: 14px; }
+  .sp-label { font-size: 12px; font-weight: 500; color: #525866; margin-bottom: 5px; display: block; }
+  .sp-help { font-size: 11px; color: #99A0AE; margin-top: 4px; line-height: 1.4; }
+  .sp-input, .sp-select, .sp-textarea { width: 100%; padding: 7px 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; color: #0E121B; font-family: inherit; outline: none; background: #fff; }
+  .sp-select { padding-right: 28px; appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg width='12' height='12' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M4 6l4 4 4-4' stroke='%2399A0AE' stroke-width='1.5' stroke-linecap='round'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 10px center; }
+  .sp-textarea { resize: vertical; min-height: 60px; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; line-height: 1.5; }
+  .sp-section-title { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.03em; margin: 16px 0 10px; padding-bottom: 6px; border-bottom: 1px solid #F1F5F9; }
+  .sp-section-title:first-child { margin-top: 0; }
+  .param-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .param-row .sp-input { flex: 1; }
+  .param-key { flex: 0 0 110px; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; color: #525866; }
+  .param-chip { font-size: 11px; padding: 2px 6px; background: #EEF2FF; color: #3d64d7; border-radius: 4px; font-family: 'SF Mono', Menlo, monospace; }
+  .sp-delete { border: 1px solid #FECACA; color: #DC2626; background: #fff; font-size: 13px; padding: 7px 12px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="home-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+  <span class="agent-name">Support Triage Agent</span>
+  <span class="agent-name-edit"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></span>
+  <span class="top-spacer"></span>
+  <div class="top-tabs">
+    <span class="top-tab active">Create</span>
+    <span class="top-tab">Simulation</span>
+  </div>
+  <div class="top-actions">
+    <span style="font-size:12px;color:#99A0AE;margin-right:4px;">Auto saved at 11:18</span>
+    <button class="btn-secondary"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10v7H7l-3 2V4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg> Give feedback</button>
+    <button class="btn-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="8" r="1.25" fill="currentColor"/><circle cx="8" cy="8" r="1.25" fill="currentColor"/><circle cx="12" cy="8" r="1.25" fill="currentColor"/></svg></button>
+    <button class="btn-publish"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Publish</button>
+  </div>
+</div>
+<div class="top-meta">
+  <span>Agent ID: ag...b7f &bull; CF ID: cv...Zd42 &bull; $0.118/min &bull; 970-1300ms latency</span>
+</div>
+
+<div class="main-layout">
+
+  <div class="node-palette">
+    <div class="palette-tabs">
+      <span class="palette-tab active">Node</span>
+      <span class="palette-tab">Components</span>
+    </div>
+    <div class="palette-items">
+      <div class="palette-item"><span class="p-icon" style="color:#EF4444;">#</span> Conversation</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#22C55E" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round"/></svg></span> Subagent</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="#3d64d7" stroke-width="1.5"/><circle cx="10" cy="10" r="2" stroke="#3d64d7" stroke-width="1.3"/><path d="M10 5v2M10 13v2M5 10h2M13 10h2" stroke="#3d64d7" stroke-width="1.3" stroke-linecap="round"/></svg></span> Function</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M17 13.5c0 1-1.5 2.5-2.5 2.5s-3-1.5-5-3.5S6 8 6 6.5 7.5 4 8.5 4c.5 0 1 .2 1.2.5L11 7l-1.5 2L12 11.5l2-1.5 2.5 1.3c.3.2.5.7.5 1.2z" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Call Transfer</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="6" cy="6" r="1.5" fill="#F59E0B"/><circle cx="10" cy="6" r="1.5" fill="#F59E0B"/><circle cx="14" cy="6" r="1.5" fill="#F59E0B"/><circle cx="6" cy="10" r="1.5" fill="#F59E0B"/><circle cx="10" cy="10" r="1.5" fill="#F59E0B"/><circle cx="14" cy="10" r="1.5" fill="#F59E0B"/><circle cx="6" cy="14" r="1.5" fill="#F59E0B"/><circle cx="10" cy="14" r="1.5" fill="#F59E0B"/><circle cx="14" cy="14" r="1.5" fill="#F59E0B"/></svg></span> Press Digit</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M6 4v12M6 10h8M14 10v-3M14 10v3" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Logic Split</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="10" height="10" rx="2" stroke="#F97316" stroke-width="1.5"/><path d="M13 8h4M13 12h4" stroke="#F97316" stroke-width="1.5" stroke-linecap="round"/></svg></span> Agent Transfer</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="10" rx="2" stroke="#F97316" stroke-width="1.5"/><path d="M7 9h6" stroke="#F97316" stroke-width="1.5" stroke-linecap="round"/></svg></span> In-Call SMS</div>
+      <div class="palette-item"><span class="p-icon" style="color:#6B7280;font-size:15px;font-weight:500;">{ }</span> Extract Variable</div>
+      <div class="palette-item"><span class="p-icon" style="color:#6B7280;font-size:15px;font-weight:500;">&lt;&gt;</span> Code</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 3l7 4v6l-7 4-7-4V7l7-4z" stroke="#8B5CF6" stroke-width="1.5"/></svg></span> MCP</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="4" y="4" width="12" height="12" rx="2" stroke="#93C5FD" stroke-width="1.5"/></svg></span> Ending</div>
+    </div>
+  </div>
+
+  <div class="canvas">
+    <div class="canvas-inner">
+
+      <!--
+        Vertical layout (canvas 720x920, center column at x=360):
+          Begin:           x=320, y=20,  w=80    (center 360)
+          Welcome:         x=240, y=80,  w=240   (center 360, bottom ~210)
+          Customer Lookup: x=240, y=240, w=240   (center 360, bottom ~325)
+          Lookup Ticket:   x=240, y=355, w=240   (center 360, bottom ~455)
+          Logic Split:     x=250, y=485, w=220   (center 360, bottom ~605)
+          Update Ticket:   x=60,  y=660, w=240   (YES branch, left,  center 180, bottom ~775)
+          Create Ticket:   x=420, y=660, w=240   (NO  branch, right, center 540, bottom ~800)
+          End Call:        x=310, y=860, w=100   (center 360)
+      -->
+
+      <svg class="conn-svg" viewBox="0 0 720 920" preserveAspectRatio="none">
+        <!-- Begin → Welcome -->
+        <path d="M360 52 L 360 80" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>
+        <!-- Welcome → Customer Lookup -->
+        <path d="M360 210 L 360 240" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>
+        <!-- Customer Lookup → Lookup Ticket -->
+        <path d="M360 325 L 360 355" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>
+        <!-- Lookup Ticket → Logic Split -->
+        <path d="M360 455 L 360 485" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>
+        <!-- Logic Split (YES, bottom-left) → Update Ticket -->
+        <path d="M360 605 L 360 630 L 180 630 L 180 660" stroke="#22C55E" stroke-width="1.5" fill="none"/>
+        <!-- Logic Split (NO, bottom-right) → Create Ticket -->
+        <path d="M360 605 L 360 630 L 540 630 L 540 660" stroke="#F97316" stroke-width="1.5" fill="none"/>
+        <!-- Update Ticket → End Call -->
+        <path d="M180 775 L 180 825 L 360 825 L 360 860" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>
+        <!-- Create Ticket → End Call -->
+        <path d="M540 800 L 540 825 L 360 825 L 360 860" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>
+
+        <!-- Branch labels on connectors -->
+        <rect x="118" y="638" width="34" height="18" rx="4" fill="#DCFCE7"/>
+        <text x="135" y="650" text-anchor="middle" font-size="10" font-weight="600" fill="#166534" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif">yes</text>
+        <rect x="568" y="638" width="32" height="18" rx="4" fill="#FEE2E2"/>
+        <text x="584" y="650" text-anchor="middle" font-size="10" font-weight="600" fill="#991B1B" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif">no</text>
+      </svg>
+
+      <!-- Begin -->
+      <div class="flow-node node-begin" style="left:320px; top:20px;">Begin</div>
+
+      <!-- Welcome -->
+      <div class="flow-node node-welcome" style="left:240px; top:80px; width:240px;">
+        <div class="node-welcome-title"><span class="dot"></span> Welcome Node</div>
+        <div class="node-welcome-body">"Thanks for calling support. Can I grab your name so I can pull up your account?"</div>
+        <div class="node-transition">
+          <div class="node-transition-title"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Transition</div>
+          <div class="node-transition-item"><span class="bullet"></span> Caller provides name or phone</div>
+        </div>
+      </div>
+
+      <!-- Customer Lookup -->
+      <div class="flow-node node-fn" style="left:240px; top:240px;">
+        <div class="node-fn-header">
+          <div class="node-fn-icon">ZD</div>
+          <div class="node-fn-label">
+            <div class="node-fn-kind">Function · Zendesk</div>
+            <div class="node-fn-name">Customer Lookup</div>
+          </div>
+        </div>
+        <div class="node-fn-meta">phone: {{caller_phone}}</div>
+      </div>
+
+      <!-- Lookup Ticket -->
+      <div class="flow-node node-fn" style="left:240px; top:355px;">
+        <div class="node-fn-header">
+          <div class="node-fn-icon">ZD</div>
+          <div class="node-fn-label">
+            <div class="node-fn-kind">Function · Zendesk</div>
+            <div class="node-fn-name">Lookup Ticket</div>
+          </div>
+        </div>
+        <div class="node-fn-meta">requester_id: {{zd_user_id}}<br>status: open, pending</div>
+      </div>
+
+      <!-- Logic Split -->
+      <div class="flow-node node-split" style="left:250px; top:485px;">
+        <div class="node-split-header"><span class="dot"></span> Logic Split</div>
+        <div style="font-size:11px;color:#6B7280;margin-bottom:8px;font-family:'SF Mono',Menlo,monospace;">open_ticket_id != null ?</div>
+        <div class="node-split-branch"><span class="tag yes">yes</span><span>use existing ticket</span></div>
+        <div class="node-split-branch"><span class="tag no">no</span><span>create new ticket</span></div>
+      </div>
+
+      <!-- Update Ticket (selected) -->
+      <div class="flow-node node-fn selected" style="left:60px; top:660px;">
+        <div class="node-fn-header">
+          <div class="node-fn-icon">ZD</div>
+          <div class="node-fn-label">
+            <div class="node-fn-kind">Function · Zendesk</div>
+            <div class="node-fn-name">Update Ticket</div>
+          </div>
+        </div>
+        <div class="node-fn-meta">ticket_id: {{open_ticket_id}}<br>comment: {{conversation_notes}}<br>status: open</div>
+      </div>
+
+      <!-- Create Ticket -->
+      <div class="flow-node node-fn" style="left:420px; top:660px;">
+        <div class="node-fn-header">
+          <div class="node-fn-icon">ZD</div>
+          <div class="node-fn-label">
+            <div class="node-fn-kind">Function · Zendesk</div>
+            <div class="node-fn-name">Create Ticket</div>
+          </div>
+        </div>
+        <div class="node-fn-meta">requester_id: {{zd_user_id}}<br>subject: {{issue_summary}}<br>form: Billing &amp; Payments<br>priority: {{priority_from_sentiment}}</div>
+      </div>
+
+      <!-- End Call -->
+      <div class="flow-node node-endcall" style="left:310px; top:860px;">
+        <span class="circle"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 8h8" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        End Call
+      </div>
+
+    </div>
+
+    <div class="canvas-toolbar">
+      <button><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 4v8M4 8h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+      <button><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+      <div class="sep"></div>
+      <button><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="3" width="10" height="10" rx="1" stroke="currentColor" stroke-width="1.3"/></svg></button>
+      <div class="sep"></div>
+      <button><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="canvas-footer">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Main Flow
+    </div>
+  </div>
+
+  <!-- Right settings panel: Update Ticket node (selected) -->
+  <div class="settings-panel">
+    <div class="sp-header">
+      <div class="sp-header-icon">ZD</div>
+      <div class="sp-header-title">
+        Update Ticket
+        <div class="sp-header-sub">Zendesk · Function Node</div>
+      </div>
+      <button class="btn-icon" style="border:none;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="sp-tabs">
+      <span class="sp-tab active">Config</span>
+      <span class="sp-tab">Prompt</span>
+      <span class="sp-tab">Transitions</span>
+    </div>
+    <div class="sp-body">
+      <div class="sp-section-title">Tool</div>
+      <div class="sp-field">
+        <label class="sp-label">Function</label>
+        <select class="sp-select">
+          <option>Update Ticket (Zendesk)</option>
+        </select>
+        <div class="sp-help">Updates an existing Zendesk ticket. Use after <code style="font-family:'SF Mono',Menlo,monospace;font-size:11px;">Lookup Ticket</code> so the ticket ID is set.</div>
+      </div>
+
+      <div class="sp-section-title">Arguments</div>
+
+      <div class="sp-field">
+        <label class="sp-label">ticket_id <span class="param-chip">number</span></label>
+        <input class="sp-input" value="{{open_ticket_id}}">
+        <div class="sp-help">Reference a dynamic variable or literal ID.</div>
+      </div>
+
+      <div class="sp-field">
+        <label class="sp-label">comment.body <span class="param-chip">string</span></label>
+        <textarea class="sp-textarea">Summary of caller's new info: {{conversation_notes}}
+
+Caller reached us on {{call_date}} via inbound support line.</textarea>
+      </div>
+
+      <div class="sp-field">
+        <label class="sp-label">comment.public <span class="param-chip">boolean</span></label>
+        <select class="sp-select">
+          <option>false — internal note</option>
+          <option>true — public reply to requester</option>
+        </select>
+      </div>
+
+      <div class="sp-field">
+        <label class="sp-label">status</label>
+        <select class="sp-select">
+          <option>open</option>
+          <option>pending</option>
+          <option>on-hold</option>
+          <option>solved</option>
+        </select>
+      </div>
+
+      <div class="sp-field">
+        <label class="sp-label">priority</label>
+        <select class="sp-select">
+          <option>— unchanged —</option>
+          <option>low</option>
+          <option>normal</option>
+          <option>high</option>
+          <option>urgent</option>
+        </select>
+      </div>
+
+      <div class="sp-section-title">Agent speaks after tool runs</div>
+      <div class="sp-field">
+        <textarea class="sp-textarea" style="font-family:inherit;font-size:13px;">Got it — I've added those notes to ticket #{{open_ticket_id}} so our team has the full picture. Anything else before we wrap up?</textarea>
+      </div>
+
+      <button class="sp-delete">Delete node</button>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

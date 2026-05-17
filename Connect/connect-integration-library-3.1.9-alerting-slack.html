@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Alerting (Slack routing)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  .sidebar { width: 260px; background: #F5F7FA; display: flex; flex-direction: column; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .nav-item:hover { background: rgba(0,0,0,0.03); }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+  .footer { padding: 16px 14px; }
+
+  .main { flex: 1; overflow: auto; background: #fff; }
+  .page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 32px 8px; }
+  .page-title { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; }
+  .page-subtitle { padding: 0 32px 16px; font-size: 13px; color: #6B7280; }
+  .btn-primary { height: 34px; padding: 0 14px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .btn-secondary { height: 34px; padding: 0 14px; background: #fff; border: 1px solid #E1E4EA; color: #374151; font-size: 13px; font-weight: 500; border-radius: 8px; cursor: pointer; }
+
+  .tabs { padding: 0 32px; border-bottom: 1px solid #E1E4EA; display: flex; }
+  .tab { padding: 10px 14px; font-size: 14px; font-weight: 500; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: #0E121B; border-bottom-color: #0E121B; }
+
+  .content { padding: 24px 32px; }
+
+  /* Destinations summary strip */
+  .dests-strip { display: flex; gap: 12px; padding: 16px; border: 1px solid #E1E4EA; border-radius: 10px; margin-bottom: 20px; background: #F9FAFB; }
+  .dest-card { flex: 1; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+  .dest-icon { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .dest-icon.email { background: #EEF2FF; color: #3d64d7; }
+  .dest-icon.slack { background: #4A154B; }
+  .dest-icon.slack img { width: 18px; height: 18px; }
+  .dest-icon.webhook { background: #F3F4F6; color: #525866; }
+  .dest-name { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .dest-sub { font-size: 12px; color: #6B7280; margin-top: 2px; }
+  .dest-dot { width: 6px; height: 6px; border-radius: 50%; background: #1FC16B; }
+  .dest-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #1FC16B; margin-top: 3px; }
+
+  /* Rules table */
+  table.rules { width: 100%; border-collapse: collapse; background: #fff; }
+  table.rules thead th { text-align: left; padding: 10px 14px; font-size: 12px; font-weight: 500; color: #6B7280; text-transform: uppercase; letter-spacing: 0.03em; border-bottom: 1px solid #E1E4EA; background: #F5F7FA; }
+  table.rules tbody td { padding: 14px; font-size: 13px; color: #0E121B; border-bottom: 1px solid #F1F5F9; vertical-align: middle; }
+  table.rules tbody tr:hover { background: rgba(0,0,0,0.02); }
+  .rule-name { font-weight: 600; }
+  .rule-desc { font-size: 12px; color: #6B7280; margin-top: 2px; }
+  .sev { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .sev.critical { background: #FEE4E2; color: #B42318; }
+  .sev.high { background: #FEF3C7; color: #B54708; }
+  .sev.medium { background: #DBEAFE; color: #1D4ED8; }
+  .sev .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  .dest-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border: 1px solid #E1E4EA; border-radius: 12px; font-size: 12px; color: #374151; background: #fff; }
+  .chip img { width: 12px; height: 12px; border-radius: 2px; }
+  .chip.slack .slack-mark { width: 12px; height: 12px; background: #4A154B; border-radius: 2px; display: inline-flex; align-items: center; justify-content: center; }
+  .chip.slack .slack-mark img { width: 8px; height: 8px; }
+  .chip .hash { color: #6B7280; font-weight: 500; }
+
+  .toggle { width: 32px; height: 18px; background: #D1D5DB; border-radius: 9px; position: relative; cursor: pointer; }
+  .toggle.on { background: #3d64d7; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: left 0.2s; }
+  .toggle.on::after { left: 16px; }
+
+  .menu-btn { width: 28px; height: 28px; border: none; background: none; cursor: pointer; color: #99A0AE; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+  .menu-btn:hover { background: #F3F4F6; color: #525866; }
+
+  /* Slide-over / edit drawer */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); z-index: 100; display: flex; justify-content: flex-end; }
+  .drawer { width: 560px; height: 100vh; background: #fff; display: flex; flex-direction: column; box-shadow: -12px 0 32px rgba(0,0,0,0.1); }
+  .drawer-header { display: flex; align-items: center; gap: 10px; padding: 18px 20px; border-bottom: 1px solid #E1E4EA; }
+  .drawer-title { font-size: 15px; font-weight: 600; flex: 1; }
+  .drawer-close { width: 28px; height: 28px; border: none; background: none; cursor: pointer; color: #6B7280; border-radius: 6px; }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 20px; }
+
+  .fg { margin-bottom: 18px; }
+  .fg-label { display: block; font-size: 13px; font-weight: 500; color: #0E121B; margin-bottom: 6px; }
+  .fg-input, .fg-select { width: 100%; height: 38px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0A0A0A; outline: none; font-family: inherit; background: #fff; }
+  .fg-helper { font-size: 12px; color: #6B7280; margin-top: 4px; }
+
+  .dest-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #E1E4EA; border-radius: 8px; margin-bottom: 8px; background: #fff; }
+  .dest-row .dest-icon { width: 28px; height: 28px; }
+  .dest-row .main-label { flex: 1; font-size: 13px; color: #0E121B; }
+  .dest-row .main-label .sub { font-size: 12px; color: #6B7280; display: block; margin-top: 1px; }
+  .dest-row .remove { color: #99A0AE; cursor: pointer; }
+
+  .add-dest { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #3d64d7; cursor: pointer; padding: 8px 0; border: none; background: none; }
+
+  .section-divider { height: 1px; background: #E1E4EA; margin: 20px 0; }
+  .drawer-footer { padding: 14px 20px; border-top: 1px solid #E1E4EA; display: flex; justify-content: flex-end; gap: 8px; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73ZM205.22 49.69C202.9 52 199.43 52.58 195.38 52.58H176.28V26.54H193.64C198.85 26.54 201.74 27.12 204.64 28.86C208.11 30.59 209.85 34.64 209.85 39.27C209.85 43.9 208.11 47.38 205.22 49.69Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item current">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item">Integrations</li><li class="nav-item">Billing</li><li class="nav-item">Settings</li></ul></div>
+  </div>
+  <div class="footer"></div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <div class="page-title">Alerting</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-secondary">Destinations</button>
+      <button class="btn-primary"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Create rule</button>
+    </div>
+  </div>
+  <div class="page-subtitle">Get notified when something needs attention. Route alerts to email, Slack, or webhooks based on severity.</div>
+
+  <div class="tabs">
+    <div class="tab active">Rules</div>
+    <div class="tab">Destinations</div>
+    <div class="tab">History</div>
+  </div>
+
+  <div class="content">
+    <!-- Destinations strip -->
+    <div class="dests-strip">
+      <div class="dest-card">
+        <div class="dest-icon email">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3 5h14v10H3z" stroke="currentColor" stroke-width="1.5"/><path d="M3 5l7 5 7-5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        </div>
+        <div style="flex:1;">
+          <div class="dest-name">Email</div>
+          <div class="dest-sub">4 recipients · oncall@retellai.com, +3</div>
+          <div class="dest-status"><span class="dest-dot"></span> Active</div>
+        </div>
+      </div>
+      <div class="dest-card">
+        <div class="dest-icon slack"><img src="https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_256.png"></div>
+        <div style="flex:1;">
+          <div class="dest-name">Slack</div>
+          <div class="dest-sub">Retell AI Team · 3 channels mapped</div>
+          <div class="dest-status"><span class="dest-dot"></span> Connected</div>
+        </div>
+      </div>
+      <div class="dest-card">
+        <div class="dest-icon webhook">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="6" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="13" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M8 9l4 3" stroke="currentColor" stroke-width="1.5"/></svg>
+        </div>
+        <div style="flex:1;">
+          <div class="dest-name">Webhook</div>
+          <div class="dest-sub">2 endpoints · POST</div>
+          <div class="dest-status"><span class="dest-dot"></span> Active</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rules table -->
+    <table class="rules">
+      <thead>
+        <tr>
+          <th>Rule</th>
+          <th>Severity</th>
+          <th>Trigger</th>
+          <th>Destinations</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:rgba(61,100,215,0.04);">
+          <td>
+            <div class="rule-name">E2E latency p95 exceeded</div>
+            <div class="rule-desc">Fires when agent latency p95 &gt; 2500ms for 2+ min</div>
+          </td>
+          <td><span class="sev critical"><span class="dot"></span> Critical</span></td>
+          <td style="font-family:'SF Mono',Menlo,monospace;font-size:12px;color:#374151;">latency_p95 &gt; 2500ms</td>
+          <td>
+            <div class="dest-chips">
+              <span class="chip">📧 oncall@retellai.com</span>
+              <span class="chip slack"><span class="slack-mark"><img src="https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_256.png"></span><span class="hash">#</span>retell-incidents</span>
+              <span class="chip">🪝 PagerDuty</span>
+            </div>
+          </td>
+          <td><div class="toggle on"></div></td>
+          <td><button class="menu-btn">⋯</button></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="rule-name">Agent error rate spike</div>
+            <div class="rule-desc">5xx or LLM error rate &gt; 3% over 5 min window</div>
+          </td>
+          <td><span class="sev critical"><span class="dot"></span> Critical</span></td>
+          <td style="font-family:'SF Mono',Menlo,monospace;font-size:12px;color:#374151;">error_rate &gt; 3%</td>
+          <td>
+            <div class="dest-chips">
+              <span class="chip">📧 oncall@retellai.com</span>
+              <span class="chip slack"><span class="slack-mark"><img src="https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_256.png"></span><span class="hash">#</span>retell-incidents</span>
+            </div>
+          </td>
+          <td><div class="toggle on"></div></td>
+          <td><button class="menu-btn">⋯</button></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="rule-name">Negative sentiment on enterprise calls</div>
+            <div class="rule-desc">Post-call sentiment = Negative for accounts &gt; $100K ARR</div>
+          </td>
+          <td><span class="sev high"><span class="dot"></span> High</span></td>
+          <td style="font-family:'SF Mono',Menlo,monospace;font-size:12px;color:#374151;">sentiment = neg AND arr &gt; 100000</td>
+          <td>
+            <div class="dest-chips">
+              <span class="chip">📧 cs-leads@retellai.com</span>
+              <span class="chip slack"><span class="slack-mark"><img src="https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_256.png"></span><span class="hash">#</span>cs-escalations</span>
+            </div>
+          </td>
+          <td><div class="toggle on"></div></td>
+          <td><button class="menu-btn">⋯</button></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="rule-name">Call transfer failed</div>
+            <div class="rule-desc">Transfer node returned error</div>
+          </td>
+          <td><span class="sev high"><span class="dot"></span> High</span></td>
+          <td style="font-family:'SF Mono',Menlo,monospace;font-size:12px;color:#374151;">transfer_status = failed</td>
+          <td>
+            <div class="dest-chips">
+              <span class="chip slack"><span class="slack-mark"><img src="https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_256.png"></span><span class="hash">#</span>voice-ops</span>
+            </div>
+          </td>
+          <td><div class="toggle on"></div></td>
+          <td><button class="menu-btn">⋯</button></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="rule-name">Daily minutes budget</div>
+            <div class="rule-desc">Alert when 80% of monthly minutes consumed</div>
+          </td>
+          <td><span class="sev medium"><span class="dot"></span> Medium</span></td>
+          <td style="font-family:'SF Mono',Menlo,monospace;font-size:12px;color:#374151;">minutes_used &gt; 80% of plan</td>
+          <td>
+            <div class="dest-chips">
+              <span class="chip">📧 billing@retellai.com</span>
+            </div>
+          </td>
+          <td><div class="toggle"></div></td>
+          <td><button class="menu-btn">⋯</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- Edit rule drawer -->
+<div class="drawer-overlay">
+  <div class="drawer">
+    <div class="drawer-header">
+      <span class="sev critical"><span class="dot"></span> Critical</span>
+      <div class="drawer-title">E2E latency p95 exceeded</div>
+      <button class="drawer-close">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="fg">
+        <label class="fg-label">Rule name</label>
+        <input type="text" class="fg-input" value="E2E latency p95 exceeded">
+      </div>
+
+      <div class="fg">
+        <label class="fg-label">Trigger</label>
+        <input type="text" class="fg-input" value="latency_p95 > 2500ms for 2 min" style="font-family:'SF Mono',Menlo,monospace;font-size:12px;">
+        <div class="fg-helper">Evaluated every 30 seconds across all agents. Use attribute:value syntax.</div>
+      </div>
+
+      <div class="fg">
+        <label class="fg-label">Severity</label>
+        <select class="fg-select"><option>Critical</option><option>High</option><option>Medium</option></select>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <label class="fg-label" style="margin-bottom:8px;">Route to destinations</label>
+      <div class="fg-helper" style="margin-bottom:10px;">High-priority alerts can fan out to email and Slack in parallel. Slack ensures the oncall engineer sees it in their chat workflow.</div>
+
+      <div class="dest-row">
+        <div class="dest-icon email"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M3 5h14v10H3z" stroke="currentColor" stroke-width="1.5"/><path d="M3 5l7 5 7-5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+        <div class="main-label">Email<span class="sub">oncall@retellai.com, ai-platform@retellai.com</span></div>
+        <span class="remove">✕</span>
+      </div>
+
+      <div class="dest-row" style="border-color:#4A154B;box-shadow:0 0 0 1px #4A154B inset;">
+        <div class="dest-icon slack"><img src="https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_256.png"></div>
+        <div class="main-label">Slack<span class="sub"><span style="color:#6B7280;">#</span>retell-incidents · mentions @oncall-voice</span></div>
+        <span class="remove">✕</span>
+      </div>
+
+      <div class="dest-row">
+        <div class="dest-icon webhook"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="6" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="13" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M8 9l4 3" stroke="currentColor" stroke-width="1.5"/></svg></div>
+        <div class="main-label">Webhook<span class="sub">POST https://events.pagerduty.com/v2/enqueue</span></div>
+        <span class="remove">✕</span>
+      </div>
+
+      <button class="add-dest"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> Add destination</button>
+
+      <div class="section-divider"></div>
+
+      <label class="fg-label" style="margin-bottom:8px;">Slack message preview</label>
+      <div style="background:#F8F8F8;border:1px solid #E1E4EA;border-radius:8px;padding:14px;font-family:-apple-system,BlinkMacSystemFont,'Lato',system-ui,sans-serif;">
+        <!-- App header row -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <div style="width:28px;height:28px;border-radius:5px;background:#0E121B;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;">R</div>
+          <span style="font-weight:700;font-size:13px;color:#1D1C1D;">Retell AI</span>
+          <span style="font-size:10px;font-weight:600;background:#E8E8E8;color:#616061;padding:1px 4px;border-radius:3px;">APP</span>
+          <span style="font-size:12px;color:#616061;">#retell-incidents</span>
+          <span style="font-size:11px;color:#9E9E9E;margin-left:auto;">10:27 AM</span>
+        </div>
+        <!-- Flat white body — no left border, no tinted bg -->
+        <div style="background:#fff;border-radius:6px;padding:14px 16px;">
+          <!-- Title + FIRING badge -->
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;">
+            <div style="font-size:14px;font-weight:700;color:#1D1C1D;line-height:1.4;">🔴 Critical: E2E latency p95 exceeded</div>
+            <span style="font-size:10px;font-weight:700;background:#FCE8EC;color:#E01E5A;padding:2px 7px;border-radius:3px;letter-spacing:0.04em;white-space:nowrap;flex-shrink:0;margin-top:1px;">FIRING</span>
+          </div>
+          <!-- 2-col inline label: value — Ergo style -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px 20px;font-size:13px;margin-bottom:12px;">
+            <div><span style="font-weight:700;color:#1D1C1D;">Observed:</span> <span style="color:#616061;">3,180 ms <span style="color:#9E9E9E;">(threshold 2,500)</span></span></div>
+            <div><span style="font-weight:700;color:#1D1C1D;">Firing for:</span> <span style="color:#616061;">4 min <span style="color:#9E9E9E;">since 14:27 PT</span></span></div>
+            <div><span style="font-weight:700;color:#1D1C1D;">Agents:</span> <span style="color:#616061;">Aria, Nova, Kai <span style="color:#9E9E9E;">(+4)</span></span></div>
+            <div><span style="font-weight:700;color:#1D1C1D;">Oncall:</span> <span style="color:#1264A3;">@maya.chen</span> <span style="color:#9E9E9E;font-size:12px;">(PagerDuty)</span></div>
+          </div>
+          <!-- Divider -->
+          <div style="height:1px;background:#F1F0EF;margin-bottom:12px;"></div>
+          <!-- Actions — solid dark primary, ghost secondaries with glyphs -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;background:#0E121B;color:#fff;font-size:12px;font-weight:600;border-radius:4px;cursor:pointer;">🔗 View in Retell</span>
+            <span style="display:inline-flex;align-items:center;gap:4px;padding:6px 14px;background:#0E121B;color:#fff;font-size:12px;font-weight:600;border-radius:4px;cursor:pointer;">✓ Acknowledge</span>
+            <span style="display:inline-flex;align-items:center;padding:6px 14px;background:#fff;color:#616061;border:1px solid #D8D8D8;font-size:12px;font-weight:500;border-radius:4px;cursor:pointer;">Mute 30m</span>
+          </div>
+        </div>
+        <!-- Footer -->
+        <div style="font-size:11px;color:#9E9E9E;margin-top:8px;">
+          Retell AI Alerting · <span style="text-decoration:underline;cursor:pointer;">View all alerts</span> · <span style="text-decoration:underline;cursor:pointer;">Manage rules</span>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn-secondary">Cancel</button>
+      <button class="btn-primary" style="height:34px;">Save rule</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

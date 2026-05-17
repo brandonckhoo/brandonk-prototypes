@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NICE CXone Integration Requirements</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: #fff; color: #0A0A0A; padding: 40px; max-width: 1200px; }
+  h3 { font-size: 16px; font-weight: 600; color: #0E121B; margin-bottom: 16px; }
+
+  /* Overview table */
+  .overview-table { width: 100%; border-collapse: collapse; border: 1px solid #D1D5DB; margin-bottom: 32px; }
+  .overview-table th, .overview-table td { padding: 12px 16px; text-align: left; vertical-align: top; border: 1px solid #E5E7EB; font-size: 14px; line-height: 1.6; }
+  .overview-table th { background: #F9FAFB; font-weight: 600; color: #0E121B; width: 200px; white-space: nowrap; }
+  .overview-table td { color: #374151; }
+  .overview-table td a { color: #3d64d7; text-decoration: none; }
+
+  /* Key requirements table */
+  h4 { font-size: 15px; font-weight: 600; color: #0E121B; margin-bottom: 12px; }
+  .req-table { width: 100%; border-collapse: collapse; border: 1px solid #D1D5DB; }
+  .req-table th { padding: 10px 16px; text-align: left; background: #F9FAFB; font-size: 13px; font-weight: 600; color: #0E121B; border: 1px solid #E5E7EB; }
+  .req-table td { padding: 12px 16px; text-align: left; vertical-align: top; border: 1px solid #E5E7EB; font-size: 14px; line-height: 1.6; color: #374151; }
+  .req-table td:first-child { font-weight: 600; color: #0E121B; width: 220px; }
+  .req-table td:nth-child(3) { width: 180px; font-size: 13px; color: #6B7280; }
+  .req-table td:last-child { width: 110px; text-align: center; }
+  .status { font-size: 13px; font-weight: 500; color: #6B7280; }
+</style>
+</head>
+<body>
+
+<h3>3.2.X Use Case X: NICE CXone (native CCaaS integration, P0)</h3>
+
+<table class="overview-table">
+  <tr>
+    <th>Integration</th>
+    <td>NICE CXone</td>
+  </tr>
+  <tr>
+    <th>Outcome</th>
+    <td>Connect your Retell agents to NICE CXone so AI agents can receive and handle calls routed through NICE's contact center platform. Agents can be assigned to queues, handle inbound and outbound calls, and transfer to human agents with full context.</td>
+  </tr>
+  <tr>
+    <th>Configuration</th>
+    <td>SIP trunk setup (automated or guided), NICE CXone API credentials, queue/skill assignment, transfer routing rules</td>
+  </tr>
+  <tr>
+    <th>Supported Actions / Tools</th>
+    <td>Receive Inbound Call, Handle Outbound Dialer Call, Transfer to Human Agent (warm), Transfer to Human Agent (cold), Pass Call Context, Receive Call Metadata, Log Call Outcome, Report Agent Availability</td>
+  </tr>
+  <tr>
+    <th>Reference Links</th>
+    <td>
+      <a href="https://developer.niceincontact.com/">NICE CXone Developer Portal</a>,
+      <a href="https://help.nice-incontact.com/">NICE CXone SIP Documentation</a>,
+      <a href="https://developer.niceincontact.com/API">NICE CXone API Reference</a>
+    </td>
+  </tr>
+</table>
+
+<h4>Key Requirements</h4>
+
+<table class="req-table">
+  <thead>
+    <tr>
+      <th>Requirement</th>
+      <th>Description</th>
+      <th>Customer Signal</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SIP connectivity</td>
+      <td>The integration should handle SIP trunk setup between NICE CXone and Retell automatically or through a guided flow, so customers do not need to manually configure dialers, SIP URIs, or trunk credentials. This is the primary pain point today and the main reason customers need specialized hand holding from the solutions team.</td>
+      <td>Morgan & Morgan (Bing Wu, Nov 2025); Mike Derlatka flagged setup complexity</td>
+      <td><span class="status">Not started</span></td>
+    </tr>
+    <tr>
+      <td>Call routing</td>
+      <td>NICE should be able to route inbound or outbound calls to a Retell AI agent the same way it routes calls to a human agent. The Retell agent should appear as an available endpoint in NICE's routing and queue configuration.</td>
+      <td>Morgan & Morgan ("directly dial in")</td>
+      <td><span class="status">Not started</span></td>
+    </tr>
+    <tr>
+      <td>Warm and cold transfer</td>
+      <td>The integration should allow seamless handoff in both directions. A Retell AI agent should be able to transfer a caller to a human agent in NICE with full context, and a human agent in NICE should be able to transfer to a Retell AI agent.</td>
+      <td></td>
+      <td><span class="status">Not started</span></td>
+    </tr>
+    <tr>
+      <td>Call context and metadata</td>
+      <td>When a call is routed from NICE to Retell, relevant context should come with it, such as caller ID, account number, queue name, or IVR selections. When Retell transfers back, conversation summary, intent, and collected data should be passed along so the human agent has full context.</td>
+      <td></td>
+      <td><span class="status">Not started</span></td>
+    </tr>
+    <tr>
+      <td>Outbound dialer integration</td>
+      <td>Enterprise customers running outbound campaigns through NICE's dialer should be able to have Retell AI agents handle those calls alongside human agents through NICE's campaign management.</td>
+      <td></td>
+      <td><span class="status">Not started</span></td>
+    </tr>
+    <tr>
+      <td>Reporting and analytics</td>
+      <td>Calls handled by Retell AI agents should be visible in NICE's reporting so enterprises have a unified view of call volume, handle time, and outcomes across both human and AI agents for capacity planning and compliance.</td>
+      <td></td>
+      <td><span class="status">Not started</span></td>
+    </tr>
+    <tr>
+      <td>Concurrent call scaling</td>
+      <td>Enterprise contact centers may route hundreds of simultaneous calls to Retell. The integration should support the concurrency levels that NICE customers expect without requiring per call setup or manual scaling.</td>
+      <td></td>
+      <td><span class="status">Not started</span></td>
+    </tr>
+    <tr>
+      <td>Failure visibility</td>
+      <td>If a call fails to route, drops during transfer, or the Retell agent is unavailable, customers need clear feedback in both the NICE and Retell dashboards. Silent failures in a live contact center are not acceptable.</td>
+      <td></td>
+      <td><span class="status">Not started</span></td>
+    </tr>
+    <tr>
+      <td>Security and compliance</td>
+      <td>Enterprise customers on NICE have specific requirements around call recording, data residency, and access controls. The integration should not introduce compliance gaps or require customers to change their existing NICE security configuration.</td>
+      <td></td>
+      <td><span class="status">Not started</span></td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>

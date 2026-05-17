@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Connect Slack (Data tab)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 280px; background: #F5F7FA; display: flex; flex-direction: column; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+  .footer { padding: 16px 14px; }
+  .main { flex: 1; background: #fff; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(6px); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .connect-modal { background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 560px; display: flex; flex-direction: column; overflow: hidden; }
+  .cm-header { display: flex; align-items: center; gap: 12px; padding: 24px 24px 0; }
+  .cm-logo { width: 32px; height: 32px; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .cm-logo img { width: 32px; height: 32px; }
+  .cm-name { font-size: 18px; font-weight: 600; color: #0E121B; }
+  .cm-close { margin-left: auto; width: 32px; height: 32px; border: none; background: none; cursor: pointer; color: #6B7280; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+  .cm-tabs { display: flex; padding: 16px 24px 0; border-bottom: 1px solid #E1E4EA; }
+  .cm-tab { padding: 8px 16px 12px; font-size: 14px; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .cm-tab.active { color: #0E121B; font-weight: 500; border-bottom-color: #0E121B; }
+  .cm-body { padding: 20px 24px; max-height: 540px; overflow-y: auto; }
+
+  .section-title { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 4px; }
+  .section-sub { font-size: 12px; color: #6B7280; margin-bottom: 12px; line-height: 1.5; }
+  .section-block { margin-bottom: 22px; }
+  .section-block:last-child { margin-bottom: 0; }
+
+  /* Event → channel mapping rows */
+  .map-row { display: grid; grid-template-columns: 1fr 240px; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid #E1E4EA; border-radius: 8px; margin-bottom: 6px; }
+  .map-row:last-child { margin-bottom: 0; }
+  .map-row .event { display: flex; align-items: center; gap: 10px; }
+  .map-row .event-icon { width: 28px; height: 28px; border-radius: 6px; background: #F5F7FA; display: flex; align-items: center; justify-content: center; color: #3d64d7; flex-shrink: 0; }
+  .map-row .event-icon.warn { color: #B45309; background: #FEF3C7; }
+  .map-row .event-icon.err { color: #B91C1C; background: #FEE2E2; }
+  .map-row .event-name { font-size: 13px; font-weight: 500; color: #0E121B; }
+  .map-row .event-desc { font-size: 12px; color: #6B7280; margin-top: 1px; }
+
+  .channel-select { height: 34px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 6px; background: #fff; font-size: 13px; color: #0E121B; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .channel-select .hash { color: #99A0AE; font-weight: 500; }
+  .channel-select .chev { margin-left: auto; color: #99A0AE; }
+  .channel-select.empty { color: #99A0AE; }
+
+  /* Field toggles */
+  .field-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #F3F4F6; }
+  .field-row:last-child { border-bottom: none; }
+  .field-meta { flex: 1; padding-right: 12px; }
+  .field-name { font-size: 13px; font-weight: 500; color: #0E121B; display: flex; align-items: center; gap: 6px; }
+  .field-name code { font-family: 'SF Mono', Menlo, monospace; font-size: 11px; background: #F9FAFB; padding: 1px 5px; border-radius: 3px; border: 1px solid #E1E4EA; color: #4A154B; font-weight: 400; }
+  .field-desc { font-size: 12px; color: #6B7280; margin-top: 2px; line-height: 1.5; }
+  .field-locked { font-size: 11px; color: #99A0AE; padding: 2px 6px; background: #F9FAFB; border-radius: 4px; border: 1px solid #E1E4EA; }
+
+  /* Toggle switch */
+  .toggle { position: relative; width: 32px; height: 18px; background: #E1E4EA; border-radius: 999px; cursor: pointer; transition: background 0.15s; flex-shrink: 0; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: transform 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+  .toggle.on { background: #3d64d7; }
+  .toggle.on::after { transform: translateX(14px); }
+
+  .retention { margin-top: 14px; padding: 10px 12px; background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 12px; color: #525866; line-height: 1.5; }
+  .retention strong { color: #0E121B; }
+
+  .cm-footer { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px 20px; border-top: 1px solid #E1E4EA; }
+  .btn-back { height: 36px; padding: 0 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 500; color: #525866; cursor: pointer; }
+  .btn-connect { height: 36px; padding: 0 20px; border: none; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item current">Integrations</li><li class="nav-item">Billing</li><li class="nav-item">Settings</li></ul></div>
+  </div>
+  <div class="footer"></div>
+</aside>
+
+<main class="main"></main>
+
+<div class="modal-overlay">
+  <div class="connect-modal">
+    <div class="cm-header">
+      <div class="cm-logo"><img src="https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_256.png"></div>
+      <span class="cm-name">Slack</span>
+      <button class="cm-close">✕</button>
+    </div>
+
+    <div class="cm-tabs">
+      <div class="cm-tab">Configure</div>
+      <div class="cm-tab active">Data</div>
+      <div class="cm-tab">Tools</div>
+      <div class="cm-tab">About</div>
+    </div>
+
+    <div class="cm-body">
+
+      <!-- Info banner -->
+      <div style="display:flex;gap:10px;padding:10px 12px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;margin-bottom:20px;font-size:13px;color:#1E40AF;line-height:1.5;">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px;"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v5M8 5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Channel routing is configured per agent in the Agent Builder. Once connected, any agent can send messages to the channel of their choice.
+      </div>
+
+      <!-- Written to Slack -->
+      <div style="border:1px solid #E1E4EA;border-radius:8px;overflow:hidden;margin-bottom:14px;">
+        <div style="background:#F5F7FA;padding:8px 12px;font-size:11px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;">Written to Slack</div>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr style="border-top:1px solid #E1E4EA;">
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#0E121B;width:150px;white-space:nowrap;vertical-align:top;">Contact</td>
+            <td style="padding:10px 12px;font-size:13px;color:#6B7280;line-height:1.5;">Caller name and phone number — referenced in template</td>
+          </tr>
+          <tr style="border-top:1px solid #E1E4EA;">
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#0E121B;vertical-align:top;">Transcript link</td>
+            <td style="padding:10px 12px;font-size:13px;color:#6B7280;line-height:1.5;">Signed URL to full transcript in Retell</td>
+          </tr>
+          <tr style="border-top:1px solid #E1E4EA;">
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#0E121B;vertical-align:top;">Agent metadata</td>
+            <td style="padding:10px 12px;font-size:13px;color:#6B7280;line-height:1.5;">Agent name, workspace, call duration, cost</td>
+          </tr>
+          <tr style="border-top:1px solid #E1E4EA;">
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#0E121B;vertical-align:top;">Custom fields</td>
+            <td style="padding:10px 12px;font-size:13px;color:#6B7280;line-height:1.5;">Any variables you reference in the message template</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Read from Slack -->
+      <div style="border:1px solid #E1E4EA;border-radius:8px;overflow:hidden;margin-bottom:14px;">
+        <div style="background:#F5F7FA;padding:8px 12px;font-size:11px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;">Read from Slack</div>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr style="border-top:1px solid #E1E4EA;">
+            <td style="padding:10px 12px;width:150px;vertical-align:top;"><code style="font-family:'SF Mono',Menlo,monospace;font-size:11px;background:#F9FAFB;padding:2px 6px;border-radius:3px;border:1px solid #E1E4EA;color:#4A154B;">channels</code></td>
+            <td style="padding:10px 12px;font-size:13px;color:#6B7280;line-height:1.5;">Public and private channel list for the channel picker</td>
+          </tr>
+          <tr style="border-top:1px solid #E1E4EA;">
+            <td style="padding:10px 12px;vertical-align:top;"><code style="font-family:'SF Mono',Menlo,monospace;font-size:11px;background:#F9FAFB;padding:2px 6px;border-radius:3px;border:1px solid #E1E4EA;color:#4A154B;">users</code></td>
+            <td style="padding:10px 12px;font-size:13px;color:#6B7280;line-height:1.5;">Workspace member directory for resolving @mentions</td>
+          </tr>
+          <tr style="border-top:1px solid #E1E4EA;">
+            <td style="padding:10px 12px;vertical-align:top;"><code style="font-family:'SF Mono',Menlo,monospace;font-size:11px;background:#F9FAFB;padding:2px 6px;border-radius:3px;border:1px solid #E1E4EA;color:#4A154B;">workspace.meta</code></td>
+            <td style="padding:10px 12px;font-size:13px;color:#6B7280;line-height:1.5;">Workspace name and team ID for display</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="retention">
+        <strong>Retention.</strong> Retell does not store messages posted to Slack. Channel and user lists are cached for 15 minutes to populate pickers. Revoking access deletes the cache immediately.
+      </div>
+
+    </div>
+
+    <div class="cm-footer">
+      <button class="btn-back">Back</button>
+      <button class="btn-connect">Save</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

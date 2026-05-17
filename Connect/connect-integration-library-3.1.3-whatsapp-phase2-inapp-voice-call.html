@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — WhatsApp In-App Voice Call (Phase 2)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 240px; background: #F5F7FA; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .nav-scroll { padding: 4px 0; flex: 1; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { padding: 8px; height: 36px; font-size: 14px; color: #525866; border-radius: 6px; display: flex; align-items: center; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+
+  .main { flex: 1; overflow: auto; background: #fff; padding: 32px 32px 48px; }
+  .page-content { max-width: 1200px; margin: 0 auto; }
+  .breadcrumb { font-size: 13px; color: #6B7280; margin-bottom: 12px; }
+  .breadcrumb a { color: #3d64d7; text-decoration: none; }
+
+  .phase-banner { background: linear-gradient(90deg, #F3E8FF 0%, #DBEAFE 100%); border: 1px solid #D8B4FE; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+  .phase-banner .icon { width: 36px; height: 36px; background: #6B21A8; color: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+  .pb-title { font-weight: 600; font-size: 14px; color: #4C1D95; }
+  .pb-sub { font-size: 12px; color: #6B21A8; line-height: 1.4; }
+
+  .page-title { font-size: 24px; font-weight: 600; margin-bottom: 6px; }
+  .page-desc { font-size: 13px; color: #6B7280; margin-bottom: 28px; max-width: 720px; line-height: 1.55; }
+
+  .flow-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 32px; }
+  .flow-col h3 { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #0E121B; display: flex; align-items: center; gap: 8px; }
+  .flow-col h3 .tag { background: #F3F4F6; color: #525866; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+
+  /* Phone mockup */
+  .phone-frame { width: 320px; height: 620px; background: #0E121B; border-radius: 40px; padding: 12px; margin: 0 auto 16px; box-shadow: 0 20px 40px -8px rgba(0,0,0,0.3); }
+  .phone-screen { width: 100%; height: 100%; background: #000; border-radius: 32px; overflow: hidden; position: relative; }
+  .phone-notch { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 80px; height: 20px; background: #0E121B; border-radius: 12px; z-index: 10; }
+
+  .wa-call-ui { height: 100%; background: linear-gradient(180deg, #075E54 0%, #128C7E 100%); color: #fff; padding: 40px 20px 24px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .wa-label { font-size: 11px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .wa-avatar { width: 110px; height: 110px; border-radius: 50%; background: #25D366; color: #fff; font-weight: 700; font-size: 38px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; border: 3px solid rgba(255,255,255,0.2); overflow: hidden; }
+  .wa-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .wa-name { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+  .wa-verified { font-size: 12px; color: #A7F3D0; display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+  .wa-status { font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 4px; }
+  .wa-e2e { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 8px; display: flex; align-items: center; gap: 4px; justify-content: center; }
+
+  .wa-spacer { flex: 1; }
+
+  .wa-actions { display: flex; justify-content: space-around; width: 100%; margin-bottom: 18px; }
+  .wa-action { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; color: rgba(255,255,255,0.9); }
+  .wa-action-btn { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .wa-action-btn.end { background: #E94A3F; width: 62px; height: 62px; }
+
+  /* Retell dashboard voice card */
+  .retell-card { background: #0E121B; color: #fff; border-radius: 16px; padding: 20px; max-width: 400px; margin: 0 auto; }
+  .rc-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .rc-logo { width: 32px; height: 32px; background: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+  .rc-meta { font-size: 11px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.05em; }
+  .rc-pill { margin-left: auto; padding: 3px 10px; background: rgba(139,92,246,0.25); color: #C4B5FD; border-radius: 999px; font-size: 10px; font-weight: 600; }
+  .rc-avatar { width: 80px; height: 80px; border-radius: 50%; background: #25D366; color: #fff; font-weight: 700; font-size: 28px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; border: 3px solid rgba(255,255,255,0.1); }
+  .rc-name { font-size: 18px; font-weight: 600; text-align: center; }
+  .rc-sub { font-size: 12px; color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 16px; }
+  .rc-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .rc-stat { padding: 10px; background: rgba(255,255,255,0.06); border-radius: 8px; }
+  .rc-stat-label { font-size: 10px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 2px; }
+  .rc-stat-value { font-size: 14px; font-weight: 600; }
+  .rc-controls { display: flex; gap: 8px; }
+  .rc-btn { flex: 1; height: 36px; background: rgba(255,255,255,0.1); color: #fff; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .rc-btn.end { background: #E94A3F; }
+
+  /* Comparison table */
+  .comparison { background: #fff; border: 1px solid #E1E4EA; border-radius: 12px; overflow: hidden; }
+  .comp-head { display: grid; grid-template-columns: 1.5fr 1fr 1fr; padding: 14px 20px; background: #F9FAFB; border-bottom: 1px solid #E1E4EA; font-size: 11px; font-weight: 600; color: #525866; text-transform: uppercase; letter-spacing: 0.03em; }
+  .comp-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr; padding: 14px 20px; border-bottom: 1px solid #F3F4F6; font-size: 13px; }
+  .comp-row:last-child { border-bottom: none; }
+  .comp-row .dim { color: #0E121B; font-weight: 500; }
+  .comp-row .cell { color: #525866; display: flex; align-items: center; gap: 6px; }
+  .comp-row .cell .check { color: #17B26A; font-weight: 700; }
+  .comp-row .cell .cross { color: #EF4444; font-weight: 700; }
+
+  .section { margin-bottom: 36px; }
+  .section-h { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo"><svg width="73" height="20" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg></div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item current">Call History</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item">Integrations</li></ul></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-content">
+    <div class="breadcrumb"><a href="connect-integration-library-3.1.3-whatsapp-app-page.html">← WhatsApp integration</a> / In-app voice calling</div>
+
+    <div class="phase-banner">
+      <div class="icon">P2</div>
+      <div style="flex:1;">
+        <div class="pb-title">Phase 2 · WhatsApp In-App Voice Calling</div>
+        <div class="pb-sub">Calls ring inside the WhatsApp app over data, not on the user's PSTN dialer. Uses Meta's Business Calling API (Opus-over-RTP). For WhatsApp-native markets where unknown PSTN numbers get ignored.</div>
+      </div>
+      <button style="padding:8px 14px;background:#6B21A8;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Enable Phase 2 beta</button>
+    </div>
+
+    <h1 class="page-title">What a WhatsApp voice call looks like</h1>
+    <p class="page-desc">Two perspectives — what the end user sees (left) and what Retell shows the operator (right). Same agent config as WhatsApp text and PSTN voice. No phone number dialed, caller ID is the verified WhatsApp profile.</p>
+
+    <div class="flow-cols">
+      <div class="flow-col">
+        <h3>End user's phone <span class="tag">WhatsApp app</span></h3>
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="wa-call-ui">
+              <div class="wa-label">WhatsApp Call</div>
+              <div class="wa-avatar">CD</div>
+              <div class="wa-name">Cream Digital Clinics</div>
+              <div class="wa-verified">✓ Verified Business</div>
+              <div class="wa-status">Ringing…</div>
+              <div class="wa-e2e">🔒 End-to-end encrypted</div>
+              <div class="wa-spacer"></div>
+              <div class="wa-actions">
+                <div class="wa-action">
+                  <div class="wa-action-btn">💬</div>
+                  <span>Message</span>
+                </div>
+                <div class="wa-action">
+                  <div class="wa-action-btn end">📞</div>
+                  <span>Decline</span>
+                </div>
+                <div class="wa-action">
+                  <div class="wa-action-btn" style="background:#25D366;">📞</div>
+                  <span>Accept</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:12px;color:#6B7280;text-align:center;line-height:1.5;">Maria taps Accept inside WhatsApp. No phone minutes used. Brand name and verified badge shown — higher pickup rate than an unknown PSTN number.</p>
+      </div>
+
+      <div class="flow-col">
+        <h3>Retell operator view <span class="tag">Call detail</span></h3>
+        <div class="retell-card">
+          <div class="rc-header">
+            <div class="rc-logo"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" fill="#0E121B"/></svg></div>
+            <div>
+              <div style="font-size:14px;font-weight:600;">Live call</div>
+              <div class="rc-meta">WhatsApp voice · Inbound</div>
+            </div>
+            <span class="rc-pill">Phase 2</span>
+          </div>
+          <div class="rc-avatar">MS</div>
+          <div class="rc-name">Maria Santos</div>
+          <div class="rc-sub">WhatsApp ID · +55 11 98732-4411 (verified)</div>
+          <div class="rc-stats">
+            <div class="rc-stat"><div class="rc-stat-label">Media path</div><div class="rc-stat-value">Opus 48kHz</div></div>
+            <div class="rc-stat"><div class="rc-stat-label">Duration</div><div class="rc-stat-value">0:14</div></div>
+            <div class="rc-stat"><div class="rc-stat-label">Agent</div><div class="rc-stat-value">Clinic Front Desk</div></div>
+            <div class="rc-stat"><div class="rc-stat-label">Conversation</div><div class="rc-stat-value">conv_e8a…22f</div></div>
+          </div>
+          <div class="rc-controls">
+            <button class="rc-btn">Warm transfer</button>
+            <button class="rc-btn">Listen</button>
+            <button class="rc-btn end">End</button>
+          </div>
+        </div>
+        <p style="font-size:12px;color:#6B7280;text-align:center;line-height:1.5;margin-top:16px;">Same conversation record as Maria's earlier WhatsApp thread. Agent opens with full context, no reintroduction needed.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-h">What's different from PSTN</div>
+      <div class="comparison">
+        <div class="comp-head">
+          <div>Dimension</div>
+          <div>PSTN voice (Phase 1)</div>
+          <div style="color:#6B21A8;">WhatsApp in-app voice (Phase 2)</div>
+        </div>
+        <div class="comp-row">
+          <div class="dim">Identity shown to callee</div>
+          <div class="cell">Unknown phone number</div>
+          <div class="cell" style="color:#6B21A8;"><span class="check">✓</span> Verified WhatsApp brand profile</div>
+        </div>
+        <div class="comp-row">
+          <div class="dim">Media path</div>
+          <div class="cell">SIP / Retell carrier</div>
+          <div class="cell">Meta RTP · Opus 48kHz</div>
+        </div>
+        <div class="comp-row">
+          <div class="dim">Cost model</div>
+          <div class="cell">Per-minute PSTN + carrier fees</div>
+          <div class="cell">Meta conversation session pricing</div>
+        </div>
+        <div class="comp-row">
+          <div class="dim">Reach</div>
+          <div class="cell">Global (local number per market)</div>
+          <div class="cell" style="color:#6B21A8;"><span class="check">✓</span> Global, no local number pool</div>
+        </div>
+        <div class="comp-row">
+          <div class="dim">Outbound gating</div>
+          <div class="cell">None (cold dial allowed)</div>
+          <div class="cell">Meta session window + prior opt-in</div>
+        </div>
+        <div class="comp-row">
+          <div class="dim">Pickup rate (WhatsApp-native markets)</div>
+          <div class="cell" style="color:#EF4444;">Low — unknown caller</div>
+          <div class="cell" style="color:#17B26A;">Higher — verified brand</div>
+        </div>
+        <div class="comp-row">
+          <div class="dim">Transfer to PSTN rep</div>
+          <div class="cell"><span class="check">✓</span> Native</div>
+          <div class="cell">Forces user to switch apps</div>
+        </div>
+        <div class="comp-row">
+          <div class="dim">Agent config</div>
+          <div class="cell">Same prompt, tools, KB</div>
+          <div class="cell"><span class="check">✓</span> Same prompt, tools, KB</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-h">Outbound: agent dials the user inside WhatsApp</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div style="padding:16px;background:#fff;border:1px solid #E1E4EA;border-radius:10px;">
+          <div style="font-size:11px;color:#6B21A8;font-weight:600;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:6px;">Step 1</div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px;">Agent checks session window</div>
+          <div style="font-size:12px;color:#6B7280;line-height:1.45;">Before dialing, <code style="font-family:monospace;background:#F3F4F6;padding:1px 5px;border-radius:3px;">Check Session Window</code> verifies Meta's opt-in rules are satisfied.</div>
+        </div>
+        <div style="padding:16px;background:#fff;border:1px solid #E1E4EA;border-radius:10px;">
+          <div style="font-size:11px;color:#6B21A8;font-weight:600;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:6px;">Step 2</div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px;">Invoke Initiate WhatsApp Voice Call</div>
+          <div style="font-size:12px;color:#6B7280;line-height:1.45;">New tool alongside the PSTN equivalent. Agent prompt preloads from prior thread context.</div>
+        </div>
+        <div style="padding:16px;background:#fff;border:1px solid #E1E4EA;border-radius:10px;">
+          <div style="font-size:11px;color:#6B21A8;font-weight:600;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:6px;">Step 3</div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px;">User's WhatsApp rings</div>
+          <div style="font-size:12px;color:#6B7280;line-height:1.45;">"WhatsApp Call" shown with brand display name and verified badge. After call ends, follow-up message drops into the same WhatsApp thread automatically.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>

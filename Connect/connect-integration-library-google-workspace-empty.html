@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Integrations (Empty + Google Workspace)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+
+  .sidebar { width: 260px; min-width: 260px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 10px 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; height: 24px; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; color: #525866; cursor: pointer; border-radius: 6px; white-space: nowrap; position: relative; }
+  .nav-item:hover { background: rgba(0,0,0,0.03); }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #FFFFFF; }
+  .nav-item.new::after { content: ''; width: 6px; height: 6px; background: #3d64d7; border-radius: 50%; margin-left: 6px; }
+  .footer { padding: 16px 14px; }
+  .footer-card { display: flex; align-items: center; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; box-shadow: rgba(0,0,0,0.1) 0 1px 3px 0; width: 100%; }
+  .footer-card.pay { padding: 16px; height: 58px; margin-bottom: 8px; }
+  .footer-card.user { padding: 10px 10px 10px 12px; height: 40px; margin-bottom: 12px; gap: 8px; }
+  .footer-badge-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px 4px 4px; background: #ecf3ff; border-radius: 6px; font-size: 12px; font-weight: 500; color: #3d64d7; }
+  .footer-card .spacer { flex: 1; }
+  .footer-user .avatar { width: 20px; height: 20px; border-radius: 50%; overflow: hidden; }
+  .footer-user .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .footer-user .name { font-size: 14px; color: #525866; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .footer-links { display: flex; align-items: center; gap: 4px; }
+  .footer-link { padding: 8px 12px; font-size: 14px; color: #525866; height: 36px; text-decoration: none; }
+  .footer-divider { width: 1px; height: 12px; background: #D1D5DB; }
+
+  .main { flex: 1; overflow: auto; background: #fff; padding: 32px 40px 48px; }
+
+  .page-header { display: flex; align-items: center; margin-bottom: 20px; }
+  .page-title { font-size: 22px; font-weight: 600; color: #0A0A0A; }
+  .btn-primary { margin-left: auto; height: 36px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+
+  .search-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+  .search { flex: 1; position: relative; }
+  .search input { width: 100%; height: 36px; padding: 0 12px 0 36px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; outline: none; background: #fff; }
+  .search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9CA3AF; }
+  .sort-btn { height: 36px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #374151; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+
+  /* Configured table header */
+  .table-head { display: grid; grid-template-columns: 1fr 240px 200px; padding: 10px 12px; border-bottom: 1px solid #E5E7EB; font-size: 12px; color: #6B7280; font-weight: 500; }
+  .table-head .sorted { display: inline-flex; align-items: center; gap: 4px; color: #374151; }
+
+  /* Empty configured state */
+  .empty-configured { display: flex; flex-direction: column; align-items: center; padding: 56px 0 48px; color: #6B7280; }
+  .empty-icon { width: 48px; height: 48px; border: 1px solid #E5E7EB; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; color: #9CA3AF; }
+  .empty-title { font-size: 16px; font-weight: 600; color: #0A0A0A; margin-bottom: 4px; }
+  .empty-sub { font-size: 14px; color: #6B7280; }
+
+  /* Library section */
+  .lib-label { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 14px; }
+  .lib-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .lib-card { border: 1px solid #E5E7EB; border-radius: 12px; padding: 18px 20px; cursor: pointer; background: #fff; transition: all 0.15s; position: relative; }
+  .lib-card:hover { border-color: #CBD5E1; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+  .lib-card.featured { border: 1.5px solid #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.08); }
+  .lib-card .badge-new { position: absolute; top: 14px; right: 14px; font-size: 10px; font-weight: 600; color: #fff; background: #3d64d7; padding: 2px 7px; border-radius: 4px; }
+  .lib-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .lib-name { font-size: 15px; font-weight: 600; color: #0A0A0A; margin-bottom: 4px; }
+  .lib-desc { font-size: 13px; color: #6B7280; line-height: 1.4; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="64" height="18" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rle)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#0A0A0A"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73Z" fill="#0A0A0A"/><path d="M255.56 34.65C238.2 34.65 226.63 47.95 226.63 66.47C226.63 84.99 242.25 98.3 256.14 98.3C270.03 98.3 279.86 90.19 283.33 78.62H269.45C267.71 82.67 264.82 87.3 256.14 87.3C247.46 87.3 239.94 81.52 239.94 69.94H283.91C283.91 49.69 272.92 34.65 255.56 34.65Z" fill="#0A0A0A"/><path d="M344.09 34.65C326.73 34.65 315.16 47.95 315.16 66.47C315.16 85.15 330.78 98.3 344.67 98.3C358.56 98.3 368.39 90.19 371.87 78.62H357.98C356.24 82.67 353.35 87.3 344.67 87.3C335.99 87.3 328.47 81.52 328.47 69.94H372.44C372.44 49.69 361.45 34.65 344.09 34.65Z" fill="#0A0A0A"/><path d="M390.96 14.97H377.65V95.92H390.96V14.97Z" fill="#0A0A0A"/><path d="M413.53 14.97H400.22V95.92H413.53V14.97Z" fill="#0A0A0A"/><path d="M304.17 17.28L290.84 17.28L290.85 34.65H282.76V45H290.85V82.82C290.85 87.58 291.8 90.43 294.66 93.29C297.51 96.14 300.37 97.09 305.13 97.09H315.14V85.67H309.88C308.16 85.67 306.96 85.37 306.13 85.11C305.27 84.84 304.61 84.16 304.4 83.29C304.17 82.33 304.17 81.09 304.17 79.9V45H315.14V34.65H304.17V17.28Z" fill="#0A0A0A"/></g><defs><clipPath id="rle"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14 7L10 3L6 7M6 13L10 17L14 13" stroke="#99A0AE" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item current new">Integrations</li><li class="nav-item">Billing</li><li class="nav-item">Settings</li></ul></div>
+  </div>
+  <div class="footer">
+    <div class="footer-card pay"><div class="footer-badge-pill">Pay As You Go</div><span class="spacer"></span></div>
+    <div class="footer-card user footer-user"><div class="avatar"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c"></div><span class="name">brandon@retellai.com</span></div>
+    <div class="footer-links"><a class="footer-link">Help</a><div class="footer-divider"></div><a class="footer-link">Updates</a></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <h1 class="page-title">Integrations</h1>
+    <button class="btn-primary"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Add integration</button>
+  </div>
+
+  <div class="search-bar">
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <input placeholder="Search integrations...">
+    </div>
+    <button class="sort-btn">Recent <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+  </div>
+
+  <div class="table-head">
+    <span>Name</span>
+    <span>Created by</span>
+    <span class="sorted">Date created <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M5 10l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+  </div>
+
+  <div class="empty-configured">
+    <div class="empty-icon"><svg width="22" height="22" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2"/></svg></div>
+    <div class="empty-title">No integrations configured</div>
+    <div class="empty-sub">Create a new custom MCP server or browse our library of integrations below.</div>
+  </div>
+
+  <div class="lib-label">Browse integrations</div>
+  <div class="lib-grid">
+    <div class="lib-card">
+      <div class="lib-icon"><img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=64" width="32" height="32"></div>
+      <div class="lib-name">Salesforce</div>
+      <div class="lib-desc">CRM and customer success platform</div>
+    </div>
+    <div class="lib-card">
+      <div class="lib-icon"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=64" width="32" height="32"></div>
+      <div class="lib-name">HubSpot</div>
+      <div class="lib-desc">Marketing, sales, and service platform</div>
+    </div>
+    <div class="lib-card">
+      <div class="lib-icon"><img src="https://www.google.com/s2/favicons?domain=gohighlevel.com&sz=64" width="32" height="32"></div>
+      <div class="lib-name">GoHighLevel</div>
+      <div class="lib-desc">CRM and marketing automation for agencies</div>
+    </div>
+    <div class="lib-card">
+      <div class="lib-icon"><img src="https://www.google.com/s2/favicons?domain=cal.com&sz=64" width="32" height="32"></div>
+      <div class="lib-name">Cal.com</div>
+      <div class="lib-desc">Open-source scheduling and calendar platform</div>
+    </div>
+    <div class="lib-card">
+      <div class="lib-icon"><img src="https://www.google.com/s2/favicons?domain=zendesk.com&sz=64" width="32" height="32"></div>
+      <div class="lib-name">Zendesk</div>
+      <div class="lib-desc">Customer support platform</div>
+    </div>
+
+    <!-- Google Workspace — featured + new -->
+    <div class="lib-card featured" onclick="window.location='connect-integration-library-google-workspace-connect.html'">
+      <span class="badge-new">New</span>
+      <div class="lib-icon" style="background:#fff;">
+        <svg width="32" height="32" viewBox="0 0 87 78" fill="none"><path d="M6.6 66.85L10.45 73.5C11.25 74.9 12.4 76 13.75 76.8L27.5 53H0C0 54.55 0.4 56.1 1.2 57.5L6.6 66.85Z" fill="#0066DA"/><path d="M43.65 25L29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L1.2 48.5C0.414 49.87 0.0003 51.4 0 52.95H27.5L43.65 25Z" fill="#00AC47"/><path d="M73.55 76.8C74.9 76 76.05 74.9 76.85 73.5L78.45 70.75L86.1 57.5C86.9 56.1 87.3 54.55 87.3 53H59.8L65.65 64.5L73.55 76.8Z" fill="#EA4335"/><path d="M43.65 25L57.4 1.2C56.05 0.4 54.5 0 52.9 0H34.4C32.8 0 31.25 0.45 29.9 1.2L43.65 25Z" fill="#00832D"/><path d="M59.8 53H27.5L13.75 76.8C15.1 77.6 16.65 78 18.25 78H69.05C70.65 78 72.2 77.55 73.55 76.8L59.8 53Z" fill="#2684FC"/><path d="M73.4 26.5L60.7 4.5C59.9 3.1 58.75 2 57.4 1.2L43.65 25L59.8 53H87.25C87.25 51.45 86.85 49.9 86.05 48.5L73.4 26.5Z" fill="#FFBA00"/></svg>
+      </div>
+      <div class="lib-name">Google Workspace</div>
+      <div class="lib-desc">Sync Drive folders, Docs, and Sheets into your Knowledge Base. Includes Drive tools for mid-call file fetch.</div>
+    </div>
+
+    <div class="lib-card">
+      <div class="lib-icon"><img src="https://www.google.com/s2/favicons?domain=slack.com&sz=64" width="32" height="32"></div>
+      <div class="lib-name">Slack</div>
+      <div class="lib-desc">Team communication and notifications</div>
+    </div>
+    <div class="lib-card">
+      <div class="lib-icon" style="background:#1A4DA8;color:#fff;font-size:11px;font-weight:700;">F9</div>
+      <div class="lib-name">Five9</div>
+      <div class="lib-desc">Contact center as a service</div>
+    </div>
+    <div class="lib-card">
+      <div class="lib-icon"><img src="https://www.google.com/s2/favicons?domain=nice.com&sz=64" width="32" height="32"></div>
+      <div class="lib-name">NICE CXone</div>
+      <div class="lib-desc">Cloud contact center platform</div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

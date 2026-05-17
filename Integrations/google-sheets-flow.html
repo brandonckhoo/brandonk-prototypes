@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Google Workspace Integration Flow</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: #fff; color: #0A0A0A; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 48px; }
+  .page { display: flex; gap: 56px; align-items: flex-start; max-width: 1700px; }
+  .diagram-col { flex: 0 0 auto; width: 1060px; position: relative; }
+  .steps-col { flex: 1; min-width: 400px; max-width: 520px; padding-top: 12px; }
+  .steps-title { font-size: 15px; font-weight: 700; color: #0E121B; margin-bottom: 24px; }
+  .step { display: flex; gap: 14px; margin-bottom: 24px; align-items: flex-start; }
+  .step-num { flex: 0 0 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; background: #6B7280; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.55; color: #374151; }
+  .step-text strong { color: #0E121B; font-weight: 600; }
+  .step-text .highlight { color: #0F9D58; font-weight: 600; }
+  .caption { font-size: 13px; color: #6B7280; text-align: center; margin-top: 20px; line-height: 1.5; }
+  .customer-emoji { position: absolute; top: 38px; left: 88px; font-size: 32px; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="page">
+<div class="diagram-col">
+<div class="customer-emoji">🗣️</div>
+<svg viewBox="0 0 1060 680" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Actor 1: Customer -->
+  <rect x="50" y="30" width="120" height="100" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="110" y="102" text-anchor="middle" font-size="10" fill="#64748B">Caller</text>
+  <text x="110" y="150" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Customer</text>
+
+  <!-- Actor 2: Retell AI -->
+  <rect x="380" y="30" width="170" height="100" rx="12" fill="#0E121B"/>
+  <image href="/Users/brandonkhoo/Documents/Retell AI/Logo.png" x="415" y="60" width="91" height="35" style="filter: brightness(0) invert(1);"/>
+  <text x="465" y="150" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Retell AI</text>
+  <text x="465" y="166" text-anchor="middle" font-size="11" fill="#94A3B8">Voice Agent + Knowledge Base</text>
+
+  <!-- Actor 3: Google Workspace (with 3 sub-sources) -->
+  <rect x="780" y="30" width="230" height="100" rx="12" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
+
+  <!-- Sheets icon -->
+  <rect x="802" y="50" width="28" height="36" rx="3" fill="#0F9D58"/>
+  <rect x="806" y="60" width="20" height="2" fill="#fff"/>
+  <rect x="806" y="66" width="20" height="2" fill="#fff"/>
+  <rect x="806" y="72" width="20" height="2" fill="#fff"/>
+  <line x1="812" y1="58" x2="812" y2="76" stroke="#0F9D58" stroke-width="1.5"/>
+  <line x1="820" y1="58" x2="820" y2="76" stroke="#0F9D58" stroke-width="1.5"/>
+  <text x="816" y="100" text-anchor="middle" font-size="10" font-weight="600" fill="#0F9D58">Sheets</text>
+
+  <!-- Docs icon -->
+  <rect x="881" y="50" width="28" height="36" rx="3" fill="#4285F4"/>
+  <rect x="885" y="58" width="20" height="2" fill="#fff"/>
+  <rect x="885" y="64" width="20" height="2" fill="#fff"/>
+  <rect x="885" y="70" width="20" height="2" fill="#fff"/>
+  <rect x="885" y="76" width="15" height="2" fill="#fff"/>
+  <text x="895" y="100" text-anchor="middle" font-size="10" font-weight="600" fill="#4285F4">Docs</text>
+
+  <!-- Drive icon (triangle) -->
+  <polygon points="960,86 946,62 970,62" fill="#FFC107"/>
+  <polygon points="960,86 974,62 988,86" fill="#1FA463"/>
+  <polygon points="960,86 946,86 974,86 974,86" fill="#4285F4"/>
+  <polygon points="974,86 988,86 960,86" fill="#4285F4"/>
+  <polygon points="946,86 960,62 974,86" fill="#4285F4" opacity="0.01"/>
+  <text x="967" y="100" text-anchor="middle" font-size="10" font-weight="600" fill="#4285F4">Drive</text>
+
+  <text x="895" y="150" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Google Workspace</text>
+  <text x="895" y="166" text-anchor="middle" font-size="11" fill="#94A3B8">Knowledge Base Sources</text>
+
+  <!-- Lifelines -->
+  <line x1="110" y1="180" x2="110" y2="660" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="465" y1="180" x2="465" y2="660" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="895" y1="180" x2="895" y2="660" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- Single OAuth connection -->
+  <line x1="465" y1="212" x2="895" y2="212" stroke="#3d64d7" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="892,207 902,212 892,217" fill="#3d64d7"/>
+  <rect x="555" y="199" width="250" height="26" rx="5" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="680" y="217" text-anchor="middle" font-size="12" font-weight="500" fill="#3730A3">Single Google OAuth connection</text>
+
+  <!-- BACKGROUND SYNC from Workspace -->
+  <line x1="895" y1="252" x2="465" y2="252" stroke="#22C55E" stroke-width="2" stroke-dasharray="6,4"/>
+  <polygon points="475,247 465,252 475,257" fill="#22C55E"/>
+  <rect x="510" y="239" width="370" height="26" rx="5" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="695" y="257" text-anchor="middle" font-size="12" font-weight="500" fill="#166534">Sync Sheets, Docs, Drive every 30 min (configurable)</text>
+
+  <!-- Chunk + embed inside Retell -->
+  <rect x="315" y="289" width="300" height="28" rx="6" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="465" y="308" text-anchor="middle" font-size="12" font-weight="600" fill="#166534">Chunk + embed content into KB</text>
+  <text x="465" y="332" text-anchor="middle" font-size="10" fill="#65A167">rows (Sheets) · paragraphs (Docs) · pages (Drive)</text>
+
+  <!-- Step 1: Inbound call -->
+  <line x1="110" y1="370" x2="465" y2="370" stroke="#9CA3AF" stroke-width="1.5"/>
+  <polygon points="462,365 472,370 462,375" fill="#9CA3AF"/>
+  <rect x="190" y="356" width="190" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="285" y="374" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Customer asks a question</text>
+
+  <!-- Step 2: Semantic search -->
+  <rect x="315" y="405" width="300" height="28" rx="6" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="465" y="424" text-anchor="middle" font-size="12" font-weight="600" fill="#166534">Semantic search across all sources</text>
+
+  <!-- Step 3: AI agent answers -->
+  <rect x="315" y="455" width="300" height="28" rx="6" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="465" y="474" text-anchor="middle" font-size="12" font-weight="600" fill="#166534">Agent answers with Workspace content</text>
+
+  <!-- Step 4: Agent responds to caller -->
+  <line x1="465" y1="515" x2="110" y2="515" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="113,510 103,515 113,520" fill="#9CA3AF"/>
+  <rect x="140" y="501" width="300" height="26" rx="5" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="290" y="519" text-anchor="middle" font-size="12" font-weight="500" fill="#166534">"Yes, SKU 1234 is $49. In stock per the sheet."</text>
+
+  <!-- Manual refresh option -->
+  <line x1="465" y1="580" x2="895" y2="580" stroke="#3d64d7" stroke-width="2" stroke-dasharray="4,3"/>
+  <polygon points="892,575 902,580 892,585" fill="#3d64d7"/>
+  <rect x="540" y="566" width="280" height="26" rx="5" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="680" y="584" text-anchor="middle" font-size="12" font-weight="500" fill="#3730A3">Optional "Refresh now" (manual)</text>
+
+</svg>
+
+<div class="caption"><strong>Proposed flow diagram (strawman for engineering review).</strong><br>Single Google OAuth grants access to Sheets, Docs, and Drive. Retell syncs selected sources into its knowledge base on a scheduled interval,<br>then uses semantic search during live calls to retrieve Workspace content without per call API lookups.</div>
+</div>
+
+<!-- RIGHT: Step-by-step walkthrough -->
+<div class="steps-col">
+  <div class="steps-title">How it works</div>
+
+  <div class="step">
+    <div class="step-num">0</div>
+    <div class="step-text"><strong>Single Google OAuth connection.</strong> The customer connects their Google account once. That single OAuth grants Retell access to <span class="highlight">Sheets, Docs, and Drive</span> in the same flow. Customers pick which spreadsheets, docs, folders, or files to sync. Org level connection ownership.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text"><strong>Scheduled sync every 30 min (configurable).</strong> Retell syncs selected Workspace sources into its knowledge base on a scheduled interval (15, 30, or 60 min). Scheduled sync avoids API latency during live calls, stays within Google API rate limits, and reuses Retell's existing document KB infrastructure.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>Chunk and embed content into KB.</strong> Retell processes each source type appropriately: Sheets chunk by row, Docs chunk by paragraph or heading, Drive files (PDFs, Word docs) chunk by page or section. All content is embedded into the same KB index so the agent can retrieve across all three source types.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>Customer asks a question.</strong> During the call, the customer asks something that requires Workspace content, for example "how much does SKU 1234 cost" (Sheets), "what's our refund policy" (Docs SOP), or "is the service manual available" (Drive PDF).</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-text"><strong>Semantic search across all sources.</strong> Retell runs a semantic search across the entire KB and returns the most relevant chunk regardless of source type. This is a local lookup inside Retell's KB, no external Google API call, no added latency.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-text"><strong>Agent answers with Workspace content.</strong> The agent uses the retrieved chunk to respond naturally, citing the row, paragraph, or section that best answers the question. The caller experiences a single seamless answer without knowing which source it came from.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">6</div>
+    <div class="step-text"><strong>Manual refresh option.</strong> If a customer updates a Workspace source and wants the change reflected immediately, the integration settings page offers a "Refresh now" button that triggers an ad hoc sync for that source. Escape hatch for urgent updates without per call API overhead.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num" style="background: #22C55E;">→</div>
+    <div class="step-text"><strong>Phase 2+ consideration: live query mode.</strong> A future phase could add live Sheets API queries for customers whose data changes in real time (live inventory, dynamic pricing). Deferred because no current customer has validated this need; the 30 min sync covers the validated use cases in Phase 1.</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

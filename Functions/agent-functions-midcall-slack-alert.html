@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Agent Builder (Mid-call Slack alert)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  /* Top bar */
+  .top-bar-wrap { background: #fff; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .top-bar-row1 { display: flex; align-items: center; height: 44px; padding: 0 16px; gap: 10px; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; color: #525866; flex-shrink: 0; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; white-space: nowrap; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+  .top-tab { padding: 4px 12px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; border-radius: 6px; }
+  .top-tab.active { font-weight: 500; color: #0E121B; background: #F3F4F6; }
+  .top-actions { display: flex; gap: 8px; align-items: center; font-size: 12px; color: #99A0AE; }
+  .btn-publish { height: 32px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .top-bar-row2 { display: flex; align-items: center; height: 22px; padding: 0 16px 6px 50px; }
+  .agent-meta { font-size: 12px; color: #99A0AE; }
+
+  /* Model bar */
+  .model-bar { display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .mb-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; white-space: nowrap; }
+  .mb-pill:hover { background: #F3F4F6; }
+  .mb-pill .chevron { color: #99A0AE; margin-left: 2px; }
+  .mb-spacer { flex: 1; }
+  .mb-handbook { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; background: #fff; white-space: nowrap; flex-shrink: 0; }
+
+  /* Main layout */
+  .builder-layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* Left: prompt editor */
+  .prompt-panel { width: 46%; display: flex; flex-direction: column; border-right: 1px solid #E1E4EA; overflow: hidden; }
+  .prompt-area { flex: 1; padding: 16px; overflow-y: auto; }
+  .prompt-textarea { width: 100%; height: calc(100% - 8px); border: 1px solid #E1E4EA; border-radius: 8px; padding: 14px 16px; outline: none; font-size: 14px; color: #0A0A0A; line-height: 1.65; resize: none; font-family: inherit; }
+  .prompt-textarea:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.08); }
+  .welcome-section { padding: 12px 16px 20px; flex-shrink: 0; border-top: 1px solid #E1E4EA; }
+  .welcome-label { font-size: 14px; font-weight: 600; color: #0E121B; margin-bottom: 8px; }
+  .welcome-select { height: 38px; padding: 0 32px 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; color: #0A0A0A; background: #fff; width: 100%; appearance: none; outline: none; font-family: inherit; }
+
+  /* Right: settings panel */
+  .settings-panel { width: 30%; overflow-y: auto; background: #fff; border-right: 1px solid #E1E4EA; }
+
+  /* Collapsible sections */
+  .section { border-bottom: 1px solid #E1E4EA; }
+  .section-header { display: flex; align-items: center; gap: 8px; padding: 13px 16px; cursor: pointer; user-select: none; }
+  .section-header:hover { background: rgba(0,0,0,0.02); }
+  .section-icon { width: 18px; height: 18px; color: #525866; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .section-title { font-size: 14px; font-weight: 500; color: #0E121B; flex: 1; }
+  .section-badge { font-size: 11px; font-weight: 600; background: #DBEAFE; color: #1D4ED8; padding: 2px 7px; border-radius: 10px; margin-left: 4px; }
+  .section-chevron { color: #99A0AE; flex-shrink: 0; transition: transform 0.2s; }
+  .section-chevron.open { transform: rotate(180deg); }
+  .section-body { padding: 0 16px 16px; }
+  .section-desc { font-size: 13px; color: #6B7280; margin-bottom: 14px; line-height: 1.4; }
+
+  /* Toggle */
+  .toggle-switch { width: 34px; height: 18px; border-radius: 9px; position: relative; cursor: pointer; flex-shrink: 0; transition: background 0.2s; }
+  .toggle-switch.on { background: #3d64d7; }
+  .toggle-switch.off { background: #D1D5DB; }
+  .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: left 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+  .toggle-switch.on::after { left: 18px; }
+
+  /* Compact tool card (in settings panel) */
+  .tool-card { border: 1px solid #E1E4EA; border-radius: 10px; overflow: hidden; cursor: pointer; }
+  .tool-card:hover { border-color: #C4C9D4; }
+  .tool-card-header { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: #fff; }
+  .tool-app-logo { width: 28px; height: 28px; border-radius: 6px; background: #4A154B; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .tool-title-block { flex: 1; }
+  .tool-title { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .tool-subtitle { font-size: 12px; color: #6B7280; margin-top: 2px; }
+  .tool-fn-badge { font-size: 11px; font-weight: 500; background: #F3F4F6; color: #374151; padding: 1px 6px; border-radius: 4px; font-family: 'SF Mono', ui-monospace, monospace; margin-left: 6px; vertical-align: middle; }
+  .tool-config-hint { font-size: 12px; color: #99A0AE; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+
+  /* Add button */
+  .add-tool-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #3d64d7; cursor: pointer; background: none; border: none; padding: 6px 0; font-family: inherit; margin-top: 10px; }
+  .add-tool-btn:hover { color: #2d4fb3; }
+
+  /* Test panel */
+  .test-panel { width: 24%; border-left: 1px solid #E1E4EA; display: flex; flex-direction: column; background: #FAFAFA; }
+  .test-tabs { display: flex; width: 100%; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .test-tab { flex: 1; padding: 10px; text-align: center; font-size: 13px; font-weight: 400; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; }
+  .test-tab.active { font-weight: 500; color: #0E121B; border-bottom-color: #0E121B; }
+  .test-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px 20px; }
+  .run-test-btn { height: 36px; padding: 0 20px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 500; color: #0E121B; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; }
+
+  /* ===== MODAL ===== */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 24px; }
+  .modal-box { background: #fff; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.18); width: 720px; max-width: 100%; max-height: calc(100vh - 48px); display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Modal header */
+  .modal-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px 20px 16px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .modal-header-left { display: flex; align-items: center; gap: 12px; }
+  .modal-app-logo { width: 32px; height: 32px; border-radius: 8px; background: #4A154B; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .modal-title-block { display: flex; flex-direction: column; gap: 2px; }
+  .modal-title { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .modal-subtitle { font-size: 12px; color: #99A0AE; }
+  .modal-close { background: none; border: none; cursor: pointer; color: #99A0AE; padding: 2px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .modal-close:hover { background: #F3F4F6; color: #525866; }
+
+  /* Modal scrollable body */
+  .modal-body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; flex: 1; }
+
+  /* Enable row */
+  .enable-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 8px; }
+  .enable-row-label { font-size: 14px; font-weight: 500; color: #0E121B; }
+  .enable-row-sub { font-size: 12px; color: #6B7280; margin-top: 1px; }
+
+  /* Field label */
+  .field-label { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 6px; }
+  .field-hint { font-size: 12px; color: #6B7280; margin-top: 5px; line-height: 1.4; }
+  .field-hint code { font-family: 'SF Mono', ui-monospace, monospace; font-size: 11px; background: #F3F4F6; padding: 1px 4px; border-radius: 3px; }
+
+  /* Channel select */
+  .channel-select-row { display: flex; align-items: center; gap: 0; border: 1px solid #E1E4EA; border-radius: 8px; height: 36px; background: #fff; padding: 0 12px; cursor: pointer; }
+  .channel-select-row:hover { border-color: #C4C9D4; }
+  .channel-hash { color: #6B7280; font-weight: 600; font-size: 14px; margin-right: 4px; }
+  .channel-name { font-size: 14px; color: #0A0A0A; flex: 1; }
+  .channel-chevron { color: #99A0AE; }
+
+  /* Message textarea */
+  .msg-textarea { width: 100%; border: 1px solid #E1E4EA; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #0A0A0A; line-height: 1.65; resize: vertical; min-height: 96px; font-family: inherit; outline: none; }
+  .msg-textarea:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.08); }
+
+  /* Condition builder */
+  .condition-row { display: flex; align-items: stretch; border: 1px solid #E1E4EA; border-radius: 8px; overflow: hidden; }
+  .condition-part { display: flex; align-items: center; padding: 0 10px; height: 36px; font-size: 13px; background: #fff; }
+  .condition-part.field { font-family: 'SF Mono', ui-monospace, monospace; font-size: 12px; color: #0E121B; border-right: 1px solid #E1E4EA; flex: 1; min-width: 0; cursor: pointer; }
+  .condition-part.field:hover { background: #F9FAFB; }
+  .condition-part.op { color: #525866; border-right: 1px solid #E1E4EA; cursor: pointer; white-space: nowrap; }
+  .condition-part.op:hover { background: #F9FAFB; }
+  .condition-part.val { font-family: 'SF Mono', ui-monospace, monospace; font-size: 12px; color: #0E121B; flex: 1; min-width: 0; cursor: pointer; }
+  .condition-part.val:hover { background: #F9FAFB; }
+  .add-condition-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #3d64d7; cursor: pointer; margin-top: 6px; background: none; border: none; font-family: inherit; padding: 0; }
+  .add-condition-link:hover { color: #2d4fb3; }
+
+  /* Slack preview */
+  .preview-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: #9CA3AF; text-transform: uppercase; margin-bottom: 6px; }
+  .preview-channel-name { font-size: 12px; font-weight: 600; color: #0E121B; margin-bottom: 8px; display: flex; align-items: center; gap: 3px; }
+  .preview-channel-name .hash { color: #525866; font-weight: 400; }
+  .slack-preview { background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; padding: 12px 14px; }
+  .slack-msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .slack-avatar { width: 28px; height: 28px; background: #0E121B; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .slack-sender { font-size: 13px; font-weight: 700; color: #0E121B; }
+  .slack-app-badge { font-size: 10px; font-weight: 600; background: #E8EAF6; color: #3949AB; padding: 1px 4px; border-radius: 3px; margin-left: 2px; vertical-align: middle; }
+  .slack-time { font-size: 11px; color: #9CA3AF; margin-left: 6px; }
+  .slack-msg-text { font-size: 13px; color: #0E121B; margin-bottom: 6px; }
+  .slack-attachment { border-left: 4px solid #7B68EE; border-radius: 0 6px 6px 0; background: #fff; border-top: 1px solid #E1E4EA; border-right: 1px solid #E1E4EA; border-bottom: 1px solid #E1E4EA; padding: 10px 12px; }
+  .slack-att-title { font-size: 13px; font-weight: 700; color: #0E121B; margin-bottom: 4px; }
+  .slack-att-field { font-size: 12px; color: #525866; line-height: 1.5; }
+  .slack-att-field b { color: #0E121B; font-weight: 600; }
+  .slack-att-quote { font-size: 12px; color: #525866; background: #F9FAFB; border-left: 3px solid #E1E4EA; padding: 5px 8px; border-radius: 0 3px 3px 0; margin-top: 6px; font-style: italic; line-height: 1.5; }
+  .slack-open-btn { display: inline-block; margin-top: 8px; padding: 4px 10px; border: 1px solid #D1D5DB; border-radius: 4px; font-size: 12px; font-weight: 500; color: #374151; cursor: pointer; background: #fff; }
+
+  /* Store Fields as Variables */
+  .kv-pair-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .kv-input { flex: 1; height: 32px; border: 1px solid #E1E4EA; border-radius: 6px; padding: 0 10px; font-size: 13px; color: #0A0A0A; font-family: 'SF Mono', ui-monospace, monospace; outline: none; }
+  .kv-input:focus { border-color: #3d64d7; }
+  .kv-arrow { font-size: 14px; color: #99A0AE; flex-shrink: 0; }
+  .kv-delete { background: none; border: none; cursor: pointer; color: #99A0AE; display: flex; align-items: center; padding: 4px; border-radius: 4px; flex-shrink: 0; }
+  .kv-delete:hover { color: #525866; background: #F3F4F6; }
+  .kv-add-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: #0E121B; background: #fff; border: 1px solid #E1E4EA; border-radius: 20px; padding: 4px 12px; cursor: pointer; font-family: inherit; margin-top: 2px; }
+  .kv-add-btn:hover { background: #F9FAFB; }
+
+  /* Advanced Settings */
+  .adv-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: #F5F7FA; border-top: 1px solid #E1E4EA; border-bottom: 1px solid #E1E4EA; margin: 0 -20px; cursor: pointer; user-select: none; }
+  .adv-header:hover { background: #EFF1F5; }
+  .adv-header-label { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .adv-chevron { color: #99A0AE; transition: transform 0.2s; }
+  .adv-chevron.open { transform: rotate(180deg); }
+  .adv-body { background: #F9FAFB; margin: 0 -20px; padding: 16px 20px 20px; display: none; }
+  .adv-field { margin-bottom: 16px; }
+  .adv-field:last-child { margin-bottom: 0; }
+  .adv-field-label { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 6px; }
+  .adv-field-hint { font-size: 12px; color: #6B7280; margin-top: 4px; line-height: 1.4; }
+  .slider-row { display: flex; align-items: center; gap: 10px; }
+  .timeout-slider { flex: 1; height: 4px; border-radius: 2px; outline: none; appearance: none; cursor: pointer; background: linear-gradient(to right, #3d64d7 33%, #E1E4EA 33%); }
+  .timeout-slider::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #3d64d7; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(61,100,215,0.3); cursor: pointer; }
+  .slider-val { font-size: 13px; font-weight: 600; color: #0E121B; min-width: 28px; text-align: right; }
+  .radio-group { display: flex; flex-direction: column; gap: 8px; }
+  .radio-row { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; }
+  .radio-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #E1E4EA; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+  .radio-dot.selected { border-color: #3d64d7; }
+  .radio-dot.selected::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #3d64d7; }
+  .radio-text { font-size: 13px; color: #0E121B; }
+  .radio-sub { font-size: 12px; color: #6B7280; margin-top: 1px; }
+
+  /* Modal footer */
+  .modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid #E1E4EA; flex-shrink: 0; background: #fff; }
+  .btn-cancel { height: 34px; padding: 0 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 500; color: #0E121B; cursor: pointer; font-family: inherit; }
+  .btn-cancel:hover { background: #F9FAFB; }
+  .btn-save { height: 34px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .btn-save:hover { background: #1a1f2e; }
+
+  /* Divider */
+  .modal-divider { height: 1px; background: #E1E4EA; margin: 0 -20px; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar-wrap">
+  <div class="top-bar-row1">
+    <div class="home-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+    <span class="agent-name">Enterprise Inbound Agent</span>
+    <span class="top-spacer"></span>
+    <div class="top-tabs">
+      <span class="top-tab active">Create</span>
+      <span class="top-tab">Simulation</span>
+    </div>
+    <div class="top-actions">
+      <span>Auto saved at 2:41 PM</span>
+      <button class="btn-publish">Publish</button>
+    </div>
+  </div>
+  <div class="top-bar-row2">
+    <span class="agent-meta">Single Prompt &middot; Version 13</span>
+  </div>
+</div>
+
+<!-- Builder layout -->
+<div class="builder-layout">
+
+  <!-- Prompt panel (left) -->
+  <div class="prompt-panel">
+    <div class="model-bar">
+      <span class="mb-pill">GPT-4.1 <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span style="color:#D1D5DB;font-size:14px;">|</span>
+      <span class="mb-pill">Aria <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span style="color:#D1D5DB;font-size:14px;">|</span>
+      <span class="mb-pill">&#x1F1FA;&#x1F1F8; English <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="mb-spacer"></span>
+      <span class="mb-handbook"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="#525866" stroke-width="1.3"/><path d="M6 5h4M6 7.5h4M6 10h2" stroke="#525866" stroke-width="1.2" stroke-linecap="round"/></svg> Agent Handbook</span>
+    </div>
+    <div class="prompt-area">
+      <textarea class="prompt-textarea">## Identity
+You are Aria, an enterprise inbound agent for Masterworks. Your job is to qualify high-value callers and route them to the right team without friction.
+
+## Style
+Warm, concise, efficient. Never more than two sentences before pausing for the caller.
+
+## Tasks
+1. Identify the caller and confirm their interest area (art investment, account, onboarding).
+2. Qualify the lead. If the caller expresses intent to invest $50K or more, set lead_qualified = true and alert the sales team via Slack immediately.
+3. Collect name, contact details, and investment range.
+4. Confirm next steps: a sales rep will follow up within the hour.</textarea>
+    </div>
+    <div class="welcome-section">
+      <div class="welcome-label">Welcome Message</div>
+      <select class="welcome-select"><option>User speaks first</option></select>
+    </div>
+  </div>
+
+  <!-- Settings panel (middle-right) -->
+  <div class="settings-panel">
+
+    <!-- Functions (EXPANDED) -->
+    <div class="section">
+      <div class="section-header" onclick="toggleSection(this)">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/></svg></span>
+        <span class="section-title">Functions <span class="section-badge">1</span></span>
+        <span class="section-chevron open"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+      <div class="section-body">
+        <div class="section-desc">Tools the agent can call during the conversation. Each fires when the agent decides the condition is met.</div>
+
+        <!-- Compact slack_send_message card -->
+        <div class="tool-card" onclick="document.getElementById('slackModal').style.display='flex'">
+          <div class="tool-card-header">
+            <div class="tool-app-logo">
+              <svg width="16" height="16" viewBox="0 0 54 54" fill="none"><path d="M19.7 33.5a4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1h4.1v4.1zM21.7 33.5a4.1 4.1 0 0 1 4.1-4.1 4.1 4.1 0 0 1 4.1 4.1v10.3a4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1V33.5z" fill="#E01E5A"/><path d="M25.8 19.7a4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1 4.1 4.1 0 0 1 4.1 4.1v4.1H25.8zM25.8 21.7a4.1 4.1 0 0 1 4.1 4.1 4.1 4.1 0 0 1-4.1 4.1H15.5a4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1h10.3z" fill="#36C5F0"/><path d="M39.6 25.8a4.1 4.1 0 0 1 4.1 4.1 4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1V25.8h4.1zM37.6 25.8a4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1H48a4.1 4.1 0 0 1 4.1 4.1 4.1 4.1 0 0 1-4.1 4.1H37.6z" fill="#2EB67D"/><path d="M33.5 39.6a4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1h4.1v4.1zM33.5 37.6a4.1 4.1 0 0 1 4.1-4.1 4.1 4.1 0 0 1 4.1 4.1V48a4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1V37.6z" fill="#ECB22E"/></svg>
+            </div>
+            <div class="tool-title-block">
+              <div class="tool-title">Alert ops on Slack<span class="tool-fn-badge">slack_send_message</span></div>
+              <div class="tool-subtitle">Native integration</div>
+              <div class="tool-config-hint">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2zM8 6v4M8 10.5v.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                #sales-leads &middot; fires when lead_qualified = true
+              </div>
+            </div>
+            <div class="toggle-switch on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off');"></div>
+          </div>
+        </div>
+
+        <button class="add-tool-btn">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Add function
+        </button>
+      </div>
+    </div>
+
+    <!-- Knowledge Base -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="4" y="3" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M7.5 3v14" stroke="currentColor" stroke-width="1.5"/></svg></span>
+        <span class="section-title">Knowledge Base</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+
+    <!-- Speech Settings -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 4a3 3 0 0 0-3 3v4a3 3 0 0 0 6 0V7a3 3 0 0 0-3-3z" stroke="currentColor" stroke-width="1.5"/><path d="M5 11a5 5 0 0 0 10 0M10 16v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        <span class="section-title">Speech Settings</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+
+    <!-- Call Settings -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M4 4c0 7.5 4.5 12 11.5 12L17 14.5l-3.5-2.5-1.5 1.5A9.5 9.5 0 0 1 8 9L9.5 7.5 7 4 5.5 4A1.5 1.5 0 0 0 4 4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+        <span class="section-title">Call Settings</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+
+    <!-- Post-call settings -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M4 10l4.5 4.5 7.5-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="section-title">Post-call settings</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+
+    <!-- Post-call Data Extraction -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3 15l4-4 3 3 5-6 2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 3v14h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        <span class="section-title">Post-Call Data Extraction</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Test panel (far right) -->
+  <div class="test-panel">
+    <div class="test-tabs">
+      <span class="test-tab active">Test Audio</span>
+      <span class="test-tab">Test LLM</span>
+    </div>
+    <div class="test-content">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style="color:#D1D5DB;"><path d="M24 6a6 6 0 0 0-6 6v12a6 6 0 0 0 12 0V12a6 6 0 0 0-6-6z" stroke="currentColor" stroke-width="2"/><path d="M12 22a12 12 0 0 0 24 0M24 34v8M18 42h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <button class="run-test-btn">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 3l8 5-8 5V3z" fill="currentColor"/></svg>
+        Run Test
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== MODAL OVERLAY ===== -->
+<div class="modal-overlay" id="slackModal">
+  <div class="modal-box">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-app-logo">
+          <svg width="18" height="18" viewBox="0 0 54 54" fill="none"><path d="M19.7 33.5a4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1h4.1v4.1zM21.7 33.5a4.1 4.1 0 0 1 4.1-4.1 4.1 4.1 0 0 1 4.1 4.1v10.3a4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1V33.5z" fill="#E01E5A"/><path d="M25.8 19.7a4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1 4.1 4.1 0 0 1 4.1 4.1v4.1H25.8zM25.8 21.7a4.1 4.1 0 0 1 4.1 4.1 4.1 4.1 0 0 1-4.1 4.1H15.5a4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1h10.3z" fill="#36C5F0"/><path d="M39.6 25.8a4.1 4.1 0 0 1 4.1 4.1 4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1V25.8h4.1zM37.6 25.8a4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1H48a4.1 4.1 0 0 1 4.1 4.1 4.1 4.1 0 0 1-4.1 4.1H37.6z" fill="#2EB67D"/><path d="M33.5 39.6a4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1h4.1v4.1zM33.5 37.6a4.1 4.1 0 0 1 4.1-4.1 4.1 4.1 0 0 1 4.1 4.1V48a4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1V37.6z" fill="#ECB22E"/></svg>
+        </div>
+        <div class="modal-title-block">
+          <div class="modal-title">Alert ops on Slack</div>
+          <div class="modal-subtitle">Native integration</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('slackModal').style.display='none'">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <!-- Scrollable body -->
+    <div class="modal-body">
+
+      <!-- Enable toggle -->
+      <div class="enable-row">
+        <div>
+          <div class="enable-row-label">Enable this function</div>
+          <div class="enable-row-sub">The agent will call this function when the trigger condition is met</div>
+        </div>
+        <div class="toggle-switch on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></div>
+      </div>
+
+      <!-- Channel -->
+      <div>
+        <div class="field-label">Channel</div>
+        <div class="channel-select-row">
+          <span class="channel-hash">#</span>
+          <span class="channel-name">sales-leads</span>
+          <svg class="channel-chevron" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="field-hint">Connected workspace: <strong style="color:#0E121B;">Masterworks</strong></div>
+      </div>
+
+      <!-- Message format -->
+      <div>
+        <div class="field-label">Message format</div>
+        <textarea class="msg-textarea">🚨 *Lead qualified* — {{call.from}}
+Agent: {{agent.name}}
+Intent: {{call.intent}}
+"{{call.transcript_snippet}}"</textarea>
+        <div class="field-hint">Type <code>{{</code> to insert a variable from the call or agent context.</div>
+      </div>
+
+      <!-- Fire when -->
+      <div>
+        <div class="field-label">Fire when</div>
+        <div class="condition-row">
+          <div class="condition-part field">lead_qualified</div>
+          <div class="condition-part op">=</div>
+          <div class="condition-part val">true</div>
+        </div>
+        <button class="add-condition-link">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Add condition
+        </button>
+        <div class="field-hint" style="margin-top:6px;">The agent evaluates this during the call. When met, it fires the notification and continues the conversation without interruption.</div>
+      </div>
+
+      <!-- Live preview -->
+      <div>
+        <div class="preview-label">Live Preview</div>
+        <div class="preview-channel-name"><span class="hash">#</span> sales-leads</div>
+        <div class="slack-preview">
+          <div class="slack-msg-header">
+            <div class="slack-avatar">R</div>
+            <div>
+              <span class="slack-sender">Retell AI</span>
+              <span class="slack-app-badge">APP</span>
+              <span class="slack-time">2:41 PM</span>
+            </div>
+          </div>
+          <div class="slack-attachment">
+            <div class="slack-att-title">🚨 Lead qualified — +1 (310) 555-0182</div>
+            <div class="slack-att-field"><b>Agent:</b> Aria (Enterprise Inbound)</div>
+            <div class="slack-att-field"><b>Intent:</b> Art investment, $75K range</div>
+            <div class="slack-att-quote">&ldquo;We&rsquo;re looking to diversify into alternative assets and we have around seventy-five thousand set aside...&rdquo;</div>
+            <div class="slack-open-btn">Open call ↗</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-divider"></div>
+
+      <!-- Store Fields as Variables -->
+      <div>
+        <div class="field-label">Store fields as variables</div>
+        <div class="field-hint" style="margin-bottom:10px;">Map JSON paths from the Slack API response to variables the agent can use later in the call.</div>
+        <div class="kv-pair-row">
+          <input class="kv-input" value="message_id" readonly>
+          <span class="kv-arrow">→</span>
+          <input class="kv-input" value="$.message.ts" readonly>
+          <button class="kv-delete"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        </div>
+        <button class="kv-add-btn">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          New key value pair
+        </button>
+      </div>
+
+      <!-- Advanced Settings (collapsed) -->
+      <div>
+        <div class="adv-header" id="advHeader" onclick="toggleAdv()">
+          <span class="adv-header-label">Advanced Settings</span>
+          <svg class="adv-chevron" id="advChevron" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="adv-body" id="advBody">
+          <!-- Timeout -->
+          <div class="adv-field">
+            <div class="adv-field-label">Timeout</div>
+            <div class="slider-row">
+              <input type="range" class="timeout-slider" min="0" max="30" value="10" id="timeoutSlider"
+                oninput="document.getElementById('sliderVal').textContent=this.value+'s';this.style.background='linear-gradient(to right,#3d64d7 '+(this.value/30*100)+'%,#E1E4EA '+(this.value/30*100)+'%)'">
+              <span class="slider-val" id="sliderVal">10s</span>
+            </div>
+            <div class="adv-field-hint">Maximum time to wait for the Slack API to respond before continuing.</div>
+          </div>
+          <!-- Failure behavior -->
+          <div class="adv-field">
+            <div class="adv-field-label">On failure</div>
+            <div class="radio-group">
+              <label class="radio-row">
+                <div class="radio-dot selected"></div>
+                <div>
+                  <div class="radio-text">Continue with variables unset</div>
+                  <div class="radio-sub">The agent proceeds normally. Stored fields will be empty.</div>
+                </div>
+              </label>
+              <label class="radio-row">
+                <div class="radio-dot"></div>
+                <div>
+                  <div class="radio-text">Surface error in Transcription tab</div>
+                  <div class="radio-sub">A failure event is logged and visible in the call record.</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="document.getElementById('slackModal').style.display='none'">Cancel</button>
+      <button class="btn-save">Save</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function toggleSection(header) {
+  var section = header.closest('.section');
+  var body = section.querySelector('.section-body');
+  var chevron = header.querySelector('.section-chevron');
+  if (!body) return;
+  if (chevron.classList.contains('open')) {
+    chevron.classList.remove('open');
+    body.style.display = 'none';
+  } else {
+    chevron.classList.add('open');
+    body.style.display = '';
+  }
+}
+
+function toggleAdv() {
+  var body = document.getElementById('advBody');
+  var chevron = document.getElementById('advChevron');
+  if (body.style.display === 'block') {
+    body.style.display = 'none';
+    chevron.classList.remove('open');
+  } else {
+    body.style.display = 'block';
+    chevron.classList.add('open');
+  }
+}
+</script>
+</body>
+</html>

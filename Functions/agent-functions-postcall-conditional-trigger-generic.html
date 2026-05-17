@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Post-call: Conditional Trigger (Generic)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1280px; }
+
+  /* ─── Top bar ─────────────────────────────────────────── */
+  .top-bar-wrap { background: #fff; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .top-bar-row1 { display: flex; align-items: center; height: 44px; padding: 0 16px; gap: 10px; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: #525866; flex-shrink: 0; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; white-space: nowrap; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+  .top-tab { padding: 4px 12px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; border-radius: 6px; }
+  .top-tab.active { font-weight: 500; color: #0E121B; background: #F3F4F6; }
+  .top-actions { display: flex; gap: 8px; align-items: center; font-size: 12px; color: #99A0AE; }
+  .btn-publish { height: 32px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .top-bar-row2 { display: flex; align-items: center; height: 22px; padding: 0 16px 6px 50px; }
+  .agent-meta { font-size: 12px; color: #99A0AE; }
+
+  /* ─── Builder layout ──────────────────────────────────── */
+  .builder-layout { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+  .model-bar { display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .mb-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; }
+  .mb-pill .ch { color: #99A0AE; margin-left: 2px; }
+  .mb-spacer { flex: 1; }
+
+  .prompt-panel { width: 48%; display: flex; flex-direction: column; border-right: 1px solid #E1E4EA; overflow: hidden; }
+  .prompt-area { flex: 1; padding: 16px; overflow-y: auto; }
+  .prompt-textarea { width: 100%; height: calc(100% - 4px); border: 1px solid #E1E4EA; border-radius: 8px; padding: 14px 16px; outline: none; font-size: 14px; color: #0A0A0A; line-height: 1.65; resize: none; font-family: inherit; }
+  .welcome-section { padding: 12px 16px 20px; flex-shrink: 0; border-top: 1px solid #E1E4EA; }
+  .welcome-label { font-size: 14px; font-weight: 600; color: #0E121B; margin-bottom: 8px; }
+  .welcome-select { height: 38px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; color: #0A0A0A; background: #fff; width: 100%; font-family: inherit; }
+
+  .settings-panel { width: 28%; overflow-y: auto; background: #fff; border-right: 1px solid #E1E4EA; }
+  .section { border-bottom: 1px solid #E1E4EA; }
+  .section-header { display: flex; align-items: center; gap: 8px; padding: 13px 16px; cursor: pointer; }
+  .section-icon { width: 18px; height: 18px; color: #525866; flex-shrink: 0; }
+  .section-title { font-size: 14px; font-weight: 500; color: #0E121B; flex: 1; }
+  .section-badge { font-size: 11px; font-weight: 600; background: #DBEAFE; color: #1D4ED8; padding: 2px 7px; border-radius: 10px; margin-left: 4px; }
+  .section-chevron { color: #99A0AE; }
+
+  .test-panel { flex: 1; border-left: 1px solid #E1E4EA; display: flex; flex-direction: column; background: #FAFAFA; }
+  .test-tabs { display: flex; width: 100%; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .test-tab { flex: 1; padding: 10px; text-align: center; font-size: 13px; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; }
+  .test-tab.active { font-weight: 500; color: #0E121B; border-bottom-color: #0E121B; }
+  .test-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px 20px; }
+
+  /* ─── Modal ───────────────────────────────────────────── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 32px 0;
+    z-index: 100;
+    overflow-y: auto;
+  }
+  .modal {
+    background: #fff;
+    border-radius: 12px;
+    width: 680px;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.1);
+    flex-shrink: 0;
+  }
+
+  /* Header */
+  .modal-header {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #E1E4EA;
+  }
+  .modal-app-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; overflow: hidden;
+  }
+  .modal-title-block { flex: 1; }
+  .modal-title { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .modal-subtitle { font-size: 13px; color: #6B7280; margin-top: 2px; }
+  .modal-close {
+    width: 28px; height: 28px; border-radius: 6px; border: none; background: none;
+    display: flex; align-items: center; justify-content: center;
+    color: #99A0AE; cursor: pointer; font-family: inherit;
+  }
+  .modal-close:hover { background: #F3F4F6; }
+
+  .modal-body { padding: 0 24px; }
+
+  /* Enable row */
+  .enable-row {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 16px 0; border-bottom: 1px solid #E1E4EA; gap: 16px;
+  }
+  .enable-label { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .enable-desc { font-size: 13px; color: #6B7280; margin-top: 2px; line-height: 1.4; }
+  .toggle { width: 40px; height: 22px; border-radius: 11px; position: relative; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+  .toggle.on { background: #3d64d7; }
+  .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.18); }
+  .toggle.on::after { left: 21px; }
+
+  /* Field sections */
+  .field-section { padding: 16px 0; border-bottom: 1px solid #E1E4EA; }
+  .field-label { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 10px; }
+  .field-hint { font-size: 12px; color: #6B7280; margin-top: 6px; line-height: 1.45; }
+
+  /* Field mapping table */
+  .field-map-table { width: 100%; border-collapse: collapse; }
+  .field-map-header { display: grid; grid-template-columns: 1fr 28px 1fr 28px; gap: 6px; margin-bottom: 6px; }
+  .field-map-header-cell { font-size: 11px; font-weight: 500; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.05em; }
+  .field-map-row { display: grid; grid-template-columns: 1fr 28px 1fr 28px; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .field-map-input {
+    height: 34px; border: 1px solid #E1E4EA; border-radius: 7px;
+    padding: 0 10px; font-size: 13px; color: #0E121B; background: #fff;
+    font-family: inherit; outline: none; width: 100%;
+  }
+  .field-map-input.var { font-family: 'SF Mono', ui-monospace, monospace; font-size: 12px; color: #3d64d7; }
+  .field-map-arrow { display: flex; align-items: center; justify-content: center; color: #99A0AE; }
+  .field-map-delete { display: flex; align-items: center; justify-content: center; color: #CACFD8; cursor: pointer; font-size: 16px; background: none; border: none; font-family: inherit; }
+  .field-map-delete:hover { color: #6B7280; }
+  .add-field-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 13px; font-weight: 500; color: #3d64d7; cursor: pointer;
+    background: none; border: none; font-family: inherit; padding: 6px 0 0;
+  }
+  .add-field-btn:hover { color: #2d4fb3; }
+
+  /* When to fire */
+  .when-section { padding: 16px 0; border-bottom: 1px solid #E1E4EA; }
+  .when-label { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 10px; }
+
+  .radio-option {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; border-radius: 8px; cursor: pointer; margin-bottom: 6px;
+  }
+  .radio-option:last-child { margin-bottom: 0; }
+  .radio-option.unselected { border: 1px solid #E1E4EA; background: #fff; }
+  .radio-option.selected {
+    border: 1px solid #D0D7E3; background: #fff;
+    flex-direction: column; padding: 12px; gap: 0;
+  }
+  .radio-option-header { display: flex; align-items: flex-start; gap: 10px; width: 100%; }
+  .radio-dot {
+    width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;
+    border: 2px solid #D1D5DB; background: #fff; position: relative;
+  }
+  .radio-dot.checked { border-color: #3d64d7; }
+  .radio-dot.checked::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px; height: 8px; border-radius: 50%; background: #3d64d7;
+  }
+  .radio-text { flex: 1; }
+  .radio-title { font-size: 14px; font-weight: 500; color: #0E121B; }
+  .radio-desc { font-size: 12px; color: #6B7280; margin-top: 2px; line-height: 1.4; }
+
+  /* Condition builder */
+  .condition-builder { margin-top: 12px; width: 100%; }
+  .condition-row-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 0; }
+  .condition-row { display: flex; align-items: center; gap: 6px; flex: 1; }
+  .cond-cell {
+    display: flex; align-items: center; padding: 0 10px; height: 34px;
+    font-size: 13px; color: #0E121B; cursor: pointer; background: #fff;
+    white-space: nowrap; border: 1px solid #E1E4EA; border-radius: 7px;
+  }
+  .cond-cell:hover { background: #F9FAFB; border-color: #C4C9D4; }
+  .cond-cell.field { width: 150px; }
+  .cond-cell.op { color: #525866; font-weight: 500; padding: 0 12px; }
+  .cond-cell.val { width: 130px; }
+  .cond-delete {
+    width: 24px; height: 24px; border: none; background: none;
+    color: #CACFD8; cursor: pointer; font-size: 18px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px; flex-shrink: 0; font-family: inherit;
+  }
+  .cond-delete:hover { color: #6B7280; }
+  .cond-connector {
+    font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase;
+    letter-spacing: 0.04em; padding: 6px 0; margin-left: 2px;
+  }
+  .add-cond-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 13px; font-weight: 500; color: #3d64d7; cursor: pointer;
+    background: none; border: none; font-family: inherit; padding: 8px 0 0;
+  }
+  .add-cond-btn:hover { color: #2d4fb3; }
+
+  /* Footer */
+  .modal-footer {
+    display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+    padding: 14px 24px; border-top: 1px solid #E1E4EA;
+    position: sticky; bottom: 0; background: #fff;
+  }
+  .btn-cancel {
+    height: 36px; padding: 0 16px; border: 1px solid #E1E4EA; border-radius: 8px;
+    background: #fff; font-size: 14px; font-weight: 500; color: #374151;
+    cursor: pointer; font-family: inherit;
+  }
+  .btn-save {
+    height: 36px; padding: 0 20px; border: none; border-radius: 8px;
+    background: #0E121B; color: #fff; font-size: 14px; font-weight: 500;
+    cursor: pointer; font-family: inherit;
+  }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar-wrap">
+  <div class="top-bar-row1">
+    <div class="home-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+    <span class="agent-name">Enterprise Inbound Agent</span>
+    <span class="top-spacer"></span>
+    <div class="top-tabs">
+      <span class="top-tab active">Create</span>
+      <span class="top-tab">Simulation</span>
+    </div>
+    <div class="top-actions">
+      <span>Auto saved at 2:32 PM</span>
+      <button class="btn-publish">✓ Publish</button>
+    </div>
+  </div>
+  <div class="top-bar-row2">
+    <span class="agent-meta">Single Prompt &middot; Version 12</span>
+  </div>
+</div>
+
+<!-- Builder layout -->
+<div class="builder-layout">
+
+  <!-- Prompt panel -->
+  <div class="prompt-panel">
+    <div class="model-bar">
+      <span class="mb-pill">GPT 4.1 <svg class="ch" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span style="color:#D1D5DB;">|</span>
+      <span class="mb-pill">Aria <svg class="ch" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span style="color:#D1D5DB;">|</span>
+      <span class="mb-pill">English <svg class="ch" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="mb-spacer"></span>
+    </div>
+    <div class="prompt-area">
+      <textarea class="prompt-textarea">## Identity
+You are Aria, an enterprise inbound agent for Retell AI. Your job is to greet high-value callers quickly, and route renewals or upgrades to the right person.
+
+## Style
+Warm, concise, efficient. Never more than two sentences before pausing for the caller.
+
+## Tasks
+- Identify the caller and pull their account from the CRM.
+- Confirm intent (renewal, upgrade, support).
+- Resolve in-call where possible. Escalate via Slack if account ARR > $100K.
+- Close with clear next steps.</textarea>
+    </div>
+    <div class="welcome-section">
+      <div class="welcome-label">Welcome Message</div>
+      <select class="welcome-select"><option>User speaks first</option></select>
+    </div>
+  </div>
+
+  <!-- Settings panel -->
+  <div class="settings-panel">
+    <div class="section">
+      <div class="section-header">
+        <svg class="section-icon" width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+        <span class="section-title">Functions <span class="section-badge">2</span></span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <svg class="section-icon" width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="4" y="3" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M7.5 3v14" stroke="currentColor" stroke-width="1.5"/></svg>
+        <span class="section-title">Knowledge Base</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <svg class="section-icon" width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 4a3 3 0 0 0-3 3v4a3 3 0 0 0 6 0V7a3 3 0 0 0-3-3z" stroke="currentColor" stroke-width="1.5"/><path d="M5 11a5 5 0 0 0 10 0M10 16v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="section-title">Speech Settings</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <svg class="section-icon" width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3 15l4-4 3 3 5-6 2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 3v14h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="section-title">Post-call</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <svg class="section-icon" width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M10 7v4M10 13v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="section-title">Call Settings</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test panel -->
+  <div class="test-panel">
+    <div class="test-tabs">
+      <span class="test-tab active">Test Audio</span>
+      <span class="test-tab">Test LLM</span>
+    </div>
+    <div class="test-content">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style="color:#D1D5DB;"><path d="M24 6a6 6 0 0 0-6 6v12a6 6 0 0 0 12 0V12a6 6 0 0 0-6-6z" stroke="currentColor" stroke-width="2"/><path d="M12 22a12 12 0 0 0 24 0M24 34v8M18 42h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <button style="height:36px;padding:0 20px;border:1px solid #E1E4EA;border-radius:8px;background:#fff;font-size:13px;font-weight:500;color:#0E121B;cursor:pointer;font-family:inherit;">Run Test</button>
+    </div>
+  </div>
+
+  <!-- ─── Modal ─────────────────────────────────────────── -->
+  <div class="modal-overlay">
+    <div class="modal">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="modal-app-icon">
+          <!-- Salesforce cloud icon -->
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="36" height="36" rx="8" fill="#00A1E0"/>
+            <path d="M15.1 10.5a4.6 4.6 0 0 1 3.3-1.4c1.7 0 3.2.9 4 2.3a5 5 0 0 1 2-.4c2.7 0 4.9 2.2 4.9 5s-2.2 5-4.9 5H11.7a3.7 3.7 0 0 1 0-7.4c.3 0 .5 0 .8.1a4.6 4.6 0 0 1 2.6-3.2z" fill="white"/>
+          </svg>
+        </div>
+        <div class="modal-title-block">
+          <div class="modal-title">Create Salesforce Lead</div>
+          <div class="modal-subtitle">Create a new lead in Salesforce after this agent's calls end.</div>
+        </div>
+        <button class="modal-close">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+
+        <!-- Enable -->
+        <div class="enable-row">
+          <div>
+            <div class="enable-label">Enable</div>
+            <div class="enable-desc">Create a lead in Salesforce after each call that meets the condition.</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+
+        <!-- Field mapping -->
+        <div class="field-section">
+          <div class="field-label">Field mapping</div>
+          <div class="field-map-header">
+            <div class="field-map-header-cell">Salesforce field</div>
+            <div></div>
+            <div class="field-map-header-cell">Value</div>
+            <div></div>
+          </div>
+
+          <div class="field-map-row">
+            <input class="field-map-input" value="FirstName" readonly/>
+            <div class="field-map-arrow">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <input class="field-map-input var" value="{{caller_first_name}}" readonly/>
+            <button class="field-map-delete">&times;</button>
+          </div>
+
+          <div class="field-map-row">
+            <input class="field-map-input" value="LastName" readonly/>
+            <div class="field-map-arrow">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <input class="field-map-input var" value="{{caller_last_name}}" readonly/>
+            <button class="field-map-delete">&times;</button>
+          </div>
+
+          <div class="field-map-row">
+            <input class="field-map-input" value="Phone" readonly/>
+            <div class="field-map-arrow">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <input class="field-map-input var" value="{{caller_phone}}" readonly/>
+            <button class="field-map-delete">&times;</button>
+          </div>
+
+          <div class="field-map-row">
+            <input class="field-map-input" value="LeadSource" readonly/>
+            <div class="field-map-arrow">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <input class="field-map-input var" value="{{campaign_source}}" readonly/>
+            <button class="field-map-delete">&times;</button>
+          </div>
+
+          <div class="field-map-row">
+            <input class="field-map-input" value="Description" readonly/>
+            <div class="field-map-arrow">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <input class="field-map-input var" value="{{call_summary}}" readonly/>
+            <button class="field-map-delete">&times;</button>
+          </div>
+
+          <button class="add-field-btn">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Add field
+          </button>
+        </div>
+
+        <!-- When to fire -->
+        <div class="when-section">
+          <div class="when-label">When to fire</div>
+
+          <!-- Every call -->
+          <div class="radio-option unselected">
+            <div class="radio-option-header">
+              <div class="radio-dot"></div>
+              <div class="radio-text">
+                <div class="radio-title">Every call</div>
+                <div class="radio-desc">Create a lead after each completed call.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Only when condition is met (selected) -->
+          <div class="radio-option selected">
+            <div class="radio-option-header">
+              <div class="radio-dot checked"></div>
+              <div class="radio-text">
+                <div class="radio-title">Only when condition is met</div>
+                <div class="radio-desc">Gate on any call variable — post-call analysis fields, pre-call function outputs, or inbound variables.</div>
+              </div>
+            </div>
+
+            <div class="condition-builder">
+              <div class="condition-row-wrap">
+                <div class="condition-row">
+                  <div class="cond-cell field">qualification</div>
+                  <div class="cond-cell op">=</div>
+                  <div class="cond-cell val">qualified</div>
+                </div>
+                <button class="cond-delete">&times;</button>
+              </div>
+              <div class="cond-connector">OR</div>
+              <div class="condition-row-wrap">
+                <div class="condition-row">
+                  <div class="cond-cell field">sentiment</div>
+                  <div class="cond-cell op">=</div>
+                  <div class="cond-cell val">negative</div>
+                </div>
+                <button class="cond-delete">&times;</button>
+              </div>
+              <button class="add-cond-btn">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                Add condition
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /modal-body -->
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button class="btn-cancel">Cancel</button>
+        <button class="btn-save">Save</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

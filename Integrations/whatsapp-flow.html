@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — WhatsApp Integration Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: #fff; color: #0A0A0A; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 48px; }
+  .page { display: flex; gap: 56px; align-items: flex-start; max-width: 1600px; }
+  .diagram-col { flex: 0 0 auto; width: 1000px; position: relative; }
+  .steps-col { flex: 1; min-width: 400px; max-width: 520px; padding-top: 12px; }
+  .steps-title { font-size: 15px; font-weight: 700; color: #0E121B; margin-bottom: 24px; }
+  .step { display: flex; gap: 14px; margin-bottom: 24px; align-items: flex-start; }
+  .step-num { flex: 0 0 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; background: #6B7280; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.55; color: #374151; }
+  .step-text strong { color: #0E121B; font-weight: 600; }
+  .step-text .highlight { color: #25D366; font-weight: 600; }
+  .caption { font-size: 13px; color: #6B7280; text-align: center; margin-top: 20px; line-height: 1.5; }
+  .customer-emoji { position: absolute; top: 38px; left: 88px; font-size: 32px; line-height: 1; }
+  .human-emoji { position: absolute; top: 38px; left: 909px; font-size: 32px; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="page">
+<div class="diagram-col">
+<div class="customer-emoji">🗣️</div>
+<div class="human-emoji">👨‍💼</div>
+<svg viewBox="0 0 1000 680" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Actor 1: Customer -->
+  <rect x="50" y="30" width="120" height="90" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="110" y="92" text-anchor="middle" font-size="10" fill="#64748B">Customer</text>
+  <text x="110" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Customer</text>
+
+  <!-- Actor 2: WhatsApp -->
+  <rect x="320" y="30" width="160" height="90" rx="12" fill="#25D366"/>
+  <!-- WhatsApp icon: circle with phone -->
+  <circle cx="400" cy="62" r="16" fill="#fff"/>
+  <path d="M 393 56 Q 393 53 396 53 L 397 53 Q 399 53 400 55 L 401 58 Q 402 60 401 61 L 399 63 Q 401 67 405 69 L 407 67 Q 408 66 410 67 L 413 68 Q 415 69 415 71 L 415 72 Q 415 75 412 75 Q 405 75 399 69 Q 393 63 393 56 Z" fill="#25D366"/>
+  <text x="400" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">WhatsApp</text>
+  <text x="400" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">WhatsApp</text>
+  <text x="400" y="156" text-anchor="middle" font-size="11" fill="#94A3B8">Meta Business API</text>
+
+  <!-- Actor 3: Retell AI -->
+  <rect x="620" y="30" width="170" height="90" rx="12" fill="#0E121B"/>
+  <image href="/Users/brandonkhoo/Documents/Retell AI/Logo.png" x="655" y="55" width="91" height="35" style="filter: brightness(0) invert(1);"/>
+  <text x="705" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Retell AI</text>
+  <text x="705" y="156" text-anchor="middle" font-size="11" fill="#94A3B8">Agent (shared config)</text>
+
+  <!-- Actor 4: Human Agent -->
+  <rect x="870" y="30" width="110" height="90" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="925" y="92" text-anchor="middle" font-size="10" fill="#64748B">Rep</text>
+  <text x="925" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Human Agent</text>
+  <text x="925" y="156" text-anchor="middle" font-size="11" fill="#94A3B8">(optional handoff)</text>
+
+  <!-- Lifelines -->
+  <line x1="110" y1="170" x2="110" y2="660" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="400" y1="170" x2="400" y2="660" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="705" y1="170" x2="705" y2="660" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="925" y1="170" x2="925" y2="660" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- Step 1: Customer sends WhatsApp message -->
+  <line x1="110" y1="205" x2="400" y2="205" stroke="#25D366" stroke-width="2"/>
+  <polygon points="397,200 407,205 397,210" fill="#25D366"/>
+  <rect x="155" y="191" width="200" height="26" rx="5" fill="#DCFCE7" stroke="#86EFAC" stroke-width="1.5"/>
+  <text x="255" y="209" text-anchor="middle" font-size="12" font-weight="500" fill="#166534">"Hi, need clinic hours"</text>
+
+  <!-- Step 2: WhatsApp webhook to Retell -->
+  <line x1="400" y1="245" x2="705" y2="245" stroke="#3d64d7" stroke-width="2"/>
+  <polygon points="702,240 712,245 702,250" fill="#3d64d7"/>
+  <rect x="450" y="231" width="210" height="26" rx="5" fill="#EEF2FF" stroke="#A5B4FC" stroke-width="1.5"/>
+  <text x="555" y="249" text-anchor="middle" font-size="12" font-weight="500" fill="#3730A3">Webhook delivers message</text>
+
+  <!-- Step 3: AI agent processes with shared config -->
+  <rect x="558" y="283" width="294" height="32" rx="7" fill="#fff"/>
+  <rect x="560" y="285" width="290" height="28" rx="6" fill="#DCFCE7" stroke="#86EFAC" stroke-width="1.5"/>
+  <text x="705" y="304" text-anchor="middle" font-size="12" font-weight="600" fill="#166534">Agent processes (same prompt + tools)</text>
+
+  <!-- Step 4: Retell sends reply via WhatsApp -->
+  <line x1="705" y1="340" x2="400" y2="340" stroke="#3d64d7" stroke-width="2"/>
+  <polygon points="403,335 393,340 403,345" fill="#3d64d7"/>
+  <rect x="460" y="326" width="190" height="26" rx="5" fill="#EEF2FF" stroke="#A5B4FC" stroke-width="1.5"/>
+  <text x="555" y="344" text-anchor="middle" font-size="12" font-weight="500" fill="#3730A3">Send reply via API</text>
+
+  <!-- Step 5: WhatsApp delivers to customer -->
+  <line x1="400" y1="380" x2="110" y2="380" stroke="#25D366" stroke-width="2"/>
+  <polygon points="113,375 103,380 113,385" fill="#25D366"/>
+  <rect x="125" y="366" width="260" height="26" rx="5" fill="#DCFCE7" stroke="#86EFAC" stroke-width="1.5"/>
+  <text x="255" y="384" text-anchor="middle" font-size="12" font-weight="500" fill="#166534">"Mon-Fri 9-5. Want to book?"</text>
+
+  <!-- Step 6: Escalation trigger (customer wants voice) -->
+  <rect x="55" y="420" width="110" height="28" rx="6" fill="#FEF3C7" stroke="#FBBF24" stroke-width="1.5"/>
+  <text x="110" y="439" text-anchor="middle" font-size="11" font-weight="600" fill="#92400E">"Call me"</text>
+
+  <!-- Step 6b: Retell initiates voice call -->
+  <line x1="110" y1="485" x2="705" y2="485" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="702,480 712,485 702,490" fill="#9CA3AF"/>
+  <rect x="260" y="471" width="320" height="26" rx="5" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5"/>
+  <text x="420" y="489" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Initiate voice call with full chat context</text>
+
+  <!-- Step 7: Human handoff (optional) -->
+  <rect x="593" y="523" width="224" height="32" rx="7" fill="#fff"/>
+  <rect x="595" y="525" width="220" height="28" rx="6" fill="#FEF3C7" stroke="#FBBF24" stroke-width="1.5"/>
+  <text x="705" y="544" text-anchor="middle" font-size="12" font-weight="600" fill="#92400E">AI handoff triggered</text>
+
+  <!-- Step 7b: Pass conversation to human rep -->
+  <line x1="705" y1="580" x2="925" y2="580" stroke="#3d64d7" stroke-width="2"/>
+  <polygon points="922,575 932,580 922,585" fill="#3d64d7"/>
+  <rect x="735" y="566" width="160" height="26" rx="5" fill="#EEF2FF" stroke="#A5B4FC" stroke-width="1.5"/>
+  <text x="815" y="584" text-anchor="middle" font-size="12" font-weight="500" fill="#3730A3">Hand off with context</text>
+
+  <!-- Step 8: Human replies via WhatsApp -->
+  <line x1="925" y1="625" x2="110" y2="625" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="113,620 103,625 113,630" fill="#9CA3AF"/>
+  <rect x="330" y="611" width="390" height="26" rx="5" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5"/>
+  <text x="525" y="629" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Human responds directly via WhatsApp (same thread)</text>
+
+</svg>
+
+<div class="caption"><strong>Proposed architecture (strawman for engineering review).</strong><br>Shows how Retell AI agents handle 2 way WhatsApp conversations using shared agent config, with optional escalation to voice<br>and seamless handoff to human agents within the same conversation thread.</div>
+</div>
+
+<!-- RIGHT: Step-by-step walkthrough -->
+<div class="steps-col">
+  <div class="steps-title">How it works</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text"><strong>Customer sends WhatsApp message.</strong> A customer initiates a conversation by messaging the business's <span class="highlight">WhatsApp</span> number. In markets like Brazil, India, and Europe, WhatsApp is the default communication channel, so customers expect to start here instead of calling.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>Webhook delivers message to Retell.</strong> Meta's WhatsApp Business API forwards the inbound message to Retell via a webhook. Each message carries the customer's phone number, which Retell uses to look up existing contact context.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>Agent processes with shared config.</strong> The same agent configuration that powers voice calls (prompt, tools, connected integrations) handles the text message. No separate agent needs to be built for WhatsApp. Connected CRM, KB, and scheduling integrations work identically across channels.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-text"><strong>Send reply via WhatsApp API.</strong> Retell sends the agent's response back through the Meta Business API. Response can include rich media (images, documents, quick reply buttons) to reduce friction for common options.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-text"><strong>Customer receives reply.</strong> The response appears in the same WhatsApp thread. The conversation continues 2 way until the customer's need is resolved or escalation is triggered.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">6</div>
+    <div class="step-text"><strong>Escalation to voice call (optional).</strong> If the conversation needs voice (complex issue, confirmation flow, customer preference), the agent can initiate an outbound voice call with full chat context carried over. The customer sees a seamless transition from text to voice without repeating information.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">7</div>
+    <div class="step-text"><strong>Human handoff (optional).</strong> At any point, the agent can hand off to a human rep. The human takes over the same WhatsApp thread with full conversation history visible. AI can toggle back on if needed. This matches the Bajacheebo feedback: "toggle off the AI and let a human interject and respond too."</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">8</div>
+    <div class="step-text"><strong>Human responds directly.</strong> The human rep replies via WhatsApp in the same conversation thread. From the customer's perspective, it is one continuous conversation regardless of who is responding. All messages are logged to the same conversation record for unified reporting and CRM activity.</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

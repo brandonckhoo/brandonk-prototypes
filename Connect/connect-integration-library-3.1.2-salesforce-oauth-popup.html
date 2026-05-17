@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salesforce — Authorize Retell AI</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Salesforce Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #181818; background: #f4f6f9; min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* Fake browser chrome */
+  .browser-chrome { background: #F0F0F0; border-bottom: 1px solid #D1D5DB; padding: 8px 12px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .browser-dots { display: flex; gap: 6px; }
+  .browser-dots span { width: 12px; height: 12px; border-radius: 50%; }
+  .browser-dots .red { background: #FF5F57; }
+  .browser-dots .yellow { background: #FEBC2E; }
+  .browser-dots .green { background: #28C840; }
+  .browser-url { flex: 1; background: #fff; border: 1px solid #D1D5DB; border-radius: 6px; padding: 6px 12px; font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 6px; margin-left: 8px; }
+  .browser-url .lock { color: #22C55E; }
+
+  /* Salesforce header bar */
+  .sf-header { background: #fff; border-bottom: 1px solid #d8dde6; padding: 14px 24px; display: flex; align-items: center; }
+  .sf-logo { display: flex; align-items: center; gap: 10px; }
+  .sf-logo-cloud { width: 60px; height: 42px; }
+
+  .oauth-page { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 40px 24px; }
+  .oauth-card { background: #fff; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); width: 460px; padding: 36px 40px; border: 1px solid #d8dde6; }
+
+  .oauth-title { font-size: 22px; font-weight: 400; color: #181818; text-align: center; margin-bottom: 6px; }
+  .oauth-subtitle { font-size: 14px; color: #54698d; text-align: center; margin-bottom: 28px; line-height: 1.5; }
+  .oauth-subtitle strong { color: #181818; font-weight: 600; }
+
+  .app-info { display: flex; align-items: center; gap: 14px; padding: 16px; background: #f4f6f9; border-radius: 6px; margin-bottom: 24px; border: 1px solid #d8dde6; }
+  .app-icon { width: 44px; height: 44px; border-radius: 8px; background: #0E121B; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .app-details { display: flex; flex-direction: column; gap: 2px; }
+  .app-name { font-size: 15px; font-weight: 600; color: #181818; }
+  .app-domain { font-size: 13px; color: #54698d; }
+  .app-verified { font-size: 11px; color: #04844B; display: flex; align-items: center; gap: 4px; margin-top: 3px; }
+
+  .user-row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border: 1px solid #d8dde6; border-radius: 6px; margin-bottom: 20px; background: #fff; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #00A1E0; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+  .user-name { font-size: 14px; color: #181818; font-weight: 500; }
+  .user-email { font-size: 12px; color: #54698d; }
+  .user-switch { margin-left: auto; font-size: 13px; color: #0070D2; cursor: pointer; }
+
+  .perms-label { font-size: 13px; font-weight: 600; color: #54698d; margin-bottom: 10px; }
+  .perm-list { list-style: none; margin-bottom: 28px; }
+  .perm-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; font-size: 14px; color: #181818; line-height: 1.4; }
+  .perm-item + .perm-item { border-top: 1px solid #f4f6f9; }
+  .perm-check { color: #04844B; flex-shrink: 0; margin-top: 1px; }
+
+  .oauth-actions { display: flex; flex-direction: column; gap: 10px; }
+  .btn-allow { width: 100%; height: 42px; border: 1px solid #0070D2; border-radius: 4px; background: #0070D2; font-size: 14px; font-weight: 600; color: #fff; cursor: pointer; font-family: inherit; }
+  .btn-allow:hover { background: #005fb2; }
+  .btn-deny { width: 100%; height: 42px; border: 1px solid #d8dde6; border-radius: 4px; background: #fff; font-size: 14px; color: #0070D2; cursor: pointer; font-family: inherit; }
+  .btn-deny:hover { background: #f4f6f9; }
+
+  .oauth-footer { text-align: center; margin-top: 20px; font-size: 12px; color: #54698d; line-height: 1.5; }
+  .oauth-footer a { color: #0070D2; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="browser-chrome">
+  <div class="browser-dots">
+    <span class="red"></span><span class="yellow"></span><span class="green"></span>
+  </div>
+  <div class="browser-url">
+    <span class="lock"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 7V5a4 4 0 1 1 8 0v2h1a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h1zm2 0h4V5a2 2 0 1 0-4 0v2z" fill="currentColor"/></svg></span>
+    login.salesforce.com/services/oauth2/authorize?client_id=retell_ai&response_type=code&scope=api%20refresh_token
+  </div>
+</div>
+
+<div class="sf-header">
+  <div class="sf-logo">
+    <svg class="sf-logo-cloud" viewBox="0 0 273 191" xmlns="http://www.w3.org/2000/svg"><path d="M113.5 21c10-11 24-18 40-18 21 0 39 12 48 29 8-3 17-5 26-5 35 0 63 29 63 64 0 35-28 63-63 63-4 0-8 0-12-1-8 14-23 23-40 23-7 0-14-2-20-5-8 18-26 31-48 31-23 0-42-14-50-33-3 0-7 1-10 1-29 0-52-23-52-52 0-20 11-37 26-46-3-7-5-15-5-23C16 22 40-2 70-2c18 0 33 9 43 23z" fill="#00A1E0"/></svg>
+  </div>
+</div>
+
+<div class="oauth-page">
+  <div class="oauth-card">
+    <h1 class="oauth-title">Allow Access?</h1>
+    <p class="oauth-subtitle"><strong>Retell AI</strong> is requesting permission to access your Salesforce organization</p>
+
+    <div class="app-info">
+      <div class="app-icon">
+        <svg width="22" height="22" viewBox="0 0 114 114" fill="none"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#fff"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#fff"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#fff"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#fff"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#fff"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#fff"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#fff"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#fff"/></svg>
+      </div>
+      <div class="app-details">
+        <span class="app-name">Retell AI</span>
+        <span class="app-domain">app.retellai.com</span>
+        <span class="app-verified"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 2 3-1 1 3 3 1-1 3 1 3-3 1-1 3-3-1-2 2-2-2-3 1-1-3-3-1 1-3-1-3 3-1 1-3 3 1 2-2z" fill="#04844B"/><path d="M5 8l2 2 4-4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Verified Salesforce partner</span>
+      </div>
+    </div>
+
+    <div class="user-row">
+      <div class="user-avatar">BK</div>
+      <div>
+        <div class="user-name">Brandon Khoo</div>
+        <div class="user-email">brandon@retellai.com · Retell AI (Prod)</div>
+      </div>
+      <a class="user-switch">Not you?</a>
+    </div>
+
+    <div class="perms-label">This will allow Retell AI to:</div>
+    <ul class="perm-list">
+      <li class="perm-item">
+        <span class="perm-check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3 4.3L6.5 11.1L2.7 7.3L3.6 6.4L6.5 9.3L12.4 3.4L13.3 4.3Z" fill="currentColor"/></svg></span>
+        Access and manage Contacts, Leads, Accounts, and Opportunities on your behalf
+      </li>
+      <li class="perm-item">
+        <span class="perm-check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3 4.3L6.5 11.1L2.7 7.3L3.6 6.4L6.5 9.3L12.4 3.4L13.3 4.3Z" fill="currentColor"/></svg></span>
+        Create and update Tasks and call activity records after calls
+      </li>
+      <li class="perm-item">
+        <span class="perm-check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3 4.3L6.5 11.1L2.7 7.3L3.6 6.4L6.5 9.3L12.4 3.4L13.3 4.3Z" fill="currentColor"/></svg></span>
+        Read org metadata (custom objects, fields, picklists) for mapping
+      </li>
+      <li class="perm-item">
+        <span class="perm-check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3 4.3L6.5 11.1L2.7 7.3L3.6 6.4L6.5 9.3L12.4 3.4L13.3 4.3Z" fill="currentColor"/></svg></span>
+        Perform these requests any time (refresh token, offline access)
+      </li>
+    </ul>
+
+    <div class="oauth-actions">
+      <button class="btn-allow" onclick="window.location='connect-integration-library-3.1.4-field-mapping.html'">Allow</button>
+      <button class="btn-deny">Deny</button>
+    </div>
+
+    <p class="oauth-footer">To revoke access at any time, go to your personal settings. <a href="#">Learn more</a></p>
+  </div>
+</div>
+
+</body>
+</html>

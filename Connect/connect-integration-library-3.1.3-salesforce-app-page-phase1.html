@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Salesforce Integration App Page</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+
+  /* Sidebar */
+  .sidebar { width: 280px; min-width: 280px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; padding: 0; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 10px 10px 12px; margin: 0 14px; width: auto; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; flex-shrink: 0; }
+  .workspace-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .workspace-chevron { color: #99A0AE; flex-shrink: 0; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; line-height: 16px; height: 24px; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; position: relative; white-space: nowrap; border-radius: 6px; }
+  .nav-item:hover { background: rgba(0,0,0,0.03); }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #FFFFFF; }
+  .footer { padding: 16px 14px; }
+  .footer-card { display: flex; align-items: center; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; box-shadow: rgba(0,0,0,0.1) 0px 1px 3px 0px; cursor: pointer; width: 100%; }
+  .footer-card.pay { padding: 16px; height: 58px; margin-bottom: 8px; }
+  .footer-card.user { padding: 10px 10px 10px 12px; height: 40px; margin-bottom: 12px; gap: 8px; }
+  .footer-badge-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px 4px 4px; background: #ecf3ff; border-radius: 6px; font-size: 12px; font-weight: 500; color: #3d64d7; }
+  .footer-card .spacer { flex: 1; }
+  .footer-user .avatar { width: 20px; height: 20px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+  .footer-user .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .footer-user .name { font-size: 14px; color: #525866; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .footer-links { display: flex; align-items: center; gap: 4px; }
+  .footer-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; font-size: 14px; color: #525866; cursor: pointer; height: 36px; }
+  .footer-link:hover { background: rgba(0,0,0,0.03); }
+  .footer-divider { width: 1px; height: 12px; background: #D1D5DB; flex-shrink: 0; }
+
+  /* Main */
+  .main { flex: 1; overflow: auto; background: #fff; position: relative; }
+  .page-content { padding: 100px 0 0; max-width: 960px; margin: 0 auto; width: 100%; padding-left: 32px; padding-right: 32px; }
+
+  /* Breadcrumb in list view behind the modal */
+  .top-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .search-wrapper { position: relative; flex: 1; max-width: 480px; }
+  .search-wrapper svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+  .search-input { width: 100%; height: 36px; padding: 0 12px 0 36px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; color: #0A0A0A; background: #fff; outline: none; }
+  .search-input::placeholder { color: #99A0AE; }
+  .sort-dropdown { display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; color: #525866; background: #fff; cursor: pointer; }
+  .add-btn { display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; background: #0E121B; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-left: auto; }
+  .integrations-table { width: 100%; border-collapse: collapse; }
+  .integrations-table thead th { padding: 10px 16px; font-size: 13px; font-weight: 500; color: #6B7280; text-align: left; border-bottom: 1px solid #E1E4EA; }
+  .integrations-table tbody tr { cursor: pointer; }
+  .integrations-table tbody tr.selected { background: rgba(61,100,215,0.04); }
+  .integrations-table tbody td { padding: 14px 16px; font-size: 14px; color: #0E121B; border-bottom: 1px solid #E1E4EA; vertical-align: middle; }
+  .integration-name-cell { display: flex; align-items: center; gap: 12px; }
+  .integration-logo { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; border: 1px solid #E1E4EA; background: #fff; }
+  .integration-info { display: flex; flex-direction: column; gap: 1px; }
+  .integration-title { font-size: 14px; font-weight: 500; color: #0E121B; }
+  .integration-subtitle { font-size: 13px; color: #6B7280; }
+  .td-created-by, .td-date { color: #525866; }
+  .menu-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; border-radius: 6px; color: #6B7280; }
+  .td-menu { width: 48px; text-align: center; }
+
+  /* Modal overlay */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 40px 20px; }
+  .modal { background: #fff; border-radius: 12px; width: 820px; max-width: 100%; max-height: calc(100vh - 80px); box-shadow: 0 20px 40px -8px rgba(0,0,0,0.2); overflow: hidden; display: flex; flex-direction: column; }
+
+  .modal-header { padding: 20px 24px 0; display: flex; align-items: flex-start; gap: 16px; }
+  .modal-logo { width: 48px; height: 48px; border-radius: 10px; border: 1px solid #E1E4EA; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #fff; }
+  .modal-title-block { flex: 1; padding-top: 2px; }
+  .modal-title { font-size: 18px; font-weight: 600; color: #0A0A0A; margin-bottom: 2px; }
+  .modal-sub { font-size: 13px; color: #6B7280; display: flex; align-items: center; gap: 6px; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #1FC16B; }
+  .modal-close { background: none; border: none; padding: 6px; cursor: pointer; color: #9CA3AF; border-radius: 6px; line-height: 0; flex-shrink: 0; }
+  .modal-close:hover { background: #F3F4F6; color: #0A0A0A; }
+
+  /* Tabs */
+  .tabs { padding: 0 24px; border-bottom: 1px solid #E1E4EA; margin-top: 16px; display: flex; gap: 0; }
+  .tab { padding: 10px 16px; font-size: 14px; font-weight: 500; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab:hover { color: #0A0A0A; }
+  .tab.active { color: #0A0A0A; border-bottom-color: #0E121B; }
+
+  /* Body */
+  .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+  .field-group { margin-bottom: 16px; }
+  .field-label { display: block; font-size: 13px; font-weight: 500; color: #0E121B; margin-bottom: 6px; }
+  .field-input { width: 100%; height: 38px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; color: #0A0A0A; background: #fff; outline: none; }
+  .field-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.1); }
+  .field-input.readonly { background: #F9FAFB; color: #525866; cursor: not-allowed; }
+  .field-help { font-size: 12px; color: #6B7280; margin-top: 6px; line-height: 1.4; }
+
+  .info-card { background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px; }
+  .info-card svg { flex-shrink: 0; margin-top: 2px; }
+  .info-card-text { flex: 1; font-size: 13px; color: #525866; line-height: 1.5; }
+  .info-card-text strong { color: #0E121B; font-weight: 600; }
+
+  /* Danger zone */
+  .danger-zone { margin-top: 24px; padding-top: 20px; border-top: 1px solid #E1E4EA; }
+  .danger-title { font-size: 12px; font-weight: 600; color: #EF4444; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 12px; }
+  .danger-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 14px; border: 1px solid #FEE2E2; border-radius: 8px; background: #FEF2F2; }
+  .danger-text { font-size: 13px; color: #991B1B; line-height: 1.4; }
+  .danger-text strong { color: #7F1D1D; font-weight: 600; }
+
+  /* Buttons */
+  .btn { height: 36px; padding: 0 14px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; }
+  .btn-secondary { background: #fff; border-color: #E1E4EA; color: #0E121B; }
+  .btn-secondary:hover { background: #F9FAFB; }
+  .btn-primary { background: #0E121B; color: #fff; }
+  .btn-primary:hover { background: #1a1f2e; }
+  .btn-destructive { background: #fff; border-color: #EF4444; color: #EF4444; flex-shrink: 0; }
+  .btn-destructive:hover { background: #FEF2F2; }
+
+  /* Footer */
+  .modal-footer { padding: 16px 24px; display: flex; justify-content: flex-end; align-items: center; gap: 8px; border-top: 1px solid #E1E4EA; background: #fff; }
+  .footer-left { flex: 1; font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 6px; }
+  .footer-left svg { flex-shrink: 0; }
+
+  /* Meta row in Configure tab */
+  .meta-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; padding: 14px; background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 8px; }
+  .meta-cell { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label { font-size: 11px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.03em; font-weight: 500; }
+  .meta-value { font-size: 13px; color: #0E121B; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#0A0A0A"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73Z" fill="#0A0A0A"/><path d="M255.56 34.65C238.2 34.65 226.63 47.95 226.63 66.47C226.63 84.99 242.25 98.3 256.14 98.3C270.03 98.3 279.86 90.19 283.33 78.62H269.45C267.71 82.67 264.82 87.3 256.14 87.3C247.46 87.3 239.94 81.52 239.94 69.94H283.91C283.91 49.69 272.92 34.65 255.56 34.65Z" fill="#0A0A0A"/><path d="M344.09 34.65C326.73 34.65 315.16 47.95 315.16 66.47C315.16 85.15 330.78 98.3 344.67 98.3C358.56 98.3 368.39 90.19 371.87 78.62H357.98C356.24 82.67 353.35 87.3 344.67 87.3C335.99 87.3 328.47 81.52 328.47 69.94H372.44C372.44 49.69 361.45 34.65 344.09 34.65Z" fill="#0A0A0A"/><path d="M390.96 14.97H377.65V95.92H390.96V14.97Z" fill="#0A0A0A"/><path d="M413.53 14.97H400.22V95.92H413.53V14.97Z" fill="#0A0A0A"/><path d="M304.17 17.28L290.84 17.28L290.85 34.65H282.76V45H290.85V82.82C290.85 87.58 291.8 90.43 294.66 93.29C297.51 96.14 300.37 97.09 305.13 97.09H315.14V85.67H309.88C308.16 85.67 306.96 85.37 306.13 85.11C305.27 84.84 304.61 84.16 304.4 83.29C304.17 82.33 304.17 81.09 304.17 79.9V45H315.14V34.65H304.17V17.28Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg>
+  </div>
+
+  <div class="workspace">
+    <div class="workspace-avatar">B</div>
+    <span class="workspace-name">Brandon K... Workspace</span>
+    <span class="workspace-chevron"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14.3105 7.94623L10 3.63574L5.68956 7.94623L6.67165 8.92835L10 5.59992L13.3284 8.92835L14.3105 7.94623ZM5.68945 12.0534L9.99996 16.364L14.3104 12.0534L13.3284 11.0713L9.99996 14.3997L6.67154 11.0713L5.68945 12.0534Z" fill="#99A0AE"/></svg></span>
+  </div>
+
+  <div class="nav-scroll">
+    <div class="section-group">
+      <div class="section-label">Build</div>
+      <ul class="nav-items">
+        <li class="nav-item">Agents</li>
+        <li class="nav-item">Knowledge Base</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Deploy</div>
+      <ul class="nav-items">
+        <li class="nav-item">Phone Numbers</li>
+        <li class="nav-item">Batch Call</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Monitor</div>
+      <ul class="nav-items">
+        <li class="nav-item">Call History</li>
+        <li class="nav-item">Chat History</li>
+        <li class="nav-item">Analytics</li>
+        <li class="nav-item">AI Quality Assurance</li>
+        <li class="nav-item">Alerting</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">System</div>
+      <ul class="nav-items">
+        <li class="nav-item current">Integrations</li>
+        <li class="nav-item">Billing</li>
+        <li class="nav-item">Settings</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-card pay">
+      <div class="footer-badge-pill">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 14C4.686 14 2 11.314 2 8C2 4.686 4.686 2 8 2C11.314 2 14 4.686 14 8C14 11.314 11.314 14 8 14Z" fill="#3d64d7"/></svg>
+        Pay As You Go
+      </div>
+      <span class="spacer"></span>
+    </div>
+    <div class="footer-card user footer-user">
+      <div class="avatar"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c" alt=""></div>
+      <span class="name">brandon@retellai.com</span>
+    </div>
+    <div class="footer-links">
+      <a class="footer-link">Help</a>
+      <div class="footer-divider"></div>
+      <a class="footer-link">Updates</a>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-content">
+    <div class="top-bar">
+      <div class="search-wrapper">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.5232 13.4627L17.7355 16.6742L16.6742 17.7355L13.4627 14.5232C12.2678 15.4812 10.7815 16.0022 9.25 16C5.524 16 2.5 12.976 2.5 9.25C2.5 5.524 5.524 2.5 9.25 2.5C12.976 2.5 16 5.524 16 9.25C16.0022 10.7815 15.4812 12.2678 14.5232 13.4627Z" fill="#99A0AE"/></svg>
+        <input type="text" class="search-input" placeholder="Search integrations...">
+      </div>
+      <button class="sort-dropdown">
+        Recent
+        <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M10 13.75L3.75 7.5H16.25L10 13.75Z" fill="#99A0AE"/></svg>
+      </button>
+      <button class="add-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Add integration
+      </button>
+    </div>
+
+    <table class="integrations-table">
+      <thead>
+        <tr>
+          <th style="width: 40%;">Name</th>
+          <th style="width: 25%;">Created by</th>
+          <th style="width: 25%;">Date created</th>
+          <th class="td-menu" style="width: 10%;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="selected">
+          <td>
+            <div class="integration-name-cell">
+              <div class="integration-logo" style="background: #00A1E0;">
+                <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><path d="M13.5 10.2a5.3 5.3 0 0 1 3.8-1.6 5.4 5.4 0 0 1 4.7 2.7 6.5 6.5 0 0 1 2.7-.6 6.6 6.6 0 0 1 0 13.2 6.4 6.4 0 0 1-1.3-.1 4.8 4.8 0 0 1-8.4.5 5.5 5.5 0 0 1-2.3.5 5.6 5.6 0 0 1-2.8-10.4 6.4 6.4 0 0 1 6-8.5 6.4 6.4 0 0 1 5.3 2.8l-.1.1a5.3 5.3 0 0 0-7.6 1.4z" fill="#fff"/></svg>
+              </div>
+              <div class="integration-info">
+                <span class="integration-title">Salesforce</span>
+                <span class="integration-subtitle">Salesforce &ndash; OAuth 2.0</span>
+              </div>
+            </div>
+          </td>
+          <td class="td-created-by">Brandon Khoo</td>
+          <td class="td-date">2 weeks ago</td>
+          <td class="td-menu"><button class="menu-btn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="3.5" r="1.25" fill="currentColor"/><circle cx="8" cy="8" r="1.25" fill="currentColor"/><circle cx="8" cy="12.5" r="1.25" fill="currentColor"/></svg></button></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="integration-name-cell">
+              <div class="integration-logo">
+                <svg width="22" height="22" viewBox="0 0 256 256" fill="none">
+                  <path d="M128 0H0V128L128 0Z" fill="#03363D"/>
+                  <path d="M128 128V256H256L128 128Z" fill="#03363D"/>
+                  <path d="M0 256C0 185.308 57.3076 128 128 128V256H0Z" fill="#03363D"/>
+                  <path d="M256 0C256 70.6925 198.692 128 128 128V0H256Z" fill="#03363D"/>
+                </svg>
+              </div>
+              <div class="integration-info">
+                <span class="integration-title">Zendesk</span>
+                <span class="integration-subtitle">Zendesk &ndash; OAuth</span>
+              </div>
+            </div>
+          </td>
+          <td class="td-created-by">Brandon Khoo</td>
+          <td class="td-date">1 month ago</td>
+          <td class="td-menu"><button class="menu-btn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="3.5" r="1.25" fill="currentColor"/><circle cx="8" cy="8" r="1.25" fill="currentColor"/><circle cx="8" cy="12.5" r="1.25" fill="currentColor"/></svg></button></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="integration-name-cell">
+              <div class="integration-logo" style="background: #111827;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="4" y="6" width="16" height="12" rx="3" fill="#fff"/><text x="12" y="15" text-anchor="middle" font-size="8" font-weight="700" fill="#111827">Cal</text></svg>
+              </div>
+              <div class="integration-info">
+                <span class="integration-title">Cal.com</span>
+                <span class="integration-subtitle">Cal.com &ndash; API Key</span>
+              </div>
+            </div>
+          </td>
+          <td class="td-created-by">Brandon Khoo</td>
+          <td class="td-date">3 months ago</td>
+          <td class="td-menu"><button class="menu-btn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="3.5" r="1.25" fill="currentColor"/><circle cx="8" cy="8" r="1.25" fill="currentColor"/><circle cx="8" cy="12.5" r="1.25" fill="currentColor"/></svg></button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- Integration app page modal (Salesforce, Configure tab) -->
+<style>
+  .hs-logo-bg { background: #00A1E0; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .tool-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1px solid #E1E4EA; border-radius: 8px; margin-bottom: 6px; background: #fff; }
+  .tool-row:last-child { margin-bottom: 0; }
+  .tool-name { font-family: 'SF Mono', ui-monospace, Menlo, Monaco, monospace; font-size: 13px; color: #0E121B; }
+  .tool-desc { font-size: 12px; color: #6B7280; margin-top: 2px; }
+  .toggle { width: 32px; height: 18px; background: #1FC16B; border-radius: 999px; position: relative; flex-shrink: 0; cursor: pointer; }
+  .toggle::after { content: ""; position: absolute; top: 2px; right: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .data-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+  .data-tile { border: 1px solid #E1E4EA; border-radius: 8px; padding: 14px; background: #fff; }
+  .data-tile .num { font-size: 22px; font-weight: 600; color: #0E121B; }
+  .data-tile .lbl { font-size: 12px; color: #6B7280; margin-top: 2px; }
+  .about-list { list-style: none; padding: 0; margin-top: 12px; }
+  .about-list li { padding: 10px 0; border-top: 1px solid #E1E4EA; font-size: 14px; color: #0E121B; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .about-list li:hover { color: #3d64d7; }
+  .about-desc { font-size: 13px; color: #525866; line-height: 1.55; }
+
+  /* Data tab */
+  .info-banner { display: flex; align-items: flex-start; gap: 8px; background: #EEF4FF; color: #3d64d7; border-radius: 8px; padding: 10px 12px; font-size: 13px; margin-bottom: 24px; }
+  .info-banner svg { flex-shrink: 0; margin-top: 1px; }
+  .data-section { margin-bottom: 24px; }
+  .data-section-title-v2 { font-size: 14px; font-weight: 600; color: #0E121B; margin-bottom: 4px; }
+  .data-section-sub { font-size: 13px; font-weight: 400; color: #525866; margin-bottom: 12px; }
+
+  .sot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .sot-card { border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 10px; position: relative; }
+  .sot-card.selected { border-color: #3d64d7; box-shadow: 0 0 0 1px #3d64d7 inset; background: #FAFBFF; }
+  .sot-radio { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #C5CAD3; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+  .sot-card.selected .sot-radio { border-color: #3d64d7; }
+  .sot-card.selected .sot-radio::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #3d64d7; }
+  .sot-header { display: flex; align-items: center; gap: 8px; }
+  .sot-title { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .sot-desc { font-size: 12px; color: #525866; line-height: 1.4; }
+  .sot-diagram { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 0 2px; }
+  .sot-logo { width: 22px; height: 22px; border-radius: 5px; border: 1px solid #E1E4EA; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; background: #0E121B; }
+  .sot-logo.hs { background: #00A1E0; }
+  .sot-logo.rt { background: #3d64d7; }
+  .sot-arrow { color: #99A0AE; display: inline-flex; align-items: center; }
+
+  .rm-card { border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; padding: 4px 14px; }
+  .rm-row { display: grid; grid-template-columns: 180px 1fr; gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
+  .rm-row:last-child { border-bottom: none; }
+  .rm-label { font-size: 13px; font-weight: 500; color: #0E121B; }
+  .rm-value { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .rm-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; background: #F3F4F6; border: 1px solid #E1E4EA; border-radius: 6px; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; color: #0E121B; }
+  .rm-helper { font-size: 12px; color: #99A0AE; margin-top: 4px; display: block; width: 100%; }
+  .rm-seg { display: inline-flex; background: #F3F4F6; border-radius: 6px; padding: 2px; font-size: 12px; font-weight: 500; }
+  .rm-seg-opt { padding: 4px 10px; border-radius: 4px; color: #6B7280; cursor: pointer; }
+  .rm-seg-opt.active { background: #fff; color: #0E121B; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+
+  /* Object sync */
+  .data-card { border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; overflow: hidden; }
+  .data-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid #F3F4F6; }
+  .data-row:last-child { border-bottom: none; }
+  .obj-left { display: flex; align-items: center; gap: 10px; flex: 1; }
+  .obj-icon { width: 24px; height: 24px; border-radius: 6px; background: #EEF4FF; color: #3d64d7; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .obj-name { font-family: 'SF Mono', Menlo, monospace; font-size: 12.5px; color: #0E121B; }
+  .custom-tag { display: inline-block; font-size: 10px; font-weight: 500; color: #6B7280; background: #F3F4F6; border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: middle; }
+  .dir-toggle { display: inline-flex; background: #F3F4F6; border-radius: 6px; padding: 2px; font-size: 11px; font-weight: 500; }
+  .dir-opt { padding: 4px 8px; border-radius: 4px; color: #6B7280; cursor: pointer; white-space: nowrap; }
+  .dir-opt.active { background: #fff; color: #0E121B; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+  .sync-note { font-size: 12px; color: #6B7280; text-align: right; min-width: 200px; }
+
+  /* Map Attributes */
+  .attr-table { width: 100%; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; border-collapse: separate; border-spacing: 0; overflow: hidden; }
+  .attr-table thead th { font-size: 11px; font-weight: 500; color: #525866; text-align: left; padding: 10px 14px; background: #FAFBFC; border-bottom: 1px solid #E1E4EA; text-transform: uppercase; letter-spacing: 0.3px; }
+  .attr-table tbody td { padding: 10px 14px; border-bottom: 1px solid #F3F4F6; font-size: 13px; color: #0E121B; vertical-align: middle; }
+  .attr-table tbody tr:last-child td { border-bottom: none; }
+  .attr-check { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid #C5CAD3; background: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .attr-check.checked { background: #3d64d7; border-color: #3d64d7; }
+  .attr-check.checked svg { display: block; }
+  .attr-check svg { display: none; }
+  .sf-col { font-family: 'SF Mono', Menlo, monospace; font-size: 12.5px; color: #0E121B; display: inline-flex; align-items: center; gap: 8px; }
+  .auto-badge { display: inline-block; background: #F3F4F6; color: #525866; font-size: 10px; font-weight: 500; border-radius: 10px; padding: 2px 6px; letter-spacing: 0.2px; }
+  .dir-cell { text-align: center; color: #99A0AE; font-size: 14px; width: 40px; }
+  .retell-select { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #E1E4EA; border-radius: 6px; background: #fff; padding: 6px 10px; font-size: 12.5px; color: #0E121B; font-family: 'SF Mono', Menlo, monospace; min-width: 180px; justify-content: space-between; cursor: pointer; }
+  .retell-select.placeholder { color: #99A0AE; font-family: inherit; }
+  .retell-select .rs-chev { color: #99A0AE; margin-left: 4px; }
+  .retell-cell { display: flex; align-items: center; gap: 8px; }
+  .post-badge { display: inline-block; background: #EEF4FF; color: #3d64d7; font-size: 9.5px; font-weight: 600; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.3px; }
+
+  /* Record owner */
+  .pill-select { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; padding: 8px 12px; font-size: 13px; color: #0E121B; cursor: pointer; min-width: 320px; justify-content: space-between; }
+  .pill-select .ps-chev { color: #99A0AE; }
+  .owner-footnote { font-size: 12px; color: #99A0AE; margin-top: 8px; }
+
+  /* Sync status */
+  .status-card { border: 1px solid #E1E4EA; border-radius: 8px; padding: 16px; background: #fff; }
+  .status-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #F3F4F6; font-size: 13px; }
+  .status-row:last-of-type { border-bottom: none; }
+  .status-label { color: #6B7280; width: 200px; flex-shrink: 0; }
+  .status-val { color: #0E121B; display: flex; align-items: center; gap: 8px; flex: 1; }
+  .green-dot { width: 8px; height: 8px; border-radius: 50%; background: #22C55E; display: inline-block; }
+  .status-sep { color: #9CA3AF; margin: 0 4px; }
+  .btn-resync { margin-top: 12px; padding: 8px 14px; font-size: 14px; font-weight: 500; color: #0E121B; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; cursor: pointer; }
+  .btn-resync:hover { background: #F9FAFB; }
+</style>
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-logo hs-logo-bg">
+        <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><path d="M13.5 10.2a5.3 5.3 0 0 1 3.8-1.6 5.4 5.4 0 0 1 4.7 2.7 6.5 6.5 0 0 1 2.7-.6 6.6 6.6 0 0 1 0 13.2 6.4 6.4 0 0 1-1.3-.1 4.8 4.8 0 0 1-8.4.5 5.5 5.5 0 0 1-2.3.5 5.6 5.6 0 0 1-2.8-10.4 6.4 6.4 0 0 1 6-8.5 6.4 6.4 0 0 1 5.3 2.8l-.1.1a5.3 5.3 0 0 0-7.6 1.4z" fill="#fff"/></svg>
+      </div>
+      <div class="modal-title-block">
+        <div class="modal-title">Salesforce</div>
+        <div class="modal-sub"><span class="status-dot"></span>Connected &middot; OAuth 2.0</div>
+      </div>
+      <button class="modal-close">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="1.67" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="configure">Configure</div>
+      <div class="tab" data-tab="data">Data</div>
+      <div class="tab" data-tab="tools">Tools</div>
+      <div class="tab" data-tab="about">About</div>
+    </div>
+
+    <div class="modal-body">
+      <!-- Configure -->
+      <div class="tab-panel active" data-panel="configure">
+      <div class="meta-row">
+        <div class="meta-cell">
+          <div class="meta-label">Org</div>
+          <div class="meta-value">Acme Sales (Salesforce Org ID: 00D5f000004AbCdEF)</div>
+        </div>
+        <div class="meta-cell">
+          <div class="meta-label">Connected by</div>
+          <div class="meta-value">Brandon Khoo</div>
+        </div>
+        <div class="meta-cell">
+          <div class="meta-label">Connected on</div>
+          <div class="meta-value">Mar 28, 2026</div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Name</label>
+        <input type="text" class="field-input" value="Salesforce — Acme Sales">
+        <div class="field-help">Internal name for this integration connection. Shown in the integrations list and in the agent editor.</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Credential type</label>
+        <input type="text" class="field-input readonly" value="OAuth 2.0" readonly>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-top:8px; padding-top:16px; border-top:1px solid #E1E4EA;">
+        <div>
+          <div style="font-size:13px; font-weight:500; color:#0E121B;">Disconnect Salesforce</div>
+          <div style="font-size:12px; color:#6B7280; margin-top:2px;">Agents using this integration will stop working on live calls.</div>
+        </div>
+        <button style="height:32px; padding:0 14px; border:1px solid #E1E4EA; border-radius:8px; background:#fff; font-size:13px; font-weight:500; color:#B91C1C; cursor:pointer; font-family:inherit;">Disconnect</button>
+      </div>
+
+      </div><!-- /configure -->
+
+      <!-- Data -->
+      <div class="tab-panel" data-panel="data">
+        <!-- Info banner -->
+        <div class="info-banner">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#3d64d7" stroke-width="1.5"/><path d="M8 7v4M8 5v.5" stroke="#3d64d7" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>Retell pulls from Salesforce every 30 minutes. Writes happen in real time after each call. Sync frequency is managed by Retell and cannot be changed.</span>
+        </div>
+
+
+        <!-- Record matching -->
+        <div class="data-section">
+          <div class="data-section-title-v2">Record matching</div>
+          <div class="data-section-sub">How Retell matches a contact to an existing Salesforce record.</div>
+          <div class="rm-card">
+            <div class="rm-row">
+              <div>
+                <div class="rm-label">Primary identifier</div>
+                <div style="font-size: 12px; color: #525866; margin-top: 2px;">Retell field &rarr; Salesforce field</div>
+              </div>
+              <div class="rm-value">
+                <div class="retell-select"><span>Retell phone_number</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M0 5h10M7 1l4 4-4 4" stroke="#99A0AE" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                <div class="retell-select"><span>Retell_Contact_ID__c</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <span class="rm-helper" style="display:block; margin-top:6px;">Recommended. Indexed External ID field on the Salesforce record.</span>
+              </div>
+            </div>
+            <div class="rm-row">
+              <div class="rm-label">Fallback identifier</div>
+              <div class="rm-value">
+                <div class="retell-select"><span>Retell phone_number</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M0 5h10M7 1l4 4-4 4" stroke="#99A0AE" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                <div class="retell-select"><span>Email</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <span class="rm-helper" style="display:block; margin-top:6px;">Used only when the primary identifier doesn't find a match.</span>
+              </div>
+            </div>
+            <div class="rm-row">
+              <div class="rm-label">When no match found</div>
+              <div class="rm-value">
+                <div class="rm-seg"><span class="rm-seg-opt active">Upsert &mdash; create new Lead in Salesforce</span><span class="rm-seg-opt">Skip &mdash; do nothing</span></div>
+                <span class="rm-helper" style="display:block; margin-top:6px;">Upsert writes a new Salesforce Lead populated from the call (phone, name, email if captured) and links it to the conversation.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Object sync -->
+        <div class="data-section">
+          <div class="data-section-title-v2">Object sync</div>
+          <div class="data-section-sub">Direction of sync per object. Cadence is managed by Retell.</div>
+          <div class="data-card">
+            <div class="data-row">
+              <div class="obj-left"><div class="obj-icon">C</div><span class="obj-name">Contact</span></div>
+              <div class="dir-toggle"><span class="dir-opt active">Salesforce → Retell</span><span class="dir-opt">Retell → Salesforce</span></div>
+              <div class="sync-note">Pull every 30 min · Write on call end</div>
+            </div>
+            <div class="data-row">
+              <div class="obj-left"><div class="obj-icon">A</div><span class="obj-name">Account</span></div>
+              <div class="dir-toggle"><span class="dir-opt active">Salesforce → Retell</span><span class="dir-opt">Retell → Salesforce</span></div>
+              <div class="sync-note">Pull every 30 min</div>
+            </div>
+            <div class="data-row">
+              <div class="obj-left"><div class="obj-icon">O</div><span class="obj-name">Opportunity</span></div>
+              <div class="dir-toggle"><span class="dir-opt active">Salesforce → Retell</span><span class="dir-opt">Retell → Salesforce</span></div>
+              <div class="sync-note">Pull every 30 min · Write on call end</div>
+            </div>
+            <div class="data-row">
+              <div class="obj-left"><div class="obj-icon">Ca</div><span class="obj-name">Case</span></div>
+              <div class="dir-toggle"><span class="dir-opt">Salesforce → Retell</span><span class="dir-opt active">Retell → Salesforce</span></div>
+              <div class="sync-note">Write on call end</div>
+            </div>
+            <div class="data-row">
+              <div class="obj-left"><div class="obj-icon">Cu</div><span class="obj-name">Custom_Object__c<span class="custom-tag">Custom</span></span></div>
+              <div class="dir-toggle"><span class="dir-opt">Salesforce → Retell</span><span class="dir-opt active">Retell → Salesforce</span></div>
+              <div class="sync-note">Write on call end</div>
+            </div>
+          </div>
+          <button style="margin-top: 10px; padding: 8px 12px; border: 1px dashed #CACFD8; background: #fff; border-radius: 6px; font-size: 13px; font-weight: 500; color: #525866; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Add custom object from Salesforce
+          </button>
+        </div>
+
+        <!-- Map Attributes -->
+        <div class="data-section">
+          <div class="data-section-title-v2">Map Attributes</div>
+          <div class="data-section-sub">Map Salesforce fields to Retell fields. Rows with POST-CALL are written back after each call.</div>
+          <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
+            <span style="font-size: 12px; color: #525866; font-weight: 500;">Object:</span>
+            <div style="display: inline-flex; border: 1px solid #E1E4EA; border-radius: 6px; padding: 2px; gap: 2px; background: #F5F7FA;">
+              <span style="padding: 4px 10px; font-size: 12px; font-weight: 500; background: #fff; border-radius: 4px; color: #0A0A0A; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">Contact</span>
+              <span style="padding: 4px 10px; font-size: 12px; font-weight: 500; color: #525866;">Account</span>
+              <span style="padding: 4px 10px; font-size: 12px; font-weight: 500; color: #525866;">Opportunity</span>
+              <span style="padding: 4px 10px; font-size: 12px; font-weight: 500; color: #525866;">Case</span>
+              <span style="padding: 4px 10px; font-size: 12px; font-weight: 500; color: #525866;">Custom_Object__c</span>
+            </div>
+          </div>
+          <table class="attr-table">
+            <thead>
+              <tr>
+                <th style="width: 40px;">Import</th>
+                <th>Salesforce Column</th>
+                <th style="width: 40px; text-align: center;">&nbsp;</th>
+                <th>Retell Field</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="attr-check checked"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5L4 7.5L8.5 2.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+                <td><span class="sf-col">Phone <span class="auto-badge">Auto</span></span></td>
+                <td class="dir-cell">⇔</td>
+                <td><div class="retell-cell"><div class="retell-select"><span>Phone</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></td>
+              </tr>
+              <tr>
+                <td><span class="attr-check checked"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5L4 7.5L8.5 2.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+                <td><span class="sf-col">FirstName <span class="auto-badge">Auto</span></span></td>
+                <td class="dir-cell">⇔</td>
+                <td><div class="retell-cell"><div class="retell-select"><span>first_name</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></td>
+              </tr>
+              <tr>
+                <td><span class="attr-check checked"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5L4 7.5L8.5 2.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+                <td><span class="sf-col">LastName <span class="auto-badge">Auto</span></span></td>
+                <td class="dir-cell">⇔</td>
+                <td><div class="retell-cell"><div class="retell-select"><span>last_name</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></td>
+              </tr>
+              <tr>
+                <td><span class="attr-check checked"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5L4 7.5L8.5 2.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+                <td><span class="sf-col">Email <span class="auto-badge">Auto</span></span></td>
+                <td class="dir-cell">⇔</td>
+                <td><div class="retell-cell"><div class="retell-select"><span>email</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></td>
+              </tr>
+              <tr>
+                <td><span class="attr-check"></span></td>
+                <td><span class="sf-col">Account.Name</span></td>
+                <td class="dir-cell">⇔</td>
+                <td><div class="retell-cell"><div class="retell-select placeholder"><span>Select</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></td>
+              </tr>
+              <tr>
+                <td><span class="attr-check"></span></td>
+                <td><span class="sf-col">LeadSource</span></td>
+                <td class="dir-cell">⇔</td>
+                <td><div class="retell-cell"><div class="retell-select placeholder"><span>Select</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></td>
+              </tr>
+              <tr>
+                <td><span class="attr-check"></span></td>
+                <td><span class="sf-col">Status</span></td>
+                <td class="dir-cell">⇔</td>
+                <td><div class="retell-cell"><div class="retell-select placeholder"><span>Select</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></td>
+              </tr>
+              <tr>
+                <td><span class="attr-check"></span></td>
+                <td><span class="sf-col">StageName</span></td>
+                <td class="dir-cell">⇔</td>
+                <td><div class="retell-cell"><div class="retell-select placeholder"><span>Select</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></td>
+              </tr>
+              <tr>
+                <td><span class="attr-check checked"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5L4 7.5L8.5 2.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+                <td><span class="sf-col">LastCallSummary__c</span></td>
+                <td class="dir-cell">⇔</td>
+                <td><div class="retell-cell"><div class="retell-select"><span>last_call_summary</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="post-badge">← POST-CALL</span></div></td>
+              </tr>
+              <tr>
+                <td><span class="attr-check checked"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5L4 7.5L8.5 2.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+                <td><span class="sf-col">Credit_Score__c</span></td>
+                <td class="dir-cell">⇔</td>
+                <td><div class="retell-cell"><div class="retell-select"><span>credit_score</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="post-badge">← POST-CALL</span></div></td>
+              </tr>
+              <tr>
+                <td><span class="attr-check checked"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5L4 7.5L8.5 2.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+                <td><span class="sf-col">Preferred_Callback_Time__c</span></td>
+                <td class="dir-cell">⇔</td>
+                <td><div class="retell-cell"><div class="retell-select"><span>callback_time</span><svg class="rs-chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="post-badge">← POST-CALL</span></div></td>
+              </tr>
+            </tbody>
+          </table>
+          <button style="margin-top: 10px; padding: 8px 12px; border: 1px dashed #CACFD8; background: #fff; border-radius: 6px; font-size: 13px; font-weight: 500; color: #525866; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Add field mapping
+          </button>
+        </div>
+
+        <!-- Record owner -->
+        <div class="data-section">
+          <div class="data-section-title-v2">Record owner</div>
+          <div class="data-section-sub">Salesforce user that owns records Retell writes.</div>
+          <div class="pill-select">
+            <span>Retell Bot (retell-bot@acme.com)</span>
+            <svg class="ps-chev" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="owner-footnote">Use a dedicated service account for clean audit trails.</div>
+        </div>
+
+        <!-- Sync status -->
+        <div class="data-section">
+          <div class="data-section-title-v2">Sync status</div>
+          <div class="status-card">
+            <div class="status-row">
+              <span class="status-label">Last pull from Salesforce</span>
+              <span class="status-val"><span class="green-dot"></span>12 min ago<span class="status-sep">·</span><span style="color: #6B7280;">Next pull in 18 min</span></span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Initial import</span>
+              <span class="status-val">12,487 Contacts, 2,104 Companies, 3,204 Deals <span class="status-sep">·</span> <span style="color: #6B7280;">Completed 2026-04-12</span></span>
+            </div>
+            <button class="btn-resync">Resync now</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tools -->
+      <div class="tab-panel" data-panel="tools">
+        <style>
+          .cmp-intro { font-size: 12px; color: #6B7280; line-height: 1.5; margin-bottom: 12px; }
+          .cmp-group { font-size: 11px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.06em; padding: 8px 12px; background: #F5F7FA; border-radius: 6px; margin-top: 16px; }
+          .cmp-group:first-of-type { margin-top: 0; }
+          .cmp-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid #F3F4F6; }
+          .cmp-group + .cmp-row { border-top: none; margin-top: 4px; }
+          .cmp-name { font-size: 13px; font-weight: 500; color: #0E121B; }
+          .cmp-desc { font-size: 13px; color: #6B7280; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .cmp-badge { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.02em; flex-shrink: 0; }
+          .cmp-badge.read { background: #ecf3ff; color: #3d64d7; }
+          .cmp-badge.write { background: #DCFCE7; color: #15803D; }
+        </style>
+        <p class="cmp-intro">Actions available once Salesforce is connected. Enable per agent in the Agent Builder.</p>
+
+        <div class="cmp-group">Contact</div>
+        <div class="cmp-row"><span class="cmp-name">Get contact</span><span class="cmp-desc">Fetch a contact by email, phone, or ID</span><span class="cmp-badge read">Read</span></div>
+        <div class="cmp-row"><span class="cmp-name">Create contact</span><span class="cmp-desc">Create a new contact record</span><span class="cmp-badge write">Write</span></div>
+        <div class="cmp-row"><span class="cmp-name">Update contact</span><span class="cmp-desc">Update fields on an existing contact</span><span class="cmp-badge write">Write</span></div>
+        <div class="cmp-row"><span class="cmp-name">Search contacts</span><span class="cmp-desc">Search contacts by filter criteria</span><span class="cmp-badge read">Read</span></div>
+
+        <div class="cmp-group">Opportunity</div>
+        <div class="cmp-row"><span class="cmp-name">Get opportunity</span><span class="cmp-desc">Fetch an Opportunity by ID or associated Contact</span><span class="cmp-badge read">Read</span></div>
+        <div class="cmp-row"><span class="cmp-name">Update opportunity</span><span class="cmp-desc">Update Opportunity stage, amount, or fields</span><span class="cmp-badge write">Write</span></div>
+        <div class="cmp-row"><span class="cmp-name">Associate contact to opportunity</span><span class="cmp-desc">Link a Contact to an Opportunity</span><span class="cmp-badge write">Write</span></div>
+
+        <div class="cmp-group">Activity</div>
+        <div class="cmp-row"><span class="cmp-name">Add note</span><span class="cmp-desc">Attach a note to a Contact, Account, or Opportunity</span><span class="cmp-badge write">Write</span></div>
+        <div class="cmp-row"><span class="cmp-name">Log call activity</span><span class="cmp-desc">Log the call as a Salesforce Task</span><span class="cmp-badge write">Write</span></div>
+      </div>
+
+      <!-- About -->
+      <div class="tab-panel" data-panel="about">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+          <div style="width: 44px; height: 44px; border-radius: 10px; background: #00A1E0; display: flex; align-items: center; justify-content: center;">
+            <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><path d="M13.5 10.2a5.3 5.3 0 0 1 3.8-1.6 5.4 5.4 0 0 1 4.7 2.7 6.5 6.5 0 0 1 2.7-.6 6.6 6.6 0 0 1 0 13.2 6.4 6.4 0 0 1-1.3-.1 4.8 4.8 0 0 1-8.4.5 5.5 5.5 0 0 1-2.3.5 5.6 5.6 0 0 1-2.8-10.4 6.4 6.4 0 0 1 6-8.5 6.4 6.4 0 0 1 5.3 2.8l-.1.1a5.3 5.3 0 0 0-7.6 1.4z" fill="#fff"/></svg>
+          </div>
+          <div>
+            <div style="font-size: 15px; font-weight: 600; color: #0E121B;">Salesforce</div>
+            <div style="font-size: 12px; color: #6B7280;">CRM &middot; Marketing &middot; Sales &middot; Service</div>
+          </div>
+        </div>
+        <div class="about-desc">Salesforce is the world's #1 customer relationship management (CRM) platform, connecting sales, service, marketing, and commerce teams on a unified Customer 360.</div>
+        <ul class="about-list">
+          <li>Salesforce Docs<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7.5 5l5 5-5 5" stroke="#6B7280" stroke-width="1.67" stroke-linecap="round"/></svg></li>
+          <li>OAuth scopes used<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7.5 5l5 5-5 5" stroke="#6B7280" stroke-width="1.67" stroke-linecap="round"/></svg></li>
+          <li>Privacy &amp; data handling<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7.5 5l5 5-5 5" stroke="#6B7280" stroke-width="1.67" stroke-linecap="round"/></svg></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <div class="footer-left">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 17.5C14.1421 17.5 17.5 14.1421 17.5 10C17.5 5.85786 14.1421 2.5 10 2.5C5.85786 2.5 2.5 5.85786 2.5 10C2.5 14.1421 5.85786 17.5 10 17.5Z" stroke="#6B7280" stroke-width="1.5"/><path d="M10 6.25V10L12.5 11.875" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Last sync: 2 minutes ago
+      </div>
+      <button class="btn btn-secondary">Cancel</button>
+      <button class="btn btn-primary">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab[data-tab]').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab[data-tab]').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      const name = t.getAttribute('data-tab');
+      document.querySelectorAll('.tab-panel').forEach(p => {
+        p.classList.toggle('active', p.getAttribute('data-panel') === name);
+      });
+    });
+  });
+</script>
+</body>
+</html>

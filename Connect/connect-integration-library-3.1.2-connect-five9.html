@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Connect Five9 (SIP + VCC API)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 260px; background: #F5F7FA; display: flex; flex-direction: column; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; color: #fff; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  .workspace-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; }
+  .section-group { margin-top: 8px; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+  .main { flex: 1; overflow: auto; padding: 32px; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(6px); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .modal { background: #fff; border-radius: 12px; width: 640px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 40px -8px rgba(0,0,0,0.2); }
+
+  .modal-header { padding: 20px 24px 0; display: flex; align-items: flex-start; gap: 14px; }
+  .modal-logo { width: 48px; height: 48px; border-radius: 10px; background: #1A4DA8; color: #fff; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .modal-title-block { flex: 1; padding-top: 4px; }
+  .modal-title { font-size: 18px; font-weight: 600; color: #0A0A0A; }
+  .modal-sub { font-size: 13px; color: #6B7280; margin-top: 2px; }
+  .modal-close { background: none; border: none; padding: 6px; cursor: pointer; color: #9CA3AF; flex-shrink: 0; line-height: 0; }
+
+  .tabs { padding: 0 24px; border-bottom: 1px solid #E1E4EA; margin-top: 16px; display: flex; gap: 0; }
+  .tab { padding: 10px 16px; font-size: 14px; font-weight: 500; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: #0A0A0A; border-bottom-color: #0E121B; }
+
+  .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+  .field-group { margin-bottom: 14px; }
+  .field-label { display: block; font-size: 13px; font-weight: 500; color: #0E121B; margin-bottom: 6px; }
+  .field-help { font-size: 12px; color: #6B7280; margin-top: 6px; line-height: 1.4; }
+  .field-input { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; color: #0A0A0A; background: #fff; outline: none; font-family: inherit; }
+  .field-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.1); }
+  .field-input.mono { font-family: 'SF Mono', Menlo, monospace; font-size: 13px; }
+
+  .field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .section-divider { display: flex; align-items: center; gap: 10px; margin: 22px 0 12px; }
+  .section-divider-text { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; }
+  .section-divider-line { flex: 1; height: 1px; background: #E1E4EA; }
+
+  .copy-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 8px; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; color: #374151; }
+  .copy-btn { font-size: 11px; color: #3d64d7; cursor: pointer; flex-shrink: 0; padding: 4px 8px; border: 1px solid #C7D2FE; border-radius: 4px; background: #fff; }
+
+  .info-card { background: #FFF8E1; border: 1px solid #FDE68A; border-radius: 8px; padding: 12px 14px; margin: 14px 0; display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: #92400E; line-height: 1.5; }
+  .info-card svg { flex-shrink: 0; margin-top: 2px; }
+  .info-card a { color: #92400E; text-decoration: underline; }
+
+  .test-status { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; font-size: 12px; color: #166534; margin: 12px 0; }
+  .test-status.idle { background: #F9FAFB; border-color: #E1E4EA; color: #6B7280; }
+  .test-status .dot { width: 8px; height: 8px; border-radius: 50%; background: #1FC16B; flex-shrink: 0; }
+  .test-status.idle .dot { background: #9CA3AF; }
+
+  .modal-footer { padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px solid #E1E4EA; }
+  .footer-meta { font-size: 12px; color: #6B7280; }
+  .btn { height: 36px; padding: 0 14px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid transparent; font-family: inherit; }
+  .btn-secondary { background: #fff; border-color: #E1E4EA; color: #0E121B; }
+  .btn-secondary:hover { background: #F9FAFB; }
+  .btn-primary { background: #0E121B; color: #fff; }
+  .btn-primary:hover { background: #1a1f2e; }
+  .btn-test { background: #fff; border-color: #E1E4EA; color: #374151; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo"><svg width="73" height="20" viewBox="0 0 414 114"><g fill="#0A0A0A"><circle cx="40" cy="103" r="10"/><circle cx="70" cy="103" r="10"/><circle cx="40" cy="10" r="10"/><circle cx="70" cy="10" r="10"/><circle cx="10" cy="42" r="10"/><circle cx="10" cy="72" r="10"/><circle cx="100" cy="42" r="10"/><circle cx="100" cy="72" r="10"/></g></svg></div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item current">Integrations</li><li class="nav-item">Billing</li><li class="nav-item">Settings</li></ul></div>
+  </div>
+</aside>
+
+<main class="main"></main>
+
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-logo">F9</div>
+      <div class="modal-title-block">
+        <div class="modal-title">Five9</div>
+        <div class="modal-sub">Connect Five9 VCC over SIP for inbound and outbound call routing</div>
+      </div>
+      <button class="modal-close"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="1.67" stroke-linecap="round"/></svg></button>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active">Configure</div>
+      <div class="tab">Tools</div>
+      <div class="tab">About</div>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- BEFORE YOU START: Setup Checklist -->
+      <div style="border: 1px solid #C7D2FE; border-radius: 10px; background: #EEF2FF; padding: 14px 16px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M3 8l3 3 7-7M3 13l3 3 11-11" stroke="#3d64d7" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font-size: 13px; font-weight: 600; color: #1E3A8A;">Before you start</span>
+        </div>
+        <div style="font-size: 12px; color: #1E3A8A; line-height: 1.5; margin-bottom: 10px;">Connecting Five9 requires admin access to your Five9 VCC. Estimated setup time: 30 minutes, or longer if you need to coordinate with your Five9 admin.</div>
+
+        <!-- Steps inside Five9 VCC -->
+        <div style="font-size: 11px; font-weight: 600; color: #1E3A8A; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 6px;">Inside Five9 VCC</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #fff; border: 1px solid #C7D2FE; border-radius: 6px; margin-bottom: 4px;">
+          <span style="width: 18px; height: 18px; border-radius: 50%; background: #1FC16B; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">✓</span>
+          <span style="font-size: 12px; color: #0E121B; flex: 1;"><strong>1. Create a VCC API user</strong> with Read Config + Manage SIP Trunks permissions</span>
+          <a href="#" style="font-size: 11px; color: #3d64d7; text-decoration: none;">Docs ↗</a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #fff; border: 1px solid #C7D2FE; border-radius: 6px; margin-bottom: 4px;">
+          <span style="width: 18px; height: 18px; border-radius: 50%; background: #1FC16B; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">✓</span>
+          <span style="font-size: 12px; color: #0E121B; flex: 1;"><strong>2. Add Retell as a SIP trunk</strong> in Five9 VCC Admin → Telephony → SIP Trunks (use the SIP endpoint below)</span>
+          <a href="#" style="font-size: 11px; color: #3d64d7; text-decoration: none;">Docs ↗</a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #fff; border: 1px solid #C7D2FE; border-radius: 6px; margin-bottom: 10px;">
+          <span style="width: 18px; height: 18px; border-radius: 50%; background: #fff; color: #6B7280; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1.5px solid #D1D5DB;">3</span>
+          <span style="font-size: 12px; color: #374151; flex: 1;"><strong>3. Configure routing</strong> — assign campaigns, queues, and skills to the new trunk; set up dial plan</span>
+          <a href="#" style="font-size: 11px; color: #3d64d7; text-decoration: none;">Docs ↗</a>
+        </div>
+
+        <!-- Steps inside Retell -->
+        <div style="font-size: 11px; font-weight: 600; color: #1E3A8A; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 6px;">Inside Retell</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #fff; border: 1.5px solid #3d64d7; border-radius: 6px; margin-bottom: 4px;">
+          <span style="width: 18px; height: 18px; border-radius: 50%; background: #3d64d7; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">4</span>
+          <span style="font-size: 12px; color: #0E121B; flex: 1;"><strong>4. Paste credentials below</strong> and validate the SIP + VCC API connection</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #fff; border: 1px solid #C7D2FE; border-radius: 6px; margin-bottom: 4px;">
+          <span style="width: 18px; height: 18px; border-radius: 50%; background: #fff; color: #6B7280; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1.5px solid #D1D5DB;">5</span>
+          <span style="font-size: 12px; color: #374151; flex: 1;"><strong>5. Assign Five9 routing to phone numbers</strong> in the Phone Numbers section</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #fff; border: 1px solid #C7D2FE; border-radius: 6px;">
+          <span style="width: 18px; height: 18px; border-radius: 50%; background: #fff; color: #6B7280; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1.5px solid #D1D5DB;">6</span>
+          <span style="font-size: 12px; color: #374151; flex: 1;"><strong>6. Verify outbound compliance</strong> rules in Five9 VCC (TCPA, DNC, state windows)</span>
+        </div>
+
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #C7D2FE; display: flex; align-items: center; gap: 8px;">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 6.25V10.625M10 13.75H10.0083M17.5 10C17.5 14.14 14.14 17.5 10 17.5C5.86 17.5 2.5 14.14 2.5 10C2.5 5.86 5.86 2.5 10 2.5C14.14 2.5 17.5 5.86 17.5 10Z" stroke="#3d64d7" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span style="font-size: 12px; color: #1E3A8A; flex: 1;">Need help? <a href="#" style="color: #3d64d7; font-weight: 500; text-decoration: none;">Read the Five9 setup guide</a> or <a href="#" style="color: #3d64d7; font-weight: 500; text-decoration: none;">contact our solutions team</a> for a guided setup call.</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Connection name</label>
+        <input type="text" class="field-input" value="Five9 — Production VCC">
+        <div class="field-help">Internal name shown in the integrations list and agent editor.</div>
+      </div>
+
+      <!-- SIP TRUNK CONFIG -->
+      <div class="section-divider">
+        <span class="section-divider-text">SIP Trunk</span>
+        <span class="section-divider-line"></span>
+      </div>
+
+      <div class="info-card">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 6.25V10.625M10 13.75H10.0083M17.5 10C17.5 14.14 14.14 17.5 10 17.5C5.86 17.5 2.5 14.14 2.5 10C2.5 5.86 5.86 2.5 10 2.5C14.14 2.5 17.5 5.86 17.5 10Z" stroke="#92400E" stroke-width="1.67" stroke-linecap="round"/></svg>
+        <div>Configure these SIP endpoint details inside your <strong>Five9 VCC Admin → Telephony → SIP Trunks → Add Trunk</strong>. Retell auto provisions a trunk template named "Retell AI" once your VCC API credentials are validated below.</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Retell SIP endpoint <span style="font-weight:400;color:#6B7280;font-size:12px;">(copy into Five9 VCC)</span></label>
+        <div class="copy-row">sip:retell-five9.us-west.retellai.com:5061;transport=tls<button class="copy-btn">Copy</button></div>
+      </div>
+
+      <div class="field-row-2">
+        <div class="field-group">
+          <label class="field-label">Codec</label>
+          <input type="text" class="field-input" value="G.711 µ-law, OPUS" readonly>
+        </div>
+        <div class="field-group">
+          <label class="field-label">DTMF mode</label>
+          <input type="text" class="field-input" value="RFC 2833" readonly>
+        </div>
+      </div>
+
+      <div class="field-row-2">
+        <div class="field-group">
+          <label class="field-label">SIP username</label>
+          <input type="text" class="field-input mono" value="retell_5g8h2j1k">
+        </div>
+        <div class="field-group">
+          <label class="field-label">SIP password</label>
+          <input type="password" class="field-input mono" value="••••••••••••••••">
+        </div>
+      </div>
+
+      <!-- VCC API CREDENTIALS -->
+      <div class="section-divider">
+        <span class="section-divider-text">Five9 VCC API Credentials</span>
+        <span class="section-divider-line"></span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Five9 domain</label>
+        <input type="text" class="field-input" value="acmecorp.five9.com">
+        <div class="field-help">Your Five9 VCC instance domain (e.g., yourcompany.five9.com).</div>
+      </div>
+
+      <div class="field-row-2">
+        <div class="field-group">
+          <label class="field-label">VCC API username</label>
+          <input type="text" class="field-input mono" value="retell_api_user@acmecorp">
+        </div>
+        <div class="field-group">
+          <label class="field-label">VCC API password</label>
+          <input type="password" class="field-input mono" value="••••••••••••••••">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Domain region</label>
+        <select class="field-input" style="appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M10 13.75L3.75 7.5H16.25L10 13.75Z' fill='%2399A0AE'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;">
+          <option>US West (default)</option>
+          <option>US Central</option>
+          <option>EU (Frankfurt)</option>
+          <option>APAC (Sydney)</option>
+        </select>
+      </div>
+
+      <!-- TEST CONNECTION -->
+      <div class="section-divider">
+        <span class="section-divider-text">Validate Connection</span>
+        <span class="section-divider-line"></span>
+      </div>
+
+      <div class="test-status">
+        <span class="dot"></span>
+        <span><strong>SIP trunk + VCC API connection successful.</strong> 14 phone numbers detected · 8 campaigns · 23 queues · CPS limit 1.</span>
+      </div>
+
+      <button class="btn btn-test"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="margin-right:6px;vertical-align:middle;"><path d="M14 8C14 11.31 11.31 14 8 14C5.13 14 2.74 11.99 2.13 9.3M2 6.7C2.61 4.01 5 2 8 2C11.31 2 14 4.69 14 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Re-test connection</button>
+    </div>
+
+    <div class="modal-footer">
+      <div class="footer-meta">Powered by Retell SIP infrastructure (US West)</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary">Cancel</button>
+        <button class="btn btn-primary">Connect</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

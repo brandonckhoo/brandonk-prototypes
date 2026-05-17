@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Calendly Integration Flow</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: #fff; color: #0A0A0A; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 48px; }
+  .page { display: flex; gap: 56px; align-items: flex-start; max-width: 1600px; }
+  .diagram-col { flex: 0 0 auto; width: 1000px; position: relative; }
+  .steps-col { flex: 1; min-width: 400px; max-width: 520px; padding-top: 12px; }
+  .steps-title { font-size: 15px; font-weight: 700; color: #0E121B; margin-bottom: 24px; }
+  .step { display: flex; gap: 14px; margin-bottom: 24px; align-items: flex-start; }
+  .step-num { flex: 0 0 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; background: #6B7280; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.55; color: #374151; }
+  .step-text strong { color: #0E121B; font-weight: 600; }
+  .step-text .highlight { color: #006BFF; font-weight: 600; }
+  .caption { font-size: 13px; color: #6B7280; text-align: center; margin-top: 20px; line-height: 1.5; }
+  .customer-emoji { position: absolute; top: 38px; left: 88px; font-size: 32px; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="page">
+<div class="diagram-col">
+<div class="customer-emoji">🗣️</div>
+<svg viewBox="0 0 1000 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Actor 1: Customer -->
+  <rect x="50" y="30" width="120" height="90" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="110" y="92" text-anchor="middle" font-size="10" fill="#64748B">Caller</text>
+  <text x="110" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Customer</text>
+
+  <!-- Actor 2: Retell AI -->
+  <rect x="380" y="30" width="170" height="90" rx="12" fill="#0E121B"/>
+  <image href="/Users/brandonkhoo/Documents/Retell AI/Logo.png" x="415" y="55" width="91" height="35" style="filter: brightness(0) invert(1);"/>
+  <text x="465" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Retell AI</text>
+  <text x="465" y="156" text-anchor="middle" font-size="11" fill="#94A3B8">Voice Agent</text>
+
+  <!-- Actor 3: Calendly -->
+  <rect x="790" y="30" width="160" height="90" rx="12" fill="#006BFF"/>
+  <circle cx="870" cy="75" r="18" fill="#fff"/>
+  <text x="870" y="82" text-anchor="middle" font-size="20" font-weight="700" fill="#006BFF">C</text>
+  <text x="870" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Calendly</text>
+  <text x="870" y="156" text-anchor="middle" font-size="11" fill="#94A3B8">Scheduling Platform</text>
+
+  <!-- Lifelines -->
+  <line x1="110" y1="170" x2="110" y2="700" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="465" y1="170" x2="465" y2="700" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="870" y1="170" x2="870" y2="700" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- Step 1: Voice conversation -->
+  <line x1="110" y1="205" x2="465" y2="205" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="462,200 472,205 462,210" fill="#9CA3AF"/>
+  <polygon points="113,200 103,205 113,210" fill="#9CA3AF"/>
+  <rect x="160" y="191" width="250" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="285" y="209" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">"I'd like to book an appointment"</text>
+
+  <!-- Step 2: Check availability -->
+  <line x1="465" y1="250" x2="870" y2="250" stroke="#006BFF" stroke-width="2"/>
+  <polygon points="867,245 877,250 867,255" fill="#006BFF"/>
+  <rect x="555" y="236" width="200" height="26" rx="5" fill="#E6F0FF" stroke="#BFDBFE"/>
+  <text x="655" y="254" text-anchor="middle" font-size="12" font-weight="500" fill="#003E99">Check availability</text>
+
+  <!-- Step 3: Return open slots -->
+  <line x1="870" y1="290" x2="465" y2="290" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="468,285 458,290 468,295" fill="#9CA3AF"/>
+  <rect x="570" y="276" width="200" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="670" y="294" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Return available slots</text>
+
+  <!-- Step 4: Offer slots to caller -->
+  <line x1="465" y1="335" x2="110" y2="335" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="113,330 103,335 113,340" fill="#9CA3AF"/>
+  <rect x="150" y="321" width="290" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="295" y="339" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">"I have Tuesday 2pm or Wednesday 3pm"</text>
+
+  <!-- Step 5: Customer picks a time -->
+  <line x1="110" y1="380" x2="465" y2="380" stroke="#9CA3AF" stroke-width="1.5"/>
+  <polygon points="462,375 472,380 462,385" fill="#9CA3AF"/>
+  <rect x="195" y="366" width="170" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="280" y="384" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">"Tuesday 2pm works"</text>
+
+  <!-- Step 6: Book event -->
+  <line x1="465" y1="425" x2="870" y2="425" stroke="#006BFF" stroke-width="2"/>
+  <polygon points="867,420 877,425 867,430" fill="#006BFF"/>
+  <rect x="535" y="411" width="240" height="26" rx="5" fill="#E6F0FF" stroke="#BFDBFE"/>
+  <text x="655" y="429" text-anchor="middle" font-size="12" font-weight="500" fill="#003E99">Book event for Tuesday 2pm</text>
+
+  <!-- Step 7: Booking confirmed -->
+  <line x1="870" y1="465" x2="465" y2="465" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="468,460 458,465 468,470" fill="#9CA3AF"/>
+  <rect x="560" y="451" width="220" height="26" rx="5" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="670" y="469" text-anchor="middle" font-size="12" font-weight="500" fill="#166534">Booking confirmed + ID</text>
+
+  <!-- Step 8: Agent confirms to caller -->
+  <line x1="465" y1="510" x2="110" y2="510" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="113,505 103,510 113,515" fill="#9CA3AF"/>
+  <rect x="130" y="496" width="325" height="26" rx="5" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="292" y="514" text-anchor="middle" font-size="12" font-weight="500" fill="#166534">"You're booked. Confirmation sent via text + email."</text>
+
+  <!-- Step 9: Calendly sends confirmation -->
+  <rect x="770" y="550" width="200" height="28" rx="6" fill="#FEF3C7" stroke="#FDE68A"/>
+  <text x="870" y="569" text-anchor="middle" font-size="12" font-weight="600" fill="#92400E">Sends SMS + email confirmation</text>
+
+  <!-- Step 10: Reschedule or cancel later (optional flow) -->
+  <line x1="110" y1="620" x2="465" y2="620" stroke="#9CA3AF" stroke-width="1.5"/>
+  <polygon points="462,615 472,620 462,625" fill="#9CA3AF"/>
+  <rect x="155" y="606" width="280" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="295" y="624" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">"Need to reschedule or cancel"</text>
+
+  <line x1="465" y1="665" x2="870" y2="665" stroke="#006BFF" stroke-width="2"/>
+  <polygon points="867,660 877,665 867,670" fill="#006BFF"/>
+  <rect x="525" y="651" width="260" height="26" rx="5" fill="#E6F0FF" stroke="#BFDBFE"/>
+  <text x="655" y="669" text-anchor="middle" font-size="12" font-weight="500" fill="#003E99">Reschedule or cancel event</text>
+
+</svg>
+
+<div class="caption">Flowchart illustrating how Retell AI agents check availability, book, reschedule, and cancel events on Calendly<br>during live voice conversations, keeping the entire scheduling workflow inside a single call.</div>
+</div>
+
+<!-- RIGHT: Step-by-step walkthrough -->
+<div class="steps-col">
+  <div class="steps-title">How it works</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text"><strong>Customer requests appointment.</strong> The customer tells the Retell AI agent they want to book an appointment, schedule a call, or set up a meeting. The agent recognizes the scheduling intent.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>Check availability.</strong> Retell calls the <span class="highlight">Calendly</span> API to fetch open time slots for the selected event type. Event type, host user, timezone, and duration are set during integration configuration.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>Calendly returns available slots.</strong> Calendly returns the open time slots based on the host's calendar availability, respecting connected calendars, buffer times, and existing bookings.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-text"><strong>Agent offers slots to caller.</strong> The agent presents a few options in natural language, for example "I have Tuesday at 2pm or Wednesday at 3pm, which works better for you?"</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-text"><strong>Customer picks a time.</strong> The customer confirms their preferred slot verbally.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">6</div>
+    <div class="step-text"><strong>Book the event.</strong> Retell calls the Calendly API to create the booking with caller details, email, phone, and any required event questions collected during the conversation.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">7</div>
+    <div class="step-text"><strong>Calendly confirms booking.</strong> Calendly returns the booking ID and confirmation. The event is now on the host's calendar.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">8</div>
+    <div class="step-text"><strong>Agent confirms to caller.</strong> The agent tells the customer their appointment is booked and that a confirmation is on the way via text and email.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">9</div>
+    <div class="step-text"><strong>Calendly sends SMS and email confirmation.</strong> Calendly's default is email only. Retell adds SMS so the caller gets an instant text confirmation while still on the phone, with the calendar invite, meeting link, and reschedule or cancel options.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">10</div>
+    <div class="step-text"><strong>Reschedule or cancel (optional).</strong> If the customer calls back later to change or cancel, the agent looks up the booking by phone or email and reschedules or cancels directly through Calendly, all inside the same conversation.</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

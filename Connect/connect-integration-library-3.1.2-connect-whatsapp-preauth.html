@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Connect WhatsApp (Pre-auth)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 280px; background: #F5F7FA; display: flex; flex-direction: column; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+  .footer { padding: 16px 14px; }
+  .main { flex: 1; background: #fff; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(6px); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .connect-modal { background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 560px; display: flex; flex-direction: column; overflow: hidden; max-height: 90vh; }
+  .cm-header { display: flex; align-items: center; gap: 12px; padding: 24px 24px 0; }
+  .cm-logo { width: 32px; height: 32px; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .cm-logo img { width: 32px; height: 32px; }
+  .cm-name { font-size: 18px; font-weight: 600; color: #0E121B; }
+  .cm-close { margin-left: auto; width: 32px; height: 32px; border: none; background: none; cursor: pointer; color: #6B7280; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .cm-tabs { display: flex; padding: 16px 24px 0; border-bottom: 1px solid #E1E4EA; }
+  .cm-tab { padding: 8px 16px 12px; font-size: 14px; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .cm-tab.active { color: #0E121B; font-weight: 500; border-bottom-color: #0E121B; }
+  .cm-body { padding: 24px; overflow-y: auto; }
+
+  .form-group { margin-bottom: 20px; }
+  .form-label { display: block; font-size: 14px; font-weight: 500; color: #0E121B; margin-bottom: 6px; }
+  .form-input { width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; }
+  .form-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.1); }
+
+  /* Provider toggle (Meta vs Twilio) */
+  .env-row { display: flex; gap: 8px; margin-bottom: 6px; }
+  .env-opt { flex: 1; padding: 10px 12px; border: 1px solid #E1E4EA; border-radius: 8px; cursor: pointer; font-size: 13px; }
+  .env-opt.active { border-color: #25D366; background: #F0FDF4; box-shadow: 0 0 0 1px #25D366; }
+  .env-opt-title { font-weight: 500; color: #0E121B; margin-bottom: 2px; }
+  .env-opt-desc { font-size: 11px; color: #6B7280; }
+
+  .oauth-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: #99A0AE; font-size: 13px; }
+  .oauth-divider::before, .oauth-divider::after { content: ''; flex: 1; height: 1px; background: #E1E4EA; }
+
+  /* Facebook Login for Business button (Meta's official OAuth) */
+  .oauth-fb-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 48px; border: none; border-radius: 8px; background: #1877F2; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+  .oauth-fb-btn:hover { background: #166FE5; }
+  .oauth-fb-btn svg { width: 22px; height: 22px; }
+
+  .oauth-note { font-size: 13px; color: #6B7280; line-height: 1.5; margin-top: 14px; }
+  .oauth-note strong { color: #0E121B; }
+
+  .scope-card { margin-top: 20px; padding: 14px; background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 8px; }
+  .scope-title { font-size: 12px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 10px; }
+  .scope-item { display: flex; gap: 10px; font-size: 13px; color: #374151; margin-bottom: 8px; line-height: 1.45; }
+  .scope-item:last-child { margin-bottom: 0; }
+  .scope-icon { width: 16px; height: 16px; flex-shrink: 0; color: #25D366; margin-top: 2px; }
+  .scope-item strong { color: #0E121B; font-weight: 600; }
+  .scope-item code { font-family: 'SF Mono', Menlo, monospace; font-size: 11px; background: #fff; padding: 1px 5px; border-radius: 3px; border: 1px solid #E1E4EA; color: #128C3E; }
+
+  .prereq-note { display: flex; gap: 10px; padding: 12px; margin-top: 16px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; font-size: 13px; color: #78350F; line-height: 1.45; }
+  .prereq-note svg { width: 16px; height: 16px; flex-shrink: 0; color: #D97706; margin-top: 1px; }
+  .prereq-note strong { color: #451A03; font-weight: 600; }
+
+  .cm-footer { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px 20px; border-top: 1px solid #E1E4EA; flex-shrink: 0; }
+  .btn-back { height: 36px; padding: 0 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 500; color: #525866; cursor: pointer; }
+  .btn-connect { height: 36px; padding: 0 20px; border: none; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; opacity: 0.5; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73ZM205.22 49.69C202.9 52 199.43 52.58 195.38 52.58H176.28V26.54H193.64C198.85 26.54 201.74 27.12 204.64 28.86C208.11 30.59 209.85 34.64 209.85 39.27C209.85 43.9 208.11 47.38 205.22 49.69Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item current">Integrations</li><li class="nav-item">Billing</li><li class="nav-item">Settings</li></ul></div>
+  </div>
+  <div class="footer"></div>
+</aside>
+
+<main class="main"></main>
+
+<div class="modal-overlay">
+  <div class="connect-modal">
+    <div class="cm-header">
+      <div class="cm-logo"><img src="https://www.google.com/s2/favicons?domain=whatsapp.com&sz=64" alt="WhatsApp"></div>
+      <span class="cm-name">WhatsApp</span>
+      <button class="cm-close">✕</button>
+    </div>
+
+    <div class="cm-tabs">
+      <div class="cm-tab active">Configure</div>
+      <div class="cm-tab">Tools</div>
+      <div class="cm-tab">About</div>
+    </div>
+
+    <div class="cm-body">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input type="text" class="form-input" value="WhatsApp">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Provider</label>
+        <div class="env-row">
+          <div class="env-opt active">
+            <div class="env-opt-title">Meta Business API</div>
+            <div class="env-opt-desc">Direct, recommended</div>
+          </div>
+          <div class="env-opt">
+            <div class="env-opt-title">Twilio</div>
+            <div class="env-opt-desc">BYO existing WhatsApp sender</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="oauth-divider">then</div>
+
+      <button class="oauth-fb-btn" onclick="window.location='connect-integration-library-3.1.2-whatsapp-meta-oauth-popup.html'">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        Continue with Facebook
+      </button>
+      <p class="oauth-note">You'll be redirected to Meta to sign in and select the WhatsApp Business Account and phone number you want Retell to manage. Retell is positioned as a Meta Tech Provider in the Facebook Login for Business flow.</p>
+
+      <div class="prereq-note">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5L1 14h14L8 1.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 6v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11.5" r="0.8" fill="currentColor"/></svg>
+        <div><strong>Prerequisite:</strong> You need an existing Meta Business Account with a verified WhatsApp Business Account and phone number.</div>
+      </div>
+
+      <div class="scope-card">
+        <div class="scope-title">Retell will request these permissions</div>
+        <div class="scope-item">
+          <svg class="scope-icon" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><code>whatsapp_business_messaging</code> <strong>Send and receive</strong> WhatsApp messages, media, and quick reply buttons through your Business Account</div>
+        </div>
+        <div class="scope-item">
+          <svg class="scope-icon" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><code>whatsapp_business_management</code> <strong>Manage phone numbers</strong> and read display name, profile, and verification status for the connected WhatsApp Business Account</div>
+        </div>
+        <div class="scope-item">
+          <svg class="scope-icon" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><code>business_management</code> <strong>Access the connected</strong> Meta Business Account to list available WhatsApp assets during setup</div>
+        </div>
+        <div class="scope-item">
+          <svg class="scope-icon" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><code>oauth</code> <strong>Stay connected</strong> with refresh tokens so you don't re-auth every session</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cm-footer">
+      <button class="btn-back">Back</button>
+      <button class="btn-connect">Connect</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

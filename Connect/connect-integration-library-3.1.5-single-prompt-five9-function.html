@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Single Prompt (Five9 Warm Transfer Function)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  /* Top bar */
+  .top-bar-wrap { background: #fff; flex-shrink: 0; }
+  .top-bar-row1 { display: flex; align-items: center; height: 40px; padding: 8px 16px 0; gap: 10px; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; color: #525866; flex-shrink: 0; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; white-space: nowrap; }
+  .agent-name-edit { color: #99A0AE; cursor: pointer; margin-left: 4px; display: inline-flex; align-items: center; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+  .top-tab { padding: 4px 8px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; }
+  .top-tab.active { font-weight: 500; color: #0E121B; }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-dots { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; cursor: pointer; color: #525866; }
+  .btn-publish { height: 32px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; }
+  .top-bar-row2 { display: flex; align-items: center; height: 20px; padding: 2px 16px 8px 50px; }
+  .agent-meta { font-size: 12px; color: #99A0AE; white-space: nowrap; }
+
+  /* Model bar */
+  .model-bar { display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .mb-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; white-space: nowrap; }
+  .mb-pill:hover { background: #F3F4F6; }
+  .mb-spacer { flex: 1; }
+  .mb-handbook { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; font-weight: 500; color: #374151; background: #fff; cursor: pointer; }
+
+  /* Layout */
+  .builder-layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* Left prompt */
+  .prompt-panel { width: 42%; display: flex; flex-direction: column; border-right: 1px solid #E1E4EA; overflow: hidden; }
+  .prompt-area { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; }
+  .prompt-box { flex: 1; border: 1px solid #d4d4d4; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; min-height: 320px; }
+  .prompt-textarea { width: 100%; flex: 1; border: none; padding: 14px 16px; outline: none; font-size: 13.5px; color: #0A0A0A; line-height: 1.65; resize: none; font-family: inherit; }
+
+  /* Middle settings */
+  .settings-panel { width: 36%; overflow-y: auto; background: #fff; border-right: 1px solid #E1E4EA; }
+  .section { border-bottom: 1px solid #E1E4EA; }
+  .section-header { display: flex; align-items: center; gap: 8px; padding: 14px 16px; cursor: pointer; }
+  .section-header:hover { background: rgba(0,0,0,0.02); }
+  .section-icon { width: 18px; height: 18px; color: #525866; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .section-title { font-size: 14px; font-weight: 500; color: #0E121B; flex: 1; }
+  .section-chevron { color: #99A0AE; transition: transform 0.2s; }
+  .section-chevron.open { transform: rotate(180deg); }
+  .section-body { padding: 0 16px 16px; }
+  .section-desc { font-size: 12px; color: #6B7280; margin-bottom: 12px; line-height: 1.5; }
+
+  /* Function row */
+  .function-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #F9FAFB; border: 1px solid #EAECEF; border-radius: 6px; margin-bottom: 6px; }
+  .function-row.active { background: #fff; border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.12); }
+  .function-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .function-icon.f9 { background: #1A4DA8; color: #fff; font-size: 9px; font-weight: 700; border-radius: 3px; }
+  .function-name { font-size: 13px; color: #0E121B; flex: 1; font-family: 'SFMono-Regular', Menlo, monospace; }
+  .function-badge { font-size: 10px; font-weight: 500; color: #3d64d7; background: #ecf3ff; padding: 2px 6px; border-radius: 3px; }
+  .function-actions { display: flex; gap: 2px; }
+  .function-actions button { width: 24px; height: 24px; border: none; background: none; cursor: pointer; color: #99A0AE; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+  .function-actions button:hover { background: #E1E4EA; color: #525866; }
+
+  .add-btn-inline { display: flex; align-items: center; gap: 6px; padding: 8px 0; font-size: 13px; font-weight: 500; color: #3d64d7; cursor: pointer; border: none; background: none; font-family: inherit; position: relative; }
+
+  /* Add function dropdown */
+  .add-dropdown { position: absolute; top: 100%; left: 0; width: 340px; background: #fff; border: 1px solid #E1E4EA; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 50; max-height: 520px; overflow-y: auto; padding: 6px 0; }
+  .dd-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; font-size: 14px; color: #0E121B; cursor: pointer; text-align: left; }
+  .dd-item:hover { background: #F5F7FA; }
+  .dd-item-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #525866; border-radius: 3px; overflow: hidden; }
+  .dd-item-icon img { width: 18px; height: 18px; object-fit: contain; border-radius: 3px; }
+  .dd-item-name { flex: 1; }
+  .dd-item-chevron { color: #C5CAD3; flex-shrink: 0; display: flex; align-items: center; }
+  .dd-divider { height: 1px; background: #E1E4EA; margin: 4px 14px; }
+  .dd-footer-link { display: flex; align-items: center; gap: 8px; padding: 9px 16px; font-size: 13px; font-weight: 500; color: #3d64d7; cursor: pointer; text-decoration: none; }
+  .dd-footer-link:hover { background: #F5F7FA; }
+  .dd-group-header { display: flex; align-items: center; gap: 10px; padding: 9px 16px; font-size: 14px; font-weight: 500; color: #0E121B; cursor: pointer; text-align: left; border-radius: 6px; margin: 0 6px; }
+  .dd-group-header:hover { background: rgba(0,0,0,0.04); }
+  .dd-group-icon { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 3px; overflow: hidden; }
+  .dd-group-icon img { width: 16px; height: 16px; object-fit: contain; border-radius: 3px; }
+  .dd-group-name { flex: 1; }
+  .dd-group-caret { color: #525866; flex-shrink: 0; display: flex; align-items: center; transition: transform 0.15s ease; }
+  .dd-group[data-expanded="true"] > .dd-group-header .dd-group-caret { transform: rotate(90deg); }
+  .dd-group-children { display: none; padding: 2px 0 4px; }
+  .dd-group[data-expanded="true"] > .dd-group-children { display: block; }
+  .dd-child { display: flex; align-items: center; padding: 7px 16px 7px 44px; font-size: 13px; color: #0E121B; cursor: pointer; border-radius: 6px; margin: 0 6px; }
+  .dd-child:hover { background: rgba(0,0,0,0.04); }
+  .dd-child.dd-child-disabled { color: #C5CAD3; cursor: default; }
+  .dd-child.dd-child-disabled:hover { background: transparent; }
+  .dd-connect-link { margin-left: auto; font-size: 13px; font-weight: 500; color: #3d64d7; text-decoration: none; }
+  .dd-connect-link:hover { text-decoration: underline; }
+
+  /* Right: Function config panel */
+  .config-panel { width: 22%; min-width: 380px; background: #fff; border-left: 1px solid #E1E4EA; display: flex; flex-direction: column; overflow: hidden; }
+  .cp-header { padding: 14px 16px 12px; border-bottom: 1px solid #E1E4EA; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .cp-header-logo { width: 30px; height: 30px; background: #1A4DA8; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 6px; flex-shrink: 0; }
+  .cp-header-title { font-size: 14px; font-weight: 600; color: #0E121B; font-family: 'SFMono-Regular', Menlo, monospace; }
+  .cp-header-sub { font-size: 11px; color: #99A0AE; margin-top: 2px; }
+  .cp-header-spacer { flex: 1; }
+  .cp-close { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #99A0AE; cursor: pointer; border-radius: 4px; }
+  .cp-close:hover { background: #F3F4F6; }
+
+  .cp-body { flex: 1; overflow-y: auto; padding: 16px; }
+  .cp-section { margin-bottom: 20px; }
+  .cp-section-title { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .cp-label { font-size: 12px; font-weight: 500; color: #525866; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+  .cp-help { font-size: 11px; color: #99A0AE; margin-top: 4px; line-height: 1.45; }
+
+  .cp-input { width: 100%; height: 34px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; color: #0E121B; font-family: inherit; outline: none; }
+  .cp-input:focus { border-color: #3d64d7; }
+  .cp-input.mono { font-family: 'SFMono-Regular', Menlo, monospace; font-size: 12px; }
+
+  .seg-ctrl { display: flex; background: #F5F7FA; border-radius: 8px; padding: 3px; gap: 3px; margin-bottom: 4px; }
+  .seg-opt { flex: 1; padding: 7px 10px; text-align: center; font-size: 12px; font-weight: 500; color: #525866; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .seg-opt.active { background: #fff; color: #0E121B; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+
+  .cp-select { width: 100%; height: 36px; padding: 0 32px 0 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; color: #0E121B; background: #fff; appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M6 8l4 4 4-4' stroke='%2399A0AE' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; outline: none; font-family: inherit; cursor: pointer; }
+  .detected { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #1FC16B; margin-top: 6px; }
+
+  .cp-textarea { width: 100%; min-height: 70px; padding: 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; color: #0E121B; font-family: inherit; resize: vertical; outline: none; line-height: 1.5; }
+
+  .toggle-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; }
+  .toggle-row + .toggle-row { border-top: 1px solid #F3F4F6; }
+  .toggle-text { flex: 1; }
+  .toggle-label { font-size: 13px; font-weight: 500; color: #0E121B; margin-bottom: 1px; }
+  .toggle-desc { font-size: 11px; color: #6B7280; line-height: 1.4; }
+  .toggle { width: 32px; height: 18px; background: #D1D5DB; border-radius: 10px; position: relative; flex-shrink: 0; cursor: pointer; margin-top: 2px; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: left 0.15s; }
+  .toggle.on { background: #0E121B; }
+  .toggle.on::after { left: 16px; }
+
+  .param-card { border: 1px solid #E1E4EA; border-radius: 8px; padding: 12px; margin-bottom: 8px; background: #FAFAFA; }
+  .param-head { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .param-name { font-size: 12px; font-weight: 600; color: #0E121B; font-family: 'SFMono-Regular', Menlo, monospace; }
+  .param-type { font-size: 10px; font-weight: 500; color: #3d64d7; background: #ecf3ff; padding: 1px 5px; border-radius: 3px; }
+  .param-required { font-size: 10px; font-weight: 500; color: #EF4444; }
+  .param-desc { font-size: 11px; color: #6B7280; line-height: 1.4; margin-bottom: 6px; }
+  .param-src { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #525866; }
+  .param-src-chip { background: #fff; border: 1px solid #E1E4EA; border-radius: 4px; padding: 2px 6px; font-family: 'SFMono-Regular', Menlo, monospace; font-size: 11px; color: #3d64d7; }
+
+  .compliance-box { background: #ecf3ff; border: 1px solid #c7d7ff; border-radius: 8px; padding: 10px 12px; display: flex; gap: 8px; font-size: 12px; color: #0E121B; line-height: 1.5; }
+  .compliance-box a { color: #3d64d7; text-decoration: none; font-weight: 500; }
+
+  .cp-footer { padding: 10px 16px; border-top: 1px solid #E1E4EA; display: flex; gap: 8px; flex-shrink: 0; justify-content: flex-end; }
+  .btn-cancel { height: 32px; padding: 0 14px; border: 1px solid #E1E4EA; border-radius: 6px; background: #fff; font-size: 13px; color: #525866; cursor: pointer; font-family: inherit; }
+  .btn-save { height: 32px; padding: 0 14px; border: none; border-radius: 6px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+</style>
+</head>
+<body>
+
+<div class="top-bar-wrap">
+  <div class="top-bar-row1">
+    <div class="home-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+    <span class="agent-name">Nesto Outbound Qualifier</span>
+    <span class="agent-name-edit"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></span>
+    <span class="top-spacer"></span>
+    <div class="top-tabs">
+      <span class="top-tab active">Create</span>
+      <span class="top-tab">Simulation</span>
+    </div>
+    <div class="top-actions">
+      <button class="btn-dots"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="8" r="1.25" fill="currentColor"/><circle cx="8" cy="8" r="1.25" fill="currentColor"/><circle cx="12" cy="8" r="1.25" fill="currentColor"/></svg></button>
+      <button class="btn-publish"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Publish</button>
+    </div>
+  </div>
+  <div class="top-bar-row2">
+    <span class="agent-meta">Agent ID: ag_ne...c4a &bull; Retell LLM ID: ll_ne...4b2 &bull; $0.115/min &bull; 950-1240ms latency &bull; Five9 SIP connected</span>
+  </div>
+</div>
+
+<div class="model-bar">
+  <span class="mb-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#525866" stroke-width="1.3"/><path d="M5 8h6M8 5v6" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg> GPT 4.1 <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+  <span class="mb-pill"><img src="https://ui-avatars.com/api/?name=C&size=20&background=E8D5C4&color=8B6F47&bold=true&rounded=true&format=svg" width="18" height="18" style="border-radius:50%;"> Cimo <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+  <span class="mb-pill">🇺🇸 English <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+  <span class="mb-spacer"></span>
+  <span class="mb-handbook"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="#525866" stroke-width="1.3"/><path d="M6 5h4M6 7.5h4M6 10h2" stroke="#525866" stroke-width="1.2" stroke-linecap="round"/></svg> Agent Handbook</span>
+</div>
+
+<div class="builder-layout">
+
+  <!-- Prompt -->
+  <div class="prompt-panel">
+    <div class="prompt-area">
+      <div class="prompt-box">
+        <textarea class="prompt-textarea">## Identity
+You are Sam from Nesto Mortgage. You are calling qualified leads who requested a refinance quote in the last 7 days. The call is routed inbound through Five9 to comply with TCPA windows and DNC filtering.
+
+## Objective
+1. Verify the prospect still wants to discuss refinancing.
+2. Collect loan amount, property state, and current rate.
+3. If the prospect is interested and loan &gt; $250k → transfer to a licensed underwriter in Five9 using `transfer_to_five9_queue` with warm handoff.
+4. If not interested or not qualified → offer a callback and end politely.
+
+## Style
+Warm, concise, no jargon. Mirror the caller's pace.
+
+## Rules
+- Never call outside 8am-9pm in the prospect's local time. Five9 enforces this.
+- If the caller asks to be removed → `end_call` and mark DNC.
+- Always confirm consent before transfer.</textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings middle -->
+  <div class="settings-panel">
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 7h6M7 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        <span class="section-title">Functions</span>
+        <span style="font-size:11px; color:#99A0AE;">3</span>
+        <span class="section-chevron open"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+      <div class="section-body">
+        <div class="section-desc">Tools the agent can call during a conversation. Functions for connected integrations appear below.</div>
+
+        <div class="function-row">
+          <span class="function-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#525866" stroke-width="1.3"/><path d="M4 8h8" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+          <span class="function-name">end_call</span>
+          <div class="function-actions">
+            <button><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></button>
+            <button><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+          </div>
+        </div>
+
+        <div class="function-row">
+          <span class="function-icon"><img src="https://www.google.com/s2/favicons?domain=cal.com&sz=32" width="16" height="16" style="border-radius:3px;"></span>
+          <span class="function-name">book_callback_cal_com</span>
+          <div class="function-actions">
+            <button><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></button>
+            <button><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+          </div>
+        </div>
+
+        <!-- Five9 function (selected / being edited) -->
+        <div class="function-row active">
+          <span class="function-icon f9">F9</span>
+          <span class="function-name">transfer_to_five9_queue</span>
+          <span class="function-badge">WARM</span>
+          <div class="function-actions">
+            <button><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></button>
+            <button><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+          </div>
+        </div>
+
+        <button class="add-btn-inline" onclick="toggleDropdown(event)">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add
+
+          <div class="add-dropdown" id="add-dropdown" style="display: none;" onclick="event.stopPropagation()">
+            <!-- Built-in -->
+            <div class="dd-item"><span class="dd-item-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg></span><span class="dd-item-name">End Call</span><span class="dd-item-chevron"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div>
+            <div class="dd-item"><span class="dd-item-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 3l6 5-6 5V3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span><span class="dd-item-name">Call Transfer</span><span class="dd-item-chevron"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div>
+            <div class="dd-item"><span class="dd-item-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="6" r="3" stroke="currentColor" stroke-width="1.3"/><circle cx="11" cy="10" r="3" stroke="currentColor" stroke-width="1.3"/></svg></span><span class="dd-item-name">Agent Transfer</span><span class="dd-item-chevron"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div>
+            <div class="dd-item"><span class="dd-item-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="3" width="10" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M6 6h4M6 8h4M6 10h2" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg></span><span class="dd-item-name">Press Digit (IVR Navigation)</span><span class="dd-item-chevron"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div>
+            <div class="dd-item"><span class="dd-item-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4h10v7H7l-3 2V4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></span><span class="dd-item-name">In-Call SMS</span><span class="dd-item-chevron"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div>
+            <div class="dd-item"><span class="dd-item-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8h8M8 4v8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><span class="dd-item-name">Extract Dynamic Variable</span><span class="dd-item-chevron"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div>
+            <div class="dd-item"><span class="dd-item-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 4l-2 4 2 4M11 4l2 4-2 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><span class="dd-item-name">Code</span><span class="dd-item-chevron"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div>
+            <div class="dd-item"><span class="dd-item-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><span class="dd-item-name">Custom Function</span><span class="dd-item-chevron"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div>
+
+            <div class="dd-divider"></div>
+
+            <!-- Cal.com (connected) -->
+            <div class="dd-group" data-expanded="false">
+              <div class="dd-group-header" onclick="toggleDdGroup(event)">
+                <span class="dd-group-icon"><img src="https://www.google.com/s2/favicons?domain=cal.com&sz=32" alt=""></span>
+                <span class="dd-group-name">Cal.com</span>
+                <span class="dd-group-caret"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+              </div>
+              <div class="dd-group-children">
+                <div class="dd-child">Check Calendar Availability</div>
+                <div class="dd-child">Book on the Calendar</div>
+              </div>
+            </div>
+
+            <!-- Salesforce (not connected) -->
+            <div class="dd-group" data-expanded="false">
+              <div class="dd-group-header" onclick="toggleDdGroup(event)">
+                <span class="dd-group-icon"><img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=32" alt=""></span>
+                <span class="dd-group-name">Salesforce</span>
+                <a class="dd-connect-link" href="#" onclick="event.stopPropagation()">Connect</a>
+                <span class="dd-group-caret" style="margin-left:10px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+              </div>
+              <div class="dd-group-children">
+                <div class="dd-child dd-child-disabled">Get Contact</div>
+                <div class="dd-child dd-child-disabled">Update Contact</div>
+                <div class="dd-child dd-child-disabled">Create Contact</div>
+                <div class="dd-child dd-child-disabled">Get Lead</div>
+                <div class="dd-child dd-child-disabled">Create Lead</div>
+                <div class="dd-child dd-child-disabled">Update Lead</div>
+                <div class="dd-child dd-child-disabled">Get Account</div>
+                <div class="dd-child dd-child-disabled">Create Case</div>
+                <div class="dd-child dd-child-disabled">Update Case</div>
+                <div class="dd-child dd-child-disabled">Create Task</div>
+                <div class="dd-child dd-child-disabled">Query SOQL</div>
+                <div class="dd-child dd-child-disabled">Search SOSL</div>
+              </div>
+            </div>
+
+            <!-- HubSpot (not connected) -->
+            <div class="dd-group" data-expanded="false">
+              <div class="dd-group-header" onclick="toggleDdGroup(event)">
+                <span class="dd-group-icon"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=32" alt=""></span>
+                <span class="dd-group-name">HubSpot</span>
+                <a class="dd-connect-link" href="#" onclick="event.stopPropagation()">Connect</a>
+                <span class="dd-group-caret" style="margin-left:10px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+              </div>
+              <div class="dd-group-children">
+                <div class="dd-child dd-child-disabled">Get Contact</div>
+                <div class="dd-child dd-child-disabled">Update Contact</div>
+                <div class="dd-child dd-child-disabled">Create Contact</div>
+                <div class="dd-child dd-child-disabled">Get Company</div>
+                <div class="dd-child dd-child-disabled">Update Company</div>
+                <div class="dd-child dd-child-disabled">Get Deal</div>
+                <div class="dd-child dd-child-disabled">Update Deal</div>
+                <div class="dd-child dd-child-disabled">Create Ticket</div>
+              </div>
+            </div>
+
+            <!-- Five9 (connected, expanded by default) -->
+            <div class="dd-group" data-expanded="true">
+              <div class="dd-group-header" onclick="toggleDdGroup(event)">
+                <span class="dd-group-icon" style="background:#1A4DA8;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:3px;">F9</span>
+                <span class="dd-group-name">Five9</span>
+                <span class="dd-group-caret"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+              </div>
+              <div class="dd-group-children">
+                <div class="dd-child">Get Agent State</div>
+                <div class="dd-child">Transfer to Queue</div>
+                <div class="dd-child">Create Disposition</div>
+                <div class="dd-child">Log Call Activity</div>
+              </div>
+            </div>
+
+            <div class="dd-divider"></div>
+            <a class="dd-footer-link" href="connect-integration-library-3.1.1-add-integration-modal.html"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 2v2.5a1.5 1.5 0 0 1-1.5 1.5H2M14 6h-2.5A1.5 1.5 0 0 1 10 4.5V2M2 10h2.5A1.5 1.5 0 0 1 6 11.5V14M10 14v-2.5a1.5 1.5 0 0 1 1.5-1.5H14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> See more integrations</a>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Other collapsed sections for context -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 3l7 4v6l-7 4-7-4V7l7-4z" stroke="currentColor" stroke-width="1.5"/></svg></span>
+        <span class="section-title">Knowledge Base</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 10a5 5 0 1 1 10 0 5 5 0 0 1-10 0z M10 3v2 M10 15v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        <span class="section-title">Speech Settings</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M17 13.5c0 1-1.5 2.5-2.5 2.5s-3-1.5-5-3.5S6 8 6 6.5 7.5 4 8.5 4c.5 0 1 .2 1.2.5L11 7l-1.5 2L12 11.5l2-1.5 2.5 1.3c.3.2.5.7.5 1.2z" stroke="currentColor" stroke-width="1.5"/></svg></span>
+        <span class="section-title">Call Related Settings</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 9h14" stroke="currentColor" stroke-width="1.5"/></svg></span>
+        <span class="section-title">Extract Data After Calls</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 3l6 3v4c0 3.5-2.5 5.5-6 6.5C4.5 15.5 2 13.5 2 10V6l8-3z" stroke="currentColor" stroke-width="1.5"/></svg></span>
+        <span class="section-title">Security Setting</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Function config panel for transfer_to_five9_queue -->
+  <aside class="config-panel">
+    <div class="cp-header">
+      <span class="cp-header-logo">F9</span>
+      <div>
+        <div class="cp-header-title">transfer_to_five9_queue</div>
+        <div class="cp-header-sub">Five9 function · warm transfer</div>
+      </div>
+      <span class="cp-header-spacer"></span>
+      <span class="cp-close"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+    </div>
+
+    <div class="cp-body">
+
+      <!-- Function name & description for LLM -->
+      <div class="cp-section">
+        <div class="cp-label">Function name</div>
+        <input class="cp-input mono" value="transfer_to_five9_queue"/>
+        <div class="cp-help">The agent will call this function by name. Snake case recommended.</div>
+
+        <div style="height:12px;"></div>
+        <div class="cp-label">Description (seen by LLM)</div>
+        <textarea class="cp-textarea">Warm transfer the live caller to a Five9 queue of licensed underwriters. Use only when the caller has confirmed consent, qualifies (loan amount &gt; $250k), and is within a TCPA-allowed calling window. The AI will stay on the line to brief the Five9 agent before dropping.</textarea>
+      </div>
+
+      <!-- Transfer mode -->
+      <div class="cp-section">
+        <div class="cp-section-title">Transfer mode</div>
+        <div class="seg-ctrl">
+          <div class="seg-opt active">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Warm
+          </div>
+          <div class="seg-opt">Cold</div>
+          <div class="seg-opt">Merge</div>
+        </div>
+        <div class="cp-help">Warm: AI briefs the human agent on a private leg, then drops. Cold: AI hangs up after transfer. Merge: 3-way call continues.</div>
+      </div>
+
+      <!-- Destination (hardcoded function target) -->
+      <div class="cp-section">
+        <div class="cp-section-title">Destination</div>
+        <div class="cp-label">Five9 queue</div>
+        <select class="cp-select">
+          <option>Senior Underwriters (queue_su_01)</option>
+          <option>General Support (queue_gs_01)</option>
+          <option>Retention (queue_ret_01)</option>
+          <option>Spanish Language (queue_esp_01)</option>
+        </select>
+        <div class="detected">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          12 queues auto-detected · synced 4 min ago
+        </div>
+
+        <div style="height:12px;"></div>
+        <div class="cp-label">Campaign</div>
+        <select class="cp-select">
+          <option>Refi Inbound Q2</option>
+          <option>Nurture Outbound</option>
+          <option>— None —</option>
+        </select>
+      </div>
+
+      <!-- Function parameters (LLM-extracted) -->
+      <div class="cp-section">
+        <div class="cp-section-title">Parameters the LLM fills in</div>
+        <div class="cp-help" style="margin-bottom:10px;">These are arguments the agent must collect before calling the function. They become Five9 call attributes on transfer.</div>
+
+        <div class="param-card">
+          <div class="param-head">
+            <span class="param-name">caller_name</span>
+            <span class="param-type">string</span>
+            <span class="param-required">required</span>
+          </div>
+          <div class="param-desc">Full name of the caller, collected during qualification.</div>
+          <div class="param-src">→ Five9 attribute: <span class="param-src-chip">caller_name</span></div>
+        </div>
+
+        <div class="param-card">
+          <div class="param-head">
+            <span class="param-name">loan_amount</span>
+            <span class="param-type">number</span>
+            <span class="param-required">required</span>
+          </div>
+          <div class="param-desc">Mortgage principal in USD. Must be &gt; 250000 per Nesto qualification rules.</div>
+          <div class="param-src">→ Five9 attribute: <span class="param-src-chip">loan_amount_usd</span></div>
+        </div>
+
+        <div class="param-card">
+          <div class="param-head">
+            <span class="param-name">property_state</span>
+            <span class="param-type">string</span>
+            <span class="param-required">required</span>
+          </div>
+          <div class="param-desc">US state code (e.g., "CA", "TX"). Five9 TCPA rules use this to enforce state-level calling windows.</div>
+          <div class="param-src">→ Five9 attribute: <span class="param-src-chip">property_state</span></div>
+        </div>
+
+        <div class="param-card">
+          <div class="param-head">
+            <span class="param-name">intent_summary</span>
+            <span class="param-type">string</span>
+          </div>
+          <div class="param-desc">One sentence summary the agent writes of why the caller wants to speak to a human.</div>
+          <div class="param-src">→ Five9 screen pop: <span class="param-src-chip">interaction_note</span></div>
+        </div>
+
+        <button class="add-btn-inline" style="margin-top:4px;">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add parameter
+        </button>
+      </div>
+
+      <!-- Announcement -->
+      <div class="cp-section">
+        <div class="cp-section-title">Announcement to Five9 agent</div>
+        <div class="cp-help" style="margin-bottom:6px;">Spoken on the private warm-transfer leg before the caller joins.</div>
+        <textarea class="cp-textarea">Hi, I have {{caller_name}} on the line. They want to refinance a {{loan_amount}} mortgage in {{property_state}}. Summary: {{intent_summary}}. Connecting them now.</textarea>
+      </div>
+
+      <!-- Context passed -->
+      <div class="cp-section">
+        <div class="cp-section-title">Context passed to Five9</div>
+        <div class="toggle-row">
+          <div class="toggle-text">
+            <div class="toggle-label">Conversation summary</div>
+            <div class="toggle-desc">AI-generated 2-3 sentence summary as Five9 screen pop note.</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-text">
+            <div class="toggle-label">Transcript deep link</div>
+            <div class="toggle-desc">Link to the Retell transcript attached to the Five9 interaction.</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-text">
+            <div class="toggle-label">Sentiment tag</div>
+            <div class="toggle-desc">Passes caller sentiment as a Five9 custom attribute.</div>
+          </div>
+          <div class="toggle"></div>
+        </div>
+      </div>
+
+      <!-- Behavior -->
+      <div class="cp-section">
+        <div class="cp-section-title">Transfer behavior</div>
+        <div class="toggle-row">
+          <div class="toggle-text">
+            <div class="toggle-label">Wait for agent accept</div>
+            <div class="toggle-desc">AI stays on until the Five9 agent confirms handoff.</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-text">
+            <div class="toggle-label">Confirm consent before transfer</div>
+            <div class="toggle-desc">LLM must receive explicit "yes" before function executes.</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+        <div style="height:10px;"></div>
+        <div class="cp-label">Ring timeout</div>
+        <select class="cp-select">
+          <option>30 seconds</option>
+          <option selected>45 seconds</option>
+          <option>60 seconds</option>
+          <option>90 seconds</option>
+        </select>
+        <div style="height:10px;"></div>
+        <div class="cp-label">If no agent available</div>
+        <select class="cp-select">
+          <option>Return to AI · offer Cal.com callback</option>
+          <option>Drop to queue voicemail</option>
+          <option>End call with apology</option>
+        </select>
+      </div>
+
+      <!-- Compliance -->
+      <div class="cp-section">
+        <div class="cp-section-title">Compliance</div>
+        <div class="compliance-box">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="color:#3d64d7; flex-shrink:0; margin-top:1px;"><path d="M8 2l6 3v4c0 3.5-2.5 5.5-6 6.5C4.5 14.5 2 12.5 2 9V5l6-3z" stroke="currentColor" stroke-width="1.4"/></svg>
+          <div>Five9 VCC enforces <strong>TCPA time windows, DNC lists, and state restrictions</strong> before the transfer leaves Five9. The AI cannot bypass these rules. <a href="#">View enforced rules →</a></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="cp-footer">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-save">Save function</button>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+document.addEventListener('click', function(e) {
+  var dd = document.getElementById('add-dropdown');
+  if (dd && !e.target.closest('.add-btn-inline')) {
+    dd.style.display = 'none';
+  }
+});
+
+function toggleDropdown(e) {
+  var dd = document.getElementById('add-dropdown');
+  dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
+}
+
+function toggleDdGroup(e) {
+  e.stopPropagation();
+  var group = e.currentTarget.closest('.dd-group');
+  var expanded = group.getAttribute('data-expanded') === 'true';
+  group.setAttribute('data-expanded', expanded ? 'false' : 'true');
+}
+</script>
+
+</body>
+</html>

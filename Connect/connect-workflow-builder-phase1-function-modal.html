@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Phase 1 — Native Salesforce Functions</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; font-size: 14px; }
+
+  /* Sidebar matching Retell CF left rail */
+  .sidebar { width: 200px; min-width: 200px; background: #fff; border-right: 1px solid #E1E4EA; display: flex; flex-direction: column; }
+  .sb-logo { padding: 12px 14px 8px; }
+  .sb-tabs { display: flex; padding: 0 14px; border-bottom: 1px solid #E1E4EA; gap: 8px; background: #F5F7FA; margin: 0 12px; border-radius: 8px; padding: 4px; border: 0; }
+  .sb-tab { flex: 1; text-align: center; font-size: 13px; padding: 6px 10px; color: #99A0AE; cursor: pointer; border-radius: 6px; font-weight: 500; }
+  .sb-tab.active { background: #fff; color: #0A0A0A; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+  .sb-nodes { padding: 12px 12px; overflow-y: auto; flex: 1; }
+  .sb-node { display: flex; align-items: center; gap: 12px; padding: 6px 6px; border-radius: 6px; cursor: pointer; font-size: 13px; color: #0A0A0A; }
+  .sb-node:hover { background: #F5F7FA; }
+  .sb-ico-box { width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  /* Tinted icon boxes per node type — matches Retell's colorful icon style */
+  .ic-conv { background: #FDF2F8; color: #DB2777; }
+  .ic-sub { background: #ECFDF5; color: #059669; }
+  .ic-fn { background: #F3E8FF; color: #7C3AED; }
+  .ic-xfer { background: #FFF7ED; color: #EA580C; }
+  .ic-digit { background: #EFF6FF; color: #2563EB; }
+  .ic-logic { background: #EFF6FF; color: #2563EB; }
+  .ic-agent { background: #FFF7ED; color: #EA580C; }
+  .ic-sms { background: #FFF7ED; color: #EA580C; }
+  .ic-extract { background: #F3F4F6; color: #4B5563; }
+  .ic-code { background: #F3F4F6; color: #4B5563; }
+  .ic-mcp { background: #F3E8FF; color: #7C3AED; }
+  .ic-end { background: #F0FDFA; color: #0D9488; }
+  .ic-note { background: #FEF9C3; color: #CA8A04; }
+
+  /* Main */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+  .topbar { display: flex; align-items: center; gap: 16px; padding: 10px 20px; border-bottom: 1px solid #E1E4EA; height: 52px; }
+  .topbar .name { font-size: 14px; font-weight: 600; }
+  .topbar .meta { font-size: 12px; color: #525866; }
+  .tabs-top { display: flex; gap: 2px; margin: 0 auto; }
+  .tab-top { padding: 6px 16px; font-size: 13px; color: #525866; border-radius: 6px; cursor: pointer; }
+  .tab-top.active { background: #F5F7FA; color: #0A0A0A; font-weight: 500; }
+  .btn-pri { background: #0E121B; color: #fff; font-size: 13px; padding: 6px 14px; border-radius: 6px; border: 0; cursor: pointer; }
+
+  /* Canvas */
+  .canvas-wrap { flex: 1; position: relative; overflow: auto; background: radial-gradient(circle, #D7DADC 1.2px, transparent 1.2px) 0 0 / 16px 16px, #F9FAFB; }
+  .canvas-inner { padding: 50px; display: flex; flex-direction: column; align-items: center; }
+
+  .begin-node { background: #F4E7FF; border: 1.5px solid #C084FC; color: #7C3AED; padding: 6px 18px; border-radius: 14px; font-size: 12px; font-weight: 600; }
+  .end-node { background: #FEE2E2; border: 1.5px solid #FCA5A5; color: #B91C1C; padding: 6px 18px; border-radius: 14px; font-size: 12px; font-weight: 600; }
+  .connector { width: 2px; height: 18px; background: #9CA3AF; position: relative; }
+  .connector::after { content: ''; position: absolute; left: 50%; bottom: -1px; transform: translateX(-50%); border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid #9CA3AF; }
+
+  .node { background: #fff; border: 1px solid #E1E4EA; border-radius: 10px; width: 320px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); overflow: hidden; }
+  .node-head { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-bottom: 1px solid #F1F2F4; }
+  .node-head .ico { width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .node-head .title { font-size: 13px; font-weight: 600; flex: 1; }
+  .node-head .type { font-size: 10px; color: #99A0AE; font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
+  .node-body { padding: 10px 12px; font-size: 12px; color: #525866; }
+  .node-body .kv { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; }
+  .kv .k { color: #99A0AE; }
+  .kv .v { color: #0E121B; font-weight: 500; font-family: "SF Mono", Monaco, monospace; font-size: 11px; }
+
+  .d-conv { background: #F4E7FF; color: #7C3AED; }
+  .d-func { background: #E0E7FF; color: #3730A3; }
+  .d-sfdc { background: #E0F2FE; color: #0369A1; }
+
+  /* Retell-native Select Function modal */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: flex-start; justify-content: center; padding-top: 14vh; z-index: 10; overflow-y: auto; }
+  .modal { width: 560px; background: #fff; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: visible; position: relative; }
+  .modal-head { padding: 18px 24px 8px; display: flex; align-items: center; }
+  .modal-head h2 { font-size: 16px; font-weight: 600; flex: 1; }
+  .modal-head .x { color: #99A0AE; cursor: pointer; font-size: 20px; }
+  .modal-empty { padding: 0 24px 16px; font-size: 13px; color: #99A0AE; }
+  .modal-foot { padding: 16px 24px; display: flex; align-items: center; gap: 10px; }
+  .modal-foot .spacer { flex: 1; }
+  .btn-add { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #E1E4EA; color: #0A0A0A; font-size: 13px; padding: 7px 14px; border-radius: 8px; cursor: pointer; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .btn-sec { background: #fff; border: 1px solid #E1E4EA; color: #0A0A0A; font-size: 13px; padding: 7px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; }
+  .btn-pri-modal { background: #99A0AE; color: #fff; font-size: 13px; padding: 7px 18px; border-radius: 8px; border: 0; cursor: pointer; font-weight: 500; }
+
+  /* Add dropdown — touches modal bottom edge */
+  .add-dropdown { position: absolute; top: 100%; left: 24px; background: #fff; border: 1px solid #E1E4EA; border-top: 0; border-radius: 0 0 10px 10px; box-shadow: 0 12px 28px rgba(0,0,0,0.12); width: 360px; padding: 6px; z-index: 11; max-height: 360px; overflow-y: auto; }
+  .dd-search { padding: 6px 8px; border-bottom: 1px solid #F1F2F4; margin-bottom: 4px; }
+  .dd-search input { width: 100%; border: 0; outline: none; font-size: 13px; color: #0E121B; padding: 4px 0; }
+  .dd-section-label { padding: 8px 10px 4px; font-size: 10px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+  .dd-section-label .new-pill { font-size: 9px; padding: 1px 5px; background: #ecf3ff; color: #3d64d7; border-radius: 4px; font-weight: 600; margin-left: auto; }
+  .dd-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; color: #0A0A0A; }
+  .dd-item:hover { background: #F5F7FA; }
+  .dd-item .dd-ico { width: 18px; height: 18px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .dd-item .dd-name { flex: 1; }
+  .dd-item .dd-suffix { font-size: 11px; color: #99A0AE; }
+  .dd-divider { height: 1px; background: #F1F2F4; margin: 6px 0; }
+  .dd-logo { width: 18px; height: 18px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .logo-cal { background: #292929; }
+  .logo-sfdc { background: #00A1E0; }
+
+  .phase-flag { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); background: #0E121B; color: #fff; font-size: 11px; font-weight: 500; padding: 6px 12px; border-radius: 16px; z-index: 2; display: inline-flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-logo">
+    <svg width="48" height="13" viewBox="0 0 414 114" fill="none"><g clip-path="url(#r1a)"><path d="M40 92C34 92 30 97 30 102C30 108 34 113 40 113C46 113 50 108 50 102C50 97 46 92 40 92Z" fill="#0A0A0A"/><path d="M70 92C64 92 60 97 60 102C60 108 64 113 70 113C76 113 80 108 80 102C80 97 76 92 70 92Z" fill="#0A0A0A"/><path d="M40 0C34 0 30 4 30 10C30 16 34 20 40 20C46 20 50 16 50 10C50 4 46 0 40 0Z" fill="#0A0A0A"/><path d="M70 0C64 0 60 4 60 10C60 16 64 20 70 20C76 20 80 16 80 10C80 4 76 0 70 0Z" fill="#0A0A0A"/><path d="M10 31C5 31 0 35 0 41C0 47 5 51 10 51C16 51 20 47 20 41C20 35 16 31 10 31Z" fill="#0A0A0A"/><path d="M10 61C5 61 0 65 0 71C0 77 5 81 10 81C16 81 20 77 20 71C20 65 16 61 10 61Z" fill="#0A0A0A"/><path d="M100 31C94 31 90 35 90 41C90 47 94 51 100 51C106 51 110 47 110 41C110 35 106 31 100 31Z" fill="#0A0A0A"/><path d="M100 61C94 61 90 65 90 71C90 77 94 81 100 81C106 81 110 77 110 71C110 65 106 61 100 61Z" fill="#0A0A0A"/></g><defs><clipPath id="r1a"><rect width="110" height="113" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="sb-tabs">
+    <div class="sb-tab active">Node</div>
+    <div class="sb-tab">Components</div>
+  </div>
+  <div class="sb-nodes">
+    <div class="sb-node"><span class="sb-ico-box ic-conv"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 6h2M5 10h6M5 14h4"/></svg></span>Conversation</div>
+    <div class="sb-node"><span class="sb-ico-box ic-sub"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="6" width="12" height="10" rx="2"/><circle cx="8" cy="11" r="1" fill="currentColor"/><circle cx="12" cy="11" r="1" fill="currentColor"/><path d="M10 6V3"/></svg></span>Subagent</div>
+    <div class="sb-node"><span class="sb-ico-box ic-fn"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="5" width="10" height="10" rx="1"/><rect x="8" y="8" width="4" height="4"/><path d="M5 8h-2M5 12h-2M15 8h2M15 12h2M8 5v-2M12 5v-2M8 15v2M12 15v2"/></svg></span>Function</div>
+    <div class="sb-node"><span class="sb-ico-box ic-xfer"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 13l-1.5-1.5a2 2 0 0 0-2.8 0l-.5.5a8 8 0 0 1-3.2-3.2l.5-.5a2 2 0 0 0 0-2.8L5 4 3 6c0 6 5 11 11 11l2-2z"/></svg></span>Call Transfer</div>
+    <div class="sb-node"><span class="sb-ico-box ic-digit"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="6" r="0.8" fill="currentColor"/><circle cx="10" cy="6" r="0.8" fill="currentColor"/><circle cx="14" cy="6" r="0.8" fill="currentColor"/><circle cx="6" cy="10" r="0.8" fill="currentColor"/><circle cx="10" cy="10" r="0.8" fill="currentColor"/><circle cx="14" cy="10" r="0.8" fill="currentColor"/><circle cx="6" cy="14" r="0.8" fill="currentColor"/><circle cx="10" cy="14" r="0.8" fill="currentColor"/><circle cx="14" cy="14" r="0.8" fill="currentColor"/></svg></span>Press Digit</div>
+    <div class="sb-node"><span class="sb-ico-box ic-logic"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="5" r="1.5"/><circle cx="14" cy="5" r="1.5"/><circle cx="10" cy="15" r="1.5"/><path d="M6 6.5v3a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-3M10 11.5v2"/></svg></span>Logic Split</div>
+    <div class="sb-node"><span class="sb-ico-box ic-agent"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="8" height="8" rx="1.5"/><path d="M11 10h6M14 7l3 3-3 3"/></svg></span>Agent Transfer</div>
+    <div class="sb-node"><span class="sb-ico-box ic-sms"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="14" height="10" rx="2"/><path d="M7 9h6M7 12h4"/></svg></span>In-Call SMS</div>
+    <div class="sb-node"><span class="sb-ico-box ic-extract"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 4c-2 0-2 2-2 3v2c0 1-1 1-2 1 1 0 2 0 2 1v2c0 1 0 3 2 3M13 4c2 0 2 2 2 3v2c0 1 1 1 2 1-1 0-2 0-2 1v2c0 1 0 3-2 3"/></svg></span>Extract Variable</div>
+    <div class="sb-node"><span class="sb-ico-box ic-code"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 6L3 10l4 4M13 6l4 4-4 4"/></svg></span>Code</div>
+    <div class="sb-node"><span class="sb-ico-box ic-mcp"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 4l-7 7a3 3 0 0 0 4 4l7-7a5 5 0 0 0-7-7l-7 7a7 7 0 0 0 10 10l5-5"/></svg></span>MCP</div>
+    <div class="sb-node"><span class="sb-ico-box ic-end"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="5" width="10" height="10" rx="1.5"/></svg></span>Ending</div>
+    <div class="sb-node"><span class="sb-ico-box ic-note"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h7l3 3v9H5z"/><path d="M12 4v3h3"/></svg></span>Note</div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <span class="name">Morgan & Morgan — Inbound Intake</span>
+    <span class="meta">GPT-4.1 · $0.17/min · 970–1020ms</span>
+    <div class="tabs-top">
+      <div class="tab-top active">Create</div>
+      <div class="tab-top">Simulation</div>
+    </div>
+    <button class="btn-pri">Publish</button>
+  </div>
+
+  <div class="canvas-wrap">
+    <div class="phase-flag">Phase 1 · Atomic SFDC actions as in-call Functions</div>
+    <div class="canvas-inner">
+      <div class="begin-node">● Begin</div>
+      <div class="connector"></div>
+      <div class="node">
+        <div class="node-head">
+          <span class="ico d-conv">💬</span>
+          <span class="title">Welcome</span>
+          <span class="type">Conversation</span>
+        </div>
+        <div class="node-body">"Thanks for calling Morgan & Morgan. To pull up your file, can I have the phone number you're calling about?"</div>
+      </div>
+      <div class="connector"></div>
+      <div style="opacity: 0.5; pointer-events: none;">
+        <div class="node">
+          <div class="node-head">
+            <span class="ico d-func">ƒ</span>
+            <span class="title">Function (select one)</span>
+            <span class="type">Function</span>
+          </div>
+          <div class="node-body" style="color: #99A0AE;">Click to choose a function →</div>
+        </div>
+      </div>
+      <div class="connector" style="opacity: 0.4;"></div>
+      <div class="end-node" style="opacity: 0.4;">■ End Call</div>
+    </div>
+  </div>
+
+  <!-- Retell-native Select Function modal -->
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Select Function</h2>
+        <span class="x">×</span>
+      </div>
+      <div class="modal-empty">No tools available</div>
+      <div class="modal-foot">
+        <button class="btn-add">
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg>
+          Add
+        </button>
+        <span class="spacer"></span>
+        <button class="btn-sec">Cancel</button>
+        <button class="btn-pri-modal">Add</button>
+      </div>
+
+      <!-- Open Add dropdown -->
+      <div class="add-dropdown">
+        <div class="dd-search">
+          <input placeholder="Search…" />
+        </div>
+        <div class="dd-section-label">Salesforce <span class="new-pill">NEW</span></div>
+        <div class="dd-item"><span class="dd-logo logo-sfdc">S</span><span class="dd-name">Get Contact</span><span class="dd-suffix">(Salesforce)</span></div>
+        <div class="dd-item"><span class="dd-logo logo-sfdc">S</span><span class="dd-name">Get Open Cases</span><span class="dd-suffix">(Salesforce)</span></div>
+        <div class="dd-item"><span class="dd-logo logo-sfdc">S</span><span class="dd-name">Create Case</span><span class="dd-suffix">(Salesforce)</span></div>
+        <div class="dd-item"><span class="dd-logo logo-sfdc">S</span><span class="dd-name">Update Case</span><span class="dd-suffix">(Salesforce)</span></div>
+        <div class="dd-item"><span class="dd-logo logo-sfdc">S</span><span class="dd-name">SOQL Query</span><span class="dd-suffix">(Salesforce)</span></div>
+        <div class="dd-divider"></div>
+        <div class="dd-section-label">Cal.com</div>
+        <div class="dd-item"><span class="dd-logo logo-cal">C</span><span class="dd-name">Check Calendar Availability</span><span class="dd-suffix">(Cal.com)</span></div>
+        <div class="dd-item"><span class="dd-logo logo-cal">C</span><span class="dd-name">Book on the Calendar</span><span class="dd-suffix">(Cal.com)</span></div>
+        <div class="dd-item"><span class="dd-logo logo-cal">C</span><span class="dd-name">Cancel Booking</span><span class="dd-suffix">(Cal.com)</span></div>
+        <div class="dd-divider"></div>
+        <div class="dd-item">
+          <span class="dd-ico"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#525866" stroke-width="1.6"><circle cx="6" cy="10" r="2"/><circle cx="14" cy="10" r="2"/><path d="M8 10h4M3 10h1M16 10h1"/></svg></span>
+          <span class="dd-name">Custom Function</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

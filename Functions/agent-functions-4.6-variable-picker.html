@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Post-call Function: Variable Picker</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; height: 100vh; overflow: hidden; }
+
+/* ── Top bar ── */
+.agent-topbar {
+  display: flex; align-items: center; padding: 0 16px;
+  height: 48px; border-bottom: 1px solid #E1E4EA; background: #fff;
+  flex-shrink: 0; position: relative;
+}
+.topbar-left { display: flex; align-items: center; gap: 6px; flex: 1; }
+.home-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; border: none; background: transparent; color: #525866; }
+.agent-name { font-size: 14px; font-weight: 600; color: #0A0A0A; }
+.agent-tag { font-size: 11px; color: #99A0AE; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 4px; padding: 2px 7px; }
+.topbar-tabs { display: flex; align-items: center; position: absolute; left: 50%; transform: translateX(-50%); }
+.topbar-tab { padding: 0 14px; height: 48px; display: flex; align-items: center; font-size: 14px; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.topbar-tab.active { color: #0A0A0A; font-weight: 500; border-bottom-color: #0A0A0A; }
+.topbar-right { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end; }
+.auto-saved { font-size: 12px; color: #99A0AE; display: flex; align-items: center; gap: 4px; }
+.publish-btn { display: flex; align-items: center; gap: 6px; padding: 0 14px; height: 32px; background: #0E121B; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+
+/* ── Sub-bar ── */
+.agent-sub-bar { display: flex; align-items: center; padding: 0 16px; gap: 8px; height: 36px; border-bottom: 1px solid #F0F2F5; background: #fff; flex-shrink: 0; }
+.sub-drop { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 12.5px; color: #0A0A0A; cursor: pointer; background: #fff; }
+
+/* ── Background (blurred) ── */
+.page-bg { display: flex; height: calc(100vh - 84px); filter: blur(3px); opacity: 0.4; pointer-events: none; overflow: hidden; }
+.bg-left { flex: 3; padding: 20px 24px; border-right: 1px solid #E1E4EA; display: flex; flex-direction: column; gap: 12px; }
+.bg-prompt { width: 100%; flex: 1; border: 1px solid #E1E4EA; border-radius: 8px; padding: 14px; font-size: 12.5px; color: #525866; line-height: 1.7; font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; resize: none; background: #fff; }
+.bg-right { flex: 2; padding: 16px 20px; }
+.bg-section-label { font-size: 11px; font-weight: 500; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+.bg-fn-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; margin-bottom: 6px; }
+.bg-fn-icon { width: 24px; height: 24px; background: #0176D3; border-radius: 5px; flex-shrink: 0; }
+.bg-fn-name { font-size: 13px; color: #0A0A0A; font-family: 'SF Mono', monospace; }
+
+/* ── Modal overlay ── */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 50; }
+
+/* ── Modal ── */
+.modal { background: #fff; border-radius: 12px; box-shadow: 0 24px 64px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.1); width: 600px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+
+.modal-header { display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid #F0F2F5; gap: 12px; flex-shrink: 0; }
+.sfdc-icon { width: 32px; height: 32px; background: #0176D3; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.modal-title-wrap { flex: 1; }
+.modal-title { font-size: 15px; font-weight: 600; color: #0A0A0A; }
+.modal-subtitle { font-size: 12px; color: #99A0AE; margin-top: 1px; }
+.modal-close { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 5px; border: none; background: transparent; color: #99A0AE; font-size: 18px; cursor: pointer; line-height: 1; }
+
+.connected-bar { display: flex; align-items: center; gap: 7px; padding: 8px 20px; background: #F0FDF4; border-bottom: 1px solid #DCFCE7; font-size: 13px; color: #166534; flex-shrink: 0; }
+.green-dot { width: 7px; height: 7px; background: #16A34A; border-radius: 50%; flex-shrink: 0; }
+
+.modal-body { flex: 1; overflow-y: auto; }
+
+/* ── Sections ── */
+.msection { padding: 18px 20px; border-bottom: 1px solid #F0F2F5; }
+.msection-title { font-size: 14px; font-weight: 600; color: #0A0A0A; margin-bottom: 4px; }
+.msection-desc { font-size: 12.5px; color: #6B7280; margin-bottom: 12px; line-height: 1.5; }
+
+.action-select { width: 100%; padding: 8px 32px 8px 12px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 13.5px; color: #0A0A0A; font-family: inherit; appearance: none; background: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%2399A0AE' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center #fff; cursor: pointer; }
+
+/* ── Field table ── */
+.field-table { width: 100%; border-collapse: collapse; }
+.field-table th { font-size: 11px; font-weight: 500; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em; padding: 0 0 8px; text-align: left; }
+.field-table td { padding: 3px 0; vertical-align: middle; }
+.fname { font-size: 13px; color: #374151; padding-right: 10px; white-space: nowrap; width: 140px; }
+.farrow { width: 20px; text-align: center; }
+.fval { position: relative; }
+.frmv { width: 24px; text-align: right; }
+
+/* ── Value field (editable input with inline chip) ── */
+.vfield { display: flex; align-items: center; padding: 5px 8px 5px 10px; border: 1px solid #E1E4EA; border-radius: 6px; background: #fff; cursor: text; min-height: 32px; gap: 6px; }
+.vfield.active { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.12); cursor: text; }
+.vfield:not(.active):hover { border-color: #B0BACC; }
+.vchip { font-family: 'SF Mono', 'Menlo', monospace; font-size: 12px; color: #3d64d7; background: #EFF6FF; border-radius: 4px; padding: 1px 5px; white-space: nowrap; }
+.vplain { font-size: 13px; color: #0A0A0A; }
+
+.rmv-btn { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; color: #CACFD8; cursor: pointer; border-radius: 4px; font-size: 16px; line-height: 1; }
+
+.add-row { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; font-size: 13px; color: #525866; cursor: pointer; }
+
+/* ── Variable picker dropdown ── */
+.picker-wrap { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 200; }
+.picker {
+  background: #fff;
+  border: 1px solid #E1E4EA;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+  overflow: hidden;
+  width: 300px;
+}
+.picker-search { display: flex; align-items: center; gap: 7px; padding: 9px 12px; border-bottom: 1px solid #F0F2F5; }
+.picker-search-icon { color: #99A0AE; flex-shrink: 0; }
+.picker-search input { border: none; outline: none; font-size: 13px; color: #0A0A0A; font-family: inherit; width: 100%; background: transparent; }
+.picker-search input::placeholder { color: #99A0AE; }
+.picker-scroll { max-height: 280px; overflow-y: auto; }
+.picker-group-label { font-size: 10.5px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.07em; padding: 10px 12px 4px; }
+.picker-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 12px; cursor: pointer; gap: 8px; }
+.picker-item:hover { background: #F5F7FA; }
+.picker-item.selected { background: #EFF6FF; }
+.picker-item-var { font-family: 'SF Mono', 'Menlo', monospace; font-size: 12px; color: #3d64d7; }
+.picker-item-desc { font-size: 12px; color: #99A0AE; white-space: nowrap; }
+.picker-check { color: #3d64d7; flex-shrink: 0; }
+
+/* ── Footer ── */
+.modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid #F0F2F5; flex-shrink: 0; }
+.btn-cancel { padding: 7px 16px; border: 1px solid #E1E4EA; border-radius: 6px; background: #fff; font-size: 13.5px; color: #525866; cursor: pointer; font-family: inherit; }
+.btn-save { padding: 7px 18px; border: none; border-radius: 6px; background: #0E121B; font-size: 13.5px; color: #fff; font-weight: 500; cursor: pointer; font-family: inherit; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<header class="agent-topbar">
+  <div class="topbar-left">
+    <button class="home-btn">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 01-1 1H3a1 1 0 01-1-1V6.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 14V9.5h4V14" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+    </button>
+    <span class="agent-name">4Refuel Dispatch Agent</span>
+    <span class="agent-tag">Single Prompt</span>
+    <span class="agent-tag">Version 7</span>
+  </div>
+  <div class="topbar-tabs">
+    <div class="topbar-tab active">Create</div>
+    <div class="topbar-tab">Simulation</div>
+  </div>
+  <div class="topbar-right">
+    <span class="auto-saved">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="#1FC16B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Auto saved at 11:42 AM
+    </span>
+    <button class="publish-btn">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 5l4 3-4 3" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Publish
+    </button>
+  </div>
+</header>
+
+<!-- Sub-bar -->
+<div class="agent-sub-bar">
+  <div class="sub-drop">GPT 4.1 <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+  <div class="sub-drop">Jordan <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+  <div class="sub-drop">English <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+</div>
+
+<!-- Background (blurred) -->
+<div class="page-bg">
+  <div class="bg-left">
+    <textarea class="bg-prompt" readonly>## Identity
+You are Jordan, a dispatch agent for 4Refuel. You call fleet operators to confirm scheduled fueling windows and capture any changes.
+
+## Tasks
+- Confirm the operator is available for the scheduled window.
+- Capture any site access changes.
+- Update the Salesforce opportunity with confirmed status.
+- If rescheduling is needed, book a new slot via Cal.com.
+
+## Style
+Professional and efficient. Confirm details clearly, read them back once.</textarea>
+  </div>
+  <div class="bg-right">
+    <div class="bg-section-label">Post-call Functions</div>
+    <div class="bg-fn-row">
+      <div class="bg-fn-icon"></div>
+      <span class="bg-fn-name">create_salesforce_task</span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="overlay">
+  <div class="modal">
+
+    <div class="modal-header">
+      <div class="sfdc-icon">
+        <svg width="18" height="13" viewBox="0 0 60 44" fill="none">
+          <path d="M24.8 5.8C27.5 2.3 31.8 0 36.6 0C43.8 0 49.8 5 51.6 11.8C53.2 11 55 10.6 56.9 10.6C60.7 10.6 63 12.8 63 12.8C63 12.8 60.2 14.1 60.2 17.8C60.2 24.6 54.6 30.2 47.8 30.2C47 30.2 46.2 30.1 45.5 29.9C44 35.5 38.9 39.6 32.8 39.6C30.3 39.6 28 38.9 26.1 37.7C24.3 41.5 20.4 44 15.9 44C9.5 44 4.3 38.8 4.3 32.4C4.3 31.5 4.4 30.7 4.6 29.9C2 28.3 0.3 25.5 0.3 22.3C0.3 17.2 4.5 13 9.6 13C10.5 13 11.4 13.1 12.2 13.4C13.3 8.8 17.4 5.4 22.3 5.4C23.2 5.4 24 5.5 24.8 5.8Z" fill="white"/>
+        </svg>
+      </div>
+      <div class="modal-title-wrap">
+        <div class="modal-title">Salesforce</div>
+        <div class="modal-subtitle">Native integration · Post-call</div>
+      </div>
+      <button class="modal-close">×</button>
+    </div>
+
+    <div class="connected-bar">
+      <span class="green-dot"></span>
+      Salesforce connected
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Action -->
+      <div class="msection">
+        <div class="msection-title">Action</div>
+        <div class="msection-desc">Choose what this function writes to Salesforce after the call ends.</div>
+        <select class="action-select"><option>Create Task</option></select>
+      </div>
+
+      <!-- Lookup -->
+      <div class="msection">
+        <div class="msection-title">Lookup</div>
+        <div class="msection-desc">Map the Salesforce identifier field to the value Retell will use to find the record to attach this task to.</div>
+        <table class="field-table">
+          <thead>
+            <tr>
+              <th style="width:140px;">SALESFORCE FIELD</th>
+              <th style="width:20px;"></th>
+              <th>VALUE</th>
+              <th style="width:24px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="fname">WhoId</td>
+              <td class="farrow"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 5l4 3-4 3" stroke="#D1D5DB" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></td>
+              <td class="fval">
+                <div class="vfield">
+                  <span class="vchip">{{contact_id}}</span>
+                                  </div>
+              </td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Output fields -->
+      <div class="msection" style="border-bottom:none;">
+        <div class="msection-title">Output fields</div>
+        <div class="msection-desc">Map Salesforce fields to the values Retell will write. Variables are grouped by source in the picker.</div>
+        <table class="field-table">
+          <thead>
+            <tr>
+              <th style="width:140px;">SALESFORCE FIELD</th>
+              <th style="width:20px;"></th>
+              <th>VALUE</th>
+              <th style="width:24px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Subject row: picker open -->
+            <tr>
+              <td class="fname">Subject</td>
+              <td class="farrow"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 5l4 3-4 3" stroke="#D1D5DB" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></td>
+              <td class="fval" style="position:relative;">
+                <div class="vfield active">
+                  <span class="vchip">{{summary}}</span>
+                                  </div>
+                <!-- Picker dropdown -->
+                <div class="picker-wrap">
+                  <div class="picker">
+                    <div class="picker-search">
+                      <svg class="picker-search-icon" width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="#99A0AE" stroke-width="1.4"/><path d="M10 10l3 3" stroke="#99A0AE" stroke-width="1.4" stroke-linecap="round"/></svg>
+                      <input type="text" placeholder="Search variables..." />
+                    </div>
+                    <div class="picker-scroll">
+
+                      <div class="picker-group-label">Post-call Analysis</div>
+                      <div class="picker-item selected">
+                        <span class="picker-item-var">{{summary}}</span>
+                        <svg class="picker-check" width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-6" stroke="#3d64d7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </div>
+                      <div class="picker-item">
+                        <span class="picker-item-var">{{transcript}}</span>
+                      </div>
+                      <div class="picker-item">
+                        <span class="picker-item-var">{{sentiment}}</span>
+                      </div>
+                      <div class="picker-item">
+                        <span class="picker-item-var">{{duration}}</span>
+                      </div>
+
+                      <div class="picker-group-label">Contacts</div>
+                      <div class="picker-item">
+                        <span class="picker-item-var">{{contact_id}}</span>
+                      </div>
+                      <div class="picker-item">
+                        <span class="picker-item-var">{{contact_name}}</span>
+                      </div>
+                      <div class="picker-item">
+                        <span class="picker-item-var">{{contact_phone}}</span>
+                      </div>
+
+                      <div class="picker-group-label">Call</div>
+                      <div class="picker-item">
+                        <span class="picker-item-var">{{call_date}}</span>
+                      </div>
+                      <div class="picker-item">
+                        <span class="picker-item-var">{{call_id}}</span>
+                      </div>
+                      <div class="picker-item">
+                        <span class="picker-item-var">{{call_duration}}</span>
+                      </div>
+
+                      <div class="picker-group-label">Inbound Webhook</div>
+                      <div class="picker-item">
+                        <span class="picker-item-var">{{record_id}}</span>
+                      </div>
+                      <div class="picker-item">
+                        <span class="picker-item-var">{{agent_id}}</span>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td><button class="rmv-btn">×</button></td>
+            </tr>
+            <tr>
+              <td class="fname">Description</td>
+              <td class="farrow"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 5l4 3-4 3" stroke="#D1D5DB" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></td>
+              <td class="fval"><div class="vfield"><span class="vchip">{{transcript}}</span><svg class="vchev" width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></td>
+              <td><button class="rmv-btn">×</button></td>
+            </tr>
+            <tr>
+              <td class="fname">Status</td>
+              <td class="farrow"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 5l4 3-4 3" stroke="#D1D5DB" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></td>
+              <td class="fval"><div class="vfield"><span class="vplain">Completed</span><svg class="vchev" width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></td>
+              <td><button class="rmv-btn">×</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="add-row">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Add
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-save">Save</button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

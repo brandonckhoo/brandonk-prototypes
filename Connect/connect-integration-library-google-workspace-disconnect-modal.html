@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Disconnect Google Workspace</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #F5F7FA; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+  .modal { background: #fff; border-radius: 14px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 520px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  .m-header { display: flex; align-items: flex-start; gap: 12px; padding: 22px 24px 16px; }
+  .warn-icon { width: 40px; height: 40px; border-radius: 10px; background: #FEF2F2; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .warn-icon svg { color: #DC2626; }
+  .m-title { font-size: 17px; font-weight: 600; color: #0E121B; margin-bottom: 4px; }
+  .m-sub { font-size: 13px; color: #525866; line-height: 1.5; }
+  .m-close { margin-left: auto; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; color: #99A0AE; border-radius: 6px; }
+  .m-close:hover { background: #F3F4F6; }
+
+  .m-body { flex: 1; overflow-y: auto; padding: 0 24px; }
+
+  .section-title { font-size: 12px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; margin: 16px 0 8px; }
+
+  /* Impact list (sources to be removed) */
+  .impact-card { border: 1px solid #FECACA; background: #FEF7F7; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; }
+  .impact-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+  .impact-row + .impact-row { border-top: 1px solid #FECACA; }
+  .impact-row .icon { width: 18px; height: 18px; flex-shrink: 0; }
+  .impact-row .name { flex: 1; font-size: 13px; font-weight: 500; color: #0E121B; }
+  .impact-row .meta { font-size: 11px; color: #6B7280; }
+  .impact-row .badge { font-size: 11px; font-weight: 500; color: #DC2626; background: #FEF2F2; padding: 2px 8px; border-radius: 4px; border: 1px solid #FECACA; }
+
+  /* Agents list */
+  .agent-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #E1E4EA; border-radius: 10px; margin-bottom: 8px; }
+  .agent-row .avatar { width: 32px; height: 32px; border-radius: 8px; background: #EFF6FF; display: flex; align-items: center; justify-content: center; color: #1D4ED8; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .agent-main { flex: 1; min-width: 0; }
+  .agent-name { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .agent-meta { font-size: 11px; color: #6B7280; margin-top: 2px; }
+  .agent-kb-chip { display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; background: #FDF2F8; color: #C026D3; border-radius: 3px; font-size: 10px; font-weight: 500; margin-right: 4px; }
+  .agent-calls { font-size: 11px; color: #6B7280; text-align: right; flex-shrink: 0; }
+  .agent-calls strong { color: #0E121B; }
+
+  /* Confirm input */
+  .confirm-block { margin-top: 16px; padding: 12px; background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 8px; }
+  .confirm-label { font-size: 12px; color: #525866; margin-bottom: 6px; }
+  .confirm-label code { background: #fff; padding: 1px 5px; border: 1px solid #E1E4EA; border-radius: 3px; font-size: 11px; color: #DC2626; font-weight: 600; }
+  .confirm-input { width: 100%; height: 36px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; }
+  .confirm-input:focus { border-color: #DC2626; }
+
+  .m-footer { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px 20px; margin-top: 16px; border-top: 1px solid #E1E4EA; }
+  .btn-secondary { height: 36px; padding: 0 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 500; color: #0E121B; cursor: pointer; font-family: inherit; }
+  .btn-secondary:hover { background: #F9FAFB; }
+  .btn-destructive { height: 36px; padding: 0 18px; border: none; border-radius: 8px; background: #DC2626; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-destructive:hover { background: #B91C1C; }
+  .btn-destructive:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="m-header">
+      <div class="warn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3L2 21h20L12 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 10v5M12 18h.01" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+      <div style="flex:1;">
+        <div class="m-title">Disconnect Google Workspace?</div>
+        <div class="m-sub">Disconnecting will remove all synced content from your Knowledge Base. Agents that rely on this KB will lose their context on the next call.</div>
+      </div>
+      <button class="m-close"><svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    </div>
+
+    <div class="m-body">
+
+      <!-- Content that will be removed -->
+      <div class="section-title">Content that will be removed from Knowledge Base</div>
+      <div class="impact-card">
+        <div class="impact-row">
+          <svg class="icon" viewBox="0 0 87 78" fill="none"><path d="M6.6 66.85L10.45 73.5C11.25 74.9 12.4 76 13.75 76.8L27.5 53H0C0 54.55 0.4 56.1 1.2 57.5L6.6 66.85Z" fill="#0066DA"/><path d="M43.65 25L29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L1.2 48.5C0.414 49.87 0.0003 51.4 0 52.95H27.5L43.65 25Z" fill="#00AC47"/><path d="M73.55 76.8C74.9 76 76.05 74.9 76.85 73.5L78.45 70.75L86.1 57.5C86.9 56.1 87.3 54.55 87.3 53H59.8L65.65 64.5L73.55 76.8Z" fill="#EA4335"/><path d="M43.65 25L57.4 1.2C56.05 0.4 54.5 0 52.9 0H34.4C32.8 0 31.25 0.45 29.9 1.2L43.65 25Z" fill="#00832D"/><path d="M59.8 53H27.5L13.75 76.8C15.1 77.6 16.65 78 18.25 78H69.05C70.65 78 72.2 77.55 73.55 76.8L59.8 53Z" fill="#2684FC"/><path d="M73.4 26.5L60.7 4.5C59.9 3.1 58.75 2 57.4 1.2L43.65 25L59.8 53H87.25C87.25 51.45 86.85 49.9 86.05 48.5L73.4 26.5Z" fill="#FFBA00"/></svg>
+          <div style="flex:1; min-width:0;">
+            <div class="name">Sales / Knowledge</div>
+            <div class="meta">Drive · 18 files</div>
+          </div>
+          <span class="badge">Will be removed</span>
+        </div>
+        <div class="impact-row">
+          <svg class="icon" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#0F9D58"/></svg>
+          <div style="flex:1; min-width:0;">
+            <div class="name">Pricing 2026</div>
+            <div class="meta">Sheet · 1,204 rows</div>
+          </div>
+          <span class="badge">Will be removed</span>
+        </div>
+        <div class="impact-row">
+          <svg class="icon" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#4285F4"/></svg>
+          <div style="flex:1; min-width:0;">
+            <div class="name">Refund Policy SOP</div>
+            <div class="meta">Doc</div>
+          </div>
+          <span class="badge">Will be removed</span>
+        </div>
+      </div>
+
+      <!-- Affected agents -->
+      <div class="section-title">Agents affected (3)</div>
+
+      <div class="agent-row">
+        <div class="avatar">ES</div>
+        <div class="agent-main">
+          <div class="agent-name">Enterprise Support Agent</div>
+          <div class="agent-meta">
+            <span class="agent-kb-chip">Sales / Knowledge</span>
+            <span class="agent-kb-chip">Refund Policy SOP</span>
+          </div>
+        </div>
+        <div class="agent-calls"><strong>1,284</strong> calls / 7d</div>
+      </div>
+
+      <div class="agent-row">
+        <div class="avatar" style="background:#FEF3C7; color:#B45309;">BA</div>
+        <div class="agent-main">
+          <div class="agent-name">Billing Assistant</div>
+          <div class="agent-meta">
+            <span class="agent-kb-chip">Pricing 2026</span>
+          </div>
+        </div>
+        <div class="agent-calls"><strong>642</strong> calls / 7d</div>
+      </div>
+
+      <div class="agent-row">
+        <div class="avatar" style="background:#FDF2F8; color:#C026D3;">OB</div>
+        <div class="agent-main">
+          <div class="agent-name">Outbound Lead Qualifier</div>
+          <div class="agent-meta">
+            <span class="agent-kb-chip">Sales / Knowledge</span>
+          </div>
+        </div>
+        <div class="agent-calls"><strong>218</strong> calls / 7d</div>
+      </div>
+
+      <div style="padding: 10px 12px; background:#FFF7ED; border:1px solid #FED7AA; border-radius:8px; margin-top:6px; font-size:12px; color:#9A3412; line-height:1.5;">
+        <strong>Heads up:</strong> These 3 agents will still run, but their responses may be less accurate until you either reconnect Google Workspace or replace the sources with another KB.
+      </div>
+
+      <!-- Confirm input -->
+      <div class="confirm-block">
+        <div class="confirm-label">Type <code>disconnect</code> to confirm</div>
+        <input class="confirm-input" placeholder="disconnect">
+      </div>
+
+    </div>
+
+    <div class="m-footer">
+      <button class="btn-secondary">Keep connected</button>
+      <button class="btn-destructive" disabled>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3h4M3 5h10M5 5v8h6V5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Disconnect Google Workspace
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

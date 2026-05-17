@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Cal.com Tools tab (Phase 1 card style)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 280px; background: #F5F7FA; display: flex; flex-direction: column; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+  .footer { padding: 16px 14px; }
+  .main { flex: 1; background: #fff; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(6px); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .connect-modal { background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 560px; display: flex; flex-direction: column; overflow: hidden; }
+  .cm-header { display: flex; align-items: center; gap: 12px; padding: 24px 24px 0; }
+  .cm-logo { width: 32px; height: 32px; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #E1E4EA; }
+  .cm-logo img { width: 24px; height: 24px; object-fit: contain; }
+  .cm-name { font-size: 18px; font-weight: 600; color: #0E121B; }
+  .cm-close { margin-left: auto; width: 32px; height: 32px; border: none; background: none; cursor: pointer; color: #6B7280; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .cm-tabs { display: flex; padding: 16px 24px 0; border-bottom: 1px solid #E1E4EA; }
+  .cm-tab { padding: 8px 16px 12px; font-size: 14px; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .cm-tab.active { color: #0E121B; font-weight: 500; border-bottom-color: #0E121B; }
+  .cm-body { padding: 24px; max-height: 520px; overflow-y: auto; }
+
+  .cmp-intro { font-size: 12px; color: #6B7280; line-height: 1.5; margin-bottom: 12px; }
+  .cmp-group { font-size: 11px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.06em; padding: 8px 12px; background: #F5F7FA; border-radius: 6px; margin-top: 16px; }
+  .cmp-group:first-of-type { margin-top: 0; }
+  .cmp-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid #F3F4F6; }
+  .cmp-group + .cmp-row { border-top: none; margin-top: 4px; }
+  .cmp-name { font-size: 13px; font-weight: 500; color: #0E121B; }
+  .cmp-desc { font-size: 13px; color: #6B7280; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cmp-badge { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.02em; flex-shrink: 0; }
+  .cmp-badge.read { background: #ecf3ff; color: #3d64d7; }
+  .cmp-badge.write { background: #DCFCE7; color: #15803D; }
+  .cmp-badge.delete { background: #FEE2E2; color: #B91C1C; }
+
+  .cm-footer { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px 20px; border-top: 1px solid #E1E4EA; }
+  .btn-back { height: 36px; padding: 0 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 500; color: #525866; cursor: pointer; }
+  .btn-connect { height: 36px; padding: 0 20px; border: none; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/></svg>
+  </div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item current">Integrations</li><li class="nav-item">Billing</li><li class="nav-item">Settings</li></ul></div>
+  </div>
+  <div class="footer"></div>
+</aside>
+
+<main class="main"></main>
+
+<div class="modal-overlay">
+  <div class="connect-modal">
+    <div class="cm-header">
+      <div class="cm-logo"><img src="https://www.google.com/s2/favicons?domain=cal.com&sz=128" alt="Cal.com"></div>
+      <span class="cm-name">Cal.com</span>
+      <button class="cm-close">✕</button>
+    </div>
+
+    <div class="cm-tabs">
+      <div class="cm-tab">Configure</div>
+      <div class="cm-tab">Data</div>
+      <div class="cm-tab active">Tools</div>
+      <div class="cm-tab">About</div>
+    </div>
+
+    <div class="cm-body">
+      <p class="cmp-intro">Actions available once Cal.com is connected. Enable per agent in the Agent Builder.</p>
+
+      <div class="cmp-group">Scheduling</div>
+      <div class="cmp-row"><span class="cmp-name">Check availability</span><span class="cmp-desc">Look up open time slots on a connected calendar</span><span class="cmp-badge read">Read</span></div>
+      <div class="cmp-row"><span class="cmp-name">Book event</span><span class="cmp-desc">Create a new booking with attendee details</span><span class="cmp-badge write">Write</span></div>
+      <div class="cmp-row"><span class="cmp-name">Reschedule event</span><span class="cmp-desc">Move an existing booking to a new start time</span><span class="cmp-badge write">Write</span></div>
+      <div class="cmp-row"><span class="cmp-name">Cancel event</span><span class="cmp-desc">Cancel an existing booking and notify attendees</span><span class="cmp-badge delete">Delete</span></div>
+    </div>
+
+    <div class="cm-footer">
+      <button class="btn-back">Back</button>
+      <button class="btn-connect">Connect</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

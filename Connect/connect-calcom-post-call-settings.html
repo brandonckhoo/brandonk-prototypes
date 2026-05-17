@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Post-call Settings (Cal.com actions)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+
+  .sidebar { width: 280px; min-width: 280px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; font-weight: 800; font-size: 18px; color: #0A0A0A; letter-spacing: -0.02em; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; height: 24px; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #FFFFFF; }
+  .nav-item.new-item::after { content: ''; display: inline-block; width: 6px; height: 6px; background: #3d64d7; border-radius: 50%; margin-left: 6px; }
+  .footer { padding: 16px 14px; }
+  .footer-card.user { display: flex; align-items: center; padding: 10px 12px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; height: 40px; margin-bottom: 12px; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .footer-user .avatar { width: 20px; height: 20px; border-radius: 50%; background: #DBE4FF; color: #3d64d7; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .footer-user .name { font-size: 14px; color: #525866; flex: 1; }
+  .footer-links { display: flex; gap: 4px; }
+  .footer-link { padding: 8px 12px; font-size: 14px; color: #525866; }
+  .footer-divider { width: 1px; height: 12px; background: #D1D5DB; align-self: center; }
+
+  .main-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { display: flex; align-items: center; gap: 16px; padding: 10px 20px; border-bottom: 1px solid #E5E7EB; height: 56px; flex-shrink: 0; }
+  .back-btn { font-size: 13px; color: #6B7280; cursor: pointer; }
+  .agent-title { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .agent-meta { font-size: 12px; color: #6B7280; }
+  .tabs { display: flex; gap: 4px; margin-left: 24px; }
+  .tab { padding: 6px 14px; font-size: 13px; color: #525866; border-radius: 6px; cursor: pointer; }
+  .tab.active { background: #F3F4F6; color: #0E121B; font-weight: 500; }
+  .tb-spacer { flex: 1; }
+  .tb-btn { height: 32px; padding: 0 14px; border: 1px solid #E1E4EA; background: #fff; border-radius: 8px; font-size: 13px; color: #374151; cursor: pointer; font-family: inherit; }
+  .tb-btn.primary { background: #0E121B; color: #fff; border: none; }
+
+  .content { flex: 1; overflow-y: auto; background: #FAFBFC; }
+  .inner { max-width: 920px; margin: 0 auto; padding: 28px 32px 48px; }
+
+  .sub-tabs { display: flex; gap: 6px; margin-bottom: 22px; border-bottom: 1px solid #E5E7EB; }
+  .sub-tab { padding: 10px 14px; font-size: 13px; color: #6B7280; border-bottom: 2px solid transparent; cursor: pointer; margin-bottom: -1px; }
+  .sub-tab.active { color: #0E121B; font-weight: 500; border-bottom-color: #3d64d7; }
+
+  .panel { background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+  .panel-hdr { padding: 16px 20px; border-bottom: 1px solid #F0F1F3; display: flex; align-items: center; gap: 12px; }
+  .panel-hdr.nb { border-bottom: none; }
+  .panel-hdr .icon-wrap { width: 32px; height: 32px; background: #292929; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 10px; letter-spacing: -0.03em; flex-shrink: 0; }
+  .panel-title { font-size: 14px; font-weight: 600; color: #0E121B; margin-bottom: 2px; }
+  .panel-sub { font-size: 12.5px; color: #6B7280; line-height: 1.5; }
+  .panel-body { padding: 0; }
+
+  /* Action rows */
+  .action-row { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; border-top: 1px solid #F0F1F3; }
+  .action-row:first-child { border-top: none; }
+  .action-row.muted { opacity: 0.72; }
+  .ar-left { flex: 1; min-width: 0; }
+  .ar-title { font-size: 13.5px; font-weight: 600; color: #0E121B; display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+  .ar-desc { font-size: 12.5px; color: #6B7280; line-height: 1.5; margin-bottom: 8px; }
+  .ar-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .cond-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 999px; font-size: 11.5px; color: #374151; }
+  .cond-pill code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #6B42D1; background: #F3EEFF; padding: 1px 4px; border-radius: 3px; }
+  .edit-link { font-size: 12px; color: #3d64d7; text-decoration: none; font-weight: 500; cursor: pointer; }
+  .no-cond { font-size: 11.5px; color: #9CA3AF; font-style: italic; }
+
+  /* Toggle */
+  .toggle { position: relative; width: 36px; height: 20px; background: #D1D5DB; border-radius: 20px; cursor: pointer; transition: background 0.2s; flex-shrink: 0; margin-top: 2px; }
+  .toggle.on { background: #10B981; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: left 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .toggle.on::after { left: 18px; }
+
+  /* Expanded builder */
+  .builder { margin-top: 12px; padding: 14px; background: #FAFBFC; border: 1px solid #E5E7EB; border-radius: 10px; }
+  .builder-title { font-size: 11.5px; font-weight: 600; color: #525866; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+  .rule-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; font-size: 12.5px; color: #374151; }
+  .chunk { display: inline-flex; align-items: center; height: 28px; padding: 0 10px; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 12px; color: #0E121B; gap: 4px; }
+  .chunk.value { background: #F3EEFF; border-color: #E0D3FA; color: #6B42D1; font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; }
+  .chunk.op { background: #fff; color: #525866; }
+  .chunk .chev { color: #99A0AE; font-size: 9px; }
+  .add-and { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 10px; border: 1px dashed #CBD5E1; background: #fff; border-radius: 6px; font-size: 12px; color: #3d64d7; cursor: pointer; font-weight: 500; }
+
+  /* Preview card */
+  .preview { background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 18px 20px; margin-bottom: 16px; }
+  .preview-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .preview-title { font-size: 13.5px; font-weight: 600; color: #0E121B; flex: 1; }
+  .preview-call { font-size: 11.5px; color: #6B7280; }
+  .preview-list { display: flex; flex-direction: column; gap: 6px; }
+  .preview-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #374151; padding: 6px 0; }
+  .preview-item .mark { width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+  .preview-item .mark.yes { background: #D1FAE5; color: #047857; }
+  .preview-item .mark.skip { background: #F3F4F6; color: #9CA3AF; }
+  .preview-item .lbl { flex: 1; }
+  .preview-item .why { font-size: 11.5px; color: #9CA3AF; }
+
+  /* Fallbacks card */
+  .simple-row { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-top: 1px solid #F0F1F3; }
+  .simple-row:first-child { border-top: none; }
+  .sr-label { flex: 1; font-size: 13px; color: #374151; }
+  .sr-hint { font-size: 11.5px; color: #9CA3AF; margin-top: 2px; }
+  .num-input { width: 56px; height: 28px; padding: 0 8px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 12.5px; text-align: center; font-family: inherit; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">Retell</div>
+  <div class="workspace">
+    <div class="workspace-avatar">B</div>
+    <span class="workspace-name">Brandon K... Workspace</span>
+  </div>
+  <div class="nav-scroll">
+    <div class="section-group">
+      <div class="section-label">Build</div>
+      <ul class="nav-items">
+        <li class="nav-item current">Agents</li>
+        <li class="nav-item">Knowledge Base</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Deploy</div>
+      <ul class="nav-items">
+        <li class="nav-item">Phone Numbers</li>
+        <li class="nav-item">Batch Call</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Monitor</div>
+      <ul class="nav-items">
+        <li class="nav-item">Contacts</li>
+        <li class="nav-item">Call History</li>
+        <li class="nav-item">Chat History</li>
+        <li class="nav-item">Analytics</li>
+        <li class="nav-item">AI Quality Assurance</li>
+        <li class="nav-item">Alerting</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">System</div>
+      <ul class="nav-items">
+        <li class="nav-item new-item">Integrations</li>
+        <li class="nav-item">Billing</li>
+        <li class="nav-item">Settings</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="footer-card user footer-user">
+      <div class="avatar">B</div>
+      <span class="name">brandon@retellai.com</span>
+    </div>
+    <div class="footer-links">
+      <span class="footer-link">Help</span>
+      <div class="footer-divider"></div>
+      <span class="footer-link">Updates</span>
+    </div>
+  </div>
+</aside>
+
+<div class="main-col">
+  <div class="topbar">
+    <div class="back-btn">← Agents</div>
+    <div>
+      <div class="agent-title">Outbound SDR — Qualification &amp; Booking</div>
+      <div class="agent-meta">Single Prompt · Last saved 24 sec ago</div>
+    </div>
+    <div class="tabs">
+      <div class="tab">Build</div>
+      <div class="tab active">Post-call settings</div>
+      <div class="tab">Deploy</div>
+      <div class="tab">Analytics</div>
+    </div>
+    <div class="tb-spacer"></div>
+    <button class="tb-btn">Simulate</button>
+    <button class="tb-btn primary">Publish</button>
+  </div>
+
+  <div class="content">
+    <div class="inner">
+      <div class="sub-tabs">
+        <div class="sub-tab">General</div>
+        <div class="sub-tab active">Cal.com</div>
+        <div class="sub-tab">Webhooks</div>
+        <div class="sub-tab">Data extraction</div>
+      </div>
+
+      <!-- Main card: Cal.com post-call actions -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="icon-wrap">Cal</div>
+          <div style="flex:1;">
+            <div class="panel-title">Cal.com post-call actions</div>
+            <div class="panel-sub">Connected as <b>maya@acme.com</b> · Actions fire after the call ends, in the order shown.</div>
+          </div>
+        </div>
+
+        <div class="panel-body">
+
+          <!-- Auto-book meeting (expanded) -->
+          <div class="action-row">
+            <div class="ar-left">
+              <div class="ar-title">Auto-book meeting</div>
+              <div class="ar-desc">Book the proposed time slot if the caller confirmed during the call.</div>
+              <div class="ar-meta">
+                <span class="cond-pill">Only when <code>lead.qualified = true</code> AND <code>call.outcome = meeting_agreed</code></span>
+                <a class="edit-link">Edit conditions</a>
+              </div>
+              <div class="builder">
+                <div class="builder-title">Conditional trigger builder</div>
+                <div class="rule-row">
+                  <span class="chunk op">Only when</span>
+                  <span class="chunk value">lead.qualified <span class="chev">▾</span></span>
+                  <span class="chunk op">=</span>
+                  <span class="chunk value">true <span class="chev">▾</span></span>
+                </div>
+                <div class="rule-row">
+                  <span class="chunk op">AND</span>
+                  <span class="chunk value">call.outcome <span class="chev">▾</span></span>
+                  <span class="chunk op">=</span>
+                  <span class="chunk value">meeting_agreed <span class="chev">▾</span></span>
+                </div>
+                <button class="add-and">+ AND</button>
+              </div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+
+          <!-- Send booking link -->
+          <div class="action-row">
+            <div class="ar-left">
+              <div class="ar-title">Send booking link</div>
+              <div class="ar-desc">SMS a Cal.com self-serve link if the agent couldn't book live.</div>
+              <div class="ar-meta">
+                <span class="cond-pill">Only when <code>call.outcome = callback_requested</code> OR <code>booking.failed = true</code></span>
+                <a class="edit-link">Edit conditions</a>
+              </div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+
+          <!-- Log call summary to event notes -->
+          <div class="action-row">
+            <div class="ar-left">
+              <div class="ar-title">Log call summary to event notes</div>
+              <div class="ar-desc">Attach the call transcript summary to the Cal.com booking's internal notes. Helpful for the AE showing up to the demo.</div>
+              <div class="ar-meta">
+                <span class="no-cond">No conditions — always runs when a booking exists</span>
+                <a class="edit-link">Add condition</a>
+              </div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+
+          <!-- Reschedule existing meeting -->
+          <div class="action-row">
+            <div class="ar-left">
+              <div class="ar-title">Reschedule existing meeting</div>
+              <div class="ar-desc">Move an existing booking if the caller requested a different time during the call.</div>
+              <div class="ar-meta">
+                <span class="cond-pill">Only when <code>user.intent = reschedule</code></span>
+                <a class="edit-link">Edit conditions</a>
+              </div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+
+          <!-- Cancel meeting -->
+          <div class="action-row muted">
+            <div class="ar-left">
+              <div class="ar-title">Cancel meeting</div>
+              <div class="ar-desc">Cancel a booking if the caller no longer wants the meeting.</div>
+              <div class="ar-meta">
+                <span class="cond-pill">Requires explicit caller confirmation phrase</span>
+                <a class="edit-link">Edit conditions</a>
+              </div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Preview with last call -->
+      <div class="preview">
+        <div class="preview-hdr">
+          <div class="preview-title">Preview with last call</div>
+          <span class="preview-call">Derek Park @ Linear · 4m 12s · just now</span>
+        </div>
+        <div class="preview-list">
+          <div class="preview-item">
+            <span class="mark yes">✓</span>
+            <span class="lbl"><b>Auto-book meeting</b> would run</span>
+            <span class="why">lead.qualified = true, call.outcome = meeting_agreed</span>
+          </div>
+          <div class="preview-item">
+            <span class="mark yes">✓</span>
+            <span class="lbl"><b>Log call summary</b> would run</span>
+            <span class="why">booking created in this call</span>
+          </div>
+          <div class="preview-item">
+            <span class="mark skip">–</span>
+            <span class="lbl"><b>Send booking link</b> skipped</span>
+            <span class="why">condition not met (booking succeeded)</span>
+          </div>
+          <div class="preview-item">
+            <span class="mark skip">–</span>
+            <span class="lbl"><b>Reschedule / Cancel</b> disabled</span>
+            <span class="why">toggle off</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fallbacks & safety -->
+      <div class="panel">
+        <div class="panel-hdr nb">
+          <div class="icon-wrap" style="background:#F3F4F6;color:#525866;font-size:14px;font-weight:500;">⚙</div>
+          <div style="flex:1;">
+            <div class="panel-title">Fallbacks &amp; safety</div>
+            <div class="panel-sub">Guardrails for unattended booking actions.</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="simple-row">
+            <div class="sr-label">
+              Max bookings per call
+              <div class="sr-hint">Hard cap to prevent runaway duplicates if extraction misfires.</div>
+            </div>
+            <input class="num-input" value="1">
+          </div>
+          <div class="simple-row">
+            <div class="sr-label">
+              Require user confirmation phrase before booking
+              <div class="sr-hint">Caller must say "yes", "book it", or similar explicit confirmation.</div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+          <div class="simple-row">
+            <div class="sr-label">
+              Dry run mode
+              <div class="sr-hint">Log intended actions to Call History without executing them against Cal.com.</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

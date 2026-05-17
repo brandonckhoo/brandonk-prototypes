@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — Google Accounts</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Google Sans', Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #202124; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* Fake browser chrome */
+  .browser-chrome { background: #F0F0F0; border-bottom: 1px solid #D1D5DB; padding: 8px 12px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .browser-dots { display: flex; gap: 6px; }
+  .browser-dots span { width: 12px; height: 12px; border-radius: 50%; }
+  .browser-dots .red { background: #FF5F57; }
+  .browser-dots .yellow { background: #FEBC2E; }
+  .browser-dots .green { background: #28C840; }
+  .browser-url { flex: 1; background: #fff; border: 1px solid #D1D5DB; border-radius: 6px; padding: 6px 12px; font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 6px; margin-left: 8px; }
+  .browser-url .lock { color: #22C55E; }
+
+  /* Google OAuth page */
+  .oauth-page { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 48px 24px; background: #fff; }
+  .oauth-card { background: #fff; border: 1px solid #DADCE0; border-radius: 8px; width: 450px; padding: 48px 40px; }
+
+  .g-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .g-logo img { width: 24px; height: 24px; }
+  .g-logo-text { font-size: 12px; color: #5F6368; letter-spacing: 0.3px; }
+
+  .g-title { font-size: 22px; font-weight: 400; color: #202124; line-height: 1.3; margin-bottom: 24px; }
+  .g-title strong { font-weight: 500; color: #1A73E8; }
+
+  /* Account chip */
+  .account-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px 6px 6px; border: 1px solid #DADCE0; border-radius: 20px; font-size: 14px; color: #202124; margin-bottom: 28px; }
+  .account-chip img { width: 24px; height: 24px; border-radius: 50%; }
+  .account-chip .email { color: #5F6368; font-size: 13px; }
+
+  .g-section-title { font-size: 14px; color: #202124; margin-bottom: 10px; line-height: 1.5; }
+  .g-section-sub { font-size: 13px; color: #5F6368; margin-bottom: 16px; line-height: 1.5; }
+
+  /* Scope list */
+  .scope-list { margin-bottom: 24px; }
+  .scope-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; }
+  .scope-icon { width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .scope-text { font-size: 14px; color: #202124; line-height: 1.4; }
+  .scope-text .info { color: #5F6368; cursor: pointer; }
+
+  /* Trust callout */
+  .trust { padding: 16px; background: #F8F9FA; border-radius: 8px; margin-bottom: 24px; }
+  .trust-title { font-size: 14px; font-weight: 500; color: #202124; margin-bottom: 6px; }
+  .trust-body { font-size: 13px; color: #5F6368; line-height: 1.55; }
+  .trust-body a { color: #1A73E8; text-decoration: none; }
+
+  /* Footer actions */
+  .g-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+  .btn-google { height: 36px; padding: 0 24px; border-radius: 4px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; border: none; }
+  .btn-cancel { background: transparent; color: #1A73E8; }
+  .btn-cancel:hover { background: rgba(26,115,232,0.04); }
+  .btn-continue { background: #1A73E8; color: #fff; }
+  .btn-continue:hover { background: #1765CC; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+</style>
+</head>
+<body>
+
+<div class="browser-chrome">
+  <div class="browser-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+  <div class="browser-url">
+    <span class="lock"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 7V5a4 4 0 1 1 8 0v2h1a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h1zm2 0h4V5a2 2 0 1 0-4 0v2z" fill="currentColor"/></svg></span>
+    accounts.google.com/o/oauth2/auth?client_id=retell-ai&scope=drive.readonly+spreadsheets.readonly+documents.readonly
+  </div>
+</div>
+
+<div class="oauth-page">
+  <div class="oauth-card">
+    <div class="g-logo">
+      <svg width="24" height="24" viewBox="0 0 48 48"><path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#34A853" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#EA4335" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      <span class="g-logo-text">Sign in with Google</span>
+    </div>
+
+    <h1 class="g-title">Retell AI wants to access your Google Account</h1>
+
+    <div class="account-chip">
+      <img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c">
+      <span>Brandon Khoo</span>
+      <span class="email">brandon@retellai.com</span>
+    </div>
+
+    <div class="g-section-title">This will allow Retell AI to:</div>
+
+    <div class="scope-list">
+      <div class="scope-row">
+        <span class="scope-icon"><svg width="20" height="20" viewBox="0 0 87 78"><path d="M6.6 66.85L10.45 73.5C11.25 74.9 12.4 76 13.75 76.8L27.5 53H0C0 54.55 0.4 56.1 1.2 57.5L6.6 66.85Z" fill="#0066DA"/><path d="M43.65 25L29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L1.2 48.5C0.414 49.87 0.0003 51.4 0 52.95H27.5L43.65 25Z" fill="#00AC47"/><path d="M73.55 76.8C74.9 76 76.05 74.9 76.85 73.5L78.45 70.75L86.1 57.5C86.9 56.1 87.3 54.55 87.3 53H59.8L65.65 64.5L73.55 76.8Z" fill="#EA4335"/><path d="M43.65 25L57.4 1.2C56.05 0.4 54.5 0 52.9 0H34.4C32.8 0 31.25 0.45 29.9 1.2L43.65 25Z" fill="#00832D"/><path d="M59.8 53H27.5L13.75 76.8C15.1 77.6 16.65 78 18.25 78H69.05C70.65 78 72.2 77.55 73.55 76.8L59.8 53Z" fill="#2684FC"/><path d="M73.4 26.5L60.7 4.5C59.9 3.1 58.75 2 57.4 1.2L43.65 25L59.8 53H87.25C87.25 51.45 86.85 49.9 86.05 48.5L73.4 26.5Z" fill="#FFBA00"/></svg></span>
+        <div class="scope-text">See and download all your Google Drive files <span class="info" title="Read-only scope. Retell can only read files you explicitly select.">ⓘ</span></div>
+      </div>
+      <div class="scope-row">
+        <span class="scope-icon"><svg width="20" height="20" viewBox="0 0 47 65"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#0F9D58"/><path d="M30.7 16.3L47 32.7V17.6L30.7 16.3Z" fill="#87CEAC"/><path d="M29.4 0V13.2C29.4 15.6 31.4 17.6 33.8 17.6H47L29.4 0Z" fill="#87CEAC"/></svg></span>
+        <div class="scope-text">See all your Google Sheets spreadsheets <span class="info">ⓘ</span></div>
+      </div>
+      <div class="scope-row">
+        <span class="scope-icon"><svg width="20" height="20" viewBox="0 0 47 65"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#4285F4"/><path d="M30.7 16.3L47 32.7V17.6L30.7 16.3Z" fill="#A1C2FA"/><path d="M29.4 0V13.2C29.4 15.6 31.4 17.6 33.8 17.6H47L29.4 0Z" fill="#A1C2FA"/></svg></span>
+        <div class="scope-text">See all your Google Docs documents <span class="info">ⓘ</span></div>
+      </div>
+      <div class="scope-row">
+        <span class="scope-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2a5 5 0 0 0-5 5v3H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-2V7a5 5 0 0 0-5-5zm0 2a3 3 0 0 1 3 3v3H9V7a3 3 0 0 1 3-3z" fill="#5F6368"/></svg></span>
+        <div class="scope-text">See your primary Google Account email address and basic profile info</div>
+      </div>
+    </div>
+
+    <div class="trust">
+      <div class="trust-title">Make sure you trust Retell AI</div>
+      <div class="trust-body">You may be sharing sensitive info with this site or app. Learn about how Retell AI will handle your data by reviewing its <a href="#">privacy policies</a> and <a href="#">terms of service</a>. You can always see or remove access in your <a href="#">Google Account</a>.</div>
+    </div>
+
+    <div class="g-actions">
+      <button class="btn-google btn-cancel" onclick="window.history.back()">Cancel</button>
+      <button class="btn-google btn-continue" onclick="window.location='connect-integration-library-google-workspace-configure.html'">Continue</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

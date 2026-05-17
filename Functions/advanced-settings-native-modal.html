@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — 4.10 Configure per-function settings</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  /* Top bar */
+  .top-bar-wrap { background: #fff; flex-shrink: 0; border-bottom: 1px solid #E1E4EA; }
+  .top-bar-row1 { display: flex; align-items: center; height: 44px; padding: 0 16px; gap: 10px; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #525866; flex-shrink: 0; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; border: 1px solid #E1E4EA; border-radius: 8px; overflow: hidden; }
+  .top-tab { padding: 5px 16px; font-size: 13px; font-weight: 400; color: #525866; cursor: pointer; background: #fff; }
+  .top-tab.active { font-weight: 500; color: #0E121B; background: #F5F7FA; }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-publish { height: 32px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; }
+  .saved-label { font-size: 12px; color: #99A0AE; }
+
+  /* Builder layout */
+  .builder-layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* Prompt panel */
+  .prompt-panel { width: 58%; display: flex; flex-direction: column; border-right: 1px solid #E1E4EA; overflow: hidden; }
+  .model-bar { display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .mb-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 6px; font-size: 13px; font-weight: 500; color: #374151; white-space: nowrap; cursor: pointer; }
+  .mb-pill .chevron { color: #99A0AE; }
+  .mb-spacer { flex: 1; }
+  .mb-handbook { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12.5px; font-weight: 500; color: #374151; background: #fff; cursor: pointer; }
+  .prompt-area { flex: 1; padding: 14px; overflow-y: auto; }
+  .prompt-content { font-size: 13.5px; line-height: 1.75; color: #0A0A0A; }
+  .prompt-content .md-h2 { font-size: 13.5px; font-weight: 700; margin: 12px 0 3px; }
+  .prompt-content .md-li { padding-left: 12px; position: relative; }
+  .prompt-content .md-li::before { content: '-'; position: absolute; left: 0; color: #99A0AE; }
+  .welcome-section { padding: 12px 14px 20px; flex-shrink: 0; border-top: 1px solid #E1E4EA; }
+  .welcome-label { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 6px; }
+  .welcome-select { height: 36px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0A0A0A; background: #fff; width: 100%; outline: none; font-family: inherit; }
+
+  /* Right panel */
+  .functions-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff; }
+  .panel-tabs { display: flex; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .panel-tab { padding: 10px 16px; font-size: 13px; font-weight: 400; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .panel-tab.active { font-weight: 600; color: #0E121B; border-bottom-color: #0E121B; }
+  .panel-body { flex: 1; overflow-y: auto; padding: 16px; }
+  .fn-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .fn-section-title { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .fn-section-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: #EFF6FF; color: #2563EB; }
+  .fn-card { border: 1px solid #E1E4EA; border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+  .fn-card-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+  .fn-dot { width: 8px; height: 8px; border-radius: 50%; background: #1FC16B; flex-shrink: 0; }
+  .fn-name { font-size: 13px; font-weight: 500; color: #0E121B; flex: 1; }
+  .fn-badge { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 20px; background: #DCFCE7; color: #16A34A; white-space: nowrap; }
+  .fn-action { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #9CA3AF; border: none; background: none; }
+  .fn-action:hover { background: #F3F4F6; color: #525866; }
+  .fn-section-divider { margin: 16px 0 12px; border: none; border-top: 1px solid #E1E4EA; }
+  .fn-add-btn { display: flex; align-items: center; gap: 6px; width: 100%; padding: 9px 12px; border: 1px dashed #D1D5DB; border-radius: 8px; font-size: 13px; font-weight: 500; color: #525866; cursor: pointer; background: none; font-family: inherit; }
+
+  /* ===================== MODAL ===================== */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { background: #fff; border-radius: 12px; width: 620px; max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.25), 0 4px 16px rgba(0,0,0,0.1); overflow: hidden; }
+
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .modal-logo { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #00A1E0; }
+  .modal-title { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .modal-subtitle { font-size: 12px; color: #9CA3AF; margin-top: 1px; }
+  .modal-close { width: 26px; height: 26px; border-radius: 6px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #9CA3AF; padding: 0; }
+  .modal-close:hover { background: #F3F4F6; color: #525866; }
+
+  .modal-body { flex: 1; overflow-y: auto; padding: 0 20px; }
+
+  .field-block { padding: 14px 0; border-bottom: 1px solid #F3F4F6; }
+  .field-block:last-child { border-bottom: none; padding-bottom: 20px; }
+  .field-label { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 6px; }
+  .field-sublabel { font-size: 12px; color: #9CA3AF; margin-bottom: 8px; line-height: 1.4; }
+  .field-select { width: 100%; height: 36px; padding: 0 28px 0 10px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0E121B; font-family: inherit; outline: none; background: #fff url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%2399A0AE' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center; appearance: none; cursor: pointer; }
+
+  /* Field mapping table */
+  .mapping-table { width: 100%; border-collapse: collapse; }
+  .mapping-table th { font-size: 11.5px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.04em; padding: 0 0 7px; text-align: left; }
+  .mapping-table td { padding: 5px 8px 5px 0; border-top: 1px solid #F3F4F6; vertical-align: middle; }
+  .mapping-table td:first-child { padding-left: 0; }
+  .field-name { font-size: 13px; font-weight: 500; color: #0E121B; }
+  .field-required { font-size: 11px; color: #FB3748; margin-left: 3px; }
+  .field-optional { font-size: 11px; color: #9CA3AF; margin-left: 3px; }
+  .mapping-input { width: 100%; height: 32px; padding: 0 9px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12.5px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; color: #E07B39; outline: none; background: #fff; }
+  .mapping-input:focus { border-color: #3d64d7; }
+
+  /* KV pairs */
+  .kv-pair-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .kv-input { flex: 1; height: 32px; padding: 0 9px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12.5px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; color: #0E121B; outline: none; background: #fff; }
+  .kv-input:focus { border-color: #3d64d7; }
+  .kv-delete { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #D1D5DB; cursor: pointer; border-radius: 4px; border: none; background: none; flex-shrink: 0; }
+  .kv-delete:hover { color: #EF4444; background: #FEF2F2; }
+  .kv-add-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1px solid #E1E4EA; border-radius: 20px; font-size: 13px; font-weight: 400; color: #374151; background: #fff; cursor: pointer; font-family: inherit; margin-top: 2px; }
+  .kv-add-btn:hover { background: #F9FAFB; }
+
+  /* Toggle rows */
+  .toggle-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F3F4F6; }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-label { font-size: 13px; font-weight: 500; color: #0E121B; }
+  .toggle-desc { font-size: 12px; color: #9CA3AF; margin-top: 3px; line-height: 1.4; }
+  .toggle { width: 36px; height: 20px; border-radius: 10px; position: relative; flex-shrink: 0; cursor: pointer; margin-top: 1px; }
+  .toggle.on { background: #3d64d7; }
+  .toggle.off { background: #D1D5DB; }
+  .toggle::after { content: ''; position: absolute; top: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .toggle.on::after { right: 2px; }
+  .toggle.off::after { left: 2px; }
+
+  /* Radio */
+  .radio-group { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+  .radio-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border-radius: 7px; cursor: pointer; border: 1px solid transparent; }
+  .radio-item:hover { background: #F9FAFB; }
+  .radio-item.selected { background: #F5F7FA; border-color: #E1E4EA; }
+  .radio-dot { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid #D1D5DB; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; }
+  .radio-item.selected .radio-dot { border-color: #3d64d7; }
+  .radio-item.selected .radio-dot::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #3d64d7; display: block; }
+  .radio-label { font-size: 13px; font-weight: 500; color: #0E121B; }
+  .radio-hint { font-size: 12px; color: #9CA3AF; margin-top: 2px; line-height: 1.35; }
+
+  /* Modal footer */
+  .modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 12px 20px; border-top: 1px solid #E1E4EA; flex-shrink: 0; background: #fff; }
+  .btn-cancel { height: 34px; padding: 0 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; font-family: inherit; }
+  .btn-save { height: 34px; padding: 0 18px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar-wrap">
+  <div class="top-bar-row1">
+    <div class="home-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+    <span class="agent-name">4Refuel Dispatch Agent</span>
+    <span style="color:#99A0AE;margin-left:4px;font-size:12px;">Single Prompt · Version 7</span>
+    <span class="top-spacer"></span>
+    <div class="top-tabs">
+      <span class="top-tab active">Create</span>
+      <span class="top-tab">Simulation</span>
+    </div>
+    <div class="top-actions">
+      <span class="saved-label">Auto saved at 11:42 AM</span>
+      <button class="btn-publish"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Publish</button>
+    </div>
+  </div>
+</div>
+
+<div class="builder-layout">
+
+  <!-- Prompt panel -->
+  <div class="prompt-panel">
+    <div class="model-bar">
+      <span class="mb-pill">GPT 4.1 <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span style="color:#E1E4EA;">|</span>
+      <span class="mb-pill">Jordan <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span style="color:#E1E4EA;">|</span>
+      <span class="mb-pill">English <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="mb-spacer"></span>
+      <span class="mb-handbook"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="#525866" stroke-width="1.3"/><path d="M6 5h4M6 7.5h4M6 10h2" stroke="#525866" stroke-width="1.2" stroke-linecap="round"/></svg> Agent Handbook</span>
+    </div>
+    <div class="prompt-area">
+      <div class="prompt-content">
+        <div class="md-h2">## Identity</div>
+        You are Jordan, a dispatch agent for 4Refuel. You call fleet operators to confirm scheduled on-site refueling appointments and update the booking record.<br><br>
+        <div class="md-h2">## Tasks</div>
+        <div class="md-li">Confirm the operator is available for the scheduled window.</div>
+        <div class="md-li">Capture any site access changes (gate code, contact name).</div>
+        <div class="md-li">Update the Salesforce opportunity with confirmed status.</div>
+        <div class="md-li">If rescheduling is needed, book a new slot via Cal.com.</div><br>
+        <div class="md-h2">## Style</div>
+        Professional and efficient. Confirm details clearly, read them back once.
+      </div>
+    </div>
+    <div class="welcome-section">
+      <div class="welcome-label">Welcome Message</div>
+      <select class="welcome-select"><option>AI starts speaking after silence</option></select>
+    </div>
+  </div>
+
+  <!-- Functions panel -->
+  <div class="functions-panel">
+    <div class="panel-tabs">
+      <span class="panel-tab active">Functions</span>
+      <span class="panel-tab">Setting</span>
+      <span class="panel-tab">Test</span>
+    </div>
+    <div class="panel-body">
+      <div class="fn-section-header">
+        <span class="fn-section-title">Post-Call Functions</span>
+        <span class="fn-section-badge">1 ACTIVE</span>
+      </div>
+      <div class="fn-card">
+        <div class="fn-card-row">
+          <div class="fn-dot"></div>
+          <span class="fn-name">Salesforce · Update Opportunity</span>
+          <span class="fn-badge">Active</span>
+          <button class="fn-action"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5a1.5 1.5 0 0 1 2.12 2.12L5 13.24l-2.83.71.71-2.83L11.5 2.5z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <button class="fn-add-btn"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Add post-call function</button>
+      <hr class="fn-section-divider">
+      <div class="fn-section-header">
+        <span class="fn-section-title">Pre-Call Functions</span>
+        <span style="font-size:11px;color:#9CA3AF;">None configured</span>
+      </div>
+      <button class="fn-add-btn"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Add pre-call function</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===================== MODAL ===================== -->
+<div class="modal-overlay">
+  <div class="modal">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;">
+        <div class="modal-logo">
+          <svg width="18" height="13" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6.5C21.8 4.4 24.4 3 27.4 3C31.6 3 35.2 5.7 36.7 9.5C37.7 9 38.8 8.7 40 8.7C44.4 8.7 48 12.3 48 16.7C48 21.1 44.4 24.7 40 24.7H10.5C6.4 24.7 3 21.3 3 17.2C3 13.4 5.8 10.2 9.5 9.8C9.2 9 9 8.2 9 7.3C9 3.8 11.8 1 15.3 1C17.4 1 19.3 2 20.5 3.6" fill="white" opacity="0.95"/></svg>
+        </div>
+        <div>
+          <div class="modal-title">Salesforce</div>
+          <div class="modal-subtitle">Native integration · Post-call</div>
+        </div>
+      </div>
+      <button class="modal-close"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+
+      <!-- Action -->
+      <div class="field-block">
+        <div class="field-label">Action</div>
+        <div class="field-sublabel">Choose what this function does in Salesforce after the call ends.</div>
+        <select class="field-select">
+          <option selected>Update Opportunity</option>
+          <option>Update Lead</option>
+          <option>Create Task</option>
+          <option>Create Case</option>
+          <option>Log Call Activity</option>
+        </select>
+      </div>
+
+      <!-- Field mapping -->
+      <div class="field-block">
+        <div class="field-label">Field Mapping</div>
+        <div class="field-sublabel">Map Salesforce fields to variables from this call. Use <span style="font-family:ui-monospace,monospace;font-size:11px;background:#F3F4F6;padding:1px 4px;border-radius:3px;color:#374151;">{{variable}}</span> to reference post-call analysis output.</div>
+        <table class="mapping-table">
+          <thead>
+            <tr>
+              <th style="width:44%;">Salesforce field</th>
+              <th style="width:56%;">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="field-name">Opportunity ID <span class="field-required">*</span></span></td>
+              <td><input class="mapping-input" type="text" value="{{opportunity_id}}"></td>
+            </tr>
+            <tr>
+              <td><span class="field-name">Stage</span></td>
+              <td><input class="mapping-input" type="text" value="{{call_outcome}}"></td>
+            </tr>
+            <tr>
+              <td><span class="field-name">Close Date <span class="field-optional">opt.</span></span></td>
+              <td><input class="mapping-input" type="text" value="{{confirmed_date}}"></td>
+            </tr>
+            <tr>
+              <td><span class="field-name">Description <span class="field-optional">opt.</span></span></td>
+              <td><input class="mapping-input" type="text" value="{{call_summary}}"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Write Response to Record -->
+      <div class="field-block">
+        <div class="field-label">Write Response to Record</div>
+        <div class="field-sublabel">Save values returned by Salesforce directly into fields on another record.</div>
+        <div style="margin-top:10px;">
+          <table class="mapping-table">
+            <thead>
+              <tr>
+                <th style="width:30%;">Object</th>
+                <th style="width:35%;">Field</th>
+                <th style="width:27%;">Response value</th>
+                <th style="width:8%;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <select class="mapping-input plain" style="height:32px;padding:0 6px;appearance:none;background:#fff url('data:image/svg+xml,%3Csvg width=\'10\' height=\'10\' viewBox=\'0 0 16 16\' fill=\'none\'%3E%3Cpath d=\'M4 6l4 4 4-4\' stroke=\'%2399A0AE\' stroke-width=\'1.5\' stroke-linecap=\'round\'/%3E%3C/svg%3E') no-repeat right 6px center;padding-right:20px;">
+                    <option selected>Lead</option>
+                    <option>Contact</option>
+                    <option>Account</option>
+                    <option>Opportunity</option>
+                  </select>
+                </td>
+                <td>
+                  <select class="mapping-input plain" style="height:32px;padding:0 6px;appearance:none;background:#fff url('data:image/svg+xml,%3Csvg width=\'10\' height=\'10\' viewBox=\'0 0 16 16\' fill=\'none\'%3E%3Cpath d=\'M4 6l4 4 4-4\' stroke=\'%2399A0AE\' stroke-width=\'1.5\' stroke-linecap=\'round\'/%3E%3C/svg%3E') no-repeat right 6px center;padding-right:20px;">
+                    <option selected>retell_AI_call__c</option>
+                    <option>Status</option>
+                    <option>Description</option>
+                  </select>
+                </td>
+                <td><input class="mapping-input" type="text" value="$.id"></td>
+                <td style="text-align:center;">
+                  <button class="kv-delete"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <select class="mapping-input plain" style="height:32px;padding:0 6px;appearance:none;background:#fff url('data:image/svg+xml,%3Csvg width=\'10\' height=\'10\' viewBox=\'0 0 16 16\' fill=\'none\'%3E%3Cpath d=\'M4 6l4 4 4-4\' stroke=\'%2399A0AE\' stroke-width=\'1.5\' stroke-linecap=\'round\'/%3E%3C/svg%3E') no-repeat right 6px center;padding-right:20px;">
+                    <option>Lead</option>
+                    <option selected>Contact</option>
+                    <option>Account</option>
+                    <option>Opportunity</option>
+                  </select>
+                </td>
+                <td>
+                  <select class="mapping-input plain" style="height:32px;padding:0 6px;appearance:none;background:#fff url('data:image/svg+xml,%3Csvg width=\'10\' height=\'10\' viewBox=\'0 0 16 16\' fill=\'none\'%3E%3Cpath d=\'M4 6l4 4 4-4\' stroke=\'%2399A0AE\' stroke-width=\'1.5\' stroke-linecap=\'round\'/%3E%3C/svg%3E') no-repeat right 6px center;padding-right:20px;">
+                    <option selected>retell_AI_call__c</option>
+                    <option>Status</option>
+                    <option>Description</option>
+                  </select>
+                </td>
+                <td><input class="mapping-input" type="text" value="$.id"></td>
+                <td style="text-align:center;">
+                  <button class="kv-delete"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="kv-add-btn" style="margin-top:8px;">+ Add record field</button>
+        </div>
+      </div>
+
+      <!-- Disable interruptions -->
+      <div class="field-block">
+        <div class="toggle-row" style="border-bottom:none;padding:0;">
+          <div>
+            <div class="toggle-label">Disable interruptions</div>
+            <div class="toggle-desc">The agent cannot be interrupted while this function runs. Recommended for write operations where partial execution causes errors.</div>
+          </div>
+          <div class="toggle off"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-save">Save</button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

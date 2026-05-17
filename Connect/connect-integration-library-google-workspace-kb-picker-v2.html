@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Google Drive — Select files (v2)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Google Sans', Roboto, -apple-system, BlinkMacSystemFont, sans-serif; color: #202124; background: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  .header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid #E8EAED; }
+  .google-logo { display: flex; align-items: center; gap: 0; font-size: 20px; font-weight: 500; letter-spacing: -0.3px; }
+  .google-logo span:nth-child(1) { color: #4285F4; }
+  .google-logo span:nth-child(2) { color: #EA4335; }
+  .google-logo span:nth-child(3) { color: #FBBC04; }
+  .google-logo span:nth-child(4) { color: #4285F4; }
+  .google-logo span:nth-child(5) { color: #34A853; }
+  .google-logo span:nth-child(6) { color: #EA4335; }
+  .header-title { font-size: 16px; color: #3c4043; margin-left: 10px; font-weight: 400; }
+  .account-chip { margin-left: auto; display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border: 1px solid #DADCE0; border-radius: 100px; font-size: 13px; color: #3c4043; cursor: pointer; }
+  .account-chip img { width: 24px; height: 24px; border-radius: 50%; }
+
+  .perms-banner { display: flex; align-items: center; gap: 10px; background: #e8f0fe; border-bottom: 1px solid #d2e3fc; padding: 10px 20px; font-size: 13px; color: #174ea6; }
+
+  .tabs { display: flex; padding: 0 20px; border-bottom: 1px solid #E8EAED; }
+  .tab { padding: 14px 16px; font-size: 14px; color: #5f6368; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+  .tab.active { color: #1a73e8; border-bottom-color: #1a73e8; font-weight: 500; }
+
+  .toolbar { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid #E8EAED; }
+  .search { flex: 1; position: relative; }
+  .search input { width: 100%; height: 38px; padding: 0 14px 0 40px; border: 1px solid #DADCE0; border-radius: 6px; font-size: 14px; outline: none; background: #f1f3f4; color: #202124; }
+  .search input:focus { background: #fff; border-color: #1a73e8; }
+  .search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #5f6368; }
+  .view-toggle { display: flex; gap: 4px; }
+  .view-btn { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border: none; background: none; color: #5f6368; border-radius: 4px; cursor: pointer; }
+  .view-btn.active { background: #e8f0fe; color: #1967d2; }
+
+  .crumbs { padding: 10px 20px; font-size: 14px; color: #5f6368; display: flex; align-items: center; gap: 6px; }
+  .crumbs a { color: #1a73e8; cursor: pointer; text-decoration: none; }
+  .crumbs a:hover { text-decoration: underline; }
+  .crumbs .sep { color: #9AA0A6; }
+
+  .file-list { flex: 1; overflow-y: auto; padding: 0 8px 8px; }
+  .list-head { display: flex; align-items: center; padding: 8px 14px; font-size: 12px; color: #5f6368; border-bottom: 1px solid #E8EAED; }
+  .list-head .c-name { flex: 1; }
+  .list-head .c-owner { width: 140px; }
+  .list-head .c-modified { width: 140px; }
+  .list-head .c-size { width: 80px; text-align: right; }
+
+  .frow { display: flex; align-items: center; padding: 10px 14px; font-size: 14px; color: #202124; border-radius: 4px; gap: 10px; position: relative; }
+  .frow:hover { background: #f1f3f4; }
+  .frow:hover .folder-open-btn { opacity: 1; }
+  .frow.selected { background: #e8f0fe; }
+  .frow.selected:hover { background: #dce8fd; }
+
+  .cb { width: 18px; height: 18px; border: 2px solid #5f6368; border-radius: 2px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; }
+  .frow.selected .cb { background: #1a73e8; border-color: #1a73e8; }
+  .frow.selected .cb svg.check { display: block; }
+  .cb svg.check { display: none; }
+
+  .ficon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  .fname { flex: 1; display: flex; flex-direction: column; gap: 2px; cursor: pointer; min-width: 0; }
+  .fname-main { display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fname-sub { font-size: 12px; color: #5f6368; display: none; }
+  .frow.selected .fname-sub { display: block; }
+
+  /* Folder-navigate affordance: "Open" button appears on hover */
+  .folder-open-btn {
+    opacity: 0;
+    transition: opacity 0.12s;
+    display: flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 4px;
+    font-size: 12px; font-weight: 500; color: #1a73e8;
+    border: 1px solid #DADCE0; background: #fff;
+    cursor: pointer; flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .folder-open-btn:hover { background: #e8f0fe; border-color: #1a73e8; }
+  .frow.selected .folder-open-btn { opacity: 1; }
+
+  .fowner { width: 140px; color: #3c4043; font-size: 13px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .fowner img { width: 22px; height: 22px; border-radius: 50%; }
+  .fmodified { width: 140px; color: #5f6368; font-size: 13px; flex-shrink: 0; }
+  .fsize { width: 80px; text-align: right; color: #5f6368; font-size: 13px; flex-shrink: 0; }
+
+  /* Inside-folder back row */
+  .back-row { display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-size: 14px; color: #1a73e8; cursor: pointer; border-radius: 4px; }
+  .back-row:hover { background: #f1f3f4; }
+
+  /* Select-all-in-folder bar */
+  .select-all-bar { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-bottom: 1px solid #E8EAED; font-size: 13px; color: #3c4043; }
+  .select-all-bar .sab-cb { width: 18px; height: 18px; border: 2px solid #5f6368; border-radius: 2px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .sab-label { cursor: pointer; }
+  .sab-hint { color: #5f6368; margin-left: auto; font-size: 12px; }
+
+  .folder-info-banner { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: #fef9e7; border-bottom: 1px solid #fde68a; font-size: 12px; color: #92400e; }
+  .folder-info-banner svg { color: #d97706; flex-shrink: 0; }
+
+  .footer { display: flex; align-items: center; padding: 14px 20px; border-top: 1px solid #E8EAED; background: #fff; gap: 12px; }
+  .footer .msg { font-size: 13px; color: #3c4043; line-height: 1.4; }
+  .footer .msg .highlight { color: #1a73e8; font-weight: 500; }
+  .footer .msg .hint { color: #5f6368; font-size: 12px; display: block; margin-top: 1px; }
+  .footer-actions { margin-left: auto; display: flex; gap: 8px; flex-shrink: 0; }
+  .btn { height: 36px; padding: 0 16px; border-radius: 4px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; }
+  .btn-cancel { border: none; background: none; color: #5f6368; }
+  .btn-cancel:hover { background: #f1f3f4; }
+  .btn-select { border: none; background: #1a73e8; color: #fff; padding: 0 24px; }
+  .btn-select:hover { background: #1557b0; }
+  .btn-select:disabled { background: #E8EAED; color: #9AA0A6; cursor: not-allowed; }
+
+  /* Section divider inside file list */
+  .list-section-label { padding: 10px 14px 6px; font-size: 11px; font-weight: 600; color: #9AA0A6; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* Tooltip */
+  .auto-badge { display: inline-flex; align-items: center; gap: 4px; padding: 1px 6px; background: #e6f4ea; color: #137333; border-radius: 10px; font-size: 11px; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="google-logo"><span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span></div>
+  <span class="header-title">Select from Google Drive</span>
+  <div class="account-chip">
+    <img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c">
+    brandon@retellai.com
+  </div>
+</div>
+
+<div class="perms-banner">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#174ea6" stroke-width="1.5"/><path d="M8 5v3" stroke="#174ea6" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11" r="0.8" fill="#174ea6"/></svg>
+  <strong>Retell AI</strong>&nbsp;is requesting read-only access. Selected files will auto-sync every 30 minutes.
+</div>
+
+<div class="tabs">
+  <div class="tab active">Recent</div>
+  <div class="tab">My Drive</div>
+  <div class="tab">Shared with me</div>
+  <div class="tab">Starred</div>
+  <div class="tab">Upload</div>
+</div>
+
+<div class="toolbar">
+  <div class="search">
+    <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <input placeholder="Search in Drive">
+  </div>
+  <div class="view-toggle">
+    <button class="view-btn active"><svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    <button class="view-btn"><svg width="18" height="18" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="2" width="5" height="5" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="9" width="5" height="5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="9" width="5" height="5" stroke="currentColor" stroke-width="1.5"/></svg></button>
+  </div>
+</div>
+
+<!-- VIEW A: My Drive › Sales -->
+<div id="view-sales">
+  <div class="crumbs">
+    <a onclick="return false;">My Drive</a>
+    <span class="sep">›</span>
+    <span>Sales</span>
+  </div>
+
+  <div class="file-list">
+    <div class="list-head">
+      <span class="c-name">Name</span>
+      <span class="c-owner">Owner</span>
+      <span class="c-modified">Last modified</span>
+      <span class="c-size">File size</span>
+    </div>
+
+    <!-- FOLDERS section -->
+    <div class="list-section-label">Folders</div>
+
+    <!-- Folder: Knowledge — Customer FAQs (selected) -->
+    <div class="frow selected" id="row-faqs">
+      <div class="cb" onclick="event.stopPropagation(); toggleRow('row-faqs')">
+        <svg class="check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="ficon"><svg width="20" height="20" viewBox="0 0 16 16" fill="none"><path d="M2 4a1 1 0 0 1 1-1h3l2 2h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H3V4z" fill="#FBBC04"/></svg></div>
+      <div class="fname" onclick="navigateInto()">
+        <div class="fname-main">
+          Knowledge — Customer FAQs
+          <span class="auto-badge">
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8a5 5 0 0 1 8.5-3.5L13 6M13 8a5 5 0 0 1-8.5 3.5L3 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            entire folder
+          </span>
+        </div>
+        <div class="fname-sub">12 files · new files auto-included on each sync</div>
+      </div>
+      <div class="fowner"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c">me</div>
+      <div class="fmodified">Apr 10, 2026</div>
+      <div class="fsize">—</div>
+      <button class="folder-open-btn" onclick="event.stopPropagation(); navigateInto()">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4a1 1 0 0 1 1-1h3l2 2h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H3V4z" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M13 6l2 2-2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Browse
+      </button>
+    </div>
+
+    <!-- Folder: SOPs (selected) -->
+    <div class="frow selected" id="row-sops">
+      <div class="cb" onclick="event.stopPropagation(); toggleRow('row-sops')">
+        <svg class="check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="ficon"><svg width="20" height="20" viewBox="0 0 16 16" fill="none"><path d="M2 4a1 1 0 0 1 1-1h3l2 2h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H3V4z" fill="#FBBC04"/></svg></div>
+      <div class="fname">
+        <div class="fname-main">
+          SOPs
+          <span class="auto-badge">
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8a5 5 0 0 1 8.5-3.5L13 6M13 8a5 5 0 0 1-8.5 3.5L3 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            entire folder
+          </span>
+        </div>
+        <div class="fname-sub">6 files · new files auto-included on each sync</div>
+      </div>
+      <div class="fowner"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c">me</div>
+      <div class="fmodified">Apr 8, 2026</div>
+      <div class="fsize">—</div>
+      <button class="folder-open-btn" onclick="event.stopPropagation();">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4a1 1 0 0 1 1-1h3l2 2h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H3V4z" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M13 6l2 2-2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Browse
+      </button>
+    </div>
+
+    <!-- FILES section -->
+    <div class="list-section-label" style="margin-top: 8px;">Files</div>
+
+    <!-- File: Pricing 2026 (selected) -->
+    <div class="frow selected" id="row-pricing">
+      <div class="cb" onclick="event.stopPropagation(); toggleRow('row-pricing')">
+        <svg class="check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="ficon"><svg width="18" height="18" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#0F9D58"/><path d="M13 31.4V51.4H34V31.4H13ZM22.2 48.7H15.7V45.1H22.2V48.7ZM22.2 43.3H15.7V39.7H22.2V43.3Z" fill="#F1F1F1"/></svg></div>
+      <div class="fname">
+        <div class="fname-main">Pricing 2026</div>
+      </div>
+      <div class="fowner"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c">me</div>
+      <div class="fmodified">Apr 11, 2026</div>
+      <div class="fsize">28 KB</div>
+    </div>
+
+    <!-- File: Enterprise MSA (unselected) -->
+    <div class="frow" id="row-msa">
+      <div class="cb" onclick="event.stopPropagation(); toggleRow('row-msa')">
+        <svg class="check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="ficon"><svg width="18" height="18" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#4285F4"/></svg></div>
+      <div class="fname"><div class="fname-main">Enterprise MSA — Template v3</div></div>
+      <div class="fowner"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c">me</div>
+      <div class="fmodified">Apr 8, 2026</div>
+      <div class="fsize">42 KB</div>
+    </div>
+
+    <!-- File: Product brief Q2.pdf (unselected) -->
+    <div class="frow" id="row-pdf">
+      <div class="cb" onclick="event.stopPropagation(); toggleRow('row-pdf')">
+        <svg class="check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="ficon"><svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M3 2h8l3 3v9H3V2z" fill="#E94235"/><path d="M11 2v3h3" stroke="#fff" stroke-width="0.8" fill="none"/><path d="M6 8h4M6 10h3" stroke="#fff" stroke-width="0.8" stroke-linecap="round"/></svg></div>
+      <div class="fname"><div class="fname-main">Product brief Q2.pdf</div></div>
+      <div class="fowner"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c">me</div>
+      <div class="fmodified">Apr 11, 2026</div>
+      <div class="fsize">1.2 MB</div>
+    </div>
+
+    <!-- File: Competitive Objections Playbook (unselected) -->
+    <div class="frow" id="row-playbook">
+      <div class="cb" onclick="event.stopPropagation(); toggleRow('row-playbook')">
+        <svg class="check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="ficon"><svg width="18" height="18" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#4285F4"/></svg></div>
+      <div class="fname"><div class="fname-main">Competitive Objections Playbook</div></div>
+      <div class="fowner"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c">me</div>
+      <div class="fmodified">Mar 28, 2026</div>
+      <div class="fsize">86 KB</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="msg">
+      <span id="footer-main-a"><span class="highlight">2 folders</span> (18 files) + <span class="highlight">1 file</span> selected · auto-sync every 30 min</span>
+      <span class="hint" id="footer-hint-a">Folders include all current files + any new files added in Drive</span>
+    </div>
+    <div class="footer-actions">
+      <button class="btn btn-cancel">Cancel</button>
+      <button class="btn btn-select" id="btn-select-a">Select</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW B: Inside Knowledge — Customer FAQs folder -->
+<div id="view-inside" style="display:none; flex:1; display:none; flex-direction:column; overflow:hidden;">
+
+  <div class="crumbs">
+    <a onclick="goBack()">My Drive</a>
+    <span class="sep">›</span>
+    <a onclick="goBack()">Sales</a>
+    <span class="sep">›</span>
+    <span>Knowledge — Customer FAQs</span>
+  </div>
+
+  <div class="folder-info-banner">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4a1 1 0 0 1 1-1h3l2 2h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H3V4z" fill="#FBBC04"/></svg>
+    <strong>Folder selected</strong> — Selecting individual files overrides the folder selection. To sync the entire folder (including future files), go back and select the folder itself.
+  </div>
+
+  <div class="file-list">
+    <div class="select-all-bar">
+      <div class="sab-cb" onclick="this.classList.toggle('checked')">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <span class="sab-label">Select all 12 files in this folder</span>
+      <span class="sab-hint">Individual file selections won't auto-include future files</span>
+    </div>
+
+    <div class="list-head">
+      <span class="c-name">Name</span>
+      <span class="c-owner">Owner</span>
+      <span class="c-modified">Last modified</span>
+      <span class="c-size">File size</span>
+    </div>
+
+    <div class="frow" id="if1"><div class="cb" onclick="toggleRow('if1')"><svg class="check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div><div class="ficon"><svg width="18" height="18" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#4285F4"/></svg></div><div class="fname"><div class="fname-main">Customer FAQ — Billing</div></div><div class="fowner"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c">me</div><div class="fmodified">Apr 9, 2026</div><div class="fsize">18 KB</div></div>
+
+    <div class="frow" id="if2"><div class="cb" onclick="toggleRow('if2')"><svg class="check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div><div class="ficon"><svg width="18" height="18" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#4285F4"/></svg></div><div class="fname"><div class="fname-main">Customer FAQ — Onboarding</div></div><div class="fowner"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c">me</div><div class="fmodified">Apr 7, 2026</div><div class="fsize">24 KB</div></div>
+
+    <div class="frow" id="if3"><div class="cb" onclick="toggleRow('if3')"><svg class="check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div><div class="ficon"><svg width="18" height="18" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#4285F4"/></svg></div><div class="fname"><div class="fname-main">Customer FAQ — Product Features</div></div><div class="fowner"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c">me</div><div class="fmodified">Apr 3, 2026</div><div class="fsize">31 KB</div></div>
+
+    <div class="frow" id="if4"><div class="cb" onclick="toggleRow('if4')"><svg class="check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div><div class="ficon"><svg width="18" height="18" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#4285F4"/></svg></div><div class="fname"><div class="fname-main">Customer FAQ — Cancellations & Refunds</div></div><div class="fowner"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c">me</div><div class="fmodified">Mar 28, 2026</div><div class="fsize">16 KB</div></div>
+
+    <div class="frow" id="if5"><div class="cb" onclick="toggleRow('if5')"><svg class="check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div><div class="ficon"><svg width="18" height="18" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#4285F4"/></svg></div><div class="fname"><div class="fname-main">Customer FAQ — Integrations</div></div><div class="fowner"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c">me</div><div class="fmodified">Apr 10, 2026</div><div class="fsize">22 KB</div></div>
+
+    <div class="frow" id="if6"><div class="cb" onclick="toggleRow('if6')"><svg class="check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L5 8.5L9.5 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div><div class="ficon"><svg width="18" height="18" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#4285F4"/></svg></div><div class="fname"><div class="fname-main">Customer FAQ — API & Developer</div></div><div class="fowner"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c">me</div><div class="fmodified">Apr 2, 2026</div><div class="fsize">29 KB</div></div>
+  </div>
+
+  <div class="footer">
+    <div class="msg">
+      <span id="footer-main-b">Browsing inside <strong>Knowledge — Customer FAQs</strong> · 12 files</span>
+      <span class="hint" id="footer-hint-b">Go back to select the entire folder and auto-include new files</span>
+    </div>
+    <div class="footer-actions">
+      <button class="btn btn-cancel" onclick="goBack()">← Back</button>
+      <button class="btn btn-select" id="btn-select-b">Select</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleRow(id) {
+  document.getElementById(id).classList.toggle('selected');
+}
+
+function navigateInto() {
+  document.getElementById('view-sales').style.display = 'none';
+  const v = document.getElementById('view-inside');
+  v.style.display = 'flex';
+  v.style.flexDirection = 'column';
+  v.style.flex = '1';
+  v.style.overflow = 'hidden';
+}
+
+function goBack() {
+  document.getElementById('view-inside').style.display = 'none';
+  document.getElementById('view-sales').style.display = 'flex';
+  document.getElementById('view-sales').style.flexDirection = 'column';
+  document.getElementById('view-sales').style.flex = '1';
+}
+
+// Make sure view-sales starts as flex
+document.getElementById('view-sales').style.display = 'flex';
+document.getElementById('view-sales').style.flexDirection = 'column';
+document.getElementById('view-sales').style.flex = '1';
+</script>
+
+</body>
+</html>

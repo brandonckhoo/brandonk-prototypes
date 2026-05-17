@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Cal.com Data tab (configure-in-Cal)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 280px; background: #F5F7FA; display: flex; flex-direction: column; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+  .footer { padding: 16px 14px; }
+  .main { flex: 1; background: #fff; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(6px); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .connect-modal { background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 560px; display: flex; flex-direction: column; overflow: hidden; }
+  .cm-header { display: flex; align-items: center; gap: 12px; padding: 24px 24px 0; }
+  .cm-logo { width: 32px; height: 32px; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #E1E4EA; }
+  .cm-logo img { width: 24px; height: 24px; object-fit: contain; }
+  .cm-name { font-size: 18px; font-weight: 600; color: #0E121B; }
+  .cm-close { margin-left: auto; width: 32px; height: 32px; border: none; background: none; cursor: pointer; color: #6B7280; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .cm-tabs { display: flex; padding: 16px 24px 0; border-bottom: 1px solid #E1E4EA; }
+  .cm-tab { padding: 8px 16px 12px; font-size: 14px; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .cm-tab.active { color: #0E121B; font-weight: 500; border-bottom-color: #0E121B; }
+  .cm-body { padding: 24px; max-height: 520px; overflow-y: auto; }
+
+  .intro { font-size: 13px; color: #525866; line-height: 1.55; margin-bottom: 20px; }
+
+  .sync-card { border: 1px solid #E1E4EA; border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+  .sync-row { display: flex; align-items: flex-start; gap: 14px; }
+  .sync-row + .sync-row { margin-top: 14px; padding-top: 14px; border-top: 1px solid #F3F4F6; }
+  .sync-label { font-size: 13px; font-weight: 500; color: #0E121B; width: 180px; flex-shrink: 0; }
+  .sync-value { font-size: 13px; color: #525866; line-height: 1.5; }
+  .sync-value strong { color: #0E121B; font-weight: 500; }
+
+  .callout { display: flex; gap: 12px; padding: 14px 16px; background: #F8FAFC; border: 1px solid #E1E4EA; border-radius: 10px; margin-bottom: 20px; }
+  .callout-icon { width: 20px; height: 20px; border-radius: 50%; background: #ecf3ff; color: #3d64d7; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; margin-top: 1px; }
+  .callout-body { font-size: 13px; color: #0E121B; line-height: 1.55; }
+  .callout-body a { color: #3d64d7; text-decoration: none; font-weight: 500; }
+  .callout-body a:hover { text-decoration: underline; }
+
+  .link-out { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 500; color: #0E121B; cursor: pointer; text-decoration: none; margin-top: 16px; }
+  .link-out:hover { background: #F9FAFB; }
+
+  .cm-footer { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px 20px; border-top: 1px solid #E1E4EA; }
+  .btn-back { height: 36px; padding: 0 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 500; color: #525866; cursor: pointer; }
+  .btn-connect { height: 36px; padding: 0 20px; border: none; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/></svg>
+  </div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item current">Integrations</li><li class="nav-item">Billing</li><li class="nav-item">Settings</li></ul></div>
+  </div>
+  <div class="footer"></div>
+</aside>
+
+<main class="main"></main>
+
+<div class="modal-overlay">
+  <div class="connect-modal">
+    <div class="cm-header">
+      <div class="cm-logo"><img src="https://www.google.com/s2/favicons?domain=cal.com&sz=128" alt="Cal.com"></div>
+      <span class="cm-name">Cal.com</span>
+      <button class="cm-close">✕</button>
+    </div>
+
+    <div class="cm-tabs">
+      <div class="cm-tab">Configure</div>
+      <div class="cm-tab active">Data</div>
+      <div class="cm-tab">Tools</div>
+      <div class="cm-tab">About</div>
+    </div>
+
+    <div class="cm-body">
+      <div class="callout">
+        <div class="callout-icon">i</div>
+        <div class="callout-body">
+          Event types, availability, buffers, and booking limits are configured in Cal.com. Retell reads them at call time, so any change you make in Cal.com takes effect on the next call.
+        </div>
+      </div>
+
+      <p class="intro">What Retell reads from your Cal.com account:</p>
+
+      <div class="sync-card">
+        <div class="sync-row">
+          <div class="sync-label">Event types</div>
+          <div class="sync-value">All event types on the connected account. The agent picks the right one at booking time based on the caller's intent.</div>
+        </div>
+        <div class="sync-row">
+          <div class="sync-label">Availability</div>
+          <div class="sync-value">Host calendars, working hours, buffers, and booking limits, exactly as configured in Cal.com.</div>
+        </div>
+        <div class="sync-row">
+          <div class="sync-label">Booking questions</div>
+          <div class="sync-value">Required fields on each event type. The agent will ask the caller for these during the call.</div>
+        </div>
+      </div>
+
+      <a href="https://app.cal.com/event-types" target="_blank" class="link-out">
+        Manage event types in Cal.com
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 4h5v1.5H5.5v9h9V11H16v5H4V4zm7 0h5v5h-1.5V6.56l-5.72 5.72-1.06-1.06 5.72-5.72H11V4z" fill="currentColor"/></svg>
+      </a>
+    </div>
+
+    <div class="cm-footer">
+      <button class="btn-back">Back</button>
+      <button class="btn-connect">Connect</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

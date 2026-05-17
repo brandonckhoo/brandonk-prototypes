@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Maria Santos · Unified Conversation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 240px; background: #F5F7FA; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .nav-scroll { padding: 4px 0; flex: 1; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { padding: 8px; height: 36px; font-size: 14px; color: #525866; border-radius: 6px; display: flex; align-items: center; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+
+  .main { flex: 1; overflow: auto; background: #fff; display: flex; flex-direction: column; }
+  .top-bar { padding: 16px 32px; border-bottom: 1px solid #E1E4EA; display: flex; align-items: center; gap: 12px; background: #fff; }
+  .breadcrumb { font-size: 13px; color: #6B7280; }
+  .breadcrumb a { color: #3d64d7; text-decoration: none; }
+  .top-bar .spacer { flex: 1; }
+  .btn { height: 34px; padding: 0 14px; border: 1px solid #E1E4EA; background: #fff; border-radius: 8px; font-size: 13px; color: #0E121B; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; font-weight: 500; }
+
+  .body { flex: 1; display: flex; overflow: hidden; }
+
+  /* Left: summary + timeline */
+  .summary-col { flex: 1.4; overflow-y: auto; padding: 24px 32px; border-right: 1px solid #E1E4EA; }
+
+  .patient-head { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+  .ph-avatar { width: 56px; height: 56px; border-radius: 50%; background: #25D366; color: #fff; font-weight: 700; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+  .ph-name { font-size: 20px; font-weight: 600; }
+  .ph-sub { font-size: 13px; color: #6B7280; margin-top: 2px; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+  .stat { padding: 12px 14px; background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 10px; }
+  .stat-label { font-size: 11px; color: #99A0AE; text-transform: uppercase; font-weight: 500; margin-bottom: 4px; letter-spacing: 0.03em; }
+  .stat-value { font-size: 18px; font-weight: 600; color: #0E121B; }
+  .stat-sub { font-size: 11px; color: #6B7280; margin-top: 2px; }
+
+  .section-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .section-title .count-pill { font-size: 11px; font-weight: 500; color: #6B7280; background: #F3F4F6; padding: 2px 8px; border-radius: 10px; }
+
+  .summary-card { padding: 16px 18px; background: #FAFBFC; border: 1px solid #E1E4EA; border-radius: 10px; margin-bottom: 24px; font-size: 14px; line-height: 1.55; color: #374151; }
+  .summary-card strong { color: #0E121B; font-weight: 600; }
+
+  /* Unified timeline */
+  .timeline { position: relative; margin-bottom: 32px; padding-left: 28px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 14px; bottom: 14px; width: 2px; background: #E1E4EA; }
+
+  .tl-block { position: relative; margin-bottom: 20px; padding: 16px 18px; background: #fff; border: 1px solid #E1E4EA; border-radius: 10px; }
+  .tl-block::before { content: ''; position: absolute; left: -24px; top: 20px; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid #25D366; }
+  .tl-block.voice::before { border-color: #3d64d7; }
+  .tl-block.voice { background: #F0F9FF; border-color: #BFDBFE; }
+  .tl-block.system::before { border-color: #E1E4EA; background: #F5F7FA; }
+  .tl-block.system { background: #F9FAFB; border-color: #E1E4EA; padding: 10px 14px; font-size: 12px; color: #6B7280; text-align: center; }
+
+  .tl-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .tl-badge { padding: 3px 9px; font-size: 11px; font-weight: 500; border-radius: 999px; }
+  .tl-badge.wa { background: #ECFDF5; color: #067647; border: 1px solid #BBF7D0; }
+  .tl-badge.voice { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+  .tl-time { font-size: 11px; color: #99A0AE; margin-left: auto; }
+  .tl-duration { font-size: 11px; color: #525866; font-weight: 500; }
+
+  .tl-msg { padding: 6px 0; font-size: 13px; color: #374151; line-height: 1.5; display: flex; gap: 8px; }
+  .tl-msg .who { font-weight: 600; font-size: 12px; min-width: 80px; color: #6B7280; }
+  .tl-msg.in .who { color: #25D366; }
+  .tl-msg.agent .who { color: #0E121B; }
+  .tl-msg.human .who { color: #3d64d7; }
+
+  .audio-bar { padding: 10px 14px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 12px; color: #525866; }
+  .audio-bar .play { width: 28px; height: 28px; border-radius: 50%; background: #3d64d7; color: #fff; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .audio-bar .track { flex: 1; height: 4px; background: #E1E4EA; border-radius: 2px; position: relative; }
+  .audio-bar .track::after { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: #3d64d7; border-radius: 2px; }
+
+  /* Right: caller context + record */
+  .context-col { width: 340px; background: #FAFBFC; overflow-y: auto; padding: 24px 20px; flex-shrink: 0; }
+  .ctx-section { margin-bottom: 24px; }
+  .ctx-title { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 12px; }
+  .ctx-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; }
+  .ctx-row .lbl { color: #6B7280; }
+  .ctx-row .val { font-weight: 500; }
+
+  .record-card { padding: 14px; background: #fff; border: 2px solid #6B21A8; border-radius: 10px; }
+  .record-card .lbl { font-size: 11px; color: #6B21A8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em; }
+  .record-card .val { font-family: 'SF Mono', Menlo, monospace; font-size: 13px; color: #0E121B; margin-top: 4px; }
+  .record-card .meta { font-size: 12px; color: #6B7280; margin-top: 8px; line-height: 1.4; }
+
+  .keyed-by { background: #F3E8FF; border: 1px solid #D8B4FE; color: #6B21A8; padding: 10px 12px; border-radius: 8px; font-size: 12px; margin-top: 10px; line-height: 1.5; }
+  .keyed-by strong { color: #4C1D95; }
+
+  .cross-chan-list { display: flex; flex-direction: column; gap: 6px; }
+  .cc-item { padding: 8px 10px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .cc-item .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .cc-item .cc-label { flex: 1; font-weight: 500; }
+  .cc-item .cc-count { color: #6B7280; }
+
+  .crm-card { padding: 10px 12px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .crm-card img { width: 20px; height: 20px; }
+  .crm-card .synced { margin-left: auto; color: #17B26A; font-size: 11px; font-weight: 500; }
+
+  .extraction-row { padding: 8px 12px; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+  .extraction-row .key { color: #6B7280; }
+  .extraction-row .val { font-weight: 500; color: #0E121B; max-width: 60%; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo"><svg width="73" height="20" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg></div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item current">Call History</li><li class="nav-item">Chat History</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item">Integrations</li></ul></div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="top-bar">
+    <div class="breadcrumb"><a href="connect-integration-library-3.1.6-call-history-whatsapp.html">← Call History</a> / Maria Santos (Chained)</div>
+    <div class="spacer"></div>
+    <button class="btn">📥 Export conversation</button>
+    <button class="btn">⋯</button>
+  </div>
+
+  <div class="body">
+    <div class="summary-col">
+      <div class="patient-head">
+        <div class="ph-avatar">MS</div>
+        <div style="flex:1;">
+          <div class="ph-name">Maria Santos</div>
+          <div class="ph-sub">+55 11 98732-4411 · Patient of Cream Digital Clinics · Conversation started 14:02 today</div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Total duration</div><div class="stat-value">8m 42s</div><div class="stat-sub">text + voice combined</div></div>
+        <div class="stat"><div class="stat-label">Channels used</div><div class="stat-value">2</div><div class="stat-sub">WhatsApp → Voice → WhatsApp</div></div>
+        <div class="stat"><div class="stat-label">Outcome</div><div class="stat-value" style="color:#17B26A;">Success</div><div class="stat-sub">booking + copay resolved</div></div>
+        <div class="stat"><div class="stat-label">Cost</div><div class="stat-value">$0.18</div><div class="stat-sub">voice + messages</div></div>
+      </div>
+
+      <div class="section-title">Conversation summary</div>
+      <div class="summary-card">
+        Maria messaged the clinic's WhatsApp to <strong>reschedule her Tuesday appointment</strong> with Dr. Chen. Agent moved her to <strong>Thursday 10am</strong> via Cal.com in the thread. Maria then asked about <strong>copay coverage under AMIL One</strong>; agent offered a voice call, Maria accepted. Agent <strong>placed an outbound call</strong> carrying the full chat context — voice agent answered the copay question from KB, no repeat of prior details. After the call, a <strong>follow-up WhatsApp message</strong> dropped back into the same thread with a policy summary link. HubSpot contact and Cal.com booking updated automatically.
+      </div>
+
+      <div class="section-title">Unified timeline <span class="count-pill">9 events</span></div>
+      <div class="timeline">
+
+        <div class="tl-block">
+          <div class="tl-head"><span class="tl-badge wa">● WhatsApp</span><span>Inbound thread opens</span><span class="tl-time">14:02</span></div>
+          <div class="tl-msg in"><span class="who">Maria →</span><span>Hi, I need to reschedule my consultation and I have questions about the copay.</span></div>
+          <div class="tl-msg agent"><span class="who">Agent →</span><span>Hi Maria, I see your Tuesday 3pm appointment. What works better for you? [Thu 10am] [Thu 3pm] [Fri 11am]</span></div>
+          <div class="tl-msg in"><span class="who">Maria →</span><span>Thursday 10am works.</span></div>
+          <div class="tl-msg agent"><span class="who">Agent →</span><span>Done ✅ Booked with Dr. Chen on Thursday 10am. I'll text a reminder.</span></div>
+          <div class="tl-msg" style="font-size:11px;color:#6B7280;font-style:italic;"><span class="who">Tools fired</span><span>CRM Contact Lookup · Cal.com: Reschedule Booking</span></div>
+        </div>
+
+        <div class="tl-block">
+          <div class="tl-head"><span class="tl-badge wa">● WhatsApp</span><span>Copay question</span><span class="tl-time">14:04</span></div>
+          <div class="tl-msg in"><span class="who">Maria →</span><span>Thanks! Quick question — I have AMIL One. Does the consultation copay apply?</span></div>
+          <div class="tl-msg agent"><span class="who">Agent →</span><span>Easier verbal. Want me to call you right now? [Yes, call me] [Keep in text]</span></div>
+          <div class="tl-msg in"><span class="who">Maria →</span><span>Yes, please call me.</span></div>
+        </div>
+
+        <div class="tl-block system">→ Agent invoked <strong style="color:#0E121B;">Initiate Voice Call with Chat Context</strong> · Chat paused · Full transcript preloaded into voice agent system prompt · 14:05</div>
+
+        <div class="tl-block voice">
+          <div class="tl-head"><span class="tl-badge voice">📞 Voice (Outbound)</span><span>Agent dialed +55 11 98732-4411</span><span class="tl-time">14:05 — 14:10</span><span class="tl-duration">4m 54s</span></div>
+          <div class="audio-bar">
+            <button class="play">▶</button>
+            <span>0:00</span>
+            <div class="track"></div>
+            <span>4:54</span>
+            <span>1.0×</span>
+          </div>
+          <div class="tl-msg agent"><span class="who">Agent →</span><span>"Hi Maria, picking up from your WhatsApp about the copay question. Let me walk you through it…"</span></div>
+          <div class="tl-msg in"><span class="who">Maria →</span><span>"Yes thanks for calling. So the AMIL One plan — does it cover the full consultation?"</span></div>
+          <div class="tl-msg agent"><span class="who">Agent →</span><span>"For AMIL One, consultations with a network doctor like Dr. Chen are fully covered — no copay. Only non-network specialist visits have a 40 BRL copay. Does that help?"</span></div>
+          <div class="tl-msg in"><span class="who">Maria →</span><span>"Perfect, yes. So I'm all set for Thursday?"</span></div>
+          <div class="tl-msg agent"><span class="who">Agent →</span><span>"All set. I'll send the booking confirmation and a link to the policy summary on WhatsApp right after this call."</span></div>
+        </div>
+
+        <div class="tl-block system">→ Voice call ended · Call summary written · Extraction data saved · Follow-up queued · 14:10</div>
+
+        <div class="tl-block">
+          <div class="tl-head"><span class="tl-badge wa">● WhatsApp</span><span>Follow-up in same thread</span><span class="tl-time">14:10</span></div>
+          <div class="tl-msg agent"><span class="who">Agent →</span><span>Confirming: Dr. Chen, Thursday 10am. AMIL One covers this visit, no copay. Policy summary: amil.com.br/summary/one</span></div>
+          <div class="tl-msg" style="font-size:11px;color:#6B7280;font-style:italic;"><span class="who">Tools fired</span><span>Send WhatsApp Message · HubSpot Log Activity · Cal.com Send Reminder</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="context-col">
+      <div class="ctx-section">
+        <div class="ctx-title">Shared conversation record</div>
+        <div class="record-card">
+          <div class="lbl">Record ID</div>
+          <div class="val">conv_e8a5c12f22f</div>
+          <div class="meta">One record stitches all three events — two WhatsApp segments and one voice call — together. This is what makes the escalation and follow-up feel like one conversation to Maria.</div>
+        </div>
+        <div class="keyed-by"><strong>Keyed by phone number</strong> +55 11 98732-4411. WhatsApp, SMS and voice calls to/from this number all append to the same record.</div>
+      </div>
+
+      <div class="ctx-section">
+        <div class="ctx-title">Channels on this record</div>
+        <div class="cross-chan-list">
+          <div class="cc-item"><span class="dot" style="background:#25D366;"></span><span class="cc-label">WhatsApp</span><span class="cc-count">7 msgs</span></div>
+          <div class="cc-item"><span class="dot" style="background:#3d64d7;"></span><span class="cc-label">Voice</span><span class="cc-count">1 call · 4m 54s</span></div>
+          <div class="cc-item" style="opacity:0.5;"><span class="dot" style="background:#99A0AE;"></span><span class="cc-label">SMS</span><span class="cc-count">—</span></div>
+        </div>
+      </div>
+
+      <div class="ctx-section">
+        <div class="ctx-title">Agent handling</div>
+        <div class="crm-card">
+          <div style="width:28px;height:28px;background:#0E121B;color:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;">CF</div>
+          <div>
+            <div style="font-weight:600;font-size:12px;">Clinic Front Desk Agent</div>
+            <div style="font-size:11px;color:#6B7280;">Single prompt · Text + Voice</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ctx-section">
+        <div class="ctx-title">CRM sync</div>
+        <div class="crm-card">
+          <img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=64" alt="">
+          <div>HubSpot Contact · #00428</div>
+          <span class="synced">✓ Synced</span>
+        </div>
+        <div class="crm-card">
+          <img src="https://www.google.com/s2/favicons?domain=cal.com&sz=64" alt="">
+          <div>Cal.com Booking · Thu 10am</div>
+          <span class="synced">✓ Synced</span>
+        </div>
+      </div>
+
+      <div class="ctx-section">
+        <div class="ctx-title">Post-call extraction</div>
+        <div class="extraction-row"><span class="key">insurer</span><span class="val">AMIL One</span></div>
+        <div class="extraction-row"><span class="key">appointment_type</span><span class="val">In-network consultation</span></div>
+        <div class="extraction-row"><span class="key">booking_confirmed</span><span class="val">Thu 10am, Dr. Chen</span></div>
+        <div class="extraction-row"><span class="key">call_successful</span><span class="val">Yes</span></div>
+        <div class="extraction-row"><span class="key">sentiment</span><span class="val">Positive</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

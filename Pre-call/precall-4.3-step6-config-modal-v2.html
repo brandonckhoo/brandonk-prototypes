@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Pre-call Config Modal (Custom Function Shell)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #F5F7FA; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 48px 24px; overflow-y: auto; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); display: flex; align-items: flex-start; justify-content: center; padding: 40px 24px; overflow-y: auto; z-index: 10; }
+
+  .fm-modal { background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.22); width: 640px; max-width: 100%; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Header */
+  .fm-header { display: flex; align-items: center; gap: 12px; padding: 18px 22px 14px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .fm-logo { width: 28px; height: 28px; background: #00A1E0; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+  .fm-logo img { width: 20px; height: 20px; object-fit: contain; }
+  .fm-titles { flex: 1; min-width: 0; }
+  .fm-title { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .fm-close { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; border-radius: 6px; color: #6B7280; flex-shrink: 0; }
+  .fm-close:hover { background: #F3F4F6; }
+
+  /* Body */
+  .fm-body { flex: 1; overflow-y: auto; padding: 18px 22px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* Field group */
+  .field-group { display: flex; flex-direction: column; gap: 5px; }
+  .field-label { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .field-sub { font-size: 12px; color: #6B7280; line-height: 1.5; }
+  .field-input { width: 100%; height: 38px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13.5px; color: #0A0A0A; background: #fff; outline: none; font-family: inherit; }
+  .field-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.1); }
+  .field-input.locked { background: #F5F7FA; color: #6B7280; cursor: not-allowed; font-family: 'SF Mono', Menlo, monospace; font-size: 12.5px; }
+  .field-textarea { width: 100%; height: 72px; padding: 10px 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13.5px; color: #0A0A0A; background: #fff; outline: none; font-family: inherit; resize: vertical; line-height: 1.5; }
+  .field-textarea:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.1); }
+
+  /* Timeout row */
+  .timeout-row { display: flex; align-items: center; gap: 10px; }
+  .timeout-input { width: 120px; height: 38px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13.5px; color: #0A0A0A; background: #fff; outline: none; font-family: inherit; text-align: right; }
+  .timeout-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.1); }
+  .timeout-unit { font-size: 13px; color: #6B7280; }
+
+  /* Key-value pairs */
+  .kv-section { display: flex; flex-direction: column; gap: 6px; }
+  .kv-section-label { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .kv-section-sub { font-size: 12px; color: #6B7280; line-height: 1.5; margin-top: 2px; margin-bottom: 4px; }
+  .kv-row { display: grid; grid-template-columns: 1fr 1fr 28px; gap: 8px; align-items: center; }
+  .kv-input { height: 34px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12.5px; color: #0A0A0A; background: #fff; outline: none; font-family: inherit; width: 100%; }
+  .kv-input::placeholder { color: #C5CAD3; }
+  .kv-input:focus { border-color: #3d64d7; }
+  .kv-del { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; color: #C5CAD3; border-radius: 4px; }
+  .kv-del:hover { color: #FB3748; background: #FFF0F0; }
+  .add-pair-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; color: #374151; padding: 5px 10px; border: 1px solid #E1E4EA; border-radius: 6px; background: #fff; cursor: pointer; font-family: inherit; margin-top: 2px; width: fit-content; }
+  .add-pair-btn:hover { background: #F5F7FA; }
+
+  /* Endpoint row with method */
+  .endpoint-row { display: flex; gap: 8px; align-items: center; }
+  .method-badge { height: 38px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 12px; font-weight: 600; color: #525866; background: #F5F7FA; display: flex; align-items: center; white-space: nowrap; flex-shrink: 0; }
+
+  /* JSON Schema section */
+  .schema-section { display: flex; flex-direction: column; gap: 6px; }
+  .schema-header-row { display: flex; align-items: center; justify-content: space-between; }
+  .schema-tabs { display: flex; border: 1px solid #E1E4EA; border-radius: 7px; overflow: hidden; background: #F5F7FA; padding: 3px; gap: 3px; }
+  .schema-tab { padding: 4px 12px; font-size: 12.5px; font-weight: 500; color: #525866; cursor: pointer; border-radius: 5px; border: none; background: transparent; font-family: inherit; }
+  .schema-tab.active { background: #fff; color: #0E121B; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+  .payload-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #525866; }
+  .toggle-sw { width: 30px; height: 16px; background: #3d64d7; border-radius: 8px; position: relative; flex-shrink: 0; cursor: pointer; }
+  .toggle-sw::after { content: ''; position: absolute; top: 2px; right: 2px; width: 12px; height: 12px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+  .schema-editor { width: 100%; height: 110px; padding: 10px 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 12.5px; font-family: 'SF Mono', Menlo, monospace; color: #0A0A0A; background: #FAFBFC; outline: none; resize: vertical; line-height: 1.6; }
+  .schema-editor:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.1); }
+  .example-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .example-pill { padding: 3px 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 11.5px; color: #525866; cursor: pointer; background: #fff; }
+  .example-pill:hover { background: #F5F7FA; }
+  .format-btn { font-size: 12px; color: #3d64d7; cursor: pointer; padding: 2px 6px; border: none; background: none; font-family: inherit; font-weight: 500; }
+  .format-row { display: flex; justify-content: flex-end; margin-top: 2px; }
+
+  /* Store Fields section */
+  .store-section { display: flex; flex-direction: column; gap: 8px; }
+  .store-header { display: flex; flex-direction: column; gap: 2px; }
+  .store-title { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .store-sub { font-size: 12px; color: #6B7280; }
+  .store-row { display: grid; grid-template-columns: 1fr 1fr 28px; gap: 8px; align-items: center; }
+  .store-input { height: 34px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12.5px; color: #0A0A0A; background: #fff; outline: none; font-family: inherit; width: 100%; }
+  .store-input::placeholder { color: #C5CAD3; }
+  .store-input:focus { border-color: #3d64d7; }
+  .store-input.path { font-family: 'SF Mono', Menlo, monospace; font-size: 12px; }
+  .store-input.path::placeholder { font-family: inherit; }
+
+  /* Divider */
+  .section-divider { height: 1px; background: #F0F2F5; margin: 2px 0; }
+
+  /* Footer */
+  .fm-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 14px 22px; border-top: 1px solid #E1E4EA; flex-shrink: 0; background: #FAFBFC; }
+  .btn { height: 36px; padding: 0 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; border: 1px solid #E1E4EA; background: #fff; color: #0E121B; }
+  .btn:hover { background: #F9FAFB; }
+  .btn-primary { background: #0E121B; color: #fff; border-color: #0E121B; }
+  .btn-primary:hover { background: #000; }
+
+  /* Lock icon inline */
+  .lock-icon { color: #99A0AE; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay">
+  <div class="fm-modal">
+
+    <!-- Header -->
+    <div class="fm-header">
+      <div class="fm-logo">
+        <img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=32" alt="Salesforce">
+      </div>
+      <div class="fm-titles">
+        <div class="fm-title">Custom Function</div>
+      </div>
+      <button class="fm-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4L4 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="fm-body">
+
+      <!-- Name -->
+      <div class="field-group">
+        <div class="field-label">Name</div>
+        <input class="field-input" type="text" value="get_salesforce_lead" />
+      </div>
+
+      <!-- Description -->
+      <div class="field-group">
+        <div class="field-label">Description</div>
+        <textarea class="field-textarea" placeholder="Enter the description of the custom function">Pull a Salesforce Lead record before the agent speaks. Replaces the Lambda service fetching lead context from trigger ID.</textarea>
+      </div>
+
+      <!-- API Endpoint (locked for native functions) -->
+      <div class="field-group">
+        <div class="field-label">API Endpoint <span style="font-size:11px; font-weight:400; color:#99A0AE; margin-left:4px;">Managed by Retell</span></div>
+        <div class="endpoint-row">
+          <div class="method-badge">GET</div>
+          <input class="field-input locked" type="text" value="https://{instance}.salesforce.com/services/data/v60.0/sobjects/Lead/{id}" readonly />
+        </div>
+      </div>
+
+      <!-- Timeout -->
+      <div class="field-group">
+        <div class="field-label">Timeout (ms)</div>
+        <div class="timeout-row">
+          <input class="timeout-input" type="number" value="5000" />
+          <span class="timeout-unit">milliseconds</span>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Headers -->
+      <div class="kv-section">
+        <div class="kv-section-label">Headers</div>
+        <div class="kv-section-sub">Specify the HTTP headers required for your API request.</div>
+        <div class="kv-row">
+          <input class="kv-input" placeholder="Key" value="Authorization" />
+          <input class="kv-input" placeholder="Value" value="Bearer {{oauth_token}}" />
+          <button class="kv-del"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3h4v1M5 4v8a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        </div>
+        <button class="add-pair-btn"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> New key value pair</button>
+      </div>
+
+      <!-- Query Parameters -->
+      <div class="kv-section">
+        <div class="kv-section-label">Query Parameters</div>
+        <div class="kv-section-sub">Query string parameters to append to the URL.</div>
+        <div class="kv-row">
+          <input class="kv-input" placeholder="Key" value="fields" />
+          <input class="kv-input" placeholder="Value" value="{{lead_fields}}" />
+          <button class="kv-del"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3h4v1M5 4v8a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        </div>
+        <button class="add-pair-btn"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> New key value pair</button>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Parameters (Optional) / JSON Schema — response filtering -->
+      <div class="schema-section">
+        <div class="schema-header-row">
+          <div class="field-label">Parameters (Optional)</div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="schema-tabs">
+              <button class="schema-tab active">JSON</button>
+              <button class="schema-tab">Form</button>
+            </div>
+            <div class="payload-toggle">
+              <div class="toggle-sw"></div>
+              <span>Payload: args only</span>
+            </div>
+          </div>
+        </div>
+        <div class="field-sub">JSON schema that defines the format in which the LLM will return. Please refer to the <span style="color:#3d64d7; cursor:pointer;">docs</span>.</div>
+        <textarea class="schema-editor" placeholder="Enter JSON Schema here…">{
+  "type": "object",
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "description": "The Salesforce Lead ID from the trigger payload"
+    }
+  },
+  "required": ["lead_id"]
+}</textarea>
+        <div class="example-pills">
+          <button class="example-pill">example 1</button>
+          <button class="example-pill">example 2</button>
+          <button class="example-pill">example 3</button>
+        </div>
+        <div class="format-row"><button class="format-btn">Format JSON</button></div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Store Fields as Variables -->
+      <div class="store-section">
+        <div class="store-header">
+          <div class="store-title">Store Fields as Variables</div>
+          <div class="store-sub">Extract values from tool response and store as dynamic variables.</div>
+        </div>
+        <div class="store-row">
+          <input class="store-input" placeholder="Name of the dynamic variable" value="lead_first_name" />
+          <input class="store-input path" placeholder="Path to the value in response body (e.g. customer.id)" value="FirstName" />
+          <button class="kv-del"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3h4v1M5 4v8a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        </div>
+        <div class="store-row">
+          <input class="store-input" placeholder="Name of the dynamic variable" value="lead_last_name" />
+          <input class="store-input path" placeholder="Path to the value in response body (e.g. customer.id)" value="LastName" />
+          <button class="kv-del"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3h4v1M5 4v8a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        </div>
+        <div class="store-row">
+          <input class="store-input" placeholder="Name of the dynamic variable" value="lead_source" />
+          <input class="store-input path" placeholder="Path to the value in response body (e.g. customer.id)" value="LeadSource" />
+          <button class="kv-del"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3h4v1M5 4v8a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        </div>
+        <div class="store-row">
+          <input class="store-input" placeholder="Name of the dynamic variable" value="lifecycle_stage" />
+          <input class="store-input path" placeholder="Path to the value in response body (e.g. customer.id)" value="Lifecycle_Stage__c" />
+          <button class="kv-del"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3h4v1M5 4v8a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        </div>
+        <button class="add-pair-btn"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> New key value pair</button>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="fm-footer">
+      <button class="btn">Cancel</button>
+      <button class="btn btn-primary">Save</button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

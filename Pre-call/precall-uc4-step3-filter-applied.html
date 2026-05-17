@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Pre-Call UC4 Step 3: Integrations filter pill applied (Salesforce calls only)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; min-width: 1280px; }
+
+  .sidebar { width: 220px; background: #F5F7FA; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-logo { padding: 16px 10px 10px 18px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin: 0 12px; height: 36px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 18px; height: 18px; background: #3d64d7; border-radius: 4px; color: #fff; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  .workspace-name { font-size: 12.5px; font-weight: 500; color: #0A0A0A; flex: 1; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 6px; }
+  .section-label { padding: 4px; margin: 0 12px; font-size: 11px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 12px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; height: 32px; font-size: 13px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+
+  .main { flex: 1; overflow: auto; background: #fff; display: flex; flex-direction: column; }
+
+  .impersonate-bar { background: #FEF3C7; color: #92400E; font-size: 12px; padding: 6px 16px; text-align: center; border-bottom: 1px solid #FDE68A; }
+  .impersonate-bar a { color: #92400E; text-decoration: underline; }
+
+  .page-head { padding: 16px 24px 8px; display: flex; align-items: center; gap: 8px; }
+  .page-head .dot { width: 8px; height: 8px; background: #3d64d7; border-radius: 50%; }
+  .page-head h1 { font-size: 16px; font-weight: 600; color: #0E121B; }
+  .page-head .spacer { flex: 1; }
+  .page-head .secondary-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #374151; cursor: pointer; }
+
+  .action-bar { padding: 6px 24px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .action-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #374151; cursor: pointer; height: 32px; }
+  .action-pill .chev { color: #99A0AE; font-size: 10px; }
+
+  /* Filter pill applied — matches production "Call Status: Ended" pattern */
+  .filter-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px 6px 10px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #0E121B; height: 32px; }
+  .filter-pill .lbl { color: #525866; }
+  .filter-pill b { color: #0E121B; font-weight: 500; }
+  .filter-pill .x { width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px; color: #99A0AE; }
+  .filter-pill .x:hover { background: #F3F4F6; color: #525866; }
+  .filter-pill .integ-icon { width: 16px; height: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+
+  .ch-table { padding: 0 24px 16px; }
+  .ch-table table { width: 100%; border-collapse: collapse; }
+  .ch-table th { font-size: 11px; font-weight: 500; color: #6B7280; text-transform: uppercase; letter-spacing: 0.4px; text-align: left; padding: 10px 12px; background: #F5F7FA; border-bottom: 1px solid #E1E4EA; }
+  .ch-table td { font-size: 13px; color: #0E121B; padding: 12px 12px; border-bottom: 1px solid #F3F4F6; }
+  .ch-table tr:hover td { background: #FAFBFC; cursor: pointer; }
+  .ch-table .cell-mono { font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace; font-size: 11.5px; color: #525866; }
+  .end-pill { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+  .end-pill.ended { background: #DCFCE7; color: #166534; }
+  .end-pill.user-hangup { background: #DBEAFE; color: #1D4ED8; }
+  .sentiment { font-size: 12px; color: #525866; }
+  .sentiment.positive { color: #166534; }
+
+  .pagination { padding: 12px 24px; display: flex; align-items: center; gap: 12px; font-size: 12px; color: #525866; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo"><svg width="60" height="16" viewBox="0 0 414 114"><g fill="#0A0A0A"><circle cx="40" cy="103" r="10"/><circle cx="70" cy="103" r="10"/><circle cx="40" cy="10" r="10"/><circle cx="70" cy="10" r="10"/><circle cx="10" cy="42" r="10"/><circle cx="10" cy="72" r="10"/><circle cx="100" cy="42" r="10"/><circle cx="100" cy="72" r="10"/></g></svg></div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Retell AI Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item current">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item">Billing</li></ul></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-head">
+    <span class="dot"></span>
+    <h1>Call History</h1>
+    <span class="spacer"></span>
+    <button class="secondary-pill"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M4 7l4 4 4-4M2 14h12" stroke="#374151" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Export</button>
+  </div>
+
+  <div class="action-bar">
+    <button class="action-pill"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="#374151" stroke-width="1.4"/><path d="M2 6h12M5 1v3M11 1v3" stroke="#374151" stroke-width="1.4" stroke-linecap="round"/></svg>Date Range <span class="chev">▾</span></button>
+
+    <span class="filter-pill">
+      <span class="lbl">Integrations:</span>
+      <span class="integ-icon"><svg width="16" height="11" viewBox="0 0 24 16"><path d="M9.13 2.42a4.42 4.42 0 0 1 3.18-1.36c1.62 0 3.04.92 3.79 2.27a5.45 5.45 0 0 1 2.22-.47 5.55 5.55 0 0 1 5.55 5.6 5.55 5.55 0 0 1-5.55 5.6c-.41 0-.81-.04-1.2-.13a4.06 4.06 0 0 1-3.55 2.07c-.6 0-1.18-.13-1.7-.36a4.62 4.62 0 0 1-4.29 2.86c-2 0-3.74-1.18-4.55-2.89a4.27 4.27 0 0 1-.88.09 4.34 4.34 0 0 1-2.13-8.13 5.06 5.06 0 0 1-.42-2.03A5.07 5.07 0 0 1 4.65 0a5.04 5.04 0 0 1 4.48 2.42z" fill="#00A1E0"/></svg></span>
+      <b>Salesforce</b>
+      <span class="x"><svg width="10" height="10" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3L3 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+    </span>
+
+    <button class="action-pill"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4 8h8M6 12h4" stroke="#374151" stroke-width="1.4" stroke-linecap="round"/></svg>Filter <span class="chev">▾</span></button>
+
+    <span style="flex:1;"></span>
+    <button class="action-pill"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="3" stroke="#374151" stroke-width="1.4"/><rect x="2" y="10" width="12" height="3" stroke="#374151" stroke-width="1.4"/></svg>Customize View</button>
+    <button class="action-pill"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="#374151" stroke-width="1.4" stroke-linecap="round"/></svg>Custom Attributes</button>
+  </div>
+
+  <div class="ch-table">
+    <table>
+      <thead>
+        <tr><th>Time</th><th>Duration</th><th>Channel Type</th><th>Cost</th><th>Session ID</th><th>End Reason</th><th>Session Status</th><th>User Sentiment</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2026-05-01 09:42:18 PDT</td><td>1:24</td><td>phone_call</td><td>$0.180</td><td class="cell-mono">call_a3c7e4f1d92b87a45c1d0</td><td>user hangup</td><td><span class="end-pill ended">ended</span></td><td class="sentiment positive">Positive</td></tr>
+        <tr><td>2026-05-01 09:21:07 PDT</td><td>2:08</td><td>phone_call</td><td>$0.260</td><td class="cell-mono">call_e92f7821c3a4d6e0a8b91</td><td>user hangup</td><td><span class="end-pill ended">ended</span></td><td class="sentiment positive">Positive</td></tr>
+        <tr><td>2026-05-01 08:58:34 PDT</td><td>3:11</td><td>phone_call</td><td>$0.480</td><td class="cell-mono">call_71a0e548b29f3c1b6d0a5</td><td>ended</td><td><span class="end-pill ended">ended</span></td><td class="sentiment">Neutral</td></tr>
+        <tr><td>2026-05-01 08:33:02 PDT</td><td>1:46</td><td>phone_call</td><td>$0.230</td><td class="cell-mono">call_d04a7f8c2e1b9530c4ef7</td><td>user hangup</td><td><span class="end-pill ended">ended</span></td><td class="sentiment">Neutral</td></tr>
+        <tr><td>2026-05-01 07:57:55 PDT</td><td>0:51</td><td>phone_call</td><td>$0.110</td><td class="cell-mono">call_5b8c3104f2917a24e0cd9</td><td>user hangup</td><td><span class="end-pill ended">ended</span></td><td class="sentiment">Neutral</td></tr>
+        <tr><td>2026-05-01 07:11:43 PDT</td><td>2:24</td><td>phone_call</td><td>$0.330</td><td class="cell-mono">call_a118fe402b7c3d1b89aef</td><td>user hangup</td><td><span class="end-pill ended">ended</span></td><td class="sentiment positive">Positive</td></tr>
+        <tr><td>2026-05-01 06:48:09 PDT</td><td>1:01</td><td>phone_call</td><td>$0.140</td><td class="cell-mono">call_60e2bf9a45c1d0e3a187f</td><td>ended</td><td><span class="end-pill ended">ended</span></td><td class="sentiment">Neutral</td></tr>
+        <tr><td>2026-04-30 22:14:25 PDT</td><td>1:53</td><td>phone_call</td><td>$0.220</td><td class="cell-mono">call_2c4f8b1e90a3d76b0f82a</td><td>user hangup</td><td><span class="end-pill ended">ended</span></td><td class="sentiment positive">Positive</td></tr>
+        <tr><td>2026-04-30 21:09:38 PDT</td><td>0:48</td><td>phone_call</td><td>$0.090</td><td class="cell-mono">call_88a3201ce4f5b91d72cd6</td><td>user hangup</td><td><span class="end-pill ended">ended</span></td><td class="sentiment">Neutral</td></tr>
+        <tr><td>2026-04-30 20:36:11 PDT</td><td>3:07</td><td>phone_call</td><td>$0.470</td><td class="cell-mono">call_d51a3b29e74c8f0a614e3</td><td>ended</td><td><span class="end-pill ended">ended</span></td><td class="sentiment">Neutral</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">Page 1 of 1 · 2,841 calls (filtered from 192,007)</div>
+</main>
+
+</body>
+</html>

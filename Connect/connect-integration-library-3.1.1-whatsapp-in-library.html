@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Integrations (WhatsApp highlighted)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 280px; min-width: 280px; background: #F5F7FA; display: flex; flex-direction: column; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .workspace-chevron { color: #99A0AE; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+  .footer { padding: 16px 14px; }
+  .main { flex: 1; overflow: auto; background: #fff; }
+  .page-content { padding: 48px 32px 0; max-width: 960px; margin: 0 auto; }
+  .page-title { font-size: 24px; font-weight: 600; color: #0E121B; margin-bottom: 8px; }
+  .page-desc { font-size: 14px; color: #6B7280; margin-bottom: 28px; line-height: 1.5; }
+  .top-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .search-wrapper { position: relative; flex: 1; max-width: 480px; }
+  .search-wrapper svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); }
+  .search-input { width: 100%; height: 36px; padding: 0 12px 0 36px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; }
+  .sort-dropdown { height: 36px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; color: #525866; background: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .add-btn { height: 36px; padding: 0 16px; background: #0E121B; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-left: auto; display: flex; align-items: center; gap: 6px; }
+  .integrations-table { width: 100%; border-collapse: collapse; }
+  .integrations-table thead th { padding: 10px 16px; font-size: 13px; font-weight: 500; color: #6B7280; text-align: left; border-bottom: 1px solid #E1E4EA; }
+  .integrations-table tbody tr { cursor: pointer; }
+  .integrations-table tbody tr:hover { background: rgba(0,0,0,0.03); }
+  .integrations-table tbody tr.new-row { background: rgba(37,211,102,0.05); }
+  .integrations-table tbody td { padding: 14px 16px; font-size: 14px; color: #0E121B; border-bottom: 1px solid #E1E4EA; }
+  .integration-name-cell { display: flex; align-items: center; gap: 12px; }
+  .integration-logo { width: 32px; height: 32px; border-radius: 6px; border: 1px solid #E1E4EA; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .integration-logo img { width: 22px; height: 22px; }
+  .integration-title { font-size: 14px; font-weight: 500; color: #0E121B; }
+  .integration-subtitle { font-size: 13px; color: #6B7280; }
+  .badge-new { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #ecf3ff; color: #3d64d7; font-size: 11px; font-weight: 500; border-radius: 10px; margin-left: 6px; }
+  .status-cell { display: flex; align-items: center; gap: 6px; }
+  .dot-g { width: 6px; height: 6px; background: #1FC16B; border-radius: 50%; }
+  .dot-y { width: 6px; height: 6px; background: #FF9147; border-radius: 50%; }
+  .dot-r { width: 6px; height: 6px; background: #FB3748; border-radius: 50%; }
+  .menu-btn { width: 32px; height: 32px; border: none; background: none; cursor: pointer; color: #6B7280; }
+  .td-menu { width: 48px; text-align: center; }
+  .flow-hint { margin-top: 40px; padding: 16px 20px; background: #F9FAFB; border: 1px dashed #E1E4EA; border-radius: 10px; font-size: 13px; color: #6B7280; display: flex; align-items: center; gap: 10px; }
+  .flow-hint strong { color: #0E121B; }
+  .flow-hint svg { flex-shrink: 0; color: #3d64d7; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo"><svg width="73" height="20" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg></div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span><span class="workspace-chevron">▾</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item current">Integrations</li><li class="nav-item">Billing</li><li class="nav-item">Settings</li></ul></div>
+  </div>
+  <div class="footer"></div>
+</aside>
+
+<main class="main">
+  <div class="page-content">
+    <h1 class="page-title">Integrations</h1>
+    <p class="page-desc">Connect external platforms. WhatsApp, Salesforce, HubSpot, Zendesk, Cal.com and more — bring your tools and channels into a single Retell agent.</p>
+
+    <div class="top-bar">
+      <div class="search-wrapper">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.52 13.46L17.74 16.67L16.67 17.74L13.46 14.52C12.27 15.48 10.78 16 9.25 16C5.52 16 2.5 12.98 2.5 9.25C2.5 5.52 5.52 2.5 9.25 2.5C12.98 2.5 16 5.52 16 9.25C16 10.78 15.48 12.27 14.52 13.46Z" fill="#99A0AE"/></svg>
+        <input type="text" class="search-input" placeholder="Search integrations..." value="whats">
+      </div>
+      <button class="sort-dropdown">Recent <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M10 13.75L3.75 7.5H16.25L10 13.75Z" fill="#99A0AE"/></svg></button>
+      <button class="add-btn">＋ Add integration</button>
+    </div>
+
+    <table class="integrations-table">
+      <thead><tr><th style="width:38%">Name</th><th style="width:20%">Status</th><th style="width:20%">Created by</th><th style="width:17%">Date created</th><th class="td-menu" style="width:5%"></th></tr></thead>
+      <tbody>
+        <tr class="new-row" onclick="window.location='connect-integration-library-3.1.2-connect-whatsapp-preauth.html'">
+          <td>
+            <div class="integration-name-cell">
+              <div class="integration-logo"><img src="https://www.google.com/s2/favicons?domain=whatsapp.com&sz=64" alt=""></div>
+              <div>
+                <div><span class="integration-title">WhatsApp</span><span class="badge-new">New</span></div>
+                <div class="integration-subtitle">WhatsApp &ndash; Meta Business API or Twilio</div>
+              </div>
+            </div>
+          </td>
+          <td><div class="status-cell"><span class="dot-y"></span>Not connected</div></td>
+          <td>&mdash;</td>
+          <td>&mdash;</td>
+          <td class="td-menu"><button class="menu-btn">⋯</button></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="integration-name-cell">
+              <div class="integration-logo"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=64" alt=""></div>
+              <div><div class="integration-title">HubSpot</div><div class="integration-subtitle">HubSpot &ndash; OAuth</div></div>
+            </div>
+          </td>
+          <td><div class="status-cell"><span class="dot-g"></span>Connected</div></td>
+          <td>Brandon Khoo</td>
+          <td>43 minutes ago</td>
+          <td class="td-menu"><button class="menu-btn">⋯</button></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="integration-name-cell">
+              <div class="integration-logo"><img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=64" alt=""></div>
+              <div><div class="integration-title">Salesforce</div><div class="integration-subtitle">Salesforce &ndash; OAuth</div></div>
+            </div>
+          </td>
+          <td><div class="status-cell"><span class="dot-g"></span>Connected</div></td>
+          <td>Brandon Khoo</td>
+          <td>2 hours ago</td>
+          <td class="td-menu"><button class="menu-btn">⋯</button></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="integration-name-cell">
+              <div class="integration-logo"><img src="https://www.google.com/s2/favicons?domain=cal.com&sz=64" alt=""></div>
+              <div><div class="integration-title">Cal.com</div><div class="integration-subtitle">Cal.com &ndash; API Key</div></div>
+            </div>
+          </td>
+          <td><div class="status-cell"><span class="dot-g"></span>Connected</div></td>
+          <td>Brandon Khoo</td>
+          <td>1 day ago</td>
+          <td class="td-menu"><button class="menu-btn">⋯</button></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="flow-hint">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 17.5C14.142 17.5 17.5 14.142 17.5 10C17.5 5.858 14.142 2.5 10 2.5C5.858 2.5 2.5 5.858 2.5 10C2.5 14.142 5.858 17.5 10 17.5ZM10.83 13.33H9.17V9.17H10.83V13.33ZM10 8.08C9.42 8.08 8.96 7.62 8.96 7.05C8.96 6.48 9.42 6.02 10 6.02C10.58 6.02 11.04 6.48 11.04 7.05C11.04 7.62 10.58 8.08 10 8.08Z" fill="currentColor"/></svg>
+      <div><strong>End-to-end setup flow →</strong> Click the WhatsApp row to open <strong>Connect</strong> → Choose provider (Meta or Twilio) → Facebook Login for Business → Bind an agent → Live. Estimated: 3-5 minutes if your Meta Business Account already has a verified WhatsApp number.</div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

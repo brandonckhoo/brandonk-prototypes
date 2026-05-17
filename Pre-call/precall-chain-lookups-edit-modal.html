@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Pre-call: Edit get_hubspot_contact</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; min-width: 1280px; position: relative; }
+
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff; filter: blur(1px); }
+.agent-header { display: flex; align-items: center; padding: 10px 16px 6px; gap: 10px; position: relative; flex-shrink: 0; }
+.agent-title { font-size: 15px; font-weight: 600; color: #0E121B; }
+.top-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; }
+.top-tab { padding: 6px 14px; font-size: 14px; color: #525866; border-radius: 6px; }
+.top-tab.active { font-weight: 600; color: #0E121B; }
+.top-spacer { flex: 1; }
+.btn-publish { height: 30px; padding: 0 14px; border: 1px solid #0E121B; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; }
+.agent-meta { display: flex; align-items: center; gap: 6px; padding: 0 16px 10px 52px; font-size: 12px; color: #99A0AE; flex-shrink: 0; }
+.agent-meta .dot { width: 3px; height: 3px; background: #99A0AE; border-radius: 50%; }
+.agent-body { display: flex; flex: 1; overflow: hidden; border-top: 1px solid #E1E4EA; }
+.prompt-area { flex: 1; background: #fff; padding: 24px; font-size: 14px; color: #99A0AE; }
+.functions-panel { width: 452px; border-left: 1px solid #E1E4EA; background: #fff; }
+.test-rail { width: 64px; border-left: 1px solid #E1E4EA; background: #fff; }
+
+/* Modal */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.modal { width: 680px; max-height: 90vh; background: #fff; border-radius: 14px; box-shadow: 0 24px 60px rgba(15,23,42,0.25); display: flex; flex-direction: column; overflow: hidden; }
+
+.modal-header { padding: 18px 20px 16px; border-bottom: 1px solid #E1E4EA; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.modal-logo { width: 32px; height: 32px; border-radius: 8px; background: #FF7A59; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.modal-titles { flex: 1; min-width: 0; }
+.modal-titles h2 { font-size: 15px; font-weight: 600; color: #0E121B; }
+.modal-titles .sub { font-size: 12px; color: #99A0AE; margin-top: 2px; }
+.modal-close { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #525866; border: none; background: transparent; }
+.modal-close:hover { background: #F3F4F6; }
+
+.conn-banner { margin: 14px 20px 0; padding: 8px 12px; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #065F46; }
+.conn-dot { width: 7px; height: 7px; background: #10B981; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(16,185,129,0.2); }
+
+.modal-body { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 20px; }
+
+/* Field blocks */
+.field-block { display: flex; flex-direction: column; gap: 6px; }
+.field-label { font-size: 13px; font-weight: 600; color: #0E121B; }
+.field-hint { font-size: 12px; color: #99A0AE; line-height: 1.5; }
+
+/* Depends on selector */
+.depends-select-wrap { position: relative; }
+.depends-select { width: 100%; padding: 9px 36px 9px 12px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-family: 'SF Mono', 'Menlo', monospace; font-size: 13px; color: #0E121B; outline: none; appearance: none; -webkit-appearance: none; cursor: pointer; }
+.depends-select:focus { border-color: #3d64d7; box-shadow: 0 0 0 3px #ECF3FF; }
+.depends-select-chev { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #99A0AE; pointer-events: none; }
+
+/* Divider */
+.section-divider { height: 1px; background: #F0F2F5; margin: 0 -20px; }
+
+/* Inputs table */
+.input-table { border: 1px solid #E1E4EA; border-radius: 8px; overflow: hidden; }
+.input-thead { display: grid; grid-template-columns: 1fr 24px 1fr; gap: 10px; padding: 7px 12px; background: #F9FAFB; border-bottom: 1px solid #E8EAED; font-size: 10.5px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.4px; }
+.input-row { display: grid; grid-template-columns: 1fr 24px 1fr; gap: 10px; align-items: center; padding: 8px 12px; border-bottom: 1px solid #F3F4F6; }
+.input-row:last-child { border-bottom: none; }
+.input-row:hover { background: #FAFBFC; }
+.input-param { font-family: 'SF Mono', monospace; font-size: 12.5px; color: #374151; }
+.input-required { color: #EF4444; font-size: 11px; margin-left: 3px; }
+.input-arrow { color: #D1D5DB; display: flex; align-items: center; justify-content: center; }
+.input-val { font-family: 'SF Mono', monospace; font-size: 12px; color: #3d64d7; background: #EEF3FF; border: 1px solid #DBEAFE; border-radius: 5px; padding: 4px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.input-val.literal { color: #374151; background: #F3F4F6; border-color: #E1E4EA; font-family: inherit; }
+.input-val.empty { color: #99A0AE; background: #fff; border: 1px dashed #D1D5DB; font-family: inherit; font-size: 12px; }
+
+/* Outputs table */
+.output-table { border: 1px solid #E1E4EA; border-radius: 8px; overflow: hidden; }
+.output-thead { display: grid; grid-template-columns: 1fr 24px 1fr; gap: 10px; padding: 7px 12px; background: #F9FAFB; border-bottom: 1px solid #E8EAED; font-size: 10.5px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.4px; }
+.output-row { display: grid; grid-template-columns: 1fr 24px 1fr; gap: 10px; align-items: center; padding: 8px 12px; border-bottom: 1px solid #F3F4F6; }
+.output-row:last-child { border-bottom: none; }
+.output-row:hover { background: #FAFBFC; }
+.output-field { font-family: 'SF Mono', monospace; font-size: 12.5px; color: #374151; }
+.output-arrow { color: #D1D5DB; display: flex; align-items: center; justify-content: center; }
+.output-var-input { width: 100%; padding: 4px 8px; border: 1px solid #E1E4EA; border-radius: 5px; font-family: 'SF Mono', monospace; font-size: 12px; color: #3d64d7; outline: none; background: #FAFBFC; }
+.output-var-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px #ECF3FF; background: #fff; }
+
+/* Advanced settings */
+.adv-section { border-top: 1px solid #E1E4EA; margin: 0 -20px; padding: 0 20px; }
+.adv-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 14px 0; user-select: none; }
+.adv-toggle-label { font-size: 14px; font-weight: 600; color: #0E121B; }
+.adv-chev { color: #99A0AE; transition: transform 0.18s ease; }
+.adv-chev.open { transform: rotate(180deg); }
+.adv-body { display: none; flex-direction: column; gap: 20px; padding-bottom: 16px; }
+.adv-body.open { display: flex; }
+.adv-row { display: flex; flex-direction: column; gap: 4px; }
+.adv-row-label { font-size: 14px; font-weight: 500; color: #0E121B; }
+.adv-row-desc { font-size: 13px; color: #6B7280; line-height: 1.4; }
+
+/* Timeout slider */
+.slider-track { position: relative; margin-top: 10px; }
+.timeout-slider { -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px; outline: none; cursor: pointer; background: #E1E4EA; }
+.timeout-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 2px solid #3d64d7; box-shadow: 0 1px 4px rgba(61,100,215,0.25); cursor: pointer; }
+.slider-labels { display: flex; justify-content: space-between; margin-top: 5px; }
+.slider-label { font-size: 12px; color: #99A0AE; }
+.slider-label.val { font-weight: 600; color: #0E121B; }
+
+/* Toggle row */
+.toggle-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.toggle-row-text { flex: 1; }
+.ios-toggle { position: relative; width: 38px; height: 22px; flex-shrink: 0; margin-top: 1px; }
+.ios-toggle input { opacity: 0; width: 0; height: 0; }
+.ios-slider { position: absolute; inset: 0; background: #D1D5DB; border-radius: 11px; cursor: pointer; transition: background 0.2s; }
+.ios-slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 2px; top: 2px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.ios-toggle input:checked + .ios-slider { background: #3d64d7; }
+.ios-toggle input:checked + .ios-slider:before { transform: translateX(16px); }
+
+/* Radio cards */
+.radio-cards { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.radio-card { display: flex; align-items: flex-start; gap: 10px; border: 1px solid #E1E4EA; border-radius: 8px; padding: 11px 13px; cursor: pointer; transition: border-color 0.15s; }
+.radio-card.selected { border-color: #3d64d7; background: #F7FAFF; }
+.radio-dot { width: 17px; height: 17px; border-radius: 50%; border: 2px solid #D1D5DB; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+.radio-dot.selected { border-color: #3d64d7; }
+.radio-dot.selected:after { content: ''; width: 8px; height: 8px; background: #3d64d7; border-radius: 50%; }
+.radio-card-label { font-size: 13px; font-weight: 500; color: #0E121B; line-height: 1.3; }
+.radio-card-desc { font-size: 12px; color: #6B7280; margin-top: 2px; line-height: 1.4; }
+
+/* Footer */
+.modal-footer { padding: 12px 20px; border-top: 1px solid #E1E4EA; display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
+.btn-cancel { padding: 8px 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #525866; cursor: pointer; font-weight: 500; font-family: inherit; }
+.btn-cancel:hover { background: #F9FAFB; }
+.btn-save { padding: 8px 16px; border: 1px solid #0E121B; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; cursor: pointer; font-weight: 500; font-family: inherit; }
+.btn-save:hover { background: #1a1a2e; }
+</style>
+</head>
+<body>
+
+<!-- Blurred background: agent builder -->
+<main class="main">
+  <div class="agent-header">
+    <span style="color:#525866;"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3.5 8.5L10 3l6.5 5.5V16a1 1 0 0 1-1 1h-3v-5h-5v5h-3a1 1 0 0 1-1-1V8.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+    <span class="agent-title">Outreach Dialer</span>
+    <div class="top-center"><span class="top-tab active">Create</span><span class="top-tab">Simulation</span></div>
+    <span class="top-spacer"></span>
+    <button class="btn-publish">Publish</button>
+  </div>
+  <div class="agent-meta"><span>Agent ID: ag...7b2</span><span class="dot"></span><span>$0.115/min</span></div>
+  <div class="agent-body">
+    <div class="prompt-area">Type in a universal prompt for your agent…</div>
+    <div class="functions-panel"></div>
+    <div class="test-rail"></div>
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="modal-backdrop">
+  <div class="modal">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 9.5V6.75A2.25 2.25 0 1 0 12.75 9H15M15 9.5H12.75M15 9.5v3m-2.25-3a2.25 2.25 0 0 0 0 4.5A2.25 2.25 0 0 0 15 12.5m0 0v3M9 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="modal-titles">
+        <h2>get_hubspot_contact</h2>
+        <div class="sub">Looks up a HubSpot contact record before the call connects.</div>
+      </div>
+      <button class="modal-close"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    </div>
+
+    <!-- Connected banner -->
+    <div class="conn-banner">
+      <span class="conn-dot"></span>
+      HubSpot connected
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Depends on -->
+      <div class="field-block">
+        <div class="field-label">Depends on</div>
+        <div class="depends-select-wrap">
+          <select class="depends-select" id="run-after-select" onchange="updateRunAfterHint(this)">
+            <option value="none" selected>None — run in parallel</option>
+          </select>
+          <svg class="depends-select-chev" width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="field-hint" id="run-after-hint" style="margin-top:4px;">This function runs at the same time as other pre-call functions.</div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Inputs -->
+      <div class="field-block">
+        <div class="field-label">Inputs</div>
+        <div class="field-hint">Map each parameter to a hard-coded value or a variable from a previous step.</div>
+        <div style="margin-top:8px;">
+          <div class="input-table">
+            <div class="input-thead">
+              <span>Parameter</span>
+              <span></span>
+              <span>Value</span>
+            </div>
+            <div class="input-row">
+              <span class="input-param">contact_id<span class="input-required">*</span></span>
+              <span class="input-arrow"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8h8M8 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="input-val">{{record_id}}</span>
+            </div>
+            <div class="input-row">
+              <span class="input-param">properties</span>
+              <span class="input-arrow"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8h8M8 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="input-val literal">firstname, associateddealids, associatedcompanyid</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Outputs -->
+      <div class="field-block">
+        <div class="field-label">Outputs</div>
+        <div class="field-hint">These fields are saved as variables and available in the agent prompt. Rename any variable to match your prompt.</div>
+        <div style="margin-top:8px;">
+          <div class="output-table">
+            <div class="output-thead">
+              <span>HubSpot field</span>
+              <span></span>
+              <span>Variable name</span>
+            </div>
+            <div class="output-row">
+              <span class="output-field">firstname</span>
+              <span class="output-arrow"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8h8M8 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <input class="output-var-input" value="contact_firstname" />
+            </div>
+            <div class="output-row">
+              <span class="output-field">associateddealids</span>
+              <span class="output-arrow"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8h8M8 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <input class="output-var-input" value="contact_associated_deal_id" />
+            </div>
+            <div class="output-row">
+              <span class="output-field">associatedcompanyid</span>
+              <span class="output-arrow"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8h8M8 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <input class="output-var-input" value="contact_company_id" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-save">Save</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function toggleAdv(toggle) {
+  const body = toggle.nextElementSibling;
+  const chev = toggle.querySelector('.adv-chev');
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function updateSlider(slider) {
+  const val = document.getElementById('slider-val');
+  val.textContent = slider.value + 's';
+  const pct = (slider.value / 30) * 100;
+  slider.style.background = `linear-gradient(to right, #3d64d7 ${pct}%, #E1E4EA ${pct}%)`;
+}
+
+function selectRadio(card) {
+  document.querySelectorAll('.radio-card').forEach(c => {
+    c.classList.remove('selected');
+    c.querySelector('.radio-dot').classList.remove('selected');
+  });
+  card.classList.add('selected');
+  card.querySelector('.radio-dot').classList.add('selected');
+}
+
+// Init slider fill on load
+window.addEventListener('DOMContentLoaded', () => {
+  const s = document.getElementById('timeout-slider');
+  if (s) updateSlider(s);
+});
+
+function updateRunAfterHint(select) {
+  const hint = document.getElementById('run-after-hint');
+  if (select.value === 'none') {
+    hint.innerHTML = 'This function runs at the same time as other pre-call functions.';
+  } else {
+    hint.innerHTML = 'Runs after <span style="font-family:\'SF Mono\',monospace;font-size:11.5px;color:#374151;">' + select.value + '</span> finishes. Its output variables are available as inputs below.';
+  }
+}
+</script>
+</body>
+</html>

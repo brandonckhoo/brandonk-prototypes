@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — CF Cal.com Flow: Step 1 — Select Function (+ Add dropdown)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  .step-banner { background: #ecf3ff; border-bottom: 1px solid #c7d8f8; padding: 7px 20px; font-size: 12px; color: #3d64d7; font-weight: 500; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .step-badge { background: #3d64d7; color: #fff; border-radius: 12px; padding: 1px 8px; font-size: 11px; font-weight: 600; }
+  .step-arrow { color: #99A0AE; margin: 0 2px; }
+  .step-dim { color: #99A0AE; }
+
+  .top-bar { display: flex; align-items: center; height: 40px; padding: 8px 16px 0; gap: 10px; position: relative; flex-shrink: 0; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; color: #525866; flex-shrink: 0; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; white-space: nowrap; }
+  .agent-name-edit { color: #99A0AE; cursor: pointer; margin-left: 4px; display: inline-flex; align-items: center; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+  .top-tab { padding: 4px 8px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; }
+  .top-tab.active { font-weight: 500; color: #0E121B; }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-secondary { height: 30px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #525866; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 5px; }
+  .btn-icon { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; cursor: pointer; color: #525866; }
+  .btn-publish { height: 30px; padding: 0 14px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 5px; }
+  .top-meta { display: flex; align-items: center; height: 20px; padding: 2px 16px 8px 50px; flex-shrink: 0; }
+  .top-meta span { font-size: 12px; color: #99A0AE; }
+  .main-layout { display: flex; flex: 1; overflow: hidden; border-top: 1px solid #E1E4EA; }
+
+  .node-palette { width: 180px; min-width: 180px; border-right: 1px solid #E1E4EA; display: flex; flex-direction: column; background: #fff; overflow-y: auto; }
+  .palette-tabs { display: flex; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .palette-tab { flex: 1; padding: 10px 8px; text-align: center; font-size: 13px; font-weight: 400; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; }
+  .palette-tab.active { font-weight: 500; color: #0E121B; border-bottom-color: #0E121B; }
+  .palette-items { padding: 8px 0; }
+  .palette-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 14px; color: #0E121B; cursor: grab; }
+  .palette-item:hover { background: rgba(0,0,0,0.03); }
+  .palette-item .p-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; font-weight: 600; line-height: 1; }
+
+  .canvas { flex: 1; background: #FAFAFA; position: relative; overflow: hidden; }
+  .canvas-content { position: absolute; top: 50%; left: 50%; transform: translate(-60%, -55%); }
+  .flow-node { position: absolute; border-radius: 8px; background: #fff; border: 1px solid #E1E4EA; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .node-begin { left: 20px; top: 125px; width: 80px; height: 30px; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 12px; font-weight: 600; color: #fff; background: #8B5CF6; border: none; border-radius: 18px; padding: 0 12px; position: relative; }
+  .node-begin::after { content: ''; position: absolute; right: -7px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #C0C7D1; background: #fff; }
+  .node-welcome { left: 160px; top: 120px; width: 300px; padding: 0; border-radius: 14px; border: 1.5px solid #F9A8D4; background: #FDF2F8; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .node-welcome-title { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: #C026D3; padding: 10px 14px 8px; position: relative; }
+  .node-welcome-title .port-left { position: absolute; left: -8px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid #C0C7D1; background: #fff; }
+  .node-welcome-body { margin: 0 12px 10px; padding: 14px; min-height: 96px; font-size: 13px; color: #0E121B; line-height: 1.5; background: #fff; border: 1px solid #F3E8EE; border-radius: 8px; }
+  .node-transition { margin: 0 12px 12px; padding: 10px 0 0; border-top: 1px solid #F3E8EE; }
+  .node-transition-title { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: #525866; margin-bottom: 8px; padding: 0 2px; }
+  .node-transition-title .spacer { flex: 1; }
+  .node-transition-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #374151; padding: 7px 10px; background: #fff; border: 1px solid #F3E8EE; border-radius: 7px; margin-bottom: 6px; position: relative; }
+  .node-transition-item .bullet { width: 12px; height: 12px; display: inline-flex; align-items: center; justify-content: center; color: #C0C7D1; flex-shrink: 0; }
+  .node-transition-item .port { position: absolute; right: -8px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid #C0C7D1; background: #fff; }
+  .node-endcall { left: 540px; top: 125px; width: 120px; height: 32px; display: flex; align-items: center; gap: 8px; padding: 0 16px 0 14px; font-size: 13px; font-weight: 500; color: #0E121B; background: #EFF6FF; border: 1px solid #DBEAFE; border-radius: 10px; position: relative; }
+  .node-endcall::before { content: ''; position: absolute; left: -7px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #C0C7D1; background: #fff; }
+  .node-endcall .circle { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid #93C5FD; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .conn-line { position: absolute; border-top: 1.5px solid #D1D5DB; }
+  .conn-begin-welcome { left: 100px; top: 140px; width: 52px; }
+  .conn-welcome-end { left: 462px; top: 140px; width: 70px; }
+  .canvas-toolbar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; align-items: center; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; padding: 4px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .canvas-toolbar button { width: 28px; height: 28px; border: none; background: none; cursor: pointer; color: #525866; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+  .canvas-toolbar .sep { width: 1px; height: 16px; background: #E1E4EA; margin: 0 4px; }
+  .canvas-footer { position: absolute; bottom: 20px; left: 16px; font-size: 13px; font-weight: 500; color: #525866; display: flex; align-items: center; gap: 6px; }
+
+  .settings-panel { width: 400px; min-width: 400px; border-left: 1px solid #E1E4EA; display: flex; flex-direction: column; overflow-y: auto; background: #fff; }
+  .settings-tabs { display: flex; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; padding: 0 16px; }
+  .settings-tab { padding: 12px 12px; font-size: 13px; font-weight: 400; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; }
+  .settings-tab.active { font-weight: 500; color: #0E121B; border-bottom-color: #0E121B; }
+  .settings-body { padding: 16px; flex: 1; }
+  .settings-section { margin-bottom: 20px; }
+  .settings-section-title { font-size: 14px; font-weight: 600; color: #0E121B; margin-bottom: 12px; }
+  .settings-label { font-size: 13px; font-weight: 500; color: #525866; margin-bottom: 6px; }
+  .settings-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .settings-pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #374151; cursor: pointer; background: #fff; }
+  .mode-card { border: 1px solid #E1E4EA; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; background: #fff; }
+  .mode-card.selected { border-color: #0E121B; background: #F5F7FA; box-shadow: 0 0 0 1px #0E121B; }
+  .mode-card-title { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 2px; }
+  .mode-card-desc { font-size: 12px; color: #6B7280; line-height: 1.4; }
+  .mode-radio { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #D1D5DB; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 8px; }
+  .mode-radio.on { border-color: #0E121B; }
+  .mode-radio.on::after { content: ''; width: 8px; height: 8px; background: #0E121B; border-radius: 50%; }
+  .global-prompt-area { width: 100%; min-height: 80px; border: 1px solid #E1E4EA; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #0A0A0A; resize: none; outline: none; font-family: inherit; }
+
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .modal { background: #fff; border-radius: 18px; box-shadow: 0 24px 60px rgba(0,0,0,0.18); width: 680px; overflow: visible; display: flex; flex-direction: column; }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 28px 28px 0; }
+  .modal-title { font-size: 22px; font-weight: 600; color: #0E121B; }
+  .modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; border-radius: 8px; color: #6B7280; font-size: 18px; }
+  .modal-close:hover { background: #F3F4F6; }
+  .modal-body { padding: 20px 28px 28px; }
+  .modal-empty { font-size: 17px; color: #9CA3AF; margin-bottom: 28px; }
+  .modal-action-row { display: flex; align-items: center; gap: 10px; }
+  .modal-action-spacer { flex: 1; }
+  .add-wrap { position: relative; display: inline-block; }
+  .modal-add-btn { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 20px; font-size: 16px; font-weight: 500; color: #0E121B; cursor: pointer; border: 1.5px solid #D1D5DB; background: #fff; border-radius: 10px; font-family: inherit; }
+  .modal-add-btn:hover { background: #F9FAFB; }
+  .modal-btn { height: 44px; padding: 0 20px; border-radius: 10px; font-size: 16px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; }
+  .modal-btn.cancel { border: 1.5px solid #D1D5DB; background: #fff; color: #374151; }
+  .modal-btn.primary { border: none; background: #374151; color: #fff; }
+  .modal-btn.primary:disabled { background: #D1D5DB; color: #9CA3AF; cursor: not-allowed; }
+  .fn-popover { position: absolute; top: calc(100% + 8px); left: 0; width: 420px; background: #fff; border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08); z-index: 10; overflow: hidden; padding: 6px 0; }
+  .fn-item { display: flex; align-items: center; gap: 16px; padding: 0 20px; height: 54px; font-size: 16px; color: #111827; cursor: pointer; }
+  .fn-item:hover { background: #F9FAFB; }
+  .fn-item-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .fn-item-icon svg { width: 20px; height: 20px; color: #374151; }
+  .fn-item-name { flex: 1; }
+  .fn-add-integration-btn { display: flex; align-items: center; gap: 16px; padding: 0 20px; height: 54px; font-size: 16px; font-weight: 400; color: #111827; cursor: pointer; text-decoration: none; }
+  .fn-add-integration-btn:hover { background: #F9FAFB; }
+  .fn-add-integration-btn svg { width: 20px; height: 20px; flex-shrink: 0; color: #374151; }
+</style>
+</head>
+<body>
+
+<div class="step-banner">
+  <span class="step-badge">Step 1 of 3</span>
+  Click "+ Add" in the Select Function modal, then click <strong>"Add Integration tool"</strong>
+  <span class="step-arrow">→</span>
+  <span class="step-dim">Step 2: Browse integrations &amp; select Cal.com</span>
+  <span class="step-arrow">→</span>
+  <span class="step-dim">Step 3: Select Cal.com tools</span>
+</div>
+
+<div class="top-bar">
+  <div class="home-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+  <span class="agent-name">Appointment Booking Agent</span>
+  <span class="agent-name-edit"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></span>
+  <span class="top-spacer"></span>
+  <div class="top-tabs">
+    <span class="top-tab active">Create</span>
+    <span class="top-tab">Simulation</span>
+  </div>
+  <div class="top-actions">
+    <span style="font-size:12px;color:#99A0AE;margin-right:4px;">Auto saved at 05:20</span>
+    <button class="btn-secondary"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10v7H7l-3 2V4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg> Give feedback</button>
+    <button class="btn-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="8" r="1.25" fill="currentColor"/><circle cx="8" cy="8" r="1.25" fill="currentColor"/><circle cx="12" cy="8" r="1.25" fill="currentColor"/></svg></button>
+    <button class="btn-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 12V8l4-4 4 4v4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="btn-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+    <button class="btn-publish"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Publish</button>
+  </div>
+</div>
+<div class="top-meta">
+  <span>Agent ID: ag...b7c &bull; CF ID: cv...Apr3 &bull; $0.115/min &bull; 970-1300ms latency &bull; 1260-1860 tokens</span>
+</div>
+
+<div class="main-layout">
+  <div class="node-palette">
+    <div class="palette-tabs">
+      <span class="palette-tab active">Node</span>
+      <span class="palette-tab">Components</span>
+    </div>
+    <div class="palette-items">
+      <div class="palette-item"><span class="p-icon" style="color:#EF4444;">#</span> Conversation</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#22C55E" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round"/></svg></span> Subagent</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="#3d64d7" stroke-width="1.5"/><circle cx="10" cy="10" r="2" stroke="#3d64d7" stroke-width="1.3"/><path d="M10 5v2M10 13v2M5 10h2M13 10h2" stroke="#3d64d7" stroke-width="1.3" stroke-linecap="round"/></svg></span> Function</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M17 13.5c0 1-1.5 2.5-2.5 2.5s-3-1.5-5-3.5S6 8 6 6.5 7.5 4 8.5 4c.5 0 1 .2 1.2.5L11 7l-1.5 2L12 11.5l2-1.5 2.5 1.3c.3.2.5.7.5 1.2z" stroke="#22C55E" stroke-width="1.5"/></svg></span> Call Transfer</div>
+      <div class="palette-item"><span class="p-icon" style="color:#F59E0B;font-size:13px;">⌨</span> Press Digit</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M6 4v12M6 10h8" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round"/></svg></span> Logic Split</div>
+      <div class="palette-item"><span class="p-icon" style="color:#F97316;font-size:13px;">⇄</span> Agent Transfer</div>
+      <div class="palette-item"><span class="p-icon" style="color:#F97316;font-size:13px;">✉</span> In-Call SMS</div>
+      <div class="palette-item"><span class="p-icon" style="color:#6B7280;font-size:15px;font-weight:500;">{ }</span> Extract Variable</div>
+      <div class="palette-item"><span class="p-icon" style="color:#6B7280;font-size:15px;font-weight:500;">&lt;&gt;</span> Code</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 3l7 4v6l-7 4-7-4V7l7-4z" stroke="#8B5CF6" stroke-width="1.5"/></svg></span> MCP</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="4" y="4" width="12" height="12" rx="2" stroke="#93C5FD" stroke-width="1.5"/></svg></span> Ending</div>
+      <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="4" y="4" width="12" height="12" rx="2" stroke="#FCD34D" stroke-width="1.5"/><path d="M4 7h12" stroke="#FCD34D" stroke-width="1.5"/></svg></span> Note</div>
+    </div>
+  </div>
+
+  <div class="canvas">
+    <div class="canvas-content">
+      <div class="node-begin">▶ Begin</div>
+      <div class="conn-line conn-begin-welcome"></div>
+      <div class="flow-node node-welcome">
+        <div class="node-welcome-title"><span class="port-left"></span># Greeting</div>
+        <div class="node-welcome-body">Hi! I can help you schedule an appointment. What date and time works best for you?</div>
+        <div class="node-transition">
+          <div class="node-transition-title">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 5h5l3 3M3 11h5l3-3" stroke="#525866" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="8" r="1.2" stroke="#525866" stroke-width="1.3"/></svg>
+            Transition<span class="spacer"></span>
+            <span style="width:18px;height:18px;display:flex;align-items:center;justify-content:center;color:#525866;border-radius:4px;cursor:pointer;">+</span>
+          </div>
+          <div class="node-transition-item"><span class="bullet">○</span>User wants to book an appointment<span class="port"></span></div>
+          <div class="node-transition-item"><span class="bullet">○</span>User wants to cancel a booking<span class="port"></span></div>
+        </div>
+      </div>
+      <div class="conn-line conn-welcome-end"></div>
+      <div class="flow-node node-endcall">
+        <span class="circle"></span>End Call
+      </div>
+    </div>
+    <div class="canvas-toolbar">
+      <button><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 4v8M4 8h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+      <button><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+      <div class="sep"></div>
+      <button><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="3" width="10" height="10" rx="1" stroke="currentColor" stroke-width="1.3"/></svg></button>
+      <button><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.3"/></svg></button>
+    </div>
+    <div class="canvas-footer">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Main Flow
+    </div>
+  </div>
+
+  <div class="settings-panel">
+    <div class="settings-tabs">
+      <span class="settings-tab active">Global Settings</span>
+      <span class="settings-tab">Test Agent</span>
+    </div>
+    <div class="settings-body">
+      <div class="settings-section">
+        <div class="settings-section-title">Agent Settings</div>
+        <div class="settings-label">Voice &amp; Language</div>
+        <div class="settings-row">
+          <span class="settings-pill">🇺🇸 English</span>
+          <span class="settings-pill" style="color:#22C55E;">● Aria</span>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-label">Execution Mode</div>
+        <div class="mode-card">
+          <div style="display:flex;align-items:flex-start;">
+            <span class="mode-radio"></span>
+            <div><div class="mode-card-title">Flex Mode</div><div class="mode-card-desc">All nodes share one context. The agent acts flexibly based on your flow.</div></div>
+          </div>
+        </div>
+        <div class="mode-card selected">
+          <div style="display:flex;align-items:flex-start;">
+            <span class="mode-radio on"></span>
+            <div><div class="mode-card-title">Rigid Mode</div><div class="mode-card-desc">Follows nodes step by step. Actions strictly follow the flow.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-label">Global Prompt</div>
+        <textarea class="global-prompt-area" placeholder="Enter your global prompt here">You are a helpful scheduling assistant. Help users book, reschedule, or cancel appointments via Cal.com. Always confirm the date, time, and event type before booking.</textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Select Function Modal — + Add dropdown OPEN -->
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Select Function</span>
+      <button class="modal-close">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-empty">No tools available</div>
+      <div class="modal-action-row">
+        <div class="add-wrap">
+          <button class="modal-add-btn">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Add
+          </button>
+          <div class="fn-popover">
+            <div class="fn-item">
+              <span class="fn-item-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M16.9 16.9l2.1 2.1M4.9 19.1l2.1-2.1M16.9 7.1l2.1-2.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+              <span class="fn-item-name">Custom Function</span>
+            </div>
+            <div class="fn-item">
+              <span class="fn-item-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M7 8L3 12l4 4M17 8l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="fn-item-name">Code</span>
+            </div>
+            <a class="fn-add-integration-btn" href="connect-cf-calcom-step2-integrations-picker.html">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+              Add Integration tool
+            </a>
+          </div>
+        </div>
+        <span class="modal-action-spacer"></span>
+        <button class="modal-btn cancel">Cancel</button>
+        <button class="modal-btn primary" disabled>Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Five9 Integration Flow</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: #fff; color: #0A0A0A; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 48px; }
+  .page { display: flex; gap: 56px; align-items: flex-start; max-width: 1600px; }
+  .diagram-col { flex: 0 0 auto; width: 1000px; position: relative; }
+  .steps-col { flex: 1; min-width: 400px; max-width: 520px; padding-top: 12px; }
+  .steps-title { font-size: 15px; font-weight: 700; color: #0E121B; margin-bottom: 24px; }
+  .step { display: flex; gap: 14px; margin-bottom: 24px; align-items: flex-start; }
+  .step-num { flex: 0 0 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; background: #6B7280; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.55; color: #374151; }
+  .step-text strong { color: #0E121B; font-weight: 600; }
+  .step-text .highlight { color: #1A4DA8; font-weight: 600; }
+  .caption { font-size: 13px; color: #6B7280; text-align: center; margin-top: 20px; line-height: 1.5; }
+  .customer-emoji { position: absolute; top: 38px; left: 88px; font-size: 32px; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="page">
+<div class="diagram-col">
+<div class="customer-emoji">🗣️</div>
+<svg viewBox="0 0 1000 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Actor 1: Caller -->
+  <rect x="50" y="30" width="120" height="90" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="110" y="90" text-anchor="middle" font-size="10" fill="#64748B">Caller</text>
+  <text x="110" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Customer</text>
+
+  <!-- Actor 2: Five9 VCC -->
+  <rect x="340" y="30" width="180" height="90" rx="12" fill="#1A4DA8"/>
+  <text x="430" y="68" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">Five9</text>
+  <text x="430" y="86" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.85)">VCC + Compliance Rules</text>
+  <text x="430" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Five9 VCC</text>
+  <text x="430" y="156" text-anchor="middle" font-size="11" fill="#94A3B8">Contact Center + Dialer</text>
+
+  <!-- Actor 3: Retell AI -->
+  <rect x="700" y="30" width="180" height="90" rx="12" fill="#0E121B"/>
+  <image href="/Users/brandonkhoo/Documents/Retell AI/Logo.png" x="740" y="55" width="100" height="40" style="filter: brightness(0) invert(1);"/>
+  <text x="790" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Retell AI</text>
+  <text x="790" y="156" text-anchor="middle" font-size="11" fill="#94A3B8">Voice Agent</text>
+
+  <!-- Lifelines -->
+  <line x1="110" y1="170" x2="110" y2="680" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="430" y1="170" x2="430" y2="680" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="790" y1="170" x2="790" y2="680" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- Step 0: Compliance rules applied (before outbound) -->
+  <rect x="340" y="195" width="180" height="40" rx="6" fill="#FEF3C7" stroke="#FDE68A"/>
+  <text x="430" y="213" text-anchor="middle" font-size="11" font-weight="600" fill="#92400E">Apply compliance rules</text>
+  <text x="430" y="227" text-anchor="middle" font-size="10" fill="#92400E">TCPA · DNC · state hours</text>
+
+  <!-- Step 1: Inbound/Outbound call routes via SIP -->
+  <line x1="110" y1="270" x2="430" y2="270" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="427,265 437,270 427,275" fill="#9CA3AF"/>
+  <polygon points="113,265 103,270 113,275" fill="#9CA3AF"/>
+  <rect x="170" y="256" width="200" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="270" y="274" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Inbound or outbound call</text>
+
+  <!-- Step 2: Five9 routes via SIP to Retell -->
+  <line x1="430" y1="315" x2="790" y2="315" stroke="#1A4DA8" stroke-width="2"/>
+  <polygon points="787,310 797,315 787,320" fill="#1A4DA8"/>
+  <rect x="500" y="301" width="220" height="26" rx="5" fill="#EEF4FF" stroke="#BFDBFE"/>
+  <text x="610" y="319" text-anchor="middle" font-size="12" font-weight="500" fill="#1E3A8A">SIP route to Retell endpoint</text>
+
+  <!-- Step 3: Context metadata passed -->
+  <rect x="700" y="345" width="180" height="28" rx="6" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="790" y="364" text-anchor="middle" font-size="12" font-weight="600" fill="#166534">Agent handles call</text>
+
+  <!-- Step 4: Agent interaction -->
+  <line x1="790" y1="400" x2="110" y2="400" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="113,395 103,400 113,405" fill="#9CA3AF"/>
+  <rect x="300" y="386" width="200" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="400" y="404" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Voice conversation</text>
+
+  <!-- Step 5: Customer needs human -->
+  <line x1="110" y1="445" x2="790" y2="445" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="787,440 797,445 787,450" fill="#9CA3AF"/>
+  <rect x="250" y="431" width="300" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="400" y="449" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">"I need to speak to a human about this"</text>
+
+  <!-- Step 6: Warm transfer with context to Five9 -->
+  <line x1="790" y1="490" x2="430" y2="490" stroke="#1A4DA8" stroke-width="2"/>
+  <polygon points="433,485 423,490 433,495" fill="#1A4DA8"/>
+  <rect x="500" y="476" width="220" height="26" rx="5" fill="#EEF4FF" stroke="#BFDBFE"/>
+  <text x="610" y="494" text-anchor="middle" font-size="12" font-weight="500" fill="#1E3A8A">Warm transfer + context</text>
+
+  <!-- Step 7: Five9 routes to human -->
+  <rect x="340" y="525" width="180" height="28" rx="6" fill="#FEF3C7" stroke="#FDE68A"/>
+  <text x="430" y="544" text-anchor="middle" font-size="12" font-weight="600" fill="#92400E">Route to skilled agent</text>
+
+  <!-- Step 8: Call outcome logged -->
+  <line x1="790" y1="590" x2="430" y2="590" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="433,585 423,590 433,595" fill="#9CA3AF"/>
+  <rect x="510" y="576" width="200" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="610" y="594" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Log call outcome + summary</text>
+
+  <!-- Step 9: Five9 reporting -->
+  <rect x="340" y="625" width="180" height="28" rx="6" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="430" y="644" text-anchor="middle" font-size="12" font-weight="600" fill="#166534">Unified Five9 reporting</text>
+
+</svg>
+
+<div class="caption">Flowchart illustrating how Retell AI agents receive calls routed from Five9 VCC, respect outbound compliance rules<br>(TCPA, DNC, state hours), and transfer to human agents with full conversation context for unified contact center operations.</div>
+</div>
+
+<!-- RIGHT: Step-by-step walkthrough -->
+<div class="steps-col">
+  <div class="steps-title">How it works</div>
+
+  <div class="step">
+    <div class="step-num">0</div>
+    <div class="step-text"><strong>Compliance rules apply before dial.</strong> <span class="highlight">Five9</span> enforces outbound compliance rules (TCPA time windows, DNC lists, state level restrictions like no calls in Georgia on Sunday at 8am, maximum retry rules) before any call leaves the platform. This is the primary reason Caribou and other outbound customers rely on Five9.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text"><strong>Call originates.</strong> Either a customer calls in (inbound) or Five9's dialer places an outbound call. The call flows through Five9 VCC first for routing, compliance checks, and campaign assignment.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>Five9 routes to Retell over SIP.</strong> Five9 VCC sends the call to Retell's SIP endpoint based on routing rules configured in Five9 admin. Call metadata (caller ID, campaign name, skill, queue, IVR selections) flows alongside the audio stream.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>Retell agent handles the call.</strong> The Retell AI agent picks up with full context from Five9. Agent behavior is configured in Retell (prompt, tools, integrations) while call routing and compliance stay in Five9.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-text"><strong>Voice conversation happens.</strong> Agent converses with the caller naturally, using connected Retell integrations (CRM lookup, knowledge base, scheduling) as needed during the call.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-text"><strong>Caller requests a human.</strong> When the conversation needs a human (complex issue, policy exception, caller preference), the AI agent initiates a warm transfer.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">6</div>
+    <div class="step-text"><strong>Warm transfer with context.</strong> Retell hands the call back to Five9 with conversation summary, caller intent, and collected data attached. The human agent in Five9 receives the call already briefed, not starting from scratch.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">7</div>
+    <div class="step-text"><strong>Five9 routes to skilled agent.</strong> Five9 applies its normal skill and queue routing to find the right human agent. The AI-to-human handoff looks identical to a caller transfer between two humans.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">8</div>
+    <div class="step-text"><strong>Call outcome logs.</strong> When the call ends, Retell writes the outcome, duration, summary, and recording link back to Five9 as a call activity.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">9</div>
+    <div class="step-text"><strong>Unified Five9 reporting.</strong> AI and human calls appear in the same Five9 reporting views so ops teams track volume, handle time, and outcomes across both. No separate Retell dashboard required for core contact center metrics.</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

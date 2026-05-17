@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Knowledge Base → Add Zendesk Help Center</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  /* Sidebar */
+  .sidebar { width: 240px; min-width: 240px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; padding: 0; border-right: 1px solid #E1E4EA; position: relative; }
+  .sidebar-logo { padding: 16px 14px 12px; display: flex; align-items: center; gap: 8px; }
+  .sidebar-logo-icon { width: 24px; height: 24px; background: #0E121B; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin: 0 10px; height: 36px; background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; cursor: pointer; }
+  .workspace-avatar { width: 18px; height: 18px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 12px; }
+  .section-label { padding: 4px 14px; font-size: 11px; font-weight: 500; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.03em; }
+  .nav-items { list-style: none; padding: 0 10px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 34px; font-size: 13px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .nav-item:hover { background: rgba(0,0,0,0.03); }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .footer { padding: 12px 10px; border-top: 1px solid #E1E4EA; }
+  .footer-card { padding: 10px 12px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .pay-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: #EEF4FF; color: #3d64d7; font-size: 11px; font-weight: 500; border-radius: 10px; }
+  .user-card { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; }
+  .user-avatar { width: 20px; height: 20px; border-radius: 50%; background: #DBE4FF; color: #3d64d7; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .user-email { font-size: 12.5px; color: #525866; flex: 1; }
+  .footer-links { display: flex; align-items: center; gap: 4px; padding: 0 4px; font-size: 12px; color: #525866; }
+  .footer-links span { padding: 6px 8px; cursor: pointer; border-radius: 4px; }
+  .footer-links span:hover { background: rgba(0,0,0,0.04); }
+
+  /* KB list column */
+  .kb-col { width: 280px; min-width: 280px; border-right: 1px solid #E1E4EA; background: #fff; display: flex; flex-direction: column; }
+  .kb-col-header { display: flex; align-items: center; gap: 8px; padding: 14px 16px 10px; }
+  .kb-col-icon { width: 18px; height: 18px; color: #525866; display: flex; align-items: center; justify-content: center; }
+  .kb-col-title { font-size: 14px; font-weight: 600; color: #0E121B; flex: 1; }
+  .kb-add-btn { width: 28px; height: 28px; background: #0E121B; color: #fff; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; }
+  .kb-add-btn.highlight { animation: pulse 2s infinite; }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(14,18,27,0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(14,18,27,0); }
+  }
+  .kb-list { padding: 6px 10px; flex: 1; overflow-y: auto; }
+  .kb-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; margin-bottom: 2px; }
+  .kb-item:hover { background: #F9FAFB; }
+  .kb-item.selected { background: #F5F9FF; }
+  .kb-item-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .kb-item-icon.zendesk { background: #03363D; color: #fff; font-size: 12px; font-weight: 700; }
+  .kb-item-icon.drive { background: #FEF2F2; }
+  .kb-item-icon.sheets { background: #D1FAE5; }
+  .kb-item-icon.upload { background: #EDE9FE; color: #6D28D9; }
+  .kb-item-info { flex: 1; min-width: 0; }
+  .kb-item-name { font-size: 13px; font-weight: 500; color: #0E121B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kb-item-meta { font-size: 11.5px; color: #99A0AE; }
+  .kb-item-status { font-size: 10px; padding: 1px 6px; border-radius: 8px; flex-shrink: 0; }
+  .kb-item-status.synced { background: #D1FAE5; color: #065F46; }
+  .kb-item-status.syncing { background: #FEF3C7; color: #92400E; }
+
+  /* Main empty state right side */
+  .kb-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FAFBFC; }
+  .kb-empty-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #99A0AE; margin-bottom: 12px; }
+  .kb-empty-text { font-size: 14px; color: #525866; }
+
+  /* Add source modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 32px 0; overflow: auto; }
+  .modal { background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 720px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+  .modal-header { display: flex; align-items: center; padding: 18px 24px 14px; border-bottom: 1px solid #E1E4EA; }
+  .modal-title { font-size: 17px; font-weight: 600; color: #0E121B; }
+  .modal-subtitle { font-size: 12.5px; color: #6B7280; margin-top: 3px; }
+  .modal-close { margin-left: auto; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; border-radius: 6px; color: #6B7280; }
+  .modal-close:hover { background: #F3F4F6; }
+  .modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+  .section-title { font-size: 14px; font-weight: 600; color: #0E121B; margin-bottom: 4px; }
+  .section-desc { font-size: 12.5px; color: #6B7280; margin-bottom: 14px; }
+  .source-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+  .source-card { display: flex; flex-direction: column; align-items: flex-start; padding: 14px; background: #fff; border: 1px solid #E1E4EA; border-radius: 10px; cursor: pointer; transition: all 0.15s; gap: 8px; }
+  .source-card:hover { border-color: #D1D5DB; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .source-card.selected { border: 2px solid #3d64d7; background: #F5F9FF; padding: 13px; }
+  .source-card.selected .source-name { color: #3d64d7; }
+  .source-logo { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .source-logo svg { width: 18px; height: 18px; }
+  .source-logo.web { background: #F3F4F6; color: #525866; }
+  .source-logo.file { background: #EDE9FE; color: #6D28D9; }
+  .source-logo.text { background: #FEF3C7; color: #92400E; }
+  .source-logo.drive { background: #fff; padding: 4px; }
+  .source-logo.sheets { background: #fff; padding: 4px; }
+  .source-logo.docs { background: #fff; padding: 4px; }
+  .source-logo.notion { background: #F3F4F6; padding: 4px; }
+  .source-logo.zendesk { background: #03363D; color: #fff; font-size: 12px; font-weight: 700; }
+  .source-logo.intercom { background: #1F6FEB; color: #fff; font-size: 12px; font-weight: 700; padding: 4px; }
+  .source-name { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .source-desc { font-size: 11.5px; color: #6B7280; line-height: 1.4; }
+
+  /* Zendesk config */
+  .config-block { border: 1px solid #E1E4EA; border-radius: 10px; padding: 18px; margin-bottom: 14px; }
+  .config-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .config-logo { width: 32px; height: 32px; background: #03363D; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; }
+  .config-title { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .config-sub { font-size: 11.5px; color: #6B7280; }
+  .config-status { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; padding: 3px 8px; background: #D1FAE5; color: #065F46; font-size: 11px; font-weight: 500; border-radius: 10px; }
+  .config-dot { width: 6px; height: 6px; border-radius: 50%; background: #065F46; }
+  .field-group { margin-bottom: 14px; }
+  .field-label { font-size: 12.5px; font-weight: 500; color: #0E121B; margin-bottom: 6px; }
+  .field-select { width: 100%; height: 36px; padding: 0 34px 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0A0A0A; background: #fff; outline: none; font-family: inherit; appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%230E121B' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+  .preview-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .preview-count { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .preview-meta { font-size: 11.5px; color: #99A0AE; margin-left: auto; }
+  .article-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; }
+  .article-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #F9FAFB; border-radius: 6px; }
+  .article-check { width: 16px; height: 16px; accent-color: #3d64d7; flex-shrink: 0; }
+  .article-title { font-size: 12.5px; color: #0E121B; flex: 1; }
+  .article-section { font-size: 11px; color: #6B7280; padding: 1px 7px; background: #fff; border: 1px solid #E1E4EA; border-radius: 10px; }
+  .sync-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-footer { display: flex; align-items: center; padding: 14px 24px; border-top: 1px solid #E1E4EA; gap: 8px; justify-content: flex-end; background: #FAFBFC; }
+  .btn { height: 36px; padding: 0 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; border: 1px solid #E1E4EA; background: #fff; color: #0E121B; }
+  .btn:hover { background: #F9FAFB; }
+  .btn-primary { background: #0E121B; color: #fff; border-color: #0E121B; }
+  .btn-primary:hover { background: #000; }
+
+  /* Step indicator */
+  .step-indicator { position: fixed; top: 16px; right: 20px; z-index: 300; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #6B7280; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; gap: 12px; align-items: center; }
+  .step { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .step-num { width: 18px; height: 18px; border-radius: 50%; background: #E1E4EA; color: #6B7280; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .step.active .step-num { background: #0E121B; color: #fff; }
+  .step.active { color: #0E121B; font-weight: 500; }
+  .step-arrow { color: #D1D5DB; font-size: 10px; }
+</style>
+</head>
+<body>
+
+<div class="step-indicator">
+  <div class="step" onclick="showStep(1)" id="nav-1"><div class="step-num">1</div> Knowledge Base</div>
+  <span class="step-arrow">→</span>
+  <div class="step" onclick="showStep(2)" id="nav-2"><div class="step-num">2</div> Add source</div>
+  <span class="step-arrow">→</span>
+  <div class="step active" onclick="showStep(3)" id="nav-3"><div class="step-num">3</div> Configure Zendesk</div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">R</div>
+    <span style="font-size: 14px; font-weight: 600; color: #0E121B;">Retell</span>
+  </div>
+  <div class="workspace">
+    <div class="workspace-avatar">B</div>
+    <span class="workspace-name">Brandon K... Workspace</span>
+  </div>
+  <div class="nav-scroll">
+    <div class="section-group">
+      <div class="section-label">BUILD</div>
+      <ul class="nav-items">
+        <li class="nav-item">Agents</li>
+        <li class="nav-item current">Knowledge Base</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">DEPLOY</div>
+      <ul class="nav-items">
+        <li class="nav-item">Phone Numbers</li>
+        <li class="nav-item">Batch Call</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">MONITOR</div>
+      <ul class="nav-items">
+        <li class="nav-item">Call History</li>
+        <li class="nav-item">Chat History</li>
+        <li class="nav-item">Analytics</li>
+        <li class="nav-item">AI Quality Assurance</li>
+        <li class="nav-item">Alerting</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">SYSTEM</div>
+      <ul class="nav-items">
+        <li class="nav-item">Integrations</li>
+        <li class="nav-item">Billing</li>
+        <li class="nav-item">Settings</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="footer-card">
+      <span class="pay-pill">Pay As You Go</span>
+    </div>
+    <div class="user-card">
+      <div class="user-avatar">B</div>
+      <span class="user-email">brandon@retellai.com</span>
+    </div>
+    <div class="footer-links"><span>Help</span><span>Updates</span></div>
+  </div>
+</div>
+
+<!-- KB list column -->
+<div class="kb-col">
+  <div class="kb-col-header">
+    <span class="kb-col-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="4" y="3" width="12" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 7h4M8 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+    <span class="kb-col-title">Knowledge Base</span>
+    <button class="kb-add-btn highlight" onclick="showStep(2)" title="Add knowledge base source">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="kb-list" id="kb-list-step1">
+    <!-- Empty state: populated after step 3 -->
+  </div>
+</div>
+
+<!-- Main area -->
+<div class="kb-main" id="kb-main">
+  <div class="kb-empty-icon">
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="8" y="6" width="24" height="28" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M14 14h12M14 19h12M14 24h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </div>
+  <div class="kb-empty-text" id="kb-empty-text">You don't have any knowledge base</div>
+</div>
+
+<!-- Add source modal (step 2 and 3) -->
+<div class="modal-overlay" id="add-modal" style="display: flex;">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Add Knowledge Base source</div>
+        <div class="modal-subtitle">Connect a source so your agent can reference it during calls.</div>
+      </div>
+      <button class="modal-close" onclick="showStep(1)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="section-title">Choose a source</div>
+      <div class="section-desc">Pick where your knowledge lives. Content is chunked, embedded, and retrieved via semantic search during calls.</div>
+
+      <div class="source-grid">
+        <div class="source-card">
+          <div class="source-logo web"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h14M10 3c2 2.5 2 11 0 14M10 3c-2 2.5-2 11 0 14" stroke="currentColor" stroke-width="1.6"/></svg></div>
+          <div><div class="source-name">Web Page</div><div class="source-desc">Crawl a public URL and keep it synced.</div></div>
+        </div>
+        <div class="source-card">
+          <div class="source-logo file"><svg viewBox="0 0 20 20" fill="none"><path d="M6 3h6l4 4v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v4h4" stroke="currentColor" stroke-width="1.6"/></svg></div>
+          <div><div class="source-name">Upload File</div><div class="source-desc">PDF, DOCX, TXT, or Markdown.</div></div>
+        </div>
+        <div class="source-card">
+          <div class="source-logo text"><svg viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h12M4 15h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <div><div class="source-name">Add Text</div><div class="source-desc">Paste text directly into the agent.</div></div>
+        </div>
+        <div class="source-card">
+          <div class="source-logo drive"><img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" width="24" height="24" alt="Google Drive"></div>
+          <div><div class="source-name">Google Drive</div><div class="source-desc">Sync files from a Drive folder.</div></div>
+        </div>
+        <div class="source-card">
+          <div class="source-logo sheets"><img src="https://upload.wikimedia.org/wikipedia/commons/a/ae/Google_Sheets_2020_Logo.svg" width="22" height="22" alt="Google Sheets"></div>
+          <div><div class="source-name">Google Sheets</div><div class="source-desc">Sync a tab of structured data.</div></div>
+        </div>
+        <div class="source-card">
+          <div class="source-logo docs"><img src="https://upload.wikimedia.org/wikipedia/commons/0/01/Google_Docs_2020_Logo.svg" width="22" height="22" alt="Google Docs"></div>
+          <div><div class="source-name">Google Docs</div><div class="source-desc">Sync narrative docs and SOPs.</div></div>
+        </div>
+        <div class="source-card selected" id="zendesk-card" onclick="showStep(3)">
+          <div class="source-logo zendesk">Z</div>
+          <div><div class="source-name">Zendesk Help Center</div><div class="source-desc">Sync published help articles.</div></div>
+        </div>
+        <div class="source-card">
+          <div class="source-logo notion"><img src="https://www.google.com/s2/favicons?domain=notion.so&sz=64" width="24" height="24" alt=""></div>
+          <div><div class="source-name">Notion</div><div class="source-desc">Sync a Notion database or page. <i>Coming soon</i></div></div>
+        </div>
+        <div class="source-card">
+          <div class="source-logo intercom">In</div>
+          <div><div class="source-name">Intercom Articles</div><div class="source-desc">Sync Intercom Help articles. <i>Coming soon</i></div></div>
+        </div>
+      </div>
+
+      <!-- Zendesk config: only visible in step 3 -->
+      <div id="zendesk-config">
+        <div class="config-block">
+          <div class="config-head">
+            <div class="config-logo">Z</div>
+            <div>
+              <div class="config-title">Zendesk Help Center</div>
+              <div class="config-sub">Sync published articles from your Help Center brand(s).</div>
+            </div>
+            <span class="config-status"><span class="config-dot"></span>Zendesk connected</span>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">Help Center brand</div>
+            <select class="field-select">
+              <option>Acme Support — support.acmecorp.com (287 articles)</option>
+              <option>Acme Developer Hub — developers.acmecorp.com (63 articles)</option>
+              <option>All brands (350 articles total)</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">Article selection</div>
+            <select class="field-select">
+              <option>Specific sections (recommended)</option>
+              <option>All published articles</option>
+              <option>By label / tag filter</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <div class="preview-head">
+              <span class="preview-count">Selected articles</span>
+              <span class="preview-meta">42 of 287 · updated 12 min ago</span>
+            </div>
+            <div class="article-list">
+              <div class="article-row"><input type="checkbox" class="article-check" checked><span class="article-title">How to reset your password</span><span class="article-section">Getting Started</span></div>
+              <div class="article-row"><input type="checkbox" class="article-check" checked><span class="article-title">Billing cycles and invoice FAQs</span><span class="article-section">Billing</span></div>
+              <div class="article-row"><input type="checkbox" class="article-check" checked><span class="article-title">Understanding Enterprise plan entitlements</span><span class="article-section">Plans</span></div>
+              <div class="article-row"><input type="checkbox" class="article-check" checked><span class="article-title">Configuring SSO with Okta, Azure AD, or Google Workspace</span><span class="article-section">Admin</span></div>
+              <div class="article-row"><input type="checkbox" class="article-check" checked><span class="article-title">Return policy and refund eligibility</span><span class="article-section">Billing</span></div>
+              <div class="article-row"><input type="checkbox" class="article-check"><span class="article-title">Changelog: Q1 2026 release notes</span><span class="article-section">Release Notes</span></div>
+            </div>
+          </div>
+
+          <div class="sync-row">
+            <div class="field-group" style="margin-bottom: 0;">
+              <div class="field-label">Sync frequency</div>
+              <select class="field-select">
+                <option>Every 30 min</option>
+                <option>Every 15 min</option>
+                <option>Every hour</option>
+                <option>Daily</option>
+              </select>
+            </div>
+            <div class="field-group" style="margin-bottom: 0;">
+              <div class="field-label">Language</div>
+              <select class="field-select">
+                <option>English (en-us)</option>
+                <option>All languages</option>
+                <option>Spanish (es)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #F0F7FF; border: 1px solid #BFDBFE; border-radius: 8px; font-size: 12.5px; color: #1E3A8A;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;"><circle cx="12" cy="12" r="10" stroke="#3d64d7" stroke-width="1.8"/><path d="M12 8v4m0 4h.01" stroke="#3d64d7" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Agents reference these articles via semantic search during calls. Drafts and unpublished articles are never synced.
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" onclick="showStep(1)">Cancel</button>
+      <button class="btn" id="preview-btn" style="display: none;">Preview content</button>
+      <button class="btn btn-primary" id="add-btn" onclick="completeAdd()">Add source</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showStep(n) {
+  var modal = document.getElementById('add-modal');
+  var config = document.getElementById('zendesk-config');
+  var preview = document.getElementById('preview-btn');
+  var addBtn = document.getElementById('add-btn');
+
+  ['nav-1','nav-2','nav-3'].forEach(function(id,i){
+    document.getElementById(id).classList.toggle('active', (i+1)===n);
+  });
+
+  if (n === 1) {
+    modal.style.display = 'none';
+  } else if (n === 2) {
+    modal.style.display = 'flex';
+    config.style.display = 'none';
+    preview.style.display = 'none';
+    addBtn.textContent = 'Continue';
+  } else if (n === 3) {
+    modal.style.display = 'flex';
+    config.style.display = 'block';
+    preview.style.display = 'inline-flex';
+    addBtn.textContent = 'Add source';
+  }
+}
+
+function completeAdd() {
+  // Populate KB list
+  var list = document.getElementById('kb-list-step1');
+  list.innerHTML = '<div class="kb-item selected"><div class="kb-item-icon zendesk">Z</div><div class="kb-item-info"><div class="kb-item-name">Zendesk Help Center</div><div class="kb-item-meta">42 articles · Acme Support</div></div><span class="kb-item-status syncing">Syncing</span></div>';
+  // Update empty state
+  document.getElementById('kb-main').innerHTML = '<div style="width: 100%; max-width: 720px; padding: 32px;"><div style="font-size: 20px; font-weight: 600; color: #0E121B; margin-bottom: 4px;">Zendesk Help Center</div><div style="font-size: 13px; color: #6B7280; margin-bottom: 20px;">Acme Support · 42 articles selected · Last synced just now</div><div style="padding: 40px; background: #fff; border: 1px solid #E1E4EA; border-radius: 12px; text-align: center;"><div style="font-size: 13px; color: #525866;">Syncing articles from your Zendesk Help Center…</div></div></div>';
+  showStep(1);
+  // Remove pulse animation
+  document.querySelector('.kb-add-btn').classList.remove('highlight');
+}
+
+// Start on step 3 to show the full config
+showStep(3);
+</script>
+
+</body>
+</html>

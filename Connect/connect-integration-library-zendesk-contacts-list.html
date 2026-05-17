@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Contacts list (Zendesk synced users)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  /* Sidebar */
+  .sidebar { width: 240px; min-width: 240px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; padding: 0; border-right: 1px solid #E1E4EA; }
+  .sidebar-logo { padding: 16px 14px 12px; display: flex; align-items: center; gap: 8px; }
+  .sidebar-logo-icon { width: 24px; height: 24px; background: #0E121B; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin: 0 10px; width: auto; height: 36px; background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; cursor: pointer; }
+  .workspace-avatar { width: 18px; height: 18px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 12px; }
+  .section-label { padding: 4px 14px; font-size: 11px; font-weight: 500; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.03em; }
+  .nav-items { list-style: none; padding: 0 10px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 34px; font-size: 13px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .nav-item:hover { background: rgba(0,0,0,0.03); }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+
+  /* Main */
+  .main { flex: 1; overflow: auto; background: #fff; padding: 28px 36px; }
+  .page-header { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .page-title { font-size: 22px; font-weight: 600; color: #0E121B; }
+  .page-subtitle { font-size: 13px; color: #6B7280; margin-bottom: 20px; }
+
+  /* Top bar: search + filters + actions */
+  .top-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .search { flex: 1; max-width: 360px; height: 36px; padding: 0 12px 0 34px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; background: #fff; background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 16 16' fill='none'%3E%3Ccircle cx='7' cy='7' r='5.5' stroke='%2399A0AE' stroke-width='1.5'/%3E%3Cpath d='M11 11l3 3' stroke='%2399A0AE' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 12px center; outline: none; }
+  .filter-pill { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #374151; background: #fff; cursor: pointer; }
+  .filter-pill.active { background: #EEF4FF; border-color: #3d64d7; color: #3d64d7; }
+  .spacer { flex: 1; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; background: #0E121B; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+
+  /* Table */
+  .contacts-table { width: 100%; border-collapse: collapse; }
+  .contacts-table thead th { text-align: left; font-size: 11px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em; padding: 10px 14px; border-bottom: 1px solid #E1E4EA; }
+  .contacts-table tbody td { font-size: 13px; color: #0E121B; padding: 12px 14px; border-bottom: 1px solid #F3F4F6; vertical-align: middle; }
+  .contacts-table tbody tr:hover { background: #FAFBFC; }
+
+  .name-cell { display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: #E8D5C4; color: #8B6F47; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .avatar.blue { background: #DBE4FF; color: #3d64d7; }
+  .avatar.green { background: #D1FAE5; color: #065F46; }
+  .avatar.pink { background: #FCE7F3; color: #BE185D; }
+  .name-info { display: flex; flex-direction: column; gap: 2px; }
+  .name { font-size: 13px; font-weight: 500; color: #0E121B; }
+  .email { font-size: 11.5px; color: #6B7280; }
+
+  /* Source badges */
+  .sources { display: flex; align-items: center; gap: 4px; }
+  .source-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 10px; font-size: 11px; font-weight: 500; color: #374151; }
+  .source-logo { width: 12px; height: 12px; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .source-logo.zendesk { background: #03363D; }
+  .source-logo.sfdc { background: #00A1E0; }
+  .source-logo.hubspot { background: #ff7a59; }
+
+  .tag { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 10.5px; font-weight: 500; margin-right: 4px; }
+  .tag.billing { background: #FEF3C7; color: #92400E; }
+  .tag.vip { background: #F3E8FF; color: #6B21A8; }
+  .tag.enterprise { background: #DBE4FF; color: #3d64d7; }
+
+  .open-count { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #FEE2E2; color: #B91C1C; border-radius: 10px; font-size: 11px; font-weight: 500; }
+  .open-count.zero { background: #D1FAE5; color: #065F46; }
+
+  .org-text { font-size: 12.5px; color: #525866; }
+  .time-text { font-size: 12px; color: #6B7280; }
+
+  /* Side panel (contact detail preview) */
+  .side-panel { width: 380px; min-width: 380px; border-left: 1px solid #E1E4EA; overflow-y: auto; background: #fff; padding: 20px 22px; }
+  .panel-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .panel-avatar { width: 44px; height: 44px; border-radius: 50%; background: #DBE4FF; color: #3d64d7; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+  .panel-name { font-size: 16px; font-weight: 600; color: #0E121B; }
+  .panel-email { font-size: 12px; color: #6B7280; }
+  .panel-sources { display: flex; gap: 4px; margin-bottom: 16px; }
+
+  .detail-section { border-top: 1px solid #F3F4F6; padding: 14px 0; }
+  .detail-label { font-size: 10.5px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+  .detail-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; font-size: 12.5px; }
+  .detail-row .k { color: #6B7280; min-width: 90px; }
+  .detail-row .v { color: #0E121B; flex: 1; }
+  .detail-row .v a { color: #3d64d7; text-decoration: none; }
+
+  .ticket-row { padding: 8px 10px; background: #F9FAFB; border: 1px solid #F3F4F6; border-radius: 6px; margin-bottom: 6px; }
+  .ticket-top { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+  .ticket-id { font-family: 'SF Mono', Menlo, monospace; font-size: 11px; color: #6B7280; }
+  .ticket-status { font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 8px; }
+  .ticket-status.open { background: #FEE2E2; color: #B91C1C; }
+  .ticket-status.pending { background: #FEF3C7; color: #92400E; }
+  .ticket-status.solved { background: #D1FAE5; color: #065F46; }
+  .ticket-subject { font-size: 12.5px; color: #0E121B; font-weight: 500; }
+  .ticket-meta { font-size: 11px; color: #99A0AE; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">R</div>
+    <span style="font-size: 14px; font-weight: 600; color: #0E121B;">Retell</span>
+  </div>
+  <div class="workspace">
+    <div class="workspace-avatar">B</div>
+    <span class="workspace-name">Brandon K... Workspace</span>
+  </div>
+  <div class="nav-scroll">
+    <div class="section-group">
+      <div class="section-label">BUILD</div>
+      <ul class="nav-items">
+        <li class="nav-item">Agents</li>
+        <li class="nav-item">Knowledge Base</li>
+        <li class="nav-item current">Contacts</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">DEPLOY</div>
+      <ul class="nav-items">
+        <li class="nav-item">Phone Numbers</li>
+        <li class="nav-item">Batch Call</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">MONITOR</div>
+      <ul class="nav-items">
+        <li class="nav-item">Call History</li>
+        <li class="nav-item">Chat History</li>
+        <li class="nav-item">Analytics</li>
+        <li class="nav-item">Alerting</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">SYSTEM</div>
+      <ul class="nav-items">
+        <li class="nav-item">Integrations</li>
+        <li class="nav-item">Billing</li>
+        <li class="nav-item">Settings</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <div class="page-title">Contacts</div>
+    <div class="source-badge" style="font-size:11px;">1,247 synced</div>
+  </div>
+  <div class="page-subtitle">Contacts synced from your connected integrations. Agents use this for caller context at call start.</div>
+
+  <div class="top-bar">
+    <input class="search" placeholder="Search by name, phone, or email…" />
+    <div class="filter-pill active">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="3" height="3" rx="0.5" fill="#03363D"/></svg>
+      Zendesk
+      <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+    <div class="filter-pill">All sources</div>
+    <div class="filter-pill">Has open tickets</div>
+    <div class="spacer"></div>
+    <button class="btn-primary">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Add contact
+    </button>
+  </div>
+
+  <table class="contacts-table">
+    <thead>
+      <tr>
+        <th style="width: 28%;">Name</th>
+        <th style="width: 15%;">Phone</th>
+        <th style="width: 16%;">Sources</th>
+        <th style="width: 15%;">Organization</th>
+        <th style="width: 11%;">Open tickets</th>
+        <th style="width: 11%;">Last ticket</th>
+        <th style="width: 8%;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="background: #F5F9FF;">
+        <td><div class="name-cell"><div class="avatar blue">SC</div><div class="name-info"><div class="name">Sarah Chen</div><div class="email">sarah@acmecorp.com</div></div></div></td>
+        <td>+1 (555) 555-1234</td>
+        <td><div class="sources"><div class="source-badge"><div class="source-logo zendesk">Z</div>Zendesk</div><div class="source-badge"><div class="source-logo sfdc">SF</div>Salesforce</div></div></td>
+        <td><span class="org-text">Acme Corp</span></td>
+        <td><span class="open-count">2 open</span></td>
+        <td><span class="time-text">2 hrs ago</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><div class="name-cell"><div class="avatar">MG</div><div class="name-info"><div class="name">Maria Gonzalez</div><div class="email">maria.g@nesto.ca</div></div></div></td>
+        <td>+1 (555) 555-0123</td>
+        <td><div class="sources"><div class="source-badge"><div class="source-logo zendesk">Z</div>Zendesk</div></div></td>
+        <td><span class="org-text">Nesto</span></td>
+        <td><span class="open-count">1 open</span></td>
+        <td><span class="time-text">1 day ago</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><div class="name-cell"><div class="avatar pink">RK</div><div class="name-info"><div class="name">Raj Khanna</div><div class="email">raj@masterworks.io</div></div></div></td>
+        <td>+1 (555) 999-4421</td>
+        <td><div class="sources"><div class="source-badge"><div class="source-logo zendesk">Z</div>Zendesk</div><div class="source-badge"><div class="source-logo hubspot">HS</div>HubSpot</div></div></td>
+        <td><span class="org-text">Masterworks</span></td>
+        <td><span class="open-count zero">0</span></td>
+        <td><span class="time-text">6 days ago</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><div class="name-cell"><div class="avatar green">DP</div><div class="name-info"><div class="name">David Pham</div><div class="email">dpham@caribouloans.com</div></div></div></td>
+        <td>+1 (555) 221-8870</td>
+        <td><div class="sources"><div class="source-badge"><div class="source-logo zendesk">Z</div>Zendesk</div></div></td>
+        <td><span class="org-text">Caribou</span></td>
+        <td><span class="open-count">3 open</span></td>
+        <td><span class="time-text">30 min ago</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><div class="name-cell"><div class="avatar">LW</div><div class="name-info"><div class="name">Linda Wu</div><div class="email">linda.wu@changeconnect.org</div></div></div></td>
+        <td>+1 (555) 333-2201</td>
+        <td><div class="sources"><div class="source-badge"><div class="source-logo zendesk">Z</div>Zendesk</div><div class="source-badge"><div class="source-logo hubspot">HS</div>HubSpot</div></div></td>
+        <td><span class="org-text">Change Connect</span></td>
+        <td><span class="open-count zero">0</span></td>
+        <td><span class="time-text">3 days ago</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><div class="name-cell"><div class="avatar blue">JR</div><div class="name-info"><div class="name">Josh Rhinehart</div><div class="email">jrhinehart@forthepeople.com</div></div></div></td>
+        <td>+1 (555) 874-0091</td>
+        <td><div class="sources"><div class="source-badge"><div class="source-logo zendesk">Z</div>Zendesk</div><div class="source-badge"><div class="source-logo sfdc">SF</div>Salesforce</div></div></td>
+        <td><span class="org-text">Morgan &amp; Morgan</span></td>
+        <td><span class="open-count">1 open</span></td>
+        <td><span class="time-text">4 hrs ago</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="side-panel">
+  <div class="panel-header">
+    <div class="panel-avatar">SC</div>
+    <div>
+      <div class="panel-name">Sarah Chen</div>
+      <div class="panel-email">sarah@acmecorp.com</div>
+    </div>
+  </div>
+  <div class="panel-sources">
+    <div class="source-badge"><div class="source-logo zendesk">Z</div>Zendesk</div>
+    <div class="source-badge"><div class="source-logo sfdc">SF</div>Salesforce</div>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-label">Contact details</div>
+    <div class="detail-row"><span class="k">Phone</span><span class="v">+1 (555) 555-1234</span></div>
+    <div class="detail-row"><span class="k">Organization</span><span class="v">Acme Corp (Enterprise)</span></div>
+    <div class="detail-row"><span class="k">Role</span><span class="v">Director of Support</span></div>
+    <div class="detail-row"><span class="k">Tags</span><span class="v"><span class="tag enterprise">enterprise</span><span class="tag vip">vip</span></span></div>
+    <div class="detail-row"><span class="k">Created</span><span class="v">Jan 12, 2024</span></div>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-label">Zendesk synced fields</div>
+    <div class="detail-row"><span class="k">Zendesk user ID</span><span class="v"><a href="#">91847</a></span></div>
+    <div class="detail-row"><span class="k">Total tickets</span><span class="v">14 (12 solved, 2 open)</span></div>
+    <div class="detail-row"><span class="k">CSAT avg</span><span class="v">4.6 / 5</span></div>
+    <div class="detail-row"><span class="k">Last sync</span><span class="v">14 min ago</span></div>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-label">Open tickets (2)</div>
+    <div class="ticket-row">
+      <div class="ticket-top"><span class="ticket-id">#47829</span><span class="ticket-status open">open</span><span class="tag billing" style="margin-left: auto;">billing</span></div>
+      <div class="ticket-subject">Invoice discrepancy on Q1 2026 statement</div>
+      <div class="ticket-meta">Updated 2 hrs ago · Assigned to Priya M.</div>
+    </div>
+    <div class="ticket-row">
+      <div class="ticket-top"><span class="ticket-id">#47650</span><span class="ticket-status pending">pending</span></div>
+      <div class="ticket-subject">SSO integration request</div>
+      <div class="ticket-meta">Updated 1 day ago · Waiting on customer</div>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-label">Salesforce synced fields</div>
+    <div class="detail-row"><span class="k">Contact ID</span><span class="v"><a href="#">003XXX9A2</a></span></div>
+    <div class="detail-row"><span class="k">Account</span><span class="v">Acme Corp — $240K ARR</span></div>
+    <div class="detail-row"><span class="k">Lifecycle</span><span class="v">Customer</span></div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Pre-Call UC4 Step 4: Call detail side panel with Pre-Call Functions at top</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; min-width: 1280px; }
+
+  .sidebar { width: 220px; background: #F5F7FA; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-logo { padding: 16px 10px 10px 18px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin: 0 12px; height: 36px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 18px; height: 18px; background: #3d64d7; border-radius: 4px; color: #fff; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  .workspace-name { font-size: 12.5px; font-weight: 500; color: #0A0A0A; flex: 1; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 6px; }
+  .section-label { padding: 4px; margin: 0 12px; font-size: 11px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 12px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; height: 32px; font-size: 13px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+
+  .main { flex: 1; overflow: hidden; background: #fff; display: flex; flex-direction: column; }
+
+  .body-row { flex: 1; display: flex; overflow: hidden; }
+
+  .left-col { flex: 1; min-width: 0; overflow-y: auto; display: flex; flex-direction: column; }
+
+  .page-head { padding: 16px 24px 8px; display: flex; align-items: center; gap: 8px; }
+  .page-head .dot { width: 8px; height: 8px; background: #3d64d7; border-radius: 50%; }
+  .page-head h1 { font-size: 16px; font-weight: 600; color: #0E121B; }
+  .page-head .spacer { flex: 1; }
+  .page-head .secondary-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #374151; cursor: pointer; }
+
+  .action-bar { padding: 6px 24px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .action-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #374151; cursor: pointer; height: 32px; }
+  .action-pill .chev { color: #99A0AE; font-size: 10px; }
+  .filter-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px 6px 10px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #0E121B; height: 32px; }
+  .filter-pill .lbl { color: #525866; }
+  .filter-pill b { color: #0E121B; font-weight: 500; }
+  .filter-pill .x { width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px; color: #99A0AE; }
+  .filter-pill .integ-icon { width: 16px; height: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+
+  .ch-table { padding: 0 24px 16px; }
+  .ch-table table { width: 100%; border-collapse: collapse; }
+  .ch-table th { font-size: 10.5px; font-weight: 500; color: #6B7280; text-transform: uppercase; letter-spacing: 0.4px; text-align: left; padding: 8px 10px; background: #F5F7FA; border-bottom: 1px solid #E1E4EA; }
+  .ch-table td { font-size: 12px; color: #0E121B; padding: 9px 10px; border-bottom: 1px solid #F3F4F6; }
+  .ch-table tr.selected td { background: #ECF3FF; }
+  .ch-table tr:hover:not(.selected) td { background: #FAFBFC; cursor: pointer; }
+  .ch-table .cell-mono { font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace; font-size: 10.5px; color: #525866; }
+  .end-pill { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 999px; font-size: 10.5px; font-weight: 500; }
+  .end-pill.ended { background: #DCFCE7; color: #166534; }
+
+  .pagination { padding: 12px 24px; display: flex; align-items: center; gap: 12px; font-size: 12px; color: #525866; }
+
+  /* Side panel */
+  .side-panel { width: 460px; min-width: 460px; max-width: 460px; border-left: 1px solid #E1E4EA; background: #fff; overflow-y: auto; box-shadow: -4px 0 20px rgba(15,23,42,0.04); display: flex; flex-direction: column; }
+
+  .sp-head { padding: 12px 16px 8px; display: flex; align-items: flex-start; gap: 10px; border-bottom: 1px solid #F3F4F6; }
+  .sp-head .titles { flex: 1; min-width: 0; }
+  .sp-head h2 { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .sp-head h2 .light { color: #99A0AE; font-weight: 400; margin-left: 4px; }
+  .sp-head .close-x { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #525866; border-radius: 4px; }
+  .sp-head .close-x:hover { background: #F3F4F6; }
+
+  .sp-submeta { padding: 6px 16px 10px; font-size: 11px; color: #525866; line-height: 1.55; border-bottom: 1px solid #F3F4F6; }
+  .sp-submeta .agent-name { color: #0E121B; font-weight: 500; }
+  .sp-submeta .prod-pill { display: inline-flex; align-items: center; padding: 0 6px; background: #F3F4F6; color: #525866; border-radius: 999px; font-size: 10px; font-weight: 500; margin-left: 4px; }
+  .sp-submeta .id { font-family: 'SF Mono', monospace; font-size: 10.5px; color: #99A0AE; }
+  .sp-submeta a { color: #3d64d7; text-decoration: none; }
+  .sp-submeta .row { margin-bottom: 2px; }
+  .sp-submeta .row:last-child { margin-bottom: 0; }
+
+  .player-bar { margin: 10px 16px; padding: 8px 12px; border: 1px solid #E1E4EA; border-radius: 8px; display: flex; align-items: center; gap: 10px; background: #FAFBFC; }
+  .player-bar .play { width: 26px; height: 26px; background: #0E121B; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .player-bar .scrubber { flex: 1; height: 3px; background: #E1E4EA; border-radius: 999px; position: relative; }
+  .player-bar .scrubber::after { content: ''; position: absolute; left: 0; top: 0; height: 3px; width: 32%; background: #0E121B; border-radius: 999px; }
+  .player-bar .time { font-size: 10.5px; color: #525866; font-family: 'SF Mono', monospace; }
+  .player-bar .speed { font-size: 11px; color: #525866; padding: 0 4px; cursor: pointer; }
+  .player-bar .rerun { padding: 4px 10px; border: 1px solid #E1E4EA; border-radius: 6px; background: #fff; font-size: 11px; color: #525866; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+  .sp-section { padding: 6px 16px 12px; }
+  .sp-section-title { font-size: 12px; font-weight: 600; color: #0E121B; padding: 8px 0 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .sp-section-title .pill { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 600; }
+  .sp-section-title .pill.warn { background: #FEF3C7; color: #92400E; }
+
+  /* Conversation Analysis checklist */
+  .ca-list { display: flex; flex-direction: column; gap: 4px; }
+  .ca-row { display: grid; grid-template-columns: 24px 1fr max-content; align-items: center; gap: 8px; padding: 4px 0; font-size: 12px; }
+  .ca-row .icon { width: 16px; height: 16px; border-radius: 3px; border: 1.5px solid #E1E4EA; display: flex; align-items: center; justify-content: center; }
+  .ca-row .icon.ok { background: #DCFCE7; border-color: #BBF7D0; color: #16A34A; }
+  .ca-row .icon.fail { background: #FEE2E2; border-color: #FECACA; color: #DC2626; }
+  .ca-row .icon svg { width: 10px; height: 10px; }
+  .ca-row .k { color: #525866; }
+  .ca-row .v { color: #0E121B; font-weight: 500; }
+
+  /* Pre/Post-Call Functions rows */
+  .pcf-rows { display: flex; flex-direction: column; gap: 4px; }
+  .pcf-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; }
+  .pcf-row.failed { border-color: #FBBF24; background: #FFFBEB; }
+  .pcf-row.timeout { border-color: #F59E0B; background: #FFFBEB; }
+  .pcf-row .status-dot { width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .pcf-row .status-dot.ok { background: #DCFCE7; color: #16A34A; }
+  .pcf-row .status-dot.fail { background: #FEE2E2; color: #DC2626; }
+  .pcf-row .status-dot.timeout { background: #FEF3C7; color: #B45309; }
+  .pcf-row .latency { font-size: 10.5px; color: #99A0AE; font-family: 'SF Mono', monospace; margin-left: auto; flex-shrink: 0; }
+  .pcf-row .latency.slow { color: #B45309; }
+  .pcf-row .resolved { margin-top: 6px; padding: 6px 8px; background: #F7FAFF; border: 1px solid #DBEAFE; border-radius: 6px; font-size: 11px; color: #1E40AF; line-height: 1.5; font-family: 'SF Mono', monospace; }
+  .pcf-row .resolved .lbl { color: #525866; font-family: -apple-system, sans-serif; font-weight: 500; margin-right: 4px; }
+  .sp-section-title .pill.ok { background: #DCFCE7; color: #166534; }
+  .sp-section-title .latency-badge { font-size: 10.5px; color: #525866; font-family: 'SF Mono', monospace; margin-left: auto; padding: 2px 7px; background: #F3F4F6; border-radius: 4px; }
+  .pcf-row .body { flex: 1; min-width: 0; }
+  .pcf-row .head-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .pcf-row .name { font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace; font-size: 12px; color: #0E121B; font-weight: 500; }
+  .pcf-row .integ-pill { display: inline-flex; align-items: center; gap: 4px; padding: 1px 6px; background: #F3F4F6; color: #525866; border-radius: 999px; font-size: 10px; font-weight: 500; }
+  .pcf-row .integ-pill .swatch { width: 7px; height: 7px; border-radius: 2px; }
+  .pcf-row .integ-pill .swatch.sf { background: #00A1E0; }
+  .pcf-row .integ-pill .swatch.zd { background: #03363D; }
+  .pcf-row .err-msg { margin-top: 6px; padding: 6px 8px; background: #FFF7E8; border: 1px solid #FBE8A6; border-radius: 6px; font-size: 11px; color: #92400E; line-height: 1.5; }
+  .pcf-row .err-msg code { font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace; font-size: 10.5px; color: #92400E; background: #FEF3C7; padding: 1px 4px; border-radius: 3px; }
+  .pcf-row .err-msg .err-label { font-weight: 600; color: #78350F; margin-right: 4px; }
+
+  /* Custom Variables */
+  .var-list { font-size: 11.5px; line-height: 1.65; }
+  .var-row { display: grid; grid-template-columns: 1fr max-content; gap: 8px; padding: 2px 0; font-family: 'SF Mono', monospace; }
+  .var-row .k { color: #525866; }
+  .var-row .v { color: #3d64d7; }
+
+  /* Summary */
+  .summary-text { font-size: 12px; color: #525866; line-height: 1.6; padding: 4px 0; }
+
+  .sp-tabs { display: flex; gap: 0; padding: 0 16px; border-bottom: 1px solid #E1E4EA; border-top: 1px solid #F3F4F6; overflow-x: auto; }
+  .sp-tab { padding: 8px 10px; font-size: 11.5px; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+  .sp-tab.active { font-weight: 600; color: #0E121B; border-bottom-color: #0E121B; }
+
+  .transcript-section { padding: 10px 16px 16px; }
+  .transcript-line { font-size: 12px; color: #0E121B; line-height: 1.5; padding: 6px 8px; border-radius: 6px; margin-bottom: 4px; max-width: 88%; }
+  .transcript-line.agent { background: #F3F4F6; }
+  .transcript-line.user { background: #ECF3FF; margin-left: auto; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo"><svg width="60" height="16" viewBox="0 0 414 114"><g fill="#0A0A0A"><circle cx="40" cy="103" r="10"/><circle cx="70" cy="103" r="10"/><circle cx="40" cy="10" r="10"/><circle cx="70" cy="10" r="10"/><circle cx="10" cy="42" r="10"/><circle cx="10" cy="72" r="10"/><circle cx="100" cy="42" r="10"/><circle cx="100" cy="72" r="10"/></g></svg></div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Retell AI Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item current">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item">Billing</li></ul></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="body-row">
+    <div class="left-col">
+      <div class="page-head">
+        <span class="dot"></span>
+        <h1>Call History</h1>
+        <span class="spacer"></span>
+        <button class="action-pill"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M4 7l4 4 4-4M2 14h12" stroke="#374151" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Export</button>
+      </div>
+
+      <div class="action-bar">
+        <button class="action-pill"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="#374151" stroke-width="1.4"/><path d="M2 6h12M5 1v3M11 1v3" stroke="#374151" stroke-width="1.4" stroke-linecap="round"/></svg>Date Range <span class="chev">▾</span></button>
+        <span class="filter-pill"><span class="lbl">Integrations:</span> <span class="integ-icon"><svg width="16" height="11" viewBox="0 0 24 16"><path d="M9.13 2.42a4.42 4.42 0 0 1 3.18-1.36c1.62 0 3.04.92 3.79 2.27a5.45 5.45 0 0 1 2.22-.47 5.55 5.55 0 0 1 5.55 5.6 5.55 5.55 0 0 1-5.55 5.6c-.41 0-.81-.04-1.2-.13a4.06 4.06 0 0 1-3.55 2.07c-.6 0-1.18-.13-1.7-.36a4.62 4.62 0 0 1-4.29 2.86c-2 0-3.74-1.18-4.55-2.89a4.27 4.27 0 0 1-.88.09 4.34 4.34 0 0 1-2.13-8.13 5.06 5.06 0 0 1-.42-2.03A5.07 5.07 0 0 1 4.65 0a5.04 5.04 0 0 1 4.48 2.42z" fill="#00A1E0"/></svg></span> <b>Salesforce</b> <span class="x"><svg width="10" height="10" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3L3 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></span>
+        <button class="action-pill"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4 8h8M6 12h4" stroke="#374151" stroke-width="1.4" stroke-linecap="round"/></svg>Filter <span class="chev">▾</span></button>
+      </div>
+
+      <div class="ch-table">
+        <table>
+          <thead>
+            <tr><th>Time</th><th>Duration</th><th>Cost</th><th>Session ID</th><th>End Reason</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr class="selected"><td>2026-05-01 09:42:18</td><td>1:24</td><td>$0.180</td><td class="cell-mono">call_a3c7e4f1d92b87a4</td><td>user hangup</td><td><span class="end-pill ended">ended</span></td></tr>
+            <tr><td>2026-05-01 09:21:07</td><td>2:08</td><td>$0.260</td><td class="cell-mono">call_e92f7821c3a4d6e0</td><td>user hangup</td><td><span class="end-pill ended">ended</span></td></tr>
+            <tr><td>2026-05-01 08:58:34</td><td>3:11</td><td>$0.480</td><td class="cell-mono">call_71a0e548b29f3c1b</td><td>ended</td><td><span class="end-pill ended">ended</span></td></tr>
+            <tr><td>2026-05-01 08:33:02</td><td>1:46</td><td>$0.230</td><td class="cell-mono">call_d04a7f8c2e1b9530</td><td>user hangup</td><td><span class="end-pill ended">ended</span></td></tr>
+            <tr><td>2026-05-01 07:57:55</td><td>0:51</td><td>$0.110</td><td class="cell-mono">call_5b8c3104f2917a24</td><td>user hangup</td><td><span class="end-pill ended">ended</span></td></tr>
+            <tr><td>2026-05-01 07:11:43</td><td>2:24</td><td>$0.330</td><td class="cell-mono">call_a118fe402b7c3d1b</td><td>user hangup</td><td><span class="end-pill ended">ended</span></td></tr>
+            <tr><td>2026-05-01 06:48:09</td><td>1:01</td><td>$0.140</td><td class="cell-mono">call_60e2bf9a45c1d0e3</td><td>ended</td><td><span class="end-pill ended">ended</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">Page 1 of 1 · 2,841 calls (filtered from 192,007)</div>
+    </div>
+
+    <!-- SIDE PANEL -->
+    <aside class="side-panel">
+      <div class="sp-head">
+        <div class="titles">
+          <h2>05/01/2026 09:42:18 <span class="light">phone_call</span></h2>
+        </div>
+        <span class="close-x"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4L4 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+
+      <div class="sp-submeta">
+        <div class="row">Agent: <span class="agent-name">Asbury Auto — Service Reminder</span> <span class="prod-pill">Production</span> <a href="#">↗</a></div>
+        <div class="row">Agent ID: <span class="id">ag_asburyServiceReminder42</span></div>
+        <div class="row">From: <span class="agent-name">+18005555910</span> · To: <span class="agent-name">+14155552330</span></div>
+      </div>
+
+      <div class="player-bar">
+        <div class="play"><svg width="9" height="9" viewBox="0 0 16 16" fill="#fff"><path d="M4 3l9 5-9 5z"/></svg></div>
+        <span class="time">0:27</span>
+        <div class="scrubber"></div>
+        <span class="time">1:24</span>
+        <span class="speed">1.0×</span>
+        <button class="rerun"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8a5 5 0 1 1 1.5 3.5M3 8V5M3 8h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Rerun</button>
+      </div>
+
+      <!-- Pre-Call Functions section (at top) -->
+      <div class="sp-section">
+        <div class="sp-section-title">
+          Pre-call Functions
+          <span class="pill warn">2 of 3 succeeded · 1 failed</span>
+          <span class="latency-badge">624ms total</span>
+        </div>
+        <div class="pcf-rows">
+          <div class="pcf-row">
+            <span class="status-dot ok"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div class="body">
+              <div class="head-row">
+                <span class="name">get_salesforce_lead</span>
+                <span class="integ-pill"><span class="swatch sf"></span>Salesforce</span>
+                <span class="latency">312ms</span>
+              </div>
+              <div class="resolved"><span class="lbl">Lead ID source:</span>{{trigger.lead_id}} → 00Q5g00000T8mP4EAJ</div>
+            </div>
+          </div>
+          <div class="pcf-row">
+            <span class="status-dot ok"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div class="body">
+              <div class="head-row">
+                <span class="name">get_salesforce_account</span>
+                <span class="integ-pill"><span class="swatch sf"></span>Salesforce</span>
+                <span class="latency">487ms</span>
+              </div>
+              <div class="resolved"><span class="lbl">Account ID source:</span>{{trigger.account_id}} → 0015g00000HpA2qEAF</div>
+            </div>
+          </div>
+          <div class="pcf-row failed">
+            <span class="status-dot fail"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4L4 12" stroke="#DC2626" stroke-width="2" stroke-linecap="round"/></svg></span>
+            <div class="body">
+              <div class="head-row">
+                <span class="name">get_salesforce_vehicles_for_contact</span>
+                <span class="integ-pill"><span class="swatch sf"></span>Salesforce</span>
+                <span class="latency">412ms</span>
+              </div>
+              <div class="err-msg">
+                <span class="err-label">Salesforce 400:</span>
+                <code>INVALID_CROSS_REFERENCE_KEY: invalid Contact ID — '{{match.contact_id}}' resolved to null because Built-in CRM and Memory did not match the inbound caller phone.</code>
+              </div>
+              <div class="resolved" style="background:#FEF3C7;border-color:#FDE68A;color:#92400E;"><span class="lbl" style="color:#78350F;">Fallback applied:</span>vehicles = [] · agent's prompt branched to "no_vehicle_history" path · call still proceeded</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conversation Analysis -->
+      <div class="sp-section">
+        <div class="sp-section-title">Conversation Analysis</div>
+        <div class="ca-list">
+          <div class="ca-row">
+            <span class="icon ok"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="k">Call Successful</span><span class="v">Successful</span>
+          </div>
+          <div class="ca-row">
+            <span class="icon ok"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="k">Call Status</span><span class="v">Ended</span>
+          </div>
+          <div class="ca-row">
+            <span class="icon ok"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="k">User Sentiment</span><span class="v">Positive</span>
+          </div>
+          <div class="ca-row">
+            <span class="icon ok"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="k">Disconnection Reason</span><span class="v">user hangup</span>
+          </div>
+          <div class="ca-row">
+            <span class="icon ok"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="k">End to End Latency</span><span class="v">982ms</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Variables -->
+      <div class="sp-section">
+        <div class="sp-section-title">Dynamic Variables</div>
+        <div class="var-list">
+          <div class="var-row"><span class="k">{{first_name}}</span><span class="v">"Sarah"</span></div>
+          <div class="var-row"><span class="k">{{last_name}}</span><span class="v">"Johnson"</span></div>
+          <div class="var-row"><span class="k">{{company}}</span><span class="v">"Asbury Auto"</span></div>
+          <div class="var-row"><span class="k">{{account_tier}}</span><span class="v">"Enterprise"</span></div>
+          <div class="var-row"><span class="k">{{renewal_date}}</span><span class="v">"2026-08-15"</span></div>
+          <div class="var-row"><span class="k">{{vehicles}}</span><span class="v">[ ] · pre-call fallback</span></div>
+          <div class="var-row"><span class="k">{{vehicle_count}}</span><span class="v">0 · pre-call fallback</span></div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="sp-section">
+        <div class="sp-section-title">Summary</div>
+        <div class="summary-text">Outbound service appointment confirmation for Sarah Johnson's 2022 Subaru Outback. Agent confirmed the Thursday 10am appointment and verified the Camry loaner reservation. Sentiment positive throughout. Pre-call vehicle list lookup failed (Built-in CRM and Memory missed the inbound match), but the agent fell back gracefully to the Lead record's stored vehicle fields.</div>
+      </div>
+
+      <!-- Bottom tabs -->
+      <div class="sp-tabs">
+        <span class="sp-tab active">Transcription</span>
+        <span class="sp-tab">Data</span>
+        <span class="sp-tab">Detail Logs</span>
+        <span class="sp-tab">Internal Logs</span>
+        <span class="sp-tab">Packet Capture</span>
+        <span class="sp-tab">Test Playground</span>
+      </div>
+
+      <div class="transcript-section">
+        <div class="transcript-line agent">Hi Sarah, calling about your service appointment for the 2022 Outback. Just wanted to confirm we're still good for Thursday at 10am?</div>
+        <div class="transcript-line user">Yeah, that works. Is the loaner still set up?</div>
+        <div class="transcript-line agent">Let me check. Yes, the Camry loaner is reserved under your name. We'll have it ready when you drop off.</div>
+        <div class="transcript-line user">Perfect. Thanks.</div>
+        <div class="transcript-line agent">You're welcome. See you Thursday.</div>
+      </div>
+
+      <!-- Post-Call Functions section (at bottom) -->
+      <div class="sp-section" style="border-top:1px solid #F3F4F6;">
+        <div class="sp-section-title">
+          Post-call Functions
+          <span class="pill ok">2 of 2 succeeded</span>
+        </div>
+        <div class="pcf-rows">
+          <div class="pcf-row">
+            <span class="status-dot ok"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div class="body">
+              <div class="head-row">
+                <span class="name">update_salesforce_lead</span>
+                <span class="integ-pill"><span class="swatch sf"></span>Salesforce</span>
+                <span class="latency">218ms</span>
+              </div>
+            </div>
+          </div>
+          <div class="pcf-row">
+            <span class="status-dot ok"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div class="body">
+              <div class="head-row">
+                <span class="name">create_salesforce_task</span>
+                <span class="integ-pill"><span class="swatch sf"></span>Salesforce</span>
+                <span class="latency">194ms</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+</body>
+</html>

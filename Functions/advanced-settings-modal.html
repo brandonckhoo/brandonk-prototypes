@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Advanced Function Settings</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  /* Top bar */
+  .top-bar-wrap { background: #fff; flex-shrink: 0; border-bottom: 1px solid #E1E4EA; }
+  .top-bar-row1 { display: flex; align-items: center; height: 44px; padding: 0 16px; gap: 10px; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #525866; flex-shrink: 0; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; border: 1px solid #E1E4EA; border-radius: 8px; overflow: hidden; }
+  .top-tab { padding: 5px 16px; font-size: 13px; font-weight: 400; color: #525866; cursor: pointer; background: #fff; }
+  .top-tab.active { font-weight: 500; color: #0E121B; background: #F5F7FA; }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-publish { height: 32px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; }
+  .saved-label { font-size: 12px; color: #99A0AE; }
+
+  /* Builder layout */
+  .builder-layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* Prompt panel */
+  .prompt-panel { width: 58%; display: flex; flex-direction: column; border-right: 1px solid #E1E4EA; overflow: hidden; }
+  .model-bar { display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .mb-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 6px; font-size: 13px; font-weight: 500; color: #374151; white-space: nowrap; cursor: pointer; }
+  .mb-pill .chevron { color: #99A0AE; }
+  .mb-spacer { flex: 1; }
+  .mb-handbook { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12.5px; font-weight: 500; color: #374151; background: #fff; cursor: pointer; }
+  .prompt-area { flex: 1; padding: 14px; overflow-y: auto; }
+  .prompt-content { font-size: 13.5px; line-height: 1.75; color: #0A0A0A; }
+  .prompt-content .md-h2 { font-size: 13.5px; font-weight: 700; margin: 12px 0 3px; }
+  .prompt-content .md-li { padding-left: 12px; position: relative; }
+  .prompt-content .md-li::before { content: '-'; position: absolute; left: 0; color: #99A0AE; }
+  .welcome-section { padding: 12px 14px 20px; flex-shrink: 0; border-top: 1px solid #E1E4EA; }
+  .welcome-label { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 6px; }
+  .welcome-select { height: 36px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0A0A0A; background: #fff; width: 100%; outline: none; font-family: inherit; }
+
+  /* Right panel */
+  .functions-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff; }
+  .panel-tabs { display: flex; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .panel-tab { padding: 10px 16px; font-size: 13px; font-weight: 400; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .panel-tab.active { font-weight: 600; color: #0E121B; border-bottom-color: #0E121B; }
+  .panel-body { flex: 1; overflow-y: auto; padding: 16px; }
+  .fn-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .fn-section-title { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .fn-section-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: #EFF6FF; color: #2563EB; }
+  .fn-card { border: 1px solid #E1E4EA; border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+  .fn-card-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+  .fn-dot { width: 8px; height: 8px; border-radius: 50%; background: #1FC16B; flex-shrink: 0; }
+  .fn-name { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12.5px; font-weight: 500; color: #0E121B; flex: 1; }
+  .fn-badge { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 20px; background: #DCFCE7; color: #16A34A; white-space: nowrap; }
+  .fn-action { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #9CA3AF; border: none; background: none; }
+  .fn-action:hover { background: #F3F4F6; color: #525866; }
+  .fn-section-divider { margin: 16px 0 12px; border: none; border-top: 1px solid #E1E4EA; }
+  .fn-add-btn { display: flex; align-items: center; gap: 6px; width: 100%; padding: 9px 12px; border: 1px dashed #D1D5DB; border-radius: 8px; font-size: 13px; font-weight: 500; color: #525866; cursor: pointer; background: none; font-family: inherit; }
+
+  /* ===================== MODAL ===================== */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { background: #fff; border-radius: 12px; width: 620px; max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.25), 0 4px 16px rgba(0,0,0,0.1); overflow: hidden; }
+
+  /* Modal header — matches production exactly */
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .modal-title { font-size: 14px; font-weight: 600; color: #0E121B; display: flex; align-items: center; gap: 8px; }
+  .modal-close { width: 26px; height: 26px; border-radius: 6px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #9CA3AF; padding: 0; }
+  .modal-close:hover { background: #F3F4F6; color: #525866; }
+
+  /* Modal body */
+  .modal-body { flex: 1; overflow-y: auto; padding: 0 20px; }
+
+  /* Field block */
+  .field-block { padding: 14px 0; border-bottom: 1px solid #F3F4F6; }
+  .field-block:last-child { border-bottom: none; }
+  .field-label { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 6px; }
+  .field-sublabel { font-size: 12px; color: #9CA3AF; margin-bottom: 7px; line-height: 1.4; }
+  .field-input { width: 100%; height: 34px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0E121B; font-family: inherit; outline: none; background: #fff; }
+  .field-input:focus { border-color: #3d64d7; }
+  .field-input::placeholder { color: #D1D5DB; }
+  .field-textarea { width: 100%; padding: 8px 10px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #9CA3AF; font-family: inherit; outline: none; resize: none; line-height: 1.5; }
+
+  /* Endpoint row */
+  .endpoint-row { display: flex; gap: 8px; }
+  .method-select { height: 34px; padding: 0 8px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; font-weight: 500; color: #0E121B; font-family: inherit; outline: none; background: #fff; width: 72px; cursor: pointer; }
+  .endpoint-input { flex: 1; }
+
+  /* Timeout row */
+  .timeout-row { display: flex; align-items: center; gap: 8px; }
+  .timeout-input { width: 80px; height: 34px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0E121B; font-family: inherit; outline: none; text-align: left; }
+  .timeout-unit { font-size: 12.5px; color: #9CA3AF; }
+
+  /* Key-value add button */
+  .kv-add { display: inline-flex; align-items: center; gap: 6px; padding: 5px 0; font-size: 13px; color: #525866; cursor: pointer; background: none; border: none; font-family: inherit; }
+  .kv-add:hover { color: #0E121B; }
+
+  /* Store fields chips */
+  .chips-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 20px; font-size: 12px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; color: #0E121B; }
+  .chip-x { color: #C0C4CC; cursor: pointer; font-style: normal; }
+
+  /* Toggle rows */
+  .toggle-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F3F4F6; }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-row-info .toggle-label { font-size: 13px; font-weight: 500; color: #0E121B; }
+  .toggle-row-info .toggle-desc { font-size: 12px; color: #9CA3AF; margin-top: 3px; line-height: 1.4; }
+  .toggle { width: 36px; height: 20px; border-radius: 10px; position: relative; flex-shrink: 0; cursor: pointer; margin-top: 1px; }
+  .toggle.on { background: #3d64d7; }
+  .toggle.off { background: #D1D5DB; }
+  .toggle::after { content: ''; position: absolute; top: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .toggle.on::after { right: 2px; }
+  .toggle.off::after { left: 2px; }
+
+  /* Advanced settings */
+  .adv-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; cursor: pointer; margin: 14px -20px 0; background: #F5F7FA; border-top: 1px solid #E1E4EA; border-bottom: 1px solid #E1E4EA; }
+  .adv-header:hover { background: #EFF1F5; }
+  .adv-header-label { font-size: 15px; font-weight: 600; color: #0E121B; }
+
+  /* Slider */
+  .slider-wrap { margin-top: 8px; }
+  .slider-row { display: flex; align-items: center; gap: 12px; }
+  .slider { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; border-radius: 2px; background: linear-gradient(to right, #3d64d7 33.33%, #E1E4EA 33.33%); outline: none; cursor: pointer; }
+  .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 2px solid #3d64d7; box-shadow: 0 1px 3px rgba(0,0,0,0.15); cursor: pointer; }
+  .slider-value { font-size: 13px; font-weight: 600; color: #0E121B; white-space: nowrap; min-width: 56px; text-align: right; }
+  .slider-labels { display: flex; justify-content: space-between; margin-top: 4px; }
+  .slider-labels span { font-size: 11.5px; color: #9CA3AF; }
+
+  /* Key-value pairs */
+  .kv-pair-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .kv-input { flex: 1; height: 32px; padding: 0 9px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12.5px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; color: #0E121B; outline: none; background: #fff; }
+  .kv-input:focus { border-color: #3d64d7; }
+  .kv-delete { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #D1D5DB; cursor: pointer; border-radius: 4px; border: none; background: none; flex-shrink: 0; }
+  .kv-delete:hover { color: #EF4444; background: #FEF2F2; }
+  .kv-add-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1px solid #E1E4EA; border-radius: 20px; font-size: 13px; font-weight: 400; color: #374151; background: #fff; cursor: pointer; font-family: inherit; margin-top: 2px; }
+  .kv-add-btn:hover { background: #F9FAFB; border-color: #D1D5DB; }
+  .adv-chevron { color: #9CA3AF; transform: rotate(180deg); }
+
+
+  /* Radio group */
+  .radio-group { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+  .radio-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border-radius: 7px; cursor: pointer; border: 1px solid transparent; }
+  .radio-item:hover { background: #F9FAFB; }
+  .radio-item.selected { background: #F5F7FA; border-color: #E1E4EA; }
+  .radio-dot { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid #D1D5DB; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; }
+  .radio-item.selected .radio-dot { border-color: #3d64d7; }
+  .radio-item.selected .radio-dot::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #3d64d7; display: block; }
+  .radio-label { font-size: 13px; font-weight: 500; color: #0E121B; }
+  .radio-hint { font-size: 12px; color: #9CA3AF; margin-top: 2px; line-height: 1.35; }
+
+  /* Existing badge */
+  .badge-existing { font-size: 10.5px; font-weight: 600; padding: 1px 6px; border-radius: 20px; background: #F3F4F6; color: #6B7280; vertical-align: middle; margin-left: 4px; }
+  .badge-phase2 { font-size: 10.5px; font-weight: 600; padding: 1px 6px; border-radius: 20px; background: #FEF3C7; color: #D97706; vertical-align: middle; margin-left: 4px; }
+
+
+  /* Modal footer */
+  .modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 12px 20px; border-top: 1px solid #E1E4EA; flex-shrink: 0; background: #fff; }
+  .btn-cancel { height: 34px; padding: 0 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; font-family: inherit; }
+  .btn-save { height: 34px; padding: 0 18px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar-wrap">
+  <div class="top-bar-row1">
+    <div class="home-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+    <span class="agent-name">Sunrun Lead Qualification</span>
+    <span style="color:#99A0AE;margin-left:4px;font-size:12px;">Single Prompt · Version 4</span>
+    <span class="top-spacer"></span>
+    <div class="top-tabs">
+      <span class="top-tab active">Create</span>
+      <span class="top-tab">Simulation</span>
+    </div>
+    <div class="top-actions">
+      <span class="saved-label">Auto saved at 11:14 AM</span>
+      <button class="btn-publish"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Publish</button>
+    </div>
+  </div>
+</div>
+
+<div class="builder-layout">
+
+  <!-- Prompt panel -->
+  <div class="prompt-panel">
+    <div class="model-bar">
+      <span class="mb-pill">GPT 4.1 <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span style="color:#E1E4EA;">|</span>
+      <span class="mb-pill">Maya <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span style="color:#E1E4EA;">|</span>
+      <span class="mb-pill">English <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="mb-spacer"></span>
+      <span class="mb-handbook"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="#525866" stroke-width="1.3"/><path d="M6 5h4M6 7.5h4M6 10h2" stroke="#525866" stroke-width="1.2" stroke-linecap="round"/></svg> Agent Handbook</span>
+    </div>
+    <div class="prompt-area">
+      <div class="prompt-content">
+        <div class="md-h2">## Identity</div>
+        You are Maya, a qualification agent for Sunrun. You call homeowners who submitted a solar interest form and determine whether they are a strong lead for the sales team.<br><br>
+        <div class="md-h2">## Tasks</div>
+        <div class="md-li">Greet the homeowner using <span style="color:#E07B39;font-family:ui-monospace,monospace;font-size:12px;">{{lead_first_name}}</span>.</div>
+        <div class="md-li">Confirm they own their home and have a south-facing roof.</div>
+        <div class="md-li">Ask about their average monthly electricity bill.</div>
+        <div class="md-li">Mark them qualified if bill is over $150 and they are the homeowner.</div><br>
+        <div class="md-h2">## Style</div>
+        Friendly and brief. Maximum two questions before confirming next steps.<br><br>
+        <div class="md-h2">## Fallback Instructions</div>
+        If <span style="color:#E07B39;font-family:ui-monospace,monospace;font-size:12px;">{{lead_first_name}}</span> or <span style="color:#E07B39;font-family:ui-monospace,monospace;font-size:12px;">{{lead_source}}</span> are missing, greet the caller generically and continue. Do not mention that any data is unavailable.
+      </div>
+    </div>
+    <div class="welcome-section">
+      <div class="welcome-label">Welcome Message</div>
+      <select class="welcome-select"><option>AI starts speaking after silence</option></select>
+    </div>
+  </div>
+
+  <!-- Functions panel -->
+  <div class="functions-panel">
+    <div class="panel-tabs">
+      <span class="panel-tab active">Functions</span>
+      <span class="panel-tab">Setting</span>
+      <span class="panel-tab">Test</span>
+    </div>
+    <div class="panel-body">
+      <div class="fn-section-header">
+        <span class="fn-section-title">Pre-Call Functions</span>
+        <span class="fn-section-badge">1 ACTIVE</span>
+      </div>
+      <div class="fn-card">
+        <div class="fn-card-row">
+          <div class="fn-dot"></div>
+          <span class="fn-name">get_salesforce_lead</span>
+          <span class="fn-badge">Active</span>
+          <button class="fn-action"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5a1.5 1.5 0 0 1 2.12 2.12L5 13.24l-2.83.71.71-2.83L11.5 2.5z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <button class="fn-add-btn"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Add pre-call function</button>
+      <hr class="fn-section-divider">
+      <div class="fn-section-header">
+        <span class="fn-section-title">Post-Call Functions</span>
+        <span style="font-size:11px;color:#9CA3AF;">None configured</span>
+      </div>
+      <button class="fn-add-btn"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Add post-call function</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===================== MODAL ===================== -->
+<div class="modal-overlay">
+  <div class="modal">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-title">
+        Custom Function
+      </div>
+      <button class="modal-close"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+
+      <!-- Name -->
+      <div class="field-block">
+        <div class="field-label">Name</div>
+        <input class="field-input" type="text" value="get_salesforce_lead">
+      </div>
+
+      <!-- Description -->
+      <div class="field-block">
+        <div class="field-label">Description</div>
+        <textarea class="field-textarea" rows="2" style="color:#0E121B;">Fetches lead record from Salesforce using the lead_id passed at call setup via the inbound webhook.</textarea>
+      </div>
+
+      <!-- API Endpoint -->
+      <div class="field-block">
+        <div class="field-label">API Endpoint</div>
+        <div class="field-sublabel">The API endpoint is the address of the service you are connecting to.</div>
+        <div class="endpoint-row">
+          <select class="method-select"><option>POST</option><option>GET</option></select>
+          <input class="field-input endpoint-input" type="text" value="https://hooks.retell.ai/sf-lead-lookup">
+        </div>
+      </div>
+
+      <!-- Timeout -->
+      <div class="field-block">
+        <div class="field-label">Timeout (ms)</div>
+        <div class="timeout-row">
+          <input class="timeout-input" type="number" value="10000">
+          <span class="timeout-unit">milliseconds</span>
+        </div>
+      </div>
+
+      <!-- Store Fields as Variables -->
+      <div class="field-block">
+        <div class="field-label">Store Fields as Variables</div>
+        <div class="field-sublabel">Extract values from tool response and store as dynamic variables.</div>
+        <div style="margin-top:8px;">
+          <div class="kv-pair-row">
+            <input class="kv-input" type="text" placeholder="Key" value="lead_first_name">
+            <input class="kv-input" type="text" placeholder="Value" value="$.lead.firstName">
+            <button class="kv-delete"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+          </div>
+          <div class="kv-pair-row">
+            <input class="kv-input" type="text" placeholder="Key" value="lead_source">
+            <input class="kv-input" type="text" placeholder="Value" value="$.lead.source">
+            <button class="kv-delete"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+          </div>
+          <div class="kv-pair-row">
+            <input class="kv-input" type="text" placeholder="Key" value="monthly_bill">
+            <input class="kv-input" type="text" placeholder="Value" value="$.lead.monthlyBill">
+            <button class="kv-delete"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+          </div>
+          <button class="kv-add-btn">+ New key value pair</button>
+        </div>
+      </div>
+
+      <!-- During Execution Feedback -->
+      <div class="field-block">
+        <div class="field-label">During Execution Feedback</div>
+
+        <div class="toggle-row">
+          <div class="toggle-row-info">
+            <div class="toggle-label">Talk While Waiting</div>
+            <div class="toggle-desc">Enable to say a short phrase to fill the silence, like "let me look that up for you."</div>
+          </div>
+          <div class="toggle off"></div>
+        </div>
+
+        <div class="toggle-row">
+          <div class="toggle-row-info">
+            <div class="toggle-label">Play typing sound</div>
+            <div class="toggle-desc">Play a subtle typing sound while the function is processing to indicate activity.</div>
+          </div>
+          <div class="toggle off"></div>
+        </div>
+
+        <div class="toggle-row">
+          <div class="toggle-row-info">
+            <div class="toggle-label">Talk After Action Completed</div>
+            <div class="toggle-desc">Enable to speak after the action is completed. Disable to execute silently in the background.</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+      </div>
+
+      <!-- Advanced Settings -->
+      <div class="field-block" style="padding:0;border:none;">
+        <div class="adv-header" onclick="var b=document.getElementById('adv-body');var c=this.querySelector('.adv-chevron');if(b.style.display==='none'){b.style.display='flex';c.style.transform='rotate(180deg)'}else{b.style.display='none';c.style.transform='rotate(0deg)'}">
+          <span class="adv-header-label">Advanced Settings</span>
+          <svg class="adv-chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" style="transform:rotate(0deg);transition:transform 0.2s;"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+
+        <!-- Phase 1 settings (collapsed by default) -->
+        <div id="adv-body" style="display:none;flex-direction:column;gap:14px;background:#F9FAFB;margin:0 -20px;padding:16px 20px 20px;border-bottom:1px solid #E1E4EA;">
+
+
+          <!-- Response timeout -->
+          <div>
+            <div class="field-label" style="font-size:13px;margin-bottom:4px;">Response timeout</div>
+            <div class="field-sublabel">How long Retell waits for the function to respond before timing out. Default: 10 seconds.</div>
+            <div class="slider-wrap">
+              <div class="slider-row">
+                <input class="slider" type="range" min="0" max="30" value="10" step="1" oninput="this.nextElementSibling.textContent=this.value+'s';this.style.background='linear-gradient(to right,#3d64d7 '+(this.value/30*100)+'%,#E1E4EA '+(this.value/30*100)+'%)'">
+                <span class="slider-value">10s</span>
+              </div>
+              <div class="slider-labels"><span>0s</span><span>30s</span></div>
+            </div>
+          </div>
+
+          <!-- Disable interruptions -->
+          <div class="toggle-row" style="padding:0;border:none;">
+            <div class="toggle-row-info">
+              <div class="toggle-label" style="font-size:13px;font-weight:600;color:#0E121B;">Disable interruptions</div>
+              <div class="toggle-desc">The agent cannot be interrupted while this function runs. Use for mid-call functions where partial execution causes errors.</div>
+            </div>
+            <div class="toggle off"></div>
+          </div>
+
+          <!-- Failure behavior -->
+          <div>
+            <div class="field-label" style="font-size:13px;margin-bottom:4px;">Failure behavior</div>
+            <div class="field-sublabel">What happens if the function fails permanently.</div>
+            <div class="radio-group">
+              <div class="radio-item selected">
+                <div class="radio-dot"></div>
+                <div>
+                  <div class="radio-label">Continue with variables unset</div>
+                  <div class="radio-hint">The call continues. Unresolved variables are left empty. Pair with a Fallback Instructions section in the prompt.</div>
+                </div>
+              </div>
+              <div class="radio-item">
+                <div class="radio-dot"></div>
+                <div>
+                  <div class="radio-label">Surface error in Transcription tab and continue</div>
+                  <div class="radio-hint">The failure is logged as an event in the call's Transcription tab for review.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-save">Save</button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

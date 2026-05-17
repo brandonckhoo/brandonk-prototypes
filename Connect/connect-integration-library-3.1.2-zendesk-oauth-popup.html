@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zendesk — Authorize Retell AI</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* Fake browser chrome */
+  .browser-chrome { background: #F0F0F0; border-bottom: 1px solid #D1D5DB; padding: 8px 12px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .browser-dots { display: flex; gap: 6px; }
+  .browser-dots span { width: 12px; height: 12px; border-radius: 50%; }
+  .browser-dots .red { background: #FF5F57; }
+  .browser-dots .yellow { background: #FEBC2E; }
+  .browser-dots .green { background: #28C840; }
+  .browser-url { flex: 1; background: #fff; border: 1px solid #D1D5DB; border-radius: 6px; padding: 6px 12px; font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 6px; margin-left: 8px; }
+  .browser-url .lock { color: #22C55E; }
+
+  /* OAuth page content */
+  .oauth-page { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 60px 24px; }
+  .oauth-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); width: 440px; padding: 40px 36px; }
+
+  /* Zendesk branding */
+  .oauth-logo { display: flex; align-items: center; justify-content: center; margin-bottom: 28px; }
+  .oauth-logo img { height: 32px; }
+
+  .oauth-title { font-size: 20px; font-weight: 600; color: #03363D; text-align: center; margin-bottom: 8px; }
+  .oauth-subtitle { font-size: 14px; color: #6B7280; text-align: center; margin-bottom: 28px; line-height: 1.5; }
+
+  /* App info */
+  .app-info { display: flex; align-items: center; gap: 12px; padding: 16px; background: #F9FAFB; border-radius: 8px; margin-bottom: 24px; }
+  .app-icon { width: 40px; height: 40px; border-radius: 8px; background: #0E121B; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .app-icon svg { width: 20px; height: 20px; }
+  .app-details { display: flex; flex-direction: column; gap: 2px; }
+  .app-name { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .app-domain { font-size: 13px; color: #6B7280; }
+
+  /* Permissions */
+  .perms-label { font-size: 13px; font-weight: 500; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .perm-list { list-style: none; margin-bottom: 28px; }
+  .perm-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; font-size: 14px; color: #0E121B; line-height: 1.4; }
+  .perm-item + .perm-item { border-top: 1px solid #F3F4F6; }
+  .perm-check { color: #22C55E; flex-shrink: 0; margin-top: 1px; }
+
+  /* Buttons */
+  .oauth-actions { display: flex; flex-direction: column; gap: 10px; }
+  .btn-authorize { width: 100%; height: 44px; border: none; border-radius: 8px; background: #03363D; font-size: 15px; font-weight: 600; color: #fff; cursor: pointer; font-family: inherit; }
+  .btn-authorize:hover { background: #024950; }
+  .btn-deny { width: 100%; height: 44px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 500; color: #6B7280; cursor: pointer; font-family: inherit; }
+  .btn-deny:hover { background: #F9FAFB; }
+
+  .oauth-footer { text-align: center; margin-top: 20px; font-size: 12px; color: #99A0AE; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- Fake browser chrome -->
+<div class="browser-chrome">
+  <div class="browser-dots">
+    <span class="red"></span>
+    <span class="yellow"></span>
+    <span class="green"></span>
+  </div>
+  <div class="browser-url">
+    <span class="lock"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 7V5a4 4 0 1 1 8 0v2h1a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h1zm2 0h4V5a2 2 0 1 0-4 0v2z" fill="currentColor"/></svg></span>
+    acme.zendesk.com/oauth/authorizations/new?client_id=retell_ai&response_type=code
+  </div>
+</div>
+
+<!-- OAuth consent page -->
+<div class="oauth-page">
+  <div class="oauth-card">
+    <div class="oauth-logo">
+      <img src="https://www.google.com/s2/favicons?domain=zendesk.com&sz=128" alt="Zendesk" style="height:32px; border-radius: 6px;">
+    </div>
+
+    <h1 class="oauth-title">Authorize Retell AI</h1>
+    <p class="oauth-subtitle">Retell AI is requesting access to your Zendesk account <strong>acme.zendesk.com</strong></p>
+
+    <div class="app-info">
+      <div class="app-icon">
+        <svg width="24" height="24" viewBox="0 0 114 114" fill="none"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#fff"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#fff"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#fff"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#fff"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#fff"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#fff"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#fff"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#fff"/></svg>
+      </div>
+      <div class="app-details">
+        <span class="app-name">Retell AI</span>
+        <span class="app-domain">app.retellai.com</span>
+      </div>
+    </div>
+
+    <div class="perms-label">This will allow Retell AI to:</div>
+    <ul class="perm-list">
+      <li class="perm-item">
+        <span class="perm-check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3 4.3L6.5 11.1L2.7 7.3L3.6 6.4L6.5 9.3L12.4 3.4L13.3 4.3Z" fill="currentColor"/></svg></span>
+        Read and write tickets on your behalf
+      </li>
+      <li class="perm-item">
+        <span class="perm-check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3 4.3L6.5 11.1L2.7 7.3L3.6 6.4L6.5 9.3L12.4 3.4L13.3 4.3Z" fill="currentColor"/></svg></span>
+        Search tickets, users, and organizations
+      </li>
+      <li class="perm-item">
+        <span class="perm-check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3 4.3L6.5 11.1L2.7 7.3L3.6 6.4L6.5 9.3L12.4 3.4L13.3 4.3Z" fill="currentColor"/></svg></span>
+        Add comments and internal notes to tickets
+      </li>
+      <li class="perm-item">
+        <span class="perm-check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3 4.3L6.5 11.1L2.7 7.3L3.6 6.4L6.5 9.3L12.4 3.4L13.3 4.3Z" fill="currentColor"/></svg></span>
+        Log call activity and create talk recordings
+      </li>
+      <li class="perm-item">
+        <span class="perm-check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3 4.3L6.5 11.1L2.7 7.3L3.6 6.4L6.5 9.3L12.4 3.4L13.3 4.3Z" fill="currentColor"/></svg></span>
+        Access user and organization profiles
+      </li>
+    </ul>
+
+    <div class="oauth-actions">
+      <button class="btn-authorize" onclick="window.location='connect-integration-library-3.1.2-zendesk-connected.html'">Allow access</button>
+      <button class="btn-deny">Deny</button>
+    </div>
+
+    <p class="oauth-footer">By clicking Allow access, you authorize Retell AI to access your Zendesk data according to their terms of service and privacy policy.</p>
+  </div>
+</div>
+
+</body>
+</html>

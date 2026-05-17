@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Docs Flow Step 3 — Google Drive Picker</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 190px; min-width: 190px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; }
+  .sidebar-logo { padding: 18px 10px 10px 16px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 10px; margin: 0 10px; height: 36px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 7px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+  .workspace-avatar { width: 18px; height: 18px; background: #3d64d7; border-radius: 3px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+  .workspace-name { font-size: 12px; font-weight: 500; color: #0A0A0A; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-scroll { padding: 4px 0 12px; flex: 1; overflow-y: auto; margin-top: 6px; }
+  .section-group { margin-top: 6px; }
+  .section-label { padding: 4px; margin: 0 10px; font-size: 11px; font-weight: 500; color: #99A0AE; text-transform: uppercase; height: 22px; }
+  .nav-items { list-style: none; padding: 0 10px; }
+  .nav-items .nav-item + .nav-item { margin-top: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 7px; padding: 7px; height: 32px; font-size: 13px; color: #525866; cursor: pointer; border-radius: 6px; white-space: nowrap; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #FFFFFF; }
+  .footer { padding: 12px 10px; }
+  .footer-card { display: flex; align-items: center; background: #fff; border: 1px solid #E1E4EA; border-radius: 7px; box-shadow: rgba(0,0,0,0.08) 0 1px 3px 0; width: 100%; }
+  .footer-card.pay { padding: 10px 12px; height: 48px; margin-bottom: 6px; }
+  .footer-card.user { padding: 8px 10px; height: 36px; margin-bottom: 10px; gap: 7px; }
+  .footer-badge-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 6px; background: #ecf3ff; border-radius: 5px; font-size: 11px; font-weight: 500; color: #3d64d7; }
+  .footer-card .spacer { flex: 1; }
+  .footer-user .avatar { width: 18px; height: 18px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+  .footer-user .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .footer-user .name { font-size: 12px; color: #525866; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .footer-links { display: flex; align-items: center; gap: 2px; }
+  .footer-link { padding: 6px 10px; font-size: 13px; color: #525866; height: 32px; text-decoration: none; }
+  .footer-divider-v { width: 1px; height: 10px; background: #D1D5DB; }
+  .kb-list { width: 200px; min-width: 200px; border-right: 1px solid #E5E7EB; display: flex; flex-direction: column; background: #fff; }
+  .kb-list-header { display: flex; align-items: center; padding: 14px 14px; border-bottom: 1px solid #F3F4F6; }
+  .kb-list-title { font-size: 14px; font-weight: 600; color: #0A0A0A; flex: 1; }
+  .kb-add-btn { width: 26px; height: 26px; border-radius: 6px; background: #0E121B; color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; line-height: 1; }
+  .kb-items { padding: 6px 8px; flex: 1; overflow-y: auto; }
+  .kb-list-item { padding: 8px 9px; border-radius: 6px; font-size: 13px; color: #374151; cursor: pointer; }
+  .kb-list-item.active { background: #F3F4F6; color: #0A0A0A; font-weight: 500; }
+  .kb-list-item .sub { font-size: 11px; color: #9CA3AF; margin-top: 1px; }
+  .main { flex: 1; background: #fff; overflow: hidden; position: relative; filter: blur(1.5px); pointer-events: none; }
+  .main-inner { padding: 20px 24px; }
+
+  /* Google Drive picker */
+  .picker-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .picker { background: #fff; border-radius: 8px; box-shadow: 0 8px 10px -5px rgba(0,0,0,0.2), 0 16px 24px 2px rgba(0,0,0,0.14), 0 6px 30px 5px rgba(0,0,0,0.12); width: 720px; height: 490px; display: flex; flex-direction: column; overflow: hidden; font-family: 'Google Sans', Roboto, Arial, sans-serif; }
+  .picker-header { display: flex; align-items: center; padding: 8px 16px; border-bottom: 1px solid #e0e0e0; gap: 12px; height: 56px; flex-shrink: 0; }
+  .gdrive-logo { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .gdrive-logo-text { font-size: 18px; font-weight: 400; color: #5f6368; letter-spacing: -0.3px; white-space: nowrap; }
+  .gdrive-logo-text span { color: #1a73e8; }
+  .picker-search { flex: 1; display: flex; align-items: center; gap: 10px; background: #f1f3f4; border-radius: 24px; padding: 0 16px; height: 36px; }
+  .picker-search input { border: none; background: transparent; outline: none; font-size: 14px; color: #202124; font-family: inherit; flex: 1; }
+  .picker-user-avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+  .picker-user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .picker-body { display: flex; flex: 1; overflow: hidden; }
+  .picker-nav { width: 168px; padding: 8px 0; flex-shrink: 0; border-right: 1px solid #e0e0e0; overflow-y: auto; }
+  .pnav-item { display: flex; align-items: center; gap: 12px; padding: 8px 16px; font-size: 13px; color: #202124; cursor: pointer; border-radius: 0 24px 24px 0; margin-right: 8px; }
+  .pnav-item:hover { background: #f1f3f4; }
+  .pnav-item.active { background: #e8f0fe; color: #1a73e8; font-weight: 500; }
+  .pnav-sub { display: flex; align-items: center; gap: 12px; padding: 7px 16px 7px 32px; font-size: 13px; color: #5f6368; cursor: pointer; }
+  .pnav-sub.active { color: #1a73e8; font-weight: 500; background: #e8f0fe; }
+  .pnav-divider { border: none; border-top: 1px solid #e0e0e0; margin: 6px 16px; }
+  .file-browser { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .breadcrumb { display: flex; align-items: center; gap: 4px; padding: 10px 16px 8px; font-size: 13px; color: #5f6368; border-bottom: 1px solid #f1f3f4; flex-shrink: 0; }
+  .bc-item { color: #1a73e8; cursor: pointer; }
+  .bc-item:hover { text-decoration: underline; }
+  .bc-sep { color: #9aa0a6; }
+  .bc-current { color: #202124; font-weight: 500; }
+  .file-col-headers { display: grid; grid-template-columns: 36px 1fr 130px 110px; padding: 6px 12px; border-bottom: 1px solid #e0e0e0; flex-shrink: 0; }
+  .fch { font-size: 11px; color: #5f6368; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; }
+  .file-rows { flex: 1; overflow-y: auto; }
+  .file-row { display: grid; grid-template-columns: 36px 1fr 130px 110px; align-items: center; padding: 0 12px; height: 44px; cursor: pointer; border-bottom: 1px solid transparent; }
+  .file-row:hover { background: #f8f9fa; }
+  .file-row.selected { background: #e8f0fe; }
+  .fr-check { width: 18px; height: 18px; border: 2px solid #9aa0a6; border-radius: 2px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .fr-check.checked { background: #1a73e8; border-color: #1a73e8; }
+  .fr-name-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .fr-icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .fr-name { font-size: 13px; color: #202124; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .file-row.selected .fr-name { font-weight: 500; }
+  .fr-owner { font-size: 13px; color: #5f6368; }
+  .fr-date { font-size: 13px; color: #5f6368; }
+  .picker-footer { display: flex; align-items: center; padding: 10px 16px; border-top: 1px solid #e0e0e0; background: #fff; gap: 10px; flex-shrink: 0; height: 56px; }
+  .pf-count { font-size: 13px; color: #5f6368; flex: 1; }
+  .pf-count strong { color: #202124; }
+  .btn-g-cancel { padding: 0 24px; height: 36px; border: none; background: transparent; font-size: 14px; font-weight: 500; color: #1a73e8; border-radius: 4px; cursor: pointer; font-family: inherit; }
+  .btn-g-cancel:hover { background: #e8f0fe; }
+  .btn-g-select { padding: 0 24px; height: 36px; border: none; background: #1a73e8; font-size: 14px; font-weight: 500; color: #fff; border-radius: 4px; cursor: pointer; font-family: inherit; box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+  .btn-g-select:hover { background: #1765cc; }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><svg width="56" height="16" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#0A0A0A"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73Z" fill="#0A0A0A"/><path d="M255.56 34.65C238.2 34.65 226.63 47.95 226.63 66.47C226.63 84.99 242.25 98.3 256.14 98.3C270.03 98.3 279.86 90.19 283.33 78.62H269.45C267.71 82.67 264.82 87.3 256.14 87.3C247.46 87.3 239.94 81.52 239.94 69.94H283.91C283.91 49.69 272.92 34.65 255.56 34.65Z" fill="#0A0A0A"/><path d="M344.09 34.65C326.73 34.65 315.16 47.95 315.16 66.47C315.16 85.15 330.78 98.3 344.67 98.3C358.56 98.3 368.39 90.19 371.87 78.62H357.98C356.24 82.67 353.35 87.3 344.67 87.3C335.99 87.3 328.47 81.52 328.47 69.94H372.44C372.44 49.69 361.45 34.65 344.09 34.65Z" fill="#0A0A0A"/><path d="M390.96 14.97H377.65V95.92H390.96V14.97Z" fill="#0A0A0A"/><path d="M413.53 14.97H400.22V95.92H413.53V14.97Z" fill="#0A0A0A"/><path d="M304.17 17.28L290.84 17.28L290.85 34.65H282.76V45H290.85V82.82C290.85 87.58 291.8 90.43 294.66 93.29C297.51 96.14 300.37 97.09 305.13 97.09H315.14V85.67H309.88C308.16 85.67 306.96 85.37 306.13 85.11C305.27 84.84 304.61 84.16 304.4 83.29C304.17 82.33 304.17 81.09 304.17 79.9V45H315.14V34.65H304.17V17.28Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg></div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span><svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M14 7L10 3L6 7M6 13L10 17L14 13" stroke="#99A0AE" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item current">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item">Integrations</li><li class="nav-item">Billing</li><li class="nav-item">Settings</li></ul></div>
+  </div>
+  <div class="footer">
+    <div class="footer-card pay"><div class="footer-badge-pill">Pay As You Go</div><span class="spacer"></span></div>
+    <div class="footer-card user footer-user"><div class="avatar"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c"></div><span class="name">brandon@retellai.com</span></div>
+    <div class="footer-links"><a class="footer-link">Help</a><div class="footer-divider-v"></div><a class="footer-link">Updates</a></div>
+  </div>
+</aside>
+<div class="kb-list">
+  <div class="kb-list-header"><span class="kb-list-title">Knowledge Base</span><button class="kb-add-btn">+</button></div>
+  <div class="kb-items">
+    <div class="kb-list-item active">Product Docs<div class="sub">1 source · 5 files</div></div>
+    <div class="kb-list-item" style="margin-top:3px;">Support Docs<div class="sub">1 source · 4 files</div></div>
+  </div>
+</div>
+<main class="main"><div class="main-inner"></div></main>
+
+<div class="picker-overlay">
+  <div class="picker">
+    <div class="picker-header">
+      <div class="gdrive-logo">
+        <svg width="28" height="24" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
+        <span class="gdrive-logo-text">Google <span>Drive</span></span>
+      </div>
+      <div class="picker-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#9aa0a6" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="#9aa0a6" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="text" placeholder="Search in Drive" value="">
+      </div>
+      <div class="picker-user-avatar"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c"></div>
+    </div>
+    <div class="picker-body">
+      <nav class="picker-nav">
+        <div class="pnav-item active">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path d="M19 2H5C3.9 2 3 2.9 3 4v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V6h10v2z" fill="#1a73e8"/></svg>
+          My Drive
+        </div>
+        <div class="pnav-sub active" style="padding-left:44px; color:#1a73e8; font-weight:500;">
+          <svg width="14" height="14" viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z" fill="#1a73e8"/></svg>
+          Product
+        </div>
+        <hr class="pnav-divider">
+        <div class="pnav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path d="M15 8c0-1.42-.5-2.73-1.33-3.76.42-.14.86-.24 1.33-.24C17.21 4 19 5.79 19 8s-1.79 4-4 4c-.47 0-.91-.1-1.33-.24C14.5 10.73 15 9.42 15 8zM4 20v-2c0-2.66 3.33-4 6-4 2.66 0 6 1.34 6 4v2H4zm16 0v-2c0-1.22-.78-2.23-1.93-3.08C19.74 15.24 22 16.29 22 18v2h-2zm-10-8C7.79 12 6 10.21 6 8s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="#5f6368"/></svg>
+          Shared with me
+        </div>
+        <div class="pnav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z" fill="#5f6368"/></svg>
+          Starred
+        </div>
+        <div class="pnav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path d="M13 3a9 9 0 1 0 .001 18.001A9 9 0 0 0 13 3zm-1 13l-4-4 1.41-1.41L12 13.17l6.59-6.59L20 8l-8 8z" fill="#5f6368" opacity=".5"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 13l-4-4 1.41-1.41L11 13.17l6.59-6.59L19 8l-8 8z" fill="#5f6368"/></svg>
+          Recent
+        </div>
+      </nav>
+      <div class="file-browser">
+        <div class="breadcrumb">
+          <span class="bc-item">My Drive</span>
+          <span class="bc-sep">›</span>
+          <span class="bc-current">Product</span>
+        </div>
+        <div class="file-col-headers">
+          <div></div>
+          <div class="fch">Name</div>
+          <div class="fch">Owner</div>
+          <div class="fch">Modified</div>
+        </div>
+        <div class="file-rows">
+
+          <!-- Product Handbook — SELECTED -->
+          <div class="file-row selected">
+            <div class="fr-check checked"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="fr-name-cell">
+              <div class="fr-icon">
+                <!-- Google Docs blue icon -->
+                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="#4285F4"/><path d="M14 2v6h6" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M8 13h8M8 16h6" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </div>
+              <span class="fr-name">Product Handbook</span>
+            </div>
+            <div class="fr-owner" style="color:#202124;">me</div>
+            <div class="fr-date" style="color:#202124;">May 2, 2026</div>
+          </div>
+
+          <!-- Release Notes Q1 — SELECTED -->
+          <div class="file-row selected">
+            <div class="fr-check checked"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="fr-name-cell">
+              <div class="fr-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="#4285F4"/><path d="M14 2v6h6" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M8 13h8M8 16h6" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </div>
+              <span class="fr-name">Release Notes Q1 2026</span>
+            </div>
+            <div class="fr-owner" style="color:#202124;">me</div>
+            <div class="fr-date" style="color:#202124;">Apr 28, 2026</div>
+          </div>
+
+          <!-- Competitive Analysis — not selected -->
+          <div class="file-row">
+            <div class="fr-check"></div>
+            <div class="fr-name-cell">
+              <div class="fr-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="#4285F4"/><path d="M14 2v6h6" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M8 13h8M8 16h6" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </div>
+              <span class="fr-name">Competitive Analysis</span>
+            </div>
+            <div class="fr-owner">sarah@co.com</div>
+            <div class="fr-date">Apr 15, 2026</div>
+          </div>
+
+          <!-- Design System PDF — not selected -->
+          <div class="file-row">
+            <div class="fr-check"></div>
+            <div class="fr-name-cell">
+              <div class="fr-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="#EF4444"/><path d="M14 2v6h6" fill="none" stroke="#fff" stroke-width="1.5"/></svg>
+              </div>
+              <span class="fr-name">Design System v2.pdf</span>
+            </div>
+            <div class="fr-owner">me</div>
+            <div class="fr-date">Mar 10, 2026</div>
+          </div>
+
+          <!-- Roadmap Slides — not selected -->
+          <div class="file-row">
+            <div class="fr-check"></div>
+            <div class="fr-name-cell">
+              <div class="fr-icon">
+                <!-- Google Slides yellow -->
+                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="#FBBC04"/><path d="M14 2v6h6" fill="none" stroke="#fff" stroke-width="1.5"/></svg>
+              </div>
+              <span class="fr-name">2026 Roadmap.slides</span>
+            </div>
+            <div class="fr-owner">me</div>
+            <div class="fr-date">Feb 22, 2026</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <div class="picker-footer">
+      <span class="pf-count"><strong>2 items</strong> selected</span>
+      <button class="btn-g-cancel">Cancel</button>
+      <button class="btn-g-select" onclick="window.location.href='gws-docs-flow-4-indexing.html'">Select</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

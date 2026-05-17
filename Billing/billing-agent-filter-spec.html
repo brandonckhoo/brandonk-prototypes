@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Billing Agent Filter — Feature Spec</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  background: #F5F7FA;
+  color: #0A0A0A;
+  padding: 48px 40px;
+  min-height: 100vh;
+}
+
+/* Page header */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.page-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #3d64d7;
+  background: #ecf3ff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0A0A0A;
+  margin-bottom: 4px;
+}
+.page-sub {
+  font-size: 14px;
+  color: #525866;
+  margin-bottom: 32px;
+}
+
+/* Table wrapper */
+.spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #E1E4EA;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* Column headers */
+.spec-table thead tr {
+  background: #F5F7FA;
+  border-bottom: 1px solid #E1E4EA;
+}
+.spec-table thead th {
+  padding: 12px 20px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: #99A0AE;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.spec-table thead th:not(:last-child) {
+  border-right: 1px solid #E1E4EA;
+}
+
+/* Column widths */
+.col-usecase   { width: 220px; }
+.col-desc      { width: 380px; }
+.col-shots     { width: auto; }
+
+/* Body cells */
+.spec-table tbody td {
+  padding: 24px 20px;
+  vertical-align: top;
+  border-bottom: 1px solid #F0F2F5;
+}
+.spec-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.spec-table tbody td:not(:last-child) {
+  border-right: 1px solid #F0F2F5;
+}
+
+/* Use case cell */
+.use-case-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0A0A0A;
+  line-height: 1.45;
+}
+.use-case-tag {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #3d64d7;
+  background: #ecf3ff;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+/* Description cell */
+.entry-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #99A0AE;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.entry-text {
+  font-size: 13px;
+  color: #525866;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.flow-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #99A0AE;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.flow-steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.flow-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: #0A0A0A;
+  line-height: 1.5;
+}
+.step-num {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  background: #0E121B;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+/* Screenshot grid */
+.shot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.shot-frame {
+  border: 1px solid #E1E4EA;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #F5F7FA;
+  position: relative;
+}
+.shot-frame iframe {
+  width: 100%;
+  height: 420px;
+  border: none;
+  display: block;
+  transform-origin: top left;
+  pointer-events: none;
+}
+.shot-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(14,18,27,0.75);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 6px 10px;
+  backdrop-filter: blur(4px);
+}
+
+/* Scaled iframe wrapper */
+.iframe-scaler {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+.iframe-scaler iframe {
+  width: 1280px;
+  height: 800px;
+  border: none;
+  display: block;
+  transform-origin: top left;
+}
+</style>
+</head>
+<body>
+
+<div class="page-title">Billing Agent Filter</div>
+<div class="page-sub">Feature specification — Filter Billing History by agent on the Billing tab</div>
+
+<table class="spec-table">
+  <thead>
+    <tr>
+      <th class="col-usecase">Use Case</th>
+      <th class="col-desc">Description</th>
+      <th class="col-shots">Screenshot</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <!-- Row 1: Default state -->
+    <tr>
+      <td>
+        <div class="use-case-title">Filter Billing History for a specific agent</div>
+        <div class="use-case-tag">Billing Tab</div>
+      </td>
+      <td>
+        <div class="entry-label">Entry</div>
+        <div class="entry-text">User clicks on the Billing tab in the sidebar.</div>
+        <div class="flow-label">Flow</div>
+        <ol class="flow-steps">
+          <li class="flow-step"><span class="step-num">1</span><span>User opens the Billing page.</span></li>
+          <li class="flow-step"><span class="step-num">2</span><span>User navigates to the Billing History tab.</span></li>
+          <li class="flow-step"><span class="step-num">3</span><span>The table displays all invoices across the workspace by default, with total amounts per billing period.</span></li>
+          <li class="flow-step"><span class="step-num">4</span><span>User clicks the <strong>Filter</strong> button above the table.</span></li>
+          <li class="flow-step"><span class="step-num">5</span><span>A dropdown appears with a searchable list of agents. User selects one or more agents and clicks <strong>Save</strong>.</span></li>
+          <li class="flow-step"><span class="step-num">6</span><span>The active filter appears as a pill tag. All invoice row amounts update to reflect only the selected agent's usage.</span></li>
+          <li class="flow-step"><span class="step-num">7</span><span>User expands a billing period row. The line-item breakdown (Voice LLM, Voice Engine, Telephony, etc.) and usage minutes all update to show only the filtered agent's contribution.</span></li>
+          <li class="flow-step"><span class="step-num">8</span><span>User clicks <strong>×</strong> on the filter pill to clear the filter and restore full workspace totals.</span></li>
+        </ol>
+      </td>
+      <td>
+        <div class="shot-grid">
+
+          <!-- Shot 1: Default billing history -->
+          <div class="shot-frame">
+            <div class="iframe-scaler" id="scaler-1">
+              <iframe src="../billing-history-agent-filter.html" id="frame-1" scrolling="no"></iframe>
+            </div>
+            <div class="shot-label">1 — Default: full workspace billing history</div>
+          </div>
+
+          <!-- Shot 2: Filter dropdown open -->
+          <div class="shot-frame">
+            <div class="iframe-scaler" id="scaler-2">
+              <iframe src="../billing-history-agent-filter.html" id="frame-2" scrolling="no"></iframe>
+            </div>
+            <div class="shot-label">2 — Filter dropdown: select agent(s)</div>
+          </div>
+
+          <!-- Shot 3: Filter applied, amounts updated -->
+          <div class="shot-frame">
+            <div class="iframe-scaler" id="scaler-3">
+              <iframe src="../billing-history-agent-filter.html" id="frame-3" scrolling="no"></iframe>
+            </div>
+            <div class="shot-label">3 — Filter active: row totals scoped to agent</div>
+          </div>
+
+          <!-- Shot 4: Row expanded, filtered line items -->
+          <div class="shot-frame">
+            <div class="iframe-scaler" id="scaler-4">
+              <iframe src="../billing-history-agent-filter.html" id="frame-4" scrolling="no"></iframe>
+            </div>
+            <div class="shot-label">4 — Expanded row: line-item breakdown for agent</div>
+          </div>
+
+        </div>
+      </td>
+    </tr>
+
+    <!-- Row 2: Branded Calling breakdown -->
+    <tr>
+      <td>
+        <div class="use-case-title">View breakdown of branded calling and base carrier costs</div>
+        <div class="use-case-tag">Billing Tab</div>
+      </td>
+      <td>
+        <div class="entry-label">Entry</div>
+        <div class="entry-text">User selects an agent from the filter and expands the Telephony row in the invoice line-item breakdown.</div>
+        <div class="flow-label">Flow</div>
+        <ol class="flow-steps">
+          <li class="flow-step"><span class="step-num">1</span><span>User opens the Billing page and selects one or more agents from the filter.</span></li>
+          <li class="flow-step"><span class="step-num">2</span><span>User expands a billing period row and locates the <strong>Telephony</strong> line item in the breakdown.</span></li>
+          <li class="flow-step"><span class="step-num">3</span><span>User clicks the expand toggle on the Telephony row.</span></li>
+          <li class="flow-step"><span class="step-num">4</span><span>Nested rows appear showing <strong>US Telephony (per second)</strong> and <strong>Branded Calling</strong> as separate line items, each with a unit count, unit rate, and subtotal.</span></li>
+          <li class="flow-step"><span class="step-num">5</span><span>User identifies which component is driving telephony cost for the selected agents.</span></li>
+        </ol>
+      </td>
+      <td>
+        <div class="shot-grid">
+
+          <!-- Shot 5: Filter + May expanded showing telephony sub-rows with Branded Calling -->
+          <div class="shot-frame">
+            <div class="iframe-scaler" id="scaler-5">
+              <iframe src="../billing-history-agent-filter.html" id="frame-5" scrolling="no"></iframe>
+            </div>
+            <div class="shot-label">5 — Telephony breakdown: base carrier vs Branded Calling</div>
+          </div>
+
+          <!-- Shot 6: 2 agents, expanded, Branded Calling visible -->
+          <div class="shot-frame">
+            <div class="iframe-scaler" id="scaler-6">
+              <iframe src="../billing-history-agent-filter.html" id="frame-6" scrolling="no"></iframe>
+            </div>
+            <div class="shot-label">6 — 2 agents filtered: Branded Calling contribution</div>
+          </div>
+
+        </div>
+      </td>
+    </tr>
+
+  </tbody>
+</table>
+
+<script>
+// Scale each iframe to fit its container
+function scaleFrames() {
+  document.querySelectorAll('.iframe-scaler').forEach(function(scaler) {
+    const containerW = scaler.offsetWidth;
+    const scale = containerW / 1280;
+    const iframe = scaler.querySelector('iframe');
+    iframe.style.transform = 'scale(' + scale + ')';
+    scaler.style.height = Math.round(800 * scale) + 'px';
+  });
+}
+scaleFrames();
+window.addEventListener('resize', scaleFrames);
+
+// Trigger states in each frame after load
+// Frame 2: open filter dropdown
+document.getElementById('frame-2').addEventListener('load', function() {
+  try {
+    this.contentWindow.toggleDropdown();
+  } catch(e) {}
+});
+
+// Frame 3: apply filter (Accounts Receivable Agent)
+document.getElementById('frame-3').addEventListener('load', function() {
+  try {
+    const w = this.contentWindow;
+    w.selectAgent('cb-1', document.getElementById('frame-3').contentDocument.querySelector('[onclick*="cb-1"]'));
+    w.applyFilter();
+  } catch(e) {}
+});
+
+// Frame 4: apply filter + expand May row
+document.getElementById('frame-4').addEventListener('load', function() {
+  try {
+    const w = this.contentWindow;
+    w.selectAgent('cb-1', document.getElementById('frame-4').contentDocument.querySelector('[onclick*="cb-1"]'));
+    w.applyFilter();
+    w.toggleRow('may');
+  } catch(e) {}
+});
+
+// Frame 5: 1 agent filtered + May expanded (Branded Calling visible)
+document.getElementById('frame-5').addEventListener('load', function() {
+  try {
+    const w = this.contentWindow;
+    w.selectAgent('cb-1', document.getElementById('frame-5').contentDocument.querySelector('[onclick*="cb-1"]'));
+    w.applyFilter();
+    w.toggleRow('may');
+  } catch(e) {}
+});
+
+// Frame 6: 2 agents filtered + May expanded
+document.getElementById('frame-6').addEventListener('load', function() {
+  try {
+    const w = this.contentWindow;
+    w.selectAgent('cb-1', document.getElementById('frame-6').contentDocument.querySelector('[onclick*="cb-1"]'));
+    w.selectAgent('cb-2', document.getElementById('frame-6').contentDocument.querySelector('[onclick*="cb-2"]'));
+    w.applyFilter();
+    w.toggleRow('may');
+  } catch(e) {}
+});
+</script>
+
+</body>
+</html>

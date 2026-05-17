@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Pre-Call UC1 Step 6 (sister): Configure get_salesforce_custom_object (3-section pattern)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; min-width: 1280px; position: relative; }
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff; }
+  .agent-header { display: flex; align-items: center; padding: 10px 16px 4px; flex-shrink: 0; gap: 10px; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #525866; }
+  .agent-name h1 { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; }
+  .top-tab { padding: 6px 12px; font-size: 14px; color: #525866; }
+  .top-tab.active { font-weight: 600; color: #0E121B; }
+  .top-spacer { flex: 1; }
+  .btn-publish { height: 30px; padding: 0 14px; border: 1px solid #E1E4EA; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .agent-meta { display: flex; align-items: center; gap: 8px; padding: 0 16px 10px 50px; font-size: 12px; color: #99A0AE; flex-shrink: 0; }
+  .agent-meta .dot { width: 3px; height: 3px; background: #99A0AE; border-radius: 50%; }
+  .settings-bar { display: flex; align-items: center; gap: 8px; padding: 6px 16px 12px; flex-shrink: 0; border-bottom: 1px solid #E1E4EA; }
+  .settings-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0E121B; background: #fff; height: 30px; }
+  .settings-pill .chev { color: #99A0AE; font-size: 11px; }
+  .settings-bar .star { color: #FCB826; font-size: 12px; }
+  .settings-bar .divider { width: 1px; height: 16px; background: #E1E4EA; margin: 0 2px; }
+  .settings-bar .spacer { flex: 1; }
+  .agent-body { display: flex; flex: 1; overflow: hidden; }
+  .prompt-col { flex: 1; padding: 16px 20px 16px 32px; }
+  .prompt-textarea { flex: 1; min-height: 320px; border: none; outline: none; resize: none; padding: 4px 0; font-size: 14px; color: #0A0A0A; font-family: inherit; line-height: 1.55; width: 100%; }
+  .settings-col { width: 420px; min-width: 420px; border-left: 1px solid #E1E4EA; padding: 16px; background: #fff; }
+  .test-col { width: 280px; min-width: 280px; border-left: 1px solid #E1E4EA; background: #fff; }
+
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.35); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { width: 720px; max-height: 92vh; background: #fff; border-radius: 14px; box-shadow: 0 24px 60px rgba(15,23,42,0.25); display: flex; flex-direction: column; overflow: hidden; }
+  .modal-header { padding: 18px 24px 14px; border-bottom: 1px solid #E1E4EA; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .modal-header .logo { width: 28px; height: 18px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .modal-header .titles { flex: 1; min-width: 0; }
+  .modal-header .titles h2 { font-size: 16px; font-weight: 600; color: #0E121B; display: flex; align-items: center; gap: 8px; }
+  .modal-header .titles .integration { color: #525866; font-weight: 400; }
+  .modal-header .titles .sub { font-size: 12px; color: #99A0AE; margin-top: 2px; }
+  .modal-header .close { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #525866; }
+
+  .oauth-banner { margin: 14px 24px 0; padding: 8px 12px; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-size: 12px; color: #065F46; line-height: 1.45; }
+  .oauth-banner .dot { width: 8px; height: 8px; background: #10B981; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(16,185,129,0.25); }
+  .oauth-banner b { color: #064E3B; font-weight: 600; }
+  .oauth-banner .link { color: #047857; text-decoration: underline; cursor: pointer; margin-left: auto; flex-shrink: 0; }
+
+  .modal-body { flex: 1; overflow-y: auto; padding: 14px 24px 12px; }
+
+  .field { margin-bottom: 14px; }
+  .field-label { display: block; font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 6px; }
+  .field-label .optional { color: #99A0AE; font-weight: 400; }
+  .field-input, .field-textarea { width: 100%; padding: 8px 12px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #0E121B; font-family: inherit; outline: none; line-height: 1.5; }
+  .field-textarea { min-height: 60px; resize: vertical; }
+  .field-input.mono, .field-textarea.mono { font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace; }
+
+  .method-row { display: grid; grid-template-columns: 130px 1fr; gap: 8px; align-items: stretch; }
+  .method-select { padding: 8px 12px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 600; color: #0E121B; font-family: 'SF Mono', monospace; outline: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 6l5 5 5-5' stroke='%2399A0AE' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 26px; }
+  .url-input { padding: 8px 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace; font-size: 12px; color: #0E121B; outline: none; }
+
+  .sub-section { margin-top: 14px; }
+  .sub-section-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .sub-section-head .title { font-size: 12px; font-weight: 600; color: #0E121B; }
+  .sub-section-head .helper { font-size: 11.5px; color: #99A0AE; }
+  .sub-section-head .spacer { flex: 1; }
+  .sub-section-head .add-btn { font-size: 11.5px; color: #3d64d7; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+  .sub-section-head .add-btn:hover { background: #ECF3FF; }
+
+  .kv-row { display: grid; grid-template-columns: 220px 1fr 24px; gap: 6px; margin-bottom: 5px; align-items: center; }
+  .kv-input { padding: 6px 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-family: 'SF Mono', monospace; font-size: 12px; color: #0E121B; outline: none; background: #fff; }
+  .kv-row .x { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: #99A0AE; cursor: pointer; border-radius: 4px; }
+  .kv-row .x:hover { background: #F3F4F6; color: #525866; }
+
+  .body-disabled { padding: 10px 12px; border: 1px dashed #E1E4EA; border-radius: 8px; background: #FAFBFC; font-size: 12px; color: #99A0AE; line-height: 1.5; font-style: italic; }
+
+  /* Section dividers (matches Built-in CRM Sync Contacts Data pattern) */
+  .bucket { margin-top: 22px; padding-top: 16px; border-top: 1px solid #E1E4EA; }
+  .bucket:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+  .bucket-head { margin-bottom: 4px; }
+  .bucket-title { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .bucket-helper { font-size: 12px; color: #525866; line-height: 1.5; margin-bottom: 12px; }
+
+  /* Trigger field chip (matches "Phone Number" chip on Map Leads in Sync Contacts Data) */
+  .field-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 8px; font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace; font-size: 12.5px; color: #0E121B; cursor: pointer; }
+  .field-chip:hover { background: #ECF3FF; border-color: #3d64d7; color: #3d64d7; }
+  .field-chip .edit-ic { color: #99A0AE; }
+  .field-chip:hover .edit-ic { color: #3d64d7; }
+
+  /* Custom object dropdown (live list from Salesforce) */
+  .select-wrapper { position: relative; display: block; }
+  .select-wrapper .select-chev { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #525866; pointer-events: none; }
+  .object-select { width: 100%; padding: 9px 40px 9px 12px; border: 1px solid #E1E4EA; border-radius: 8px; background-color: #fff; font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace; font-size: 13px; color: #0E121B; outline: none; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; transition: border-color 0.12s, box-shadow 0.12s; }
+  .object-select:hover { border-color: #C5CAD3; background-color: #FAFBFC; }
+  .object-select:focus { border-color: #3d64d7; box-shadow: 0 0 0 3px #ECF3FF; }
+  .select-wrapper:hover .select-chev { color: #0E121B; }
+  .object-source-meta { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11.5px; color: #99A0AE; }
+  .object-source-meta .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #16A34A; flex-shrink: 0; }
+
+  /* Lookup parameter row */
+  .lookup-row { display: grid; grid-template-columns: 1fr 28px 1fr; gap: 0; align-items: end; }
+  .lookup-col { display: flex; flex-direction: column; gap: 5px; }
+  .lookup-label { font-size: 11.5px; font-weight: 600; color: #525866; text-transform: uppercase; letter-spacing: 0.04em; }
+  .lookup-equals { display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; color: #99A0AE; padding-bottom: 10px; }
+  .lookup-source-meta { display: flex; align-items: center; gap: 5px; margin-top: 5px; font-size: 11px; color: #99A0AE; }
+  .lookup-source-meta .live-dot { width: 5px; height: 5px; border-radius: 50%; background: #16A34A; flex-shrink: 0; }
+
+  /* Advanced settings (collapsible) */
+  .advanced { margin-top: 22px; padding-top: 16px; border-top: 1px solid #E1E4EA; }
+  .advanced-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 6px 0; font-size: 13px; font-weight: 500; color: #525866; user-select: none; }
+  .advanced-toggle .chev { color: #99A0AE; transition: transform 0.15s; }
+  .advanced.open .advanced-toggle .chev { transform: rotate(90deg); }
+  .advanced-body { margin-top: 10px; padding-left: 18px; display: none; }
+  .advanced.open .advanced-body { display: block; }
+  .advanced-section { margin-bottom: 16px; }
+  .advanced-section:last-child { margin-bottom: 0; }
+  .advanced-label { font-size: 12.5px; font-weight: 500; color: #0E121B; margin-bottom: 4px; }
+  .advanced-help { font-size: 11.5px; color: #99A0AE; line-height: 1.5; margin-bottom: 8px; }
+  .advanced-action-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border: 1px solid #E1E4EA; border-radius: 6px; background: #fff; font-size: 12px; color: #525866; cursor: pointer; font-family: inherit; }
+  .advanced-action-btn:hover { background: #F5F7FA; }
+
+  /* Context input chips */
+  .ctx-list { padding: 12px 14px; border: 1px solid #E1E4EA; border-radius: 8px; background: #FAFBFC; }
+  .ctx-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+  .ctx-row + .ctx-row { border-top: 1px dashed #E1E4EA; }
+  .ctx-var { font-family: 'SF Mono', monospace; font-size: 12px; color: #3d64d7; flex: 1; min-width: 0; }
+  .ctx-source { font-size: 11.5px; color: #525866; flex-shrink: 0; }
+  .ctx-source .src-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #fff; border: 1px solid #E1E4EA; border-radius: 999px; font-weight: 500; }
+  .ctx-empty { font-size: 12px; color: #99A0AE; font-style: italic; }
+
+  /* Disabled/N-A bucket */
+  .na-block { padding: 12px 14px; border: 1px dashed #E1E4EA; border-radius: 8px; background: #FAFBFC; font-size: 12px; color: #525866; line-height: 1.5; }
+  .na-block b { color: #0E121B; font-weight: 600; }
+  .na-block .midcall-link { color: #3d64d7; text-decoration: underline; cursor: pointer; }
+
+  /* Response field mapping rows */
+  .resp-row { display: grid; grid-template-columns: 1fr 14px 1fr 24px; gap: 6px; margin-bottom: 5px; align-items: center; }
+  .resp-row .arrow-ic { color: #99A0AE; display: flex; align-items: center; justify-content: center; }
+
+  /* Field checklist with attribute → variable mapping */
+  .map-table { background: #fff; }
+  .field-search { position: relative; margin-bottom: 6px; }
+  .field-search input { width: 100%; padding: 8px 12px 8px 32px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 12.5px; outline: none; font-family: inherit; }
+  .field-search input::placeholder { color: #99A0AE; }
+  .field-search svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #99A0AE; }
+  .field-search .count { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #99A0AE; }
+  .map-thead { display: grid; grid-template-columns: 24px 1fr 24px 1fr 100px; gap: 12px; padding: 8px 12px 8px 12px; font-size: 10.5px; font-weight: 500; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.4px; align-items: center; }
+  .field-list { max-height: 260px; overflow-y: auto; border: 1px solid #E1E4EA; border-radius: 8px; }
+  .map-row { display: grid; grid-template-columns: 24px 1fr 24px 1fr 100px; gap: 12px; align-items: center; padding: 8px 12px; border-bottom: 1px solid #F3F4F6; }
+  .map-row:last-of-type { border-bottom: none; }
+  .map-row:hover { background: #FAFBFC; }
+  .map-checkbox { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid #D1D5DB; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; background: #fff; cursor: pointer; }
+  .map-checkbox.checked { background: #3d64d7; border-color: #3d64d7; }
+  .map-field-name { font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace; font-size: 12.5px; color: #0E121B; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .map-arrow { color: #99A0AE; text-align: center; font-size: 14px; }
+  .map-var-input { width: 100%; padding: 5px 8px; border: 1px solid #E1E4EA; border-radius: 6px; font-family: 'SF Mono', monospace; font-size: 12.5px; color: #3d64d7; outline: none; background: #FAFBFC; min-width: 0; }
+  .map-var-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px #ECF3FF; background: #fff; }
+  .type-select-wrap { position: relative; display: block; }
+  .type-select-wrap .type-chev { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); color: #99A0AE; pointer-events: none; }
+  .map-type-select { width: 100%; padding: 4px 24px 4px 10px; border: 1px solid #E1E4EA; border-radius: 999px; background-color: #F3F4F6; font-size: 11px; font-weight: 500; color: #525866; outline: none; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; font-family: inherit; transition: border-color 0.12s; }
+  .map-type-select:hover { border-color: #C5CAD3; }
+  .map-type-select:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px #ECF3FF; }
+  .map-footer-help { margin-top: 12px; padding: 10px 12px; background: #F7FAFF; border: 1px solid #DBEAFE; border-radius: 8px; font-size: 11.5px; color: #1E40AF; line-height: 1.5; }
+  .map-footer-help code { font-family: 'SF Mono', monospace; font-size: 11px; color: #1E40AF; background: #DBEAFE; padding: 1px 5px; border-radius: 3px; }
+  .selected-summary { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px; background: #ECF3FF; color: #3d64d7; border-radius: 999px; font-size: 10.5px; font-weight: 600; margin-left: 6px; }
+
+  /* Latency cap row */
+  .latency-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .latency-help { font-size: 11.5px; color: #99A0AE; margin-top: 4px; line-height: 1.4; }
+
+  /* Mode toggle (Auto vs Custom) */
+  .mode-toggle { display: inline-flex; padding: 3px; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 10px; gap: 2px; margin-bottom: 12px; }
+  .mode-toggle-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid transparent; border-radius: 7px; background: transparent; font-size: 12.5px; font-weight: 500; color: #525866; cursor: pointer; font-family: inherit; transition: all 0.12s; }
+  .mode-toggle-btn:hover { color: #0E121B; }
+  .mode-toggle-btn.active { background: #fff; border-color: #E1E4EA; color: #0E121B; box-shadow: 0 1px 2px rgba(15,23,42,0.06); }
+  .mode-toggle-btn .reco { font-size: 10px; font-weight: 600; color: #3d64d7; background: #ECF3FF; padding: 1px 6px; border-radius: 999px; margin-left: 2px; }
+  .mode-toggle-btn .mode-icon { color: #99A0AE; flex-shrink: 0; }
+  .mode-toggle-btn.active .mode-icon { color: #3d64d7; }
+
+  /* Auto mode preview banner */
+  .auto-banner { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px solid #DBEAFE; background: #F7FAFF; border-radius: 10px; margin-bottom: 8px; }
+  .auto-banner-icon { width: 24px; height: 24px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #ECF3FF; border-radius: 6px; color: #3d64d7; }
+  .auto-banner-text { flex: 1; min-width: 0; font-size: 12px; color: #1E40AF; line-height: 1.5; }
+  .auto-banner-text b { color: #0E121B; font-weight: 600; }
+
+  /* Auto mode read-only row list (same shape as Custom checklist, no checkbox/edit) */
+  .auto-list { border: 1px solid #E1E4EA; border-radius: 8px; max-height: 260px; overflow-y: auto; }
+  .auto-thead { display: grid; grid-template-columns: 1fr 24px 1fr 100px; gap: 12px; padding: 8px 12px; font-size: 10.5px; font-weight: 500; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.4px; align-items: center; }
+  .auto-row { display: grid; grid-template-columns: 1fr 24px 1fr 100px; gap: 12px; align-items: center; padding: 8px 12px; border-bottom: 1px solid #F3F4F6; }
+  .auto-row:last-of-type { border-bottom: none; }
+  .auto-row:hover { background: #FAFBFC; }
+  .auto-row .attr { font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace; font-size: 12.5px; color: #0E121B; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .auto-row .arrow { color: #99A0AE; text-align: center; font-size: 14px; }
+  .auto-row .var { font-family: 'SF Mono', monospace; font-size: 12.5px; color: #3d64d7; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .auto-row .type { display: inline-flex; align-items: center; padding: 3px 10px; background: #F3F4F6; border: 1px solid #E1E4EA; border-radius: 999px; font-size: 11px; font-weight: 500; color: #525866; width: fit-content; }
+
+  .modal-footer { padding: 12px 24px; border-top: 1px solid #E1E4EA; display: flex; justify-content: flex-end; align-items: center; flex-shrink: 0; background: #fff; }
+  .modal-footer .left { display: flex; gap: 8px; }
+  .modal-footer .right { display: flex; gap: 8px; }
+  .btn-tertiary { padding: 8px 14px; border: 1px solid transparent; border-radius: 8px; background: transparent; font-size: 13px; color: #525866; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-tertiary:hover { background: #F3F4F6; }
+  .btn-secondary { padding: 8px 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #525866; cursor: pointer; font-weight: 500; }
+  .btn-primary { padding: 8px 16px; border: 1px solid #0E121B; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; cursor: pointer; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<main class="main">
+  <div class="agent-header">
+    <span class="home-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3.5 8.5L10 3l6.5 5.5V16a1 1 0 0 1-1 1h-3v-5h-5v5h-3a1 1 0 0 1-1-1V8.5z" stroke="#525866" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+    <div class="agent-name"><h1>Single-Prompt Agent</h1></div>
+    <div class="top-tabs"><span class="top-tab active">Create</span><span class="top-tab">Simulation</span></div>
+    <span class="top-spacer"></span>
+    <button class="btn-publish"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10l3 3 7-7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Publish</button>
+  </div>
+  <div class="agent-meta">
+    <span>Agent ID: ag...cf1</span><span class="dot"></span>
+    <span>Retell LLM ID: ll...3f3</span><span class="dot"></span>
+    <span>$0.115/min</span>
+  </div>
+  <div class="settings-bar">
+    <span class="settings-pill"><svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M10 2L13 8l6 1-4.5 4.5L16 19l-6-3-6 3 1.5-5.5L1 9l6-1z" fill="#3d64d7"/></svg>GPT 4.1 <span class="chev">▾</span></span>
+    <span class="star">☼</span>
+    <span class="divider"></span>
+    <span class="settings-pill"><span style="display:inline-flex;width:14px;height:14px;background:#16A34A;color:#fff;border-radius:50%;align-items:center;justify-content:center;font-size:9px;font-weight:600;">C</span>Cimo <span class="chev">▾</span></span>
+    <span class="spacer"></span>
+  </div>
+  <div class="agent-body">
+    <div class="prompt-col"><textarea class="prompt-textarea" placeholder="Type in a universal prompt for your agent..."></textarea></div>
+    <div class="settings-col"></div>
+    <div class="test-col"></div>
+  </div>
+</main>
+
+<!-- Custom function modal -->
+<div class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="logo"><svg width="26" height="17" viewBox="0 0 24 16"><path d="M9.13 2.42a4.42 4.42 0 0 1 3.18-1.36c1.62 0 3.04.92 3.79 2.27a5.45 5.45 0 0 1 2.22-.47 5.55 5.55 0 0 1 5.55 5.6 5.55 5.55 0 0 1-5.55 5.6c-.41 0-.81-.04-1.2-.13a4.06 4.06 0 0 1-3.55 2.07c-.6 0-1.18-.13-1.7-.36a4.62 4.62 0 0 1-4.29 2.86c-2 0-3.74-1.18-4.55-2.89a4.27 4.27 0 0 1-.88.09 4.34 4.34 0 0 1-2.13-8.13 5.06 5.06 0 0 1-.42-2.03A5.07 5.07 0 0 1 4.65 0a5.04 5.04 0 0 1 4.48 2.42z" fill="#00A1E0"/></svg></span>
+      <div class="titles">
+        <h2>Set up custom object lookup <span class="integration">— Salesforce</span></h2>
+        <div class="sub">Pick the object, tell Retell how to find the right record, and choose which fields the agent sees before saying hello.</div>
+      </div>
+      <span class="close"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 5l10 10M15 5L5 15" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+    </div>
+
+    <div class="modal-body">
+      <!-- Which custom object -->
+      <div class="bucket">
+        <div class="bucket-head">
+          <span class="bucket-title">Which custom object should we look up?</span>
+        </div>
+        <div class="bucket-helper">Pick the Salesforce custom object you want to pull into Retell. The field list below loads from whatever you choose.</div>
+        <div class="select-wrapper">
+          <select class="object-select" id="object-select">
+            <option value="vehicle__c" selected>vehicle__c</option>
+            <option value="retell_AI_call__c">retell_AI_call__c</option>
+            <option value="service_record__c">service_record__c</option>
+            <option value="warranty_claim__c">warranty_claim__c</option>
+            <option value="dispatch_event__c">dispatch_event__c</option>
+            <option value="callback_request__c">callback_request__c</option>
+            <option value="opportunity_extension__c">opportunity_extension__c</option>
+          </select>
+          <svg class="select-chev" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <!-- Primary key / lookup parameter -->
+      <div class="bucket">
+        <div class="bucket-head">
+          <span class="bucket-title">Which field identifies the caller?</span>
+        </div>
+        <div class="bucket-helper">Every object stores caller data differently. Pick the field that links the caller to a row in this object, then map it to the matching Retell value. Retell loads all available fields from the Salesforce Schema API.</div>
+        <div class="lookup-row">
+          <div class="lookup-col">
+            <span class="lookup-label">Salesforce field</span>
+            <div class="select-wrapper">
+              <select class="object-select" id="lookup-field-select">
+                <option value="Owner_Phone__c" selected>Owner_Phone__c</option>
+                <option value="Name">Name</option>
+                <option value="VIN__c">VIN__c</option>
+                <option value="Make__c">Make__c</option>
+                <option value="Model__c">Model__c</option>
+                <option value="Year__c">Year__c</option>
+                <option value="Last_Service_Date__c">Last_Service_Date__c</option>
+              </select>
+              <svg class="select-chev" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="lookup-source-meta"><span class="live-dot"></span> Fields loaded from Salesforce Schema API</div>
+          </div>
+          <div class="lookup-equals">=</div>
+          <div class="lookup-col">
+            <span class="lookup-label">Retell variable</span>
+            <div class="select-wrapper">
+              <select class="object-select" id="lookup-value-select">
+                <option value="{{from_number}}">{{from_number}}</option>
+                <option value="{{to_number}}">{{to_number}}</option>
+                <option value="{{trigger.record_id}}">{{trigger.record_id}}</option>
+                <option value="{{trigger.email}}">{{trigger.email}}</option>
+                <option value="{{trigger.customer_id}}">{{trigger.customer_id}}</option>
+              </select>
+              <svg class="select-chev" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="lookup-source-meta">From the incoming call or trigger payload</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Which attributes -->
+      <div class="bucket">
+        <div class="bucket-head">
+          <span class="bucket-title">What attributes from this object should the agent see?<span class="selected-summary" id="selected-count" style="display:none">5 selected</span></span>
+        </div>
+        <div class="bucket-helper">By default, Retell pulls every attribute from this object and names each as a dynamic variable for you. Switch to Custom if you want to hand-pick attributes or rename them yourself.</div>
+
+        <div class="mode-toggle">
+          <button class="mode-toggle-btn active" data-mode="auto">
+            <svg class="mode-icon" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L9.6 5.4 13.5 7l-3.9 1.6L8 12.5 6.4 8.6 2.5 7l3.9-1.6z" fill="currentColor"/></svg>
+            Auto
+            <span class="reco">Recommended</span>
+          </button>
+          <button class="mode-toggle-btn" data-mode="custom">
+            <svg class="mode-icon" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h7M2 8h11M2 12h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="11" cy="4" r="1.6" fill="currentColor"/><circle cx="5" cy="12" r="1.6" fill="currentColor"/></svg>
+            Custom
+          </button>
+        </div>
+
+        <!-- Auto mode preview -->
+        <div id="auto-preview">
+          <div class="auto-banner">
+            <span class="auto-banner-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L9.6 5.4 13.5 7l-3.9 1.6L8 12.5 6.4 8.6 2.5 7l3.9-1.6z" fill="currentColor"/></svg></span>
+            <div class="auto-banner-text" id="auto-banner-text"><b>All 12 attributes from vehicle__c</b> will be available to the agent as dynamic variables. Retell auto-names each one. The LLM picks what's relevant during the conversation.</div>
+          </div>
+          <div class="auto-thead">
+            <span>Salesforce attribute</span>
+            <span></span>
+            <span>Dynamic variable</span>
+            <span>Type</span>
+          </div>
+          <div class="auto-list" id="auto-list"></div>
+        </div>
+
+        <!-- Custom mode (existing checklist) -->
+        <div id="custom-mode" style="display:none">
+        <div class="field-search">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input placeholder="Search attributes..." id="field-search" />
+          <span class="count" id="field-count">9 of 14</span>
+        </div>
+
+        <div class="map-thead">
+          <span></span>
+          <span>Salesforce attribute</span>
+          <span></span>
+          <span>Dynamic variable</span>
+          <span>Type</span>
+        </div>
+
+        <div class="field-list" id="field-list">
+          <div class="map-row">
+            <span class="map-checkbox checked"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="map-field-name">Name</span>
+            <span class="map-field-meta">Standard</span>
+          </div>
+          <div class="map-row">
+            <span class="map-checkbox checked"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="map-field-name">Lead__c</span>
+            <span class="map-field-meta custom">Custom</span>
+          </div>
+          <div class="map-row">
+            <span class="map-checkbox checked"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="map-field-name">Contact__c</span>
+            <span class="map-field-meta custom">Custom</span>
+          </div>
+          <div class="map-row">
+            <span class="map-checkbox checked"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="map-field-name">Call_Reason__c</span>
+            <span class="map-field-meta custom">Custom</span>
+          </div>
+          <div class="map-row">
+            <span class="map-checkbox checked"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="map-field-name">Dispatcher_Notes__c</span>
+            <span class="map-field-meta custom">Custom</span>
+          </div>
+          <div class="map-row">
+            <span class="map-checkbox"></span>
+            <span class="map-field-name">Scheduled_At__c</span>
+            <span class="map-field-meta custom">Custom</span>
+          </div>
+          <div class="map-row">
+            <span class="map-checkbox"></span>
+            <span class="map-field-name">CreatedDate</span>
+            <span class="map-field-meta">Standard</span>
+          </div>
+          <div class="map-row">
+            <span class="map-checkbox"></span>
+            <span class="map-field-name">CreatedById</span>
+            <span class="map-field-meta">Standard</span>
+          </div>
+          <div class="map-row">
+            <span class="map-checkbox"></span>
+            <span class="map-field-name">Status__c</span>
+            <span class="map-field-meta custom">Custom</span>
+          </div>
+        </div>
+        </div><!-- /custom-mode -->
+
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <div class="right">
+        <button class="btn-secondary">Cancel</button>
+        <button class="btn-primary">Save and Publish</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const objectSchemas = {
+    'retell_AI_call__c': {
+      fields: [
+        { name: 'Name', dataType: 'Text' },
+        { name: 'Customer_Name__c', dataType: 'Text' },
+        { name: 'Customer_Phone__c', dataType: 'Phone' },
+        { name: 'Call_Reason__c', dataType: 'Picklist' },
+        { name: 'Dispatcher_Notes__c', dataType: 'Text' },
+        { name: 'Scheduled_At__c', dataType: 'Date' },
+        { name: 'CreatedDate', dataType: 'Date' },
+        { name: 'CreatedById', dataType: 'Text' },
+        { name: 'Status__c', dataType: 'Picklist' }
+      ],
+      defaultChecked: ['Name', 'Customer_Name__c', 'Customer_Phone__c', 'Call_Reason__c', 'Dispatcher_Notes__c'],
+      totalFields: 14
+    },
+    'service_record__c': {
+      fields: [
+        { name: 'Name', dataType: 'Text' },
+        { name: 'Vehicle_VIN__c', dataType: 'Text' },
+        { name: 'Service_Type__c', dataType: 'Picklist' },
+        { name: 'Service_Date__c', dataType: 'Date' },
+        { name: 'Mileage__c', dataType: 'Number' },
+        { name: 'Technician_Name__c', dataType: 'Text' },
+        { name: 'Cost__c', dataType: 'Currency' },
+        { name: 'CreatedDate', dataType: 'Date' },
+        { name: 'Notes__c', dataType: 'Text' }
+      ],
+      defaultChecked: ['Name', 'Vehicle_VIN__c', 'Service_Type__c', 'Service_Date__c'],
+      totalFields: 11
+    },
+    'vehicle__c': {
+      fields: [
+        { name: 'Name', dataType: 'Text' },
+        { name: 'VIN__c', dataType: 'Text' },
+        { name: 'Make__c', dataType: 'Text' },
+        { name: 'Model__c', dataType: 'Text' },
+        { name: 'Year__c', dataType: 'Number' },
+        { name: 'Owner_Name__c', dataType: 'Text' },
+        { name: 'Owner_Phone__c', dataType: 'Phone' },
+        { name: 'Last_Service_Date__c', dataType: 'Date' },
+        { name: 'CreatedDate', dataType: 'Date' }
+      ],
+      defaultChecked: ['Name', 'VIN__c', 'Make__c', 'Model__c', 'Year__c'],
+      totalFields: 12,
+      phoneFields: ['Owner_Phone__c']
+    },
+    'warranty_claim__c': {
+      fields: [
+        { name: 'Name', dataType: 'Text' },
+        { name: 'Claim_Number__c', dataType: 'Text' },
+        { name: 'Vehicle_VIN__c', dataType: 'Text' },
+        { name: 'Issue_Description__c', dataType: 'Text' },
+        { name: 'Status__c', dataType: 'Picklist' },
+        { name: 'Claim_Amount__c', dataType: 'Currency' },
+        { name: 'Approver_Name__c', dataType: 'Text' },
+        { name: 'CreatedDate', dataType: 'Date' }
+      ],
+      defaultChecked: ['Name', 'Claim_Number__c', 'Vehicle_VIN__c', 'Issue_Description__c', 'Status__c'],
+      totalFields: 9
+    },
+    'dispatch_event__c': {
+      fields: [
+        { name: 'Name', dataType: 'Text' },
+        { name: 'Driver_Name__c', dataType: 'Text' },
+        { name: 'Origin_Address__c', dataType: 'Text' },
+        { name: 'Destination_Address__c', dataType: 'Text' },
+        { name: 'Scheduled_Time__c', dataType: 'Date' },
+        { name: 'Status__c', dataType: 'Picklist' },
+        { name: 'CreatedDate', dataType: 'Date' }
+      ],
+      defaultChecked: ['Name', 'Driver_Name__c', 'Origin_Address__c', 'Destination_Address__c', 'Scheduled_Time__c'],
+      totalFields: 8
+    },
+    'callback_request__c': {
+      fields: [
+        { name: 'Name', dataType: 'Text' },
+        { name: 'Caller_Name__c', dataType: 'Text' },
+        { name: 'Callback_Time__c', dataType: 'Date' },
+        { name: 'Reason__c', dataType: 'Picklist' },
+        { name: 'Priority__c', dataType: 'Picklist' },
+        { name: 'Status__c', dataType: 'Picklist' },
+        { name: 'CreatedDate', dataType: 'Date' }
+      ],
+      defaultChecked: ['Name', 'Caller_Name__c', 'Callback_Time__c', 'Reason__c'],
+      totalFields: 7
+    },
+    'opportunity_extension__c': {
+      fields: [
+        { name: 'Name', dataType: 'Text' },
+        { name: 'Opportunity_Name__c', dataType: 'Text' },
+        { name: 'Extended_Until__c', dataType: 'Date' },
+        { name: 'Reason__c', dataType: 'Text' },
+        { name: 'Approver_Name__c', dataType: 'Text' },
+        { name: 'CreatedDate', dataType: 'Date' }
+      ],
+      defaultChecked: ['Name', 'Opportunity_Name__c', 'Extended_Until__c', 'Reason__c'],
+      totalFields: 10
+    }
+  };
+
+  const checkSvg = '<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  // Auto-derive a clean Retell variable name from a Salesforce attribute name
+  function autoVarName(attr) {
+    return attr
+      .replace(/__c$/, '')           // strip __c suffix
+      .replace(/([a-z])([A-Z])/g, '$1_$2')  // CamelCase → snake_case
+      .toLowerCase();
+  }
+
+  function renderFieldList(objectName) {
+    const schema = objectSchemas[objectName];
+    if (!schema) return;
+
+    const list = document.getElementById('field-list');
+    list.innerHTML = '';
+
+    schema.fields.forEach(field => {
+      const checked = schema.defaultChecked.includes(field.name);
+      const varName = autoVarName(field.name);
+      const row = document.createElement('div');
+      row.className = 'map-row';
+      const types = ['Text','Number','Date','Picklist','Email','Phone','Currency','Boolean'];
+      const typeOpts = types.map(t => `<option ${t === field.dataType ? 'selected' : ''}>${t}</option>`).join('');
+      row.innerHTML = `
+        <span class="map-checkbox ${checked ? 'checked' : ''}">${checked ? checkSvg : ''}</span>
+        <span class="map-field-name" title="${field.name}">${field.name}</span>
+        <span class="map-arrow">↔</span>
+        <input class="map-var-input" value="{{${varName}}}" />
+        <span class="type-select-wrap">
+          <select class="map-type-select ${field.dataType.toLowerCase()}">${typeOpts}</select>
+          <svg class="type-chev" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      `;
+      const checkbox = row.querySelector('.map-checkbox');
+      checkbox.addEventListener('click', () => {
+        if (checkbox.classList.contains('checked')) {
+          checkbox.classList.remove('checked');
+          checkbox.innerHTML = '';
+        } else {
+          checkbox.classList.add('checked');
+          checkbox.innerHTML = checkSvg;
+        }
+        updateSelectedCount();
+      });
+      list.appendChild(row);
+    });
+
+    document.getElementById('field-count').textContent = `${schema.fields.length} of ${schema.totalFields}`;
+    updateSelectedCount();
+  }
+
+  function updateSelectedCount() {
+    const count = document.querySelectorAll('#field-list .map-checkbox.checked').length;
+    document.getElementById('selected-count').textContent = `${count} selected`;
+  }
+
+  function updateAutoPreview(objectName) {
+    const schema = objectSchemas[objectName];
+    if (!schema) return;
+    const total = schema.totalFields;
+    document.getElementById('auto-banner-text').innerHTML =
+      `<b>All ${total} attributes from ${objectName}</b> will be available to the agent as dynamic variables. Retell auto-names each one. The LLM picks what's relevant during the conversation.`;
+    const list = document.getElementById('auto-list');
+    list.innerHTML = '';
+    schema.fields.forEach(f => {
+      const row = document.createElement('div');
+      row.className = 'auto-row';
+      row.innerHTML = `
+        <span class="attr" title="${f.name}">${f.name}</span>
+        <span class="arrow">↔</span>
+        <span class="var">{{${autoVarName(f.name)}}}</span>
+        <span class="type">${f.dataType}</span>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  function updateLookupFieldDropdown(objectName) {
+    const schema = objectSchemas[objectName];
+    if (!schema) return;
+    const sel = document.getElementById('lookup-field-select');
+    sel.innerHTML = '';
+    // Phone-type fields first, then the rest
+    const phoneFields = (schema.phoneFields || []);
+    const allFields = schema.fields.map(f => f.name);
+    const sorted = [...phoneFields, ...allFields.filter(n => !phoneFields.includes(n))];
+    sorted.forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      if (phoneFields.includes(name)) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+
+  document.getElementById('object-select').addEventListener('change', (e) => {
+    renderFieldList(e.target.value);
+    updateAutoPreview(e.target.value);
+    updateLookupFieldDropdown(e.target.value);
+  });
+
+  // Auto / Custom mode toggle
+  document.querySelectorAll('.mode-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mode-toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const mode = btn.dataset.mode;
+      const autoPreview = document.getElementById('auto-preview');
+      const customMode = document.getElementById('custom-mode');
+      const summary = document.getElementById('selected-count');
+      if (mode === 'auto') {
+        autoPreview.style.display = 'block';
+        customMode.style.display = 'none';
+        if (summary) summary.style.display = 'none';
+      } else {
+        autoPreview.style.display = 'none';
+        customMode.style.display = 'block';
+        if (summary) summary.style.display = 'inline-flex';
+      }
+    });
+  });
+
+  // Initial render
+  renderFieldList('vehicle__c');
+  updateAutoPreview('vehicle__c');
+  updateLookupFieldDropdown('vehicle__c');
+
+
+  // Field search filter
+  document.getElementById('field-search').addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase();
+    document.querySelectorAll('#field-list .map-row').forEach(row => {
+      const name = row.querySelector('.map-field-name').textContent.toLowerCase();
+      row.style.display = name.includes(query) ? 'grid' : 'none';
+    });
+  });
+</script>
+
+</body>
+</html>

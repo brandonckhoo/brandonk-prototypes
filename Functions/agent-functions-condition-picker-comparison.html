@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Condition Picker: Before / After</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    color: #0A0A0A; background: #F0F2F5;
+    min-height: 100vh; padding: 40px 32px;
+  }
+
+  /* ─── Page header ──────────────────────────────────────── */
+  .page-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 28px;
+  }
+  .page-title { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .page-subtitle { font-size: 13px; color: #6B7280; }
+
+  /* ─── Two-column layout ──────────────────────────────────── */
+  .comparison {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    max-width: 1320px; margin: 0 auto;
+  }
+  .col-label {
+    font-size: 11px; font-weight: 600; color: #99A0AE;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .col-label span {
+    display: inline-block; width: 18px; height: 18px; border-radius: 50%;
+    background: #0E121B; color: #fff; font-size: 10px; font-weight: 700;
+    text-align: center; line-height: 18px; margin-right: 6px;
+    text-transform: none; letter-spacing: 0;
+  }
+
+  /* ─── Modal shell ───────────────────────────────────────── */
+  .modal {
+    background: #fff; border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+    overflow: visible;
+  }
+  .modal-header {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 18px 22px 14px; border-bottom: 1px solid #E1E4EA;
+  }
+  .modal-app-icon { width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0; overflow: hidden; }
+  .modal-title-block { flex: 1; }
+  .modal-title { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .modal-subtitle { font-size: 12px; color: #6B7280; margin-top: 2px; }
+  .modal-close { width: 26px; height: 26px; border-radius: 6px; border: none; background: none; display: flex; align-items: center; justify-content: center; color: #99A0AE; cursor: pointer; font-family: inherit; flex-shrink: 0; }
+
+  .modal-body { padding: 0 22px; }
+
+  /* Enable row */
+  .enable-row { display: flex; align-items: flex-start; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #E1E4EA; gap: 14px; }
+  .enable-label { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .enable-desc { font-size: 12px; color: #6B7280; margin-top: 2px; line-height: 1.4; }
+  .toggle { width: 38px; height: 20px; border-radius: 10px; position: relative; flex-shrink: 0; margin-top: 2px; }
+  .toggle.on { background: #3d64d7; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.18); }
+  .toggle.on::after { left: 20px; }
+
+  /* Field mapping */
+  .field-section { padding: 14px 0; border-bottom: 1px solid #E1E4EA; }
+  .field-label { font-size: 12px; font-weight: 600; color: #0E121B; margin-bottom: 8px; }
+  .field-map-header { display: grid; grid-template-columns: 1fr 24px 1fr 24px; gap: 5px; margin-bottom: 5px; }
+  .fmh-cell { font-size: 10px; font-weight: 500; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.05em; }
+  .field-map-row { display: grid; grid-template-columns: 1fr 24px 1fr 24px; gap: 5px; align-items: center; margin-bottom: 5px; }
+  .fm-input { height: 32px; border: 1px solid #E1E4EA; border-radius: 7px; padding: 0 9px; font-size: 12px; color: #0E121B; background: #fff; font-family: inherit; width: 100%; }
+  .fm-input.var { font-family: 'SF Mono', ui-monospace, monospace; font-size: 11px; color: #3d64d7; }
+  .fm-arrow { display: flex; align-items: center; justify-content: center; color: #99A0AE; }
+  .fm-del { display: flex; align-items: center; justify-content: center; color: #CACFD8; font-size: 15px; background: none; border: none; cursor: pointer; font-family: inherit; }
+  .add-field-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; color: #3d64d7; background: none; border: none; cursor: pointer; font-family: inherit; padding: 4px 0 0; }
+
+  /* When to fire */
+  .when-section { padding: 14px 0; }
+  .when-label { font-size: 12px; font-weight: 600; color: #0E121B; margin-bottom: 8px; }
+  .radio-option { display: flex; align-items: flex-start; gap: 9px; padding: 9px 11px; border-radius: 7px; cursor: pointer; margin-bottom: 5px; }
+  .radio-option.unselected { border: 1px solid #E1E4EA; background: #fff; }
+  .radio-option.selected { border: 1px solid #D0D7E3; background: #fff; flex-direction: column; padding: 11px; gap: 0; }
+  .radio-option-header { display: flex; align-items: flex-start; gap: 9px; width: 100%; }
+  .radio-dot { width: 15px; height: 15px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; border: 2px solid #D1D5DB; background: #fff; position: relative; }
+  .radio-dot.checked { border-color: #3d64d7; }
+  .radio-dot.checked::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 7px; height: 7px; border-radius: 50%; background: #3d64d7; }
+  .radio-text { flex: 1; }
+  .radio-title { font-size: 13px; font-weight: 500; color: #0E121B; }
+  .radio-desc { font-size: 11px; color: #6B7280; margin-top: 2px; line-height: 1.4; }
+
+  /* Condition builder */
+  .condition-builder { margin-top: 10px; width: 100%; }
+  .cond-row-wrap { display: flex; align-items: center; gap: 7px; position: relative; }
+  .cond-row { display: flex; align-items: center; gap: 5px; flex: 1; }
+  .cond-cell {
+    display: flex; align-items: center; padding: 0 9px; height: 32px;
+    font-size: 12px; color: #0E121B; cursor: pointer; background: #fff;
+    white-space: nowrap; border: 1px solid #E1E4EA; border-radius: 7px;
+  }
+  .cond-cell.field { width: 140px; justify-content: space-between; gap: 5px; }
+  .cond-cell.field.open { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.12); }
+  .cond-cell.op { color: #525866; font-weight: 500; padding: 0 11px; }
+  .cond-cell.val { width: 120px; }
+  .cond-del { width: 22px; height: 22px; border: none; background: none; color: #CACFD8; cursor: pointer; font-size: 17px; line-height: 1; display: flex; align-items: center; justify-content: center; border-radius: 4px; flex-shrink: 0; font-family: inherit; }
+  .cond-connector { font-size: 10px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; padding: 5px 0; margin-left: 1px; }
+  .add-cond-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; color: #3d64d7; background: none; border: none; font-family: inherit; padding: 7px 0 0; cursor: pointer; }
+
+  /* ─── Picker dropdown ───────────────────────────────────── */
+  .var-picker {
+    position: absolute; top: calc(100% + 4px); left: 0;
+    width: 248px; background: #fff;
+    border: 1px solid #E1E4EA; border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.07);
+    z-index: 50;
+  }
+  .picker-search { display: flex; align-items: center; gap: 7px; padding: 7px 10px; border-bottom: 1px solid #E1E4EA; }
+  .picker-search svg { color: #99A0AE; flex-shrink: 0; }
+  .picker-search input { flex: 1; border: none; outline: none; font-size: 12px; color: #0E121B; font-family: inherit; background: transparent; }
+  .picker-search input::placeholder { color: #99A0AE; }
+  .picker-body { max-height: 210px; overflow-y: auto; padding: 3px 0; }
+  .picker-group-label { font-size: 10px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.06em; padding: 7px 11px 3px; }
+  .picker-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 11px; cursor: pointer; gap: 7px; }
+  .picker-item:hover { background: #F5F7FA; }
+  .picker-item.selected { background: #EEF3FF; }
+  .picker-item-name { font-family: 'SF Mono', ui-monospace, monospace; font-size: 11px; color: #0E121B; flex: 1; }
+  .picker-item.selected .picker-item-name { color: #3d64d7; font-weight: 500; }
+  .picker-item-check { color: #3d64d7; flex-shrink: 0; }
+  .picker-divider { height: 1px; background: #F3F4F6; margin: 3px 0; }
+
+  /* Modal footer */
+  .modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 7px; padding: 13px 22px; border-top: 1px solid #E1E4EA; }
+  .btn-cancel { height: 34px; padding: 0 14px; border: 1px solid #E1E4EA; border-radius: 7px; background: #fff; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; font-family: inherit; }
+  .btn-save { height: 34px; padding: 0 18px; border: none; border-radius: 7px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+
+  /* Salesforce icon reused */
+  .sf-icon { width: 34px; height: 34px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <div class="page-title">4.7 — Condition field picker</div>
+    <div class="page-subtitle">Clicking the field cell opens a categorised variable picker. Selecting a variable collapses it.</div>
+  </div>
+</div>
+
+<div class="comparison">
+
+  <!-- ── LEFT: picker open ─────────────────────────────── -->
+  <div>
+    <div class="col-label"><span>1</span> Click field cell → picker opens</div>
+    <div class="modal">
+      <div class="modal-header">
+        <svg class="sf-icon" viewBox="0 0 34 34" fill="none"><rect width="34" height="34" rx="8" fill="#00A1E0"/><path d="M14.3 9.8a4.3 4.3 0 0 1 3.1-1.3c1.6 0 3 .8 3.8 2.1a4.7 4.7 0 0 1 1.9-.4c2.5 0 4.6 2.1 4.6 4.7s-2.1 4.7-4.6 4.7H11.1a3.5 3.5 0 0 1 0-7c.3 0 .5 0 .7.1a4.3 4.3 0 0 1 2.5-2.9z" fill="white"/></svg>
+        <div class="modal-title-block">
+          <div class="modal-title">Create Salesforce Lead</div>
+          <div class="modal-subtitle">Create a new lead in Salesforce after this agent's calls end.</div>
+        </div>
+        <button class="modal-close"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="enable-row">
+          <div><div class="enable-label">Enable</div><div class="enable-desc">Create a lead in Salesforce after each call that meets the condition.</div></div>
+          <div class="toggle on"></div>
+        </div>
+
+        <div class="field-section">
+          <div class="field-label">Field mapping</div>
+          <div class="field-map-header"><div class="fmh-cell">Salesforce field</div><div></div><div class="fmh-cell">Value</div><div></div></div>
+          <div class="field-map-row">
+            <input class="fm-input" value="FirstName" readonly/>
+            <div class="fm-arrow"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <input class="fm-input var" value="{{caller_first_name}}" readonly/>
+            <button class="fm-del">&times;</button>
+          </div>
+          <div class="field-map-row">
+            <input class="fm-input" value="Phone" readonly/>
+            <div class="fm-arrow"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <input class="fm-input var" value="{{caller_phone}}" readonly/>
+            <button class="fm-del">&times;</button>
+          </div>
+          <div class="field-map-row">
+            <input class="fm-input" value="Description" readonly/>
+            <div class="fm-arrow"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <input class="fm-input var" value="{{call_summary}}" readonly/>
+            <button class="fm-del">&times;</button>
+          </div>
+          <button class="add-field-btn"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Add field</button>
+        </div>
+
+        <div class="when-section">
+          <div class="when-label">When to fire</div>
+
+          <div class="radio-option unselected">
+            <div class="radio-option-header">
+              <div class="radio-dot"></div>
+              <div class="radio-text"><div class="radio-title">Every call</div><div class="radio-desc">Create a lead after each completed call.</div></div>
+            </div>
+          </div>
+
+          <div class="radio-option selected">
+            <div class="radio-option-header">
+              <div class="radio-dot checked"></div>
+              <div class="radio-text">
+                <div class="radio-title">Only when condition is met</div>
+                <div class="radio-desc">Gate on any call variable — post-call analysis fields, pre-call outputs, or inbound variables.</div>
+              </div>
+            </div>
+
+            <div class="condition-builder">
+              <!-- Row 1: picker OPEN -->
+              <div class="cond-row-wrap">
+                <div class="cond-row">
+                  <div class="cond-cell field open">
+                    <span>qualification</span>
+                    <svg width="11" height="11" viewBox="0 0 16 16" fill="none" style="color:#3d64d7;flex-shrink:0;"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  </div>
+                  <div class="cond-cell op">=</div>
+                  <div class="cond-cell val">qualified</div>
+                </div>
+                <button class="cond-del">&times;</button>
+
+                <!-- Picker dropdown -->
+                <div class="var-picker">
+                  <div class="picker-search">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M10 10l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                    <input type="text" placeholder="Search variables…"/>
+                  </div>
+                  <div class="picker-body">
+                    <div class="picker-group-label">Post-call</div>
+                    <div class="picker-item selected">
+                      <span class="picker-item-name">qualification</span>
+                      <svg class="picker-item-check" width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <div class="picker-item"><span class="picker-item-name">call_summary</span></div>
+                    <div class="picker-item"><span class="picker-item-name">call_successful</span></div>
+                    <div class="picker-item"><span class="picker-item-name">user_sentiment</span></div>
+                    <div class="picker-item"><span class="picker-item-name">confirmation_number</span></div>
+                    <div class="picker-item"><span class="picker-item-name">is_payment_successful</span></div>
+                    <div class="picker-item"><span class="picker-item-name">failed_reason</span></div>
+                    <div class="picker-divider"></div>
+                    <div class="picker-group-label">Pre-call</div>
+                    <div class="picker-item"><span class="picker-item-name">LeadStatus</span></div>
+                    <div class="picker-item"><span class="picker-item-name">AnnualRevenue</span></div>
+                    <div class="picker-divider"></div>
+                    <div class="picker-group-label">Inbound</div>
+                    <div class="picker-item"><span class="picker-item-name">record_id</span></div>
+                    <div class="picker-item"><span class="picker-item-name">campaign_source</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cond-connector">OR</div>
+              <div class="cond-row-wrap">
+                <div class="cond-row">
+                  <div class="cond-cell field">
+                    <span>sentiment</span>
+                    <svg width="11" height="11" viewBox="0 0 16 16" fill="none" style="color:#99A0AE;flex-shrink:0;"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  </div>
+                  <div class="cond-cell op">=</div>
+                  <div class="cond-cell val">negative</div>
+                </div>
+                <button class="cond-del">&times;</button>
+              </div>
+
+              <button class="add-cond-btn">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                Add condition
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel">Cancel</button>
+        <button class="btn-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT: picker collapsed ───────────────────────── -->
+  <div>
+    <div class="col-label"><span>2</span> Select variable → picker collapses</div>
+    <div class="modal">
+      <div class="modal-header">
+        <svg class="sf-icon" viewBox="0 0 34 34" fill="none"><rect width="34" height="34" rx="8" fill="#00A1E0"/><path d="M14.3 9.8a4.3 4.3 0 0 1 3.1-1.3c1.6 0 3 .8 3.8 2.1a4.7 4.7 0 0 1 1.9-.4c2.5 0 4.6 2.1 4.6 4.7s-2.1 4.7-4.6 4.7H11.1a3.5 3.5 0 0 1 0-7c.3 0 .5 0 .7.1a4.3 4.3 0 0 1 2.5-2.9z" fill="white"/></svg>
+        <div class="modal-title-block">
+          <div class="modal-title">Create Salesforce Lead</div>
+          <div class="modal-subtitle">Create a new lead in Salesforce after this agent's calls end.</div>
+        </div>
+        <button class="modal-close"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="enable-row">
+          <div><div class="enable-label">Enable</div><div class="enable-desc">Create a lead in Salesforce after each call that meets the condition.</div></div>
+          <div class="toggle on"></div>
+        </div>
+
+        <div class="field-section">
+          <div class="field-label">Field mapping</div>
+          <div class="field-map-header"><div class="fmh-cell">Salesforce field</div><div></div><div class="fmh-cell">Value</div><div></div></div>
+          <div class="field-map-row">
+            <input class="fm-input" value="FirstName" readonly/>
+            <div class="fm-arrow"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <input class="fm-input var" value="{{caller_first_name}}" readonly/>
+            <button class="fm-del">&times;</button>
+          </div>
+          <div class="field-map-row">
+            <input class="fm-input" value="Phone" readonly/>
+            <div class="fm-arrow"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <input class="fm-input var" value="{{caller_phone}}" readonly/>
+            <button class="fm-del">&times;</button>
+          </div>
+          <div class="field-map-row">
+            <input class="fm-input" value="Description" readonly/>
+            <div class="fm-arrow"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <input class="fm-input var" value="{{call_summary}}" readonly/>
+            <button class="fm-del">&times;</button>
+          </div>
+          <button class="add-field-btn"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Add field</button>
+        </div>
+
+        <div class="when-section">
+          <div class="when-label">When to fire</div>
+
+          <div class="radio-option unselected">
+            <div class="radio-option-header">
+              <div class="radio-dot"></div>
+              <div class="radio-text"><div class="radio-title">Every call</div><div class="radio-desc">Create a lead after each completed call.</div></div>
+            </div>
+          </div>
+
+          <div class="radio-option selected">
+            <div class="radio-option-header">
+              <div class="radio-dot checked"></div>
+              <div class="radio-text">
+                <div class="radio-title">Only when condition is met</div>
+                <div class="radio-desc">Gate on any call variable — post-call analysis fields, pre-call outputs, or inbound variables.</div>
+              </div>
+            </div>
+
+            <div class="condition-builder">
+              <!-- Row 1: picker CLOSED, variable selected -->
+              <div class="cond-row-wrap">
+                <div class="cond-row">
+                  <div class="cond-cell field">
+                    <span>qualification</span>
+                    <svg width="11" height="11" viewBox="0 0 16 16" fill="none" style="color:#99A0AE;flex-shrink:0;"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  </div>
+                  <div class="cond-cell op">=</div>
+                  <div class="cond-cell val">qualified</div>
+                </div>
+                <button class="cond-del">&times;</button>
+              </div>
+
+              <div class="cond-connector">OR</div>
+              <div class="cond-row-wrap">
+                <div class="cond-row">
+                  <div class="cond-cell field">
+                    <span>sentiment</span>
+                    <svg width="11" height="11" viewBox="0 0 16 16" fill="none" style="color:#99A0AE;flex-shrink:0;"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  </div>
+                  <div class="cond-cell op">=</div>
+                  <div class="cond-cell val">negative</div>
+                </div>
+                <button class="cond-del">&times;</button>
+              </div>
+
+              <button class="add-cond-btn">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                Add condition
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel">Cancel</button>
+        <button class="btn-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

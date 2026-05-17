@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Pre-call Custom Object Config (Auto / Custom)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #f5f7fa; min-height: 100vh; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.25); backdrop-filter: blur(6px); display: flex; align-items: flex-start; justify-content: center; padding: 48px 0; overflow: auto; }
+
+  .fm-modal { background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 960px; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Header */
+  .fm-header { display: flex; align-items: center; padding: 18px 24px; border-bottom: 1px solid #E1E4EA; gap: 12px; }
+  .sf-logo { width: 32px; height: 32px; background: #00A1E0; border-radius: 7px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .fm-title { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .fm-subtitle { font-size: 12.5px; color: #6B7280; margin-top: 2px; }
+  .fm-close { margin-left: auto; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; border-radius: 6px; color: #6B7280; }
+  .fm-close:hover { background: #F3F4F6; color: #0A0A0A; }
+
+  /* Body */
+  .fm-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+  .field-label { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 4px; }
+  .field-help { font-size: 12.5px; color: #6B7280; margin-bottom: 10px; line-height: 1.5; }
+
+  /* Custom object dropdown */
+  .obj-select-wrap { margin-bottom: 22px; }
+  .obj-select { width: 100%; height: 40px; padding: 0 32px 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13.5px; color: #0A0A0A; background: #fff; outline: none; font-family: inherit; appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M10 13.75L3.75 7.5H16.25L10 13.75Z' fill='%2399A0AE'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+  .obj-select:focus { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.1); }
+
+  /* Auto / Custom toggle */
+  .toggle-block { margin-bottom: 18px; }
+  .toggle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 4px; background: #F3F4F6; border-radius: 8px; }
+  .toggle-opt { padding: 10px 12px; border-radius: 6px; cursor: pointer; text-align: left; background: transparent; border: none; font-family: inherit; transition: all 0.15s; }
+  .toggle-opt.active { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .toggle-opt-title { font-size: 13px; font-weight: 600; color: #0E121B; display: flex; align-items: center; gap: 6px; }
+  .toggle-opt:not(.active) .toggle-opt-title { color: #6B7280; }
+  .toggle-opt-desc { font-size: 11.5px; color: #6B7280; margin-top: 2px; line-height: 1.4; }
+  .recommended-pill { display: inline-flex; align-items: center; padding: 1px 6px; background: #DCFCE7; color: #14532D; font-size: 9.5px; font-weight: 700; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  /* Auto explainer card */
+  .auto-card { padding: 14px 16px; background: #F8FAFC; border: 1px solid #E1E4EA; border-radius: 8px; margin-bottom: 16px; display: none; }
+  .auto-card.active { display: block; }
+  .auto-card-row { display: flex; gap: 10px; align-items: flex-start; }
+  .auto-card-icon { width: 28px; height: 28px; background: #DCFCE7; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .auto-card-text { font-size: 12.5px; color: #374151; line-height: 1.55; }
+  .auto-card-text b { color: #0E121B; }
+  .auto-stats { display: flex; gap: 12px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #E1E4EA; font-size: 11.5px; color: #6B7280; }
+  .auto-stat-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: #fff; border: 1px solid #E1E4EA; border-radius: 4px; font-family: 'SF Mono', Menlo, monospace; }
+  .auto-stat-pill b { color: #0E121B; font-weight: 600; }
+
+  /* Custom mode container */
+  .custom-block { display: none; }
+  .custom-block.active { display: block; }
+
+  .search-bar { position: relative; margin-bottom: 8px; }
+  .search-input { width: 100%; height: 36px; padding: 0 12px 0 34px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; color: #0A0A0A; background: #fff; outline: none; font-family: inherit; }
+  .search-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.1); }
+  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #99A0AE; pointer-events: none; }
+  .search-meta { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #99A0AE; }
+
+  .map-table { width: 100%; border-collapse: collapse; }
+  .map-table thead th { padding: 8px 6px; font-size: 10px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.05em; text-align: left; border-bottom: 1px solid #E1E4EA; }
+  .map-table tbody td { padding: 8px 6px; font-size: 12.5px; color: #0E121B; border-bottom: 1px solid #F3F4F6; vertical-align: middle; }
+  .map-table tbody tr:hover td { background: #FAFBFC; }
+  .map-checkbox { width: 16px; height: 16px; border-radius: 4px; cursor: pointer; accent-color: #3d64d7; }
+  .sf-attr { font-family: 'SF Mono', Menlo, monospace; font-size: 12px; color: #0E121B; }
+  .var-input { height: 28px; padding: 0 8px; border: 1px solid #E1E4EA; border-radius: 5px; font-size: 12px; color: #3d64d7; background: #fff; font-family: 'SF Mono', Menlo, monospace; outline: none; width: 100%; }
+  .var-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.1); }
+  .type-select { height: 28px; padding: 0 22px 0 8px; border: 1px solid #E1E4EA; border-radius: 5px; font-size: 11.5px; color: #525866; background: #fff; font-family: inherit; outline: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M10 13.75L3.75 7.5H16.25L10 13.75Z' fill='%2399A0AE'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; width: 100%; }
+  .arrow { color: #99A0AE; text-align: center; font-family: 'SF Mono', Menlo, monospace; font-size: 11px; }
+
+  /* Footer */
+  .fm-footer { display: flex; align-items: center; padding: 14px 24px; border-top: 1px solid #E1E4EA; gap: 8px; background: #FAFBFC; }
+  .fm-footer-meta { font-size: 12px; color: #6B7280; }
+  .fm-footer-meta b { color: #0E121B; font-weight: 600; }
+  .spacer { flex: 1; }
+  .btn { height: 36px; padding: 0 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; border: 1px solid #E1E4EA; background: #fff; color: #0E121B; }
+  .btn:hover { background: #F9FAFB; }
+  .btn-primary { background: #0E121B; color: #fff; border-color: #0E121B; }
+  .btn-primary:hover { background: #000; }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay">
+  <div class="fm-modal">
+
+    <!-- Header -->
+    <div class="fm-header">
+      <div class="sf-logo">SF</div>
+      <div>
+        <div class="fm-title">Configure pre-call function — Salesforce</div>
+        <div class="fm-subtitle"><span style="font-family: 'SF Mono', Menlo, monospace; font-size: 11.5px; color: #3d64d7;">get_salesforce_custom_object</span> · pulls a custom record onto the prompt before the agent speaks</div>
+      </div>
+      <button class="fm-close" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="fm-body">
+
+      <!-- Custom object dropdown (only for get_salesforce_custom_object) -->
+      <div class="obj-select-wrap">
+        <div class="field-label">Which custom object should we look up?</div>
+        <div class="field-help">Pick the Salesforce custom object you want to pull. The attribute list below loads from whatever you choose.</div>
+        <select class="obj-select">
+          <option>retell_AI_call__c</option>
+          <option>Home_Service_Job__c</option>
+          <option selected>vehicle__c</option>
+          <option>Patient_Record__c</option>
+          <option>Quote_Request__c</option>
+        </select>
+      </div>
+
+      <!-- Auto / Custom toggle -->
+      <div class="toggle-block">
+        <div class="field-label">What should the agent see from this record?</div>
+        <div class="field-help">Pick fields manually, or let Retell pull everything and let the agent's LLM decide what's relevant.</div>
+        <div class="toggle-row">
+          <button class="toggle-opt active" id="auto-btn" onclick="switchMode('auto')">
+            <div class="toggle-opt-title">Auto <span class="recommended-pill">Recommended</span></div>
+            <div class="toggle-opt-desc">Pull every attribute. LLM filters at runtime.</div>
+          </button>
+          <button class="toggle-opt" id="custom-btn" onclick="switchMode('custom')">
+            <div class="toggle-opt-title">Custom</div>
+            <div class="toggle-opt-desc">Pick specific attributes. Trim payload, rename variables.</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Auto state -->
+      <div class="auto-card active" id="auto-state">
+        <div class="auto-card-row">
+          <div class="auto-card-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="auto-card-text">
+            <b>Retell will pull every attribute on <span style="font-family: 'SF Mono', Menlo, monospace; font-size: 12px; color: #3d64d7;">vehicle__c</span> at call setup and expose each one as a dynamic variable.</b><br><br>
+            Variable names are auto-derived from the Salesforce field name (snake_case). The agent's LLM filters at runtime, picking only the fields relevant to the conversation. Zero setup.
+          </div>
+        </div>
+        <div class="auto-stats">
+          <span class="auto-stat-pill"><b>12</b> attributes</span>
+          <span class="auto-stat-pill">e.g. <b>{{get_salesforce_custom_object.name}}</b></span>
+          <span class="auto-stat-pill">refreshed 2m ago</span>
+        </div>
+      </div>
+
+      <!-- Custom state -->
+      <div class="custom-block" id="custom-state">
+        <div class="search-bar">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input class="search-input" type="text" placeholder="Search attributes…" />
+          <span class="search-meta">5 of 12 selected</span>
+        </div>
+
+        <table class="map-table">
+          <thead>
+            <tr>
+              <th style="width: 24px;"></th>
+              <th style="width: 35%;">Salesforce attribute</th>
+              <th style="width: 14px;"></th>
+              <th style="width: 35%;">Variable name</th>
+              <th style="width: 80px;">Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" class="map-checkbox" checked /></td>
+              <td><span class="sf-attr">Name</span></td>
+              <td class="arrow">→</td>
+              <td><input class="var-input" value="name" /></td>
+              <td><select class="type-select"><option>Text</option><option>Number</option><option>Date</option><option>Boolean</option></select></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="map-checkbox" checked /></td>
+              <td><span class="sf-attr">VIN__c</span></td>
+              <td class="arrow">→</td>
+              <td><input class="var-input" value="vin" /></td>
+              <td><select class="type-select"><option>Text</option><option>Number</option><option>Date</option></select></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="map-checkbox" checked /></td>
+              <td><span class="sf-attr">Make__c</span></td>
+              <td class="arrow">→</td>
+              <td><input class="var-input" value="make" /></td>
+              <td><select class="type-select"><option>Text</option><option>Number</option></select></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="map-checkbox" checked /></td>
+              <td><span class="sf-attr">Model__c</span></td>
+              <td class="arrow">→</td>
+              <td><input class="var-input" value="model" /></td>
+              <td><select class="type-select"><option>Text</option><option>Number</option></select></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="map-checkbox" checked /></td>
+              <td><span class="sf-attr">Year__c</span></td>
+              <td class="arrow">→</td>
+              <td><input class="var-input" value="year" /></td>
+              <td><select class="type-select"><option selected>Number</option><option>Text</option></select></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="map-checkbox" /></td>
+              <td><span class="sf-attr" style="color:#99A0AE;">Owner_Name__c</span></td>
+              <td class="arrow" style="color:#D1D5DB;">→</td>
+              <td><input class="var-input" value="owner_name" style="color:#99A0AE;" /></td>
+              <td><select class="type-select" style="color:#99A0AE;"><option>Text</option></select></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="map-checkbox" /></td>
+              <td><span class="sf-attr" style="color:#99A0AE;">Color__c</span></td>
+              <td class="arrow" style="color:#D1D5DB;">→</td>
+              <td><input class="var-input" value="color" style="color:#99A0AE;" /></td>
+              <td><select class="type-select" style="color:#99A0AE;"><option>Text</option></select></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="fm-footer">
+      <div class="fm-footer-meta" id="footer-meta"><b>Auto mode</b> · all 12 attributes will be available to the agent</div>
+      <div class="spacer"></div>
+      <button class="btn">Cancel</button>
+      <button class="btn btn-primary">Save and Publish</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function switchMode(mode) {
+    const autoBtn = document.getElementById('auto-btn');
+    const customBtn = document.getElementById('custom-btn');
+    const autoState = document.getElementById('auto-state');
+    const customState = document.getElementById('custom-state');
+    const footerMeta = document.getElementById('footer-meta');
+
+    if (mode === 'auto') {
+      autoBtn.classList.add('active');
+      customBtn.classList.remove('active');
+      autoState.classList.add('active');
+      customState.classList.remove('active');
+      footerMeta.innerHTML = '<b>Auto mode</b> · all 12 attributes will be available to the agent';
+    } else {
+      customBtn.classList.add('active');
+      autoBtn.classList.remove('active');
+      customState.classList.add('active');
+      autoState.classList.remove('active');
+      footerMeta.innerHTML = '<b>Custom mode</b> · 5 of 12 attributes selected';
+    }
+  }
+</script>
+
+</body>
+</html>

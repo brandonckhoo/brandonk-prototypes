@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Call History · CRM source on Dynamic Variables</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+
+  /* Sidebar */
+  .sidebar { width: 260px; min-width: 260px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 10px 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; cursor: pointer; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; flex-shrink: 0; }
+  .workspace-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .workspace-chevron { color: #99A0AE; flex-shrink: 0; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; line-height: 16px; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .nav-item:hover { background: rgba(0,0,0,0.03); }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #FFFFFF; }
+  .footer { padding: 16px 14px; }
+
+  /* Main */
+  .main { flex: 1; overflow: hidden; background: #fff; display: flex; flex-direction: column; }
+  .page-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px 10px; border-bottom: 1px solid #F1F5F9; }
+  .page-title { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; color: #0A0A0A; }
+  .page-dot { width: 10px; height: 10px; background: #3d64d7; border-radius: 50%; }
+  .pill-btn { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; color: #374151; white-space: nowrap; }
+
+  /* Filter row */
+  .filter-row { display: flex; align-items: center; gap: 8px; padding: 10px 24px; }
+  .filter-chip { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 1px solid #BFDBFE; border-radius: 6px; background: #EFF6FF; font-size: 13px; color: #1D4ED8; }
+  .sf-dot { width: 14px; height: 14px; background: #00A1E0; border-radius: 3px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 7px; font-weight: 700; flex-shrink: 0; }
+  .chip-x { color: #93C5FD; margin-left: 2px; font-size: 14px; }
+  .filter-spacer { flex: 1; }
+
+  /* Content */
+  .content { flex: 1; display: flex; overflow: hidden; }
+
+  /* Call list */
+  .call-list { flex: 1; overflow-y: auto; min-width: 0; }
+  .call-table { width: 100%; border-collapse: collapse; }
+  .call-table thead th { padding: 8px 12px; font-size: 12px; font-weight: 500; color: #6B7280; text-align: left; border-bottom: 1px solid #E1E4EA; white-space: nowrap; background: #F9FAFB; text-transform: uppercase; letter-spacing: 0.02em; }
+  .call-table tbody tr { cursor: pointer; }
+  .call-table tbody tr:hover { background: rgba(0,0,0,0.02); }
+  .call-table tbody tr.selected { background: rgba(61,100,215,0.04); }
+  .call-table tbody td { padding: 10px 12px; font-size: 13px; color: #0E121B; border-bottom: 1px solid #F1F5F9; vertical-align: middle; white-space: nowrap; }
+  .text-mono { font-family: 'SF Mono', Menlo, monospace; font-size: 11px; color: #525866; }
+  .status-badge { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+  .status-badge.ended { background: #DCFCE7; color: #166534; }
+  .tbl-footer { padding: 10px 12px; font-size: 12px; color: #6B7280; border-top: 1px solid #E1E4EA; }
+
+  /* Detail panel */
+  .detail-panel { width: 400px; min-width: 400px; border-left: 1px solid #E1E4EA; overflow-y: auto; background: #fff; }
+  .detail-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 14px 16px 10px; border-bottom: 1px solid #E1E4EA; }
+  .detail-ts { font-size: 13px; font-weight: 600; color: #0A0A0A; }
+  .detail-type { font-size: 12px; color: #6B7280; margin-left: 6px; }
+  .detail-meta-row { font-size: 12px; color: #6B7280; margin-top: 3px; line-height: 1.6; }
+  .detail-close { color: #99A0AE; cursor: pointer; }
+
+  /* Audio bar */
+  .audio-bar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid #E1E4EA; }
+  .play-btn { width: 26px; height: 26px; border-radius: 50%; background: #0E121B; color: #fff; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .audio-time { font-size: 11px; color: #525866; }
+  .audio-progress { flex: 1; height: 3px; background: #E1E4EA; border-radius: 2px; position: relative; }
+  .audio-progress::after { content: ''; position: absolute; left: 0; top: 0; width: 27%; height: 3px; background: #525866; border-radius: 2px; }
+  .audio-speed { font-size: 11px; color: #525866; padding: 3px 7px; border: 1px solid #E1E4EA; border-radius: 4px; cursor: pointer; }
+  .rerun-btn { font-size: 12px; padding: 3px 8px; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px; color: #374151; }
+
+  /* Sections */
+  .section { padding: 12px 16px; border-bottom: 1px solid #E1E4EA; }
+  .section-title { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 8px; }
+  .analysis-row { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 3px 0; }
+  .analysis-row .label { color: #6B7280; min-width: 150px; display: flex; align-items: center; gap: 6px; }
+  .check-circle { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid #1FC16B; background: #1FC16B; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; }
+  .analysis-row .value { font-weight: 500; color: #0E121B; }
+  .value-green { color: #166534 !important; }
+
+  /* Dynamic Variables — the key change */
+  .dv-row { display: flex; align-items: baseline; gap: 0; padding: 4px 0; font-size: 12px; border-bottom: 1px solid #F9FAFB; }
+  .dv-key { font-family: 'SF Mono', Menlo, monospace; font-size: 11px; color: #6B7280; min-width: 140px; flex-shrink: 0; }
+  .dv-val { font-size: 12px; color: #166534; font-weight: 500; flex: 1; }
+  .dv-source { font-size: 11px; color: #CACFD8; margin-left: 8px; white-space: nowrap; }
+  .dv-fallback { font-size: 11px; color: #99A0AE; flex: 1; }
+
+  /* Summary */
+  .summary-text { font-size: 12px; color: #374151; line-height: 1.6; }
+
+  /* Tabs */
+  .tabs { display: flex; padding: 0 16px; border-bottom: 1px solid #E1E4EA; }
+  .tab { padding: 9px 12px; font-size: 13px; font-weight: 500; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: #0A0A0A; border-bottom-color: #0E121B; }
+
+  /* Timeline */
+  .timeline { padding: 0; }
+  .tl-row { display: flex; gap: 10px; padding: 8px 16px; font-size: 12px; border-bottom: 1px solid #F1F5F9; align-items: flex-start; }
+  .tl-icon { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .tl-icon.sf { background: #00A1E0; color: #fff; font-size: 8px; font-weight: 700; }
+  .tl-icon.sys { background: #F1F5F9; color: #6B7280; }
+  .tl-icon.err { background: #FEE2E2; color: #EF4444; }
+  .tl-name { font-size: 12px; font-weight: 500; color: #0E121B; }
+  .tl-latency { font-size: 11px; color: #99A0AE; margin-left: 6px; }
+  .tl-badge { display: inline-flex; padding: 1px 6px; border-radius: 3px; font-size: 11px; font-weight: 500; margin-left: 6px; }
+  .tl-badge.success { background: #DCFCE7; color: #166534; }
+  .tl-badge.failed { background: #FEE2E2; color: #DC2626; }
+  .tl-error { font-size: 11px; color: #DC2626; margin-top: 3px; font-family: 'SF Mono', Menlo, monospace; }
+  .tl-time { font-size: 11px; color: #99A0AE; margin-left: 6px; }
+  .tl-sys-name { font-size: 12px; font-weight: 400; color: #525866; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#0A0A0A"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73ZM205.22 49.69C202.9 52 199.43 52.58 195.38 52.58H176.28V26.54H193.64C198.85 26.54 201.74 27.12 204.64 28.86C208.11 30.59 209.85 34.64 209.85 39.27C209.85 43.9 208.11 47.38 205.22 49.69Z" fill="#0A0A0A"/><path d="M255.56 34.65C238.2 34.65 226.63 47.95 226.63 66.47C226.63 84.99 242.25 98.3 256.14 98.3C270.03 98.3 279.86 90.19 283.33 78.62H269.45C267.71 82.67 264.82 87.3 256.14 87.3C247.46 87.3 239.94 81.52 239.94 69.94H283.91C283.91 49.69 272.92 34.65 255.56 34.65ZM240.51 60.11C241.09 51.43 246.88 45.06 255.56 45.06C264.24 45.06 270.02 51.43 270.02 60.11H240.51Z" fill="#0A0A0A"/><path d="M344.09 34.65C326.73 34.65 315.16 47.95 315.16 66.47C315.16 85.15 330.78 98.3 344.67 98.3C358.56 98.3 368.39 90.19 371.87 78.62H357.98C356.24 82.67 353.35 87.3 344.67 87.3C335.99 87.3 328.47 81.52 328.47 69.94H372.44C372.44 49.69 361.45 34.65 344.09 34.65ZM329.05 60.11C329.62 51.43 335.41 45.06 344.09 45.06C352.77 45.06 358.56 51.43 358.56 60.11H329.05Z" fill="#0A0A0A"/><path d="M390.96 14.97H377.65V95.92H390.96V14.97Z" fill="#0A0A0A"/><path d="M413.53 14.97H400.22V95.92H413.53V14.97Z" fill="#0A0A0A"/><path d="M304.17 17.28L290.84 17.28L290.85 34.65H282.76V45H290.85V82.82C290.85 87.58 291.8 90.43 294.66 93.29C297.51 96.14 300.37 97.09 305.13 97.09H315.14V85.67H309.88C308.16 85.67 306.96 85.37 306.13 85.11C305.27 84.84 304.61 84.16 304.4 83.29C304.17 82.33 304.17 81.09 304.17 79.9V45H315.14V34.65H304.17V17.28Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="workspace">
+    <div class="workspace-avatar">R</div>
+    <span class="workspace-name">Retell AI Workspace</span>
+    <span class="workspace-chevron"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14.31 7.95L10 3.64L5.69 7.95L6.67 8.93L10 5.6L13.33 8.93L14.31 7.95ZM5.69 12.05L10 16.36L14.31 12.05L13.33 11.07L10 14.4L6.67 11.07L5.69 12.05Z" fill="#99A0AE"/></svg></span>
+  </div>
+  <div class="nav-scroll">
+    <div class="section-group">
+      <div class="section-label">Build</div>
+      <ul class="nav-items">
+        <li class="nav-item">Agents</li>
+        <li class="nav-item">Knowledge Base</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Deploy</div>
+      <ul class="nav-items">
+        <li class="nav-item">Phone Numbers</li>
+        <li class="nav-item">Batch Call</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Monitor</div>
+      <ul class="nav-items">
+        <li class="nav-item current">Call History</li>
+        <li class="nav-item">Chat History</li>
+        <li class="nav-item">Analytics</li>
+        <li class="nav-item">AI Quality Assurance</li>
+        <li class="nav-item">Alerting</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">System</div>
+      <ul class="nav-items">
+        <li class="nav-item">Billing</li>
+        <li class="nav-item">Integrations</li>
+        <li class="nav-item">Settings</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"></div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <div class="page-title"><div class="page-dot"></div>Call History</div>
+    <button class="pill-btn">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M4 6l4 4 4-4M3 14h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Export
+    </button>
+  </div>
+
+  <div class="filter-row">
+    <button class="pill-btn"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1" stroke="currentColor" stroke-width="1.4"/><path d="M2 6h12M5 2v3M11 2v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> Date Range</button>
+    <div class="filter-chip"><div class="sf-dot">SF</div>Integrations: Salesforce<span class="chip-x">×</span></div>
+    <button class="pill-btn"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5 8h6M7 12h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> Filter</button>
+    <div class="filter-spacer"></div>
+    <button class="pill-btn">Customize View</button>
+    <button class="pill-btn">+ Custom Attributes</button>
+  </div>
+
+  <div class="content">
+    <div class="call-list">
+      <table class="call-table">
+        <thead>
+          <tr>
+            <th>Time</th><th>Duration</th><th>Cost</th><th>Session ID</th><th>End Reason</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="selected">
+            <td>2026-05-01 09:42:18</td><td>1:24</td><td>$0.180</td>
+            <td><span class="text-mono">call_a3c7e4f1d92b87a45c1d0</span></td>
+            <td>user hangup</td><td><span class="status-badge ended">ended</span></td>
+          </tr>
+          <tr><td>2026-05-01 09:21:07</td><td>2:08</td><td>$0.260</td><td><span class="text-mono">call_e92f7821c3a4d6e0a8b91</span></td><td>user hangup</td><td><span class="status-badge ended">ended</span></td></tr>
+          <tr><td>2026-05-01 08:58:34</td><td>3:11</td><td>$0.480</td><td><span class="text-mono">call_71a0e548b29f3c1b6d0a5</span></td><td>ended</td><td><span class="status-badge ended">ended</span></td></tr>
+          <tr><td>2026-05-01 08:33:02</td><td>1:46</td><td>$0.230</td><td><span class="text-mono">call_d04a7f8c2e1b9530c4ef7</span></td><td>user hangup</td><td><span class="status-badge ended">ended</span></td></tr>
+          <tr><td>2026-05-01 07:57:55</td><td>0:51</td><td>$0.110</td><td><span class="text-mono">call_5b8c3104f2917a24e0cd9</span></td><td>user hangup</td><td><span class="status-badge ended">ended</span></td></tr>
+          <tr><td>2026-05-01 07:11:43</td><td>2:24</td><td>$0.330</td><td><span class="text-mono">call_a118fe402b7c3d1b89aef</span></td><td>user hangup</td><td><span class="status-badge ended">ended</span></td></tr>
+          <tr><td>2026-05-01 06:48:09</td><td>1:01</td><td>$0.140</td><td><span class="text-mono">call_60e2bf9a45c1d0e3a187f</span></td><td>ended</td><td><span class="status-badge ended">ended</span></td></tr>
+        </tbody>
+      </table>
+      <div class="tbl-footer">Page 1 of 7 · 2,841 calls (filtered from 192,007)</div>
+    </div>
+
+    <aside class="detail-panel">
+      <div class="detail-header">
+        <div>
+          <div><span class="detail-ts">05/01/2026 09:42:18</span><span class="detail-type">phone_call</span></div>
+          <div class="detail-meta-row">
+            Agent: Asbury Auto — Service Reminder &nbsp;<span style="background:#DCFCE7;color:#166534;font-size:11px;padding:1px 6px;border-radius:3px;font-weight:500;">Production</span><br>
+            From: +18005555910 · To: +14155552330
+          </div>
+        </div>
+        <span class="detail-close"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+      </div>
+
+      <div class="audio-bar">
+        <button class="play-btn"><svg width="9" height="9" viewBox="0 0 10 10" fill="none"><path d="M2 1L9 5L2 9V1Z" fill="currentColor"/></svg></button>
+        <span class="audio-time">0:27</span>
+        <div class="audio-progress"></div>
+        <span class="audio-time">1:24</span>
+        <button class="audio-speed">1.0×</button>
+        <button class="rerun-btn"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M14 8C14 11.31 11.31 14 8 14C5.13 14 2.74 11.99 2.13 9.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M2 6.7C2.61 4.01 5 2 8 2C11.31 2 14 4.69 14 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> Rerun</button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Conversation Analysis</div>
+        <div class="analysis-row"><span class="label"><span class="check-circle"><svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M2 4l1.5 1.5L6 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Call Successful</span><span class="value value-green">Successful</span></div>
+        <div class="analysis-row"><span class="label"><span class="check-circle"><svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M2 4l1.5 1.5L6 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Call Status</span><span class="value">Ended</span></div>
+        <div class="analysis-row"><span class="label"><span class="check-circle"><svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M2 4l1.5 1.5L6 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>User Sentiment</span><span class="value value-green">Positive</span></div>
+        <div class="analysis-row"><span class="label"><span class="check-circle"><svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M2 4l1.5 1.5L6 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Disconnection Reason</span><span class="value">user hangup</span></div>
+        <div class="analysis-row"><span class="label"><span class="check-circle"><svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M2 4l1.5 1.5L6 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>End to End Latency</span><span class="value">982ms</span></div>
+      </div>
+
+      <!-- THE KEY CHANGE: Dynamic Variables with CRM source attribution -->
+      <div class="section">
+        <div class="section-title">Dynamic Variables</div>
+
+        <!-- Variables sourced from Salesforce — show connection name -->
+        <div class="dv-row">
+          <span class="dv-key">{{first_name}}</span>
+          <span class="dv-val">"Sarah"</span>
+          <span class="dv-source">Salesforce</span>
+        </div>
+        <div class="dv-row">
+          <span class="dv-key">{{last_name}}</span>
+          <span class="dv-val">"Johnson"</span>
+          <span class="dv-source">Salesforce</span>
+        </div>
+        <div class="dv-row">
+          <span class="dv-key">{{company}}</span>
+          <span class="dv-val">"Asbury Auto"</span>
+          <span class="dv-source">Salesforce</span>
+        </div>
+        <div class="dv-row">
+          <span class="dv-key">{{account_tier}}</span>
+          <span class="dv-val">"Enterprise"</span>
+          <span class="dv-source">Salesforce</span>
+        </div>
+        <div class="dv-row">
+          <span class="dv-key">{{renewal_date}}</span>
+          <span class="dv-val">"2026-08-15"</span>
+          <span class="dv-source">Salesforce</span>
+        </div>
+
+        <!-- Variables that fell back — no source -->
+        <div class="dv-row">
+          <span class="dv-key">{{vehicles}}</span>
+          <span class="dv-fallback">[ ] · pre-call fallback</span>
+        </div>
+        <div class="dv-row">
+          <span class="dv-key">{{vehicle_count}}</span>
+          <span class="dv-fallback">0 · pre-call fallback</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Summary</div>
+        <div class="summary-text">Outbound service appointment confirmation for Sarah Johnson's 2022 Subaru Outback. The agent confirmed her Thursday 10am appointment and verified the Camry loaner reservation. Vehicle details were pulled from her saved profile after the initial lookup returned no results.</div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab">Transcription</div>
+        <div class="tab">Data</div>
+        <div class="tab active">Detail Logs</div>
+        <div class="tab">Internal Logs</div>
+        <div class="tab">Packet Capture</div>
+      </div>
+
+      <div class="timeline">
+        <div class="tl-row">
+          <div class="tl-icon sf">SF</div>
+          <div><span class="tl-name">Salesforce · Get Lead</span><span class="tl-latency">312ms</span><span class="tl-badge success">succeeded</span></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-icon sf">SF</div>
+          <div><span class="tl-name">Salesforce · Get Account</span><span class="tl-latency">487ms</span><span class="tl-badge success">succeeded</span></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-icon err"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M8 4v5M8 11v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <div>
+            <div><span class="tl-name">Salesforce · Get Contact</span><span class="tl-latency">412ms</span><span class="tl-badge failed">failed</span></div>
+            <div class="tl-error">No contact found in Salesforce - vehicle list not loaded</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-icon sys"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" fill="currentColor"/></svg></div>
+          <div><span class="tl-sys-name">Call connected</span><span class="tl-time">09:42:18</span></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-icon sys"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" fill="currentColor"/></svg></div>
+          <div><span class="tl-sys-name">Agent sent greeting</span><span class="tl-time">09:42:19</span></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-icon sys"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" fill="currentColor"/></svg></div>
+          <div><span class="tl-sys-name">Call ended - user hangup</span><span class="tl-time">09:43:41</span></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-icon sf">SF</div>
+          <div><span class="tl-name">Salesforce · Update Lead</span><span class="tl-latency">219ms</span><span class="tl-badge success">succeeded</span></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-icon sf">SF</div>
+          <div><span class="tl-name">Salesforce · Create Task</span><span class="tl-latency">194ms</span><span class="tl-badge success">succeeded</span></div>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</main>
+
+</body>
+</html>

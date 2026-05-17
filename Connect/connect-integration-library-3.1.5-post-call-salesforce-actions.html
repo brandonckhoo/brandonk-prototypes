@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Post-Call Salesforce Actions</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; font-size: 14px; }
+  .sidebar { width: 248px; min-width: 248px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; }
+  .sidebar-logo { padding: 18px 10px 10px 18px; font-size: 16px; font-weight: 700; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 12px; height: 38px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-label { padding: 4px; margin: 0 12px; font-size: 11px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 12px; }
+  .nav-items li + li { margin-top: 2px; }
+  .nav-item { padding: 7px 8px; font-size: 13px; color: #525866; cursor: pointer; border-radius: 6px; display: flex; align-items: center; gap: 8px; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+  .footer { padding: 14px 12px; border-top: 1px solid #E5E7EB; }
+  .footer-user { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #525866; }
+  .footer-user .av { width: 20px; height: 20px; border-radius: 50%; overflow:hidden; }
+  .footer-user .av img { width:100%; height:100%; object-fit:cover; }
+
+  .main { flex: 1; overflow: auto; background: #FFFFFF; }
+  .top-bar { display: flex; align-items: center; gap: 24px; padding: 14px 28px; border-bottom: 1px solid #E5E7EB; }
+  .top-breadcrumb { display:flex; align-items:center; gap:6px; font-size:12px; color:#6B7280; cursor:pointer; }
+  .top-title { display: flex; flex-direction: column; }
+  .top-title h1 { font-size: 14px; font-weight: 600; color: #0A0A0A; }
+  .top-title .meta { font-size: 12px; color: #6B7280; margin-top: 1px; }
+  .top-tabs { display: flex; gap: 22px; flex: 1; justify-content:center; }
+  .top-tab { font-size: 13px; color: #6B7280; padding: 6px 2px; cursor: pointer; border-bottom: 2px solid transparent; }
+  .top-tab.active { color: #0A0A0A; font-weight: 500; border-bottom-color: #0A0A0A; }
+  .btn-simulate { padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; border: 1px solid #E1E4EA; background: #fff; cursor: pointer; }
+  .btn-publish { padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; border: none; background: #0E121B; color: #fff; cursor: pointer; }
+
+  .sub-tabs { display: flex; gap: 4px; padding: 10px 28px 0; border-bottom: 1px solid #E5E7EB; justify-content:center; }
+  .sub-tab { padding: 8px 14px; font-size: 13px; color: #6B7280; cursor: pointer; border-radius: 6px 6px 0 0; margin-bottom: -1px; }
+  .sub-tab.active { color: #0A0A0A; font-weight: 500; background: #fff; border: 1px solid #E5E7EB; border-bottom-color: #fff; }
+  .sub-tab:hover:not(.active) { background: #F5F7FA; }
+
+  .content { padding: 24px 28px; max-width: 920px; margin: 0 auto; }
+
+  /* Action card */
+  .action-card { border: 1px solid #E5E7EB; border-radius: 10px; margin-bottom: 14px; overflow: hidden; background: #fff; }
+  .action-head { display: flex; align-items: center; gap: 12px; padding: 14px 18px; }
+  .action-head .ic { width: 28px; height: 28px; background: #E8F4FF; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .action-head .titles { flex: 1; min-width: 0; }
+  .action-head .title { font-size: 14px; font-weight: 600; color: #0A0A0A; display:flex; align-items:center; gap:6px; }
+  .action-head .subtitle { font-size: 12px; color: #6B7280; margin-top: 2px; line-height: 1.45; }
+  .toggle-on { position: relative; width: 34px; height: 20px; background: #3D64D7; border-radius: 999px; flex-shrink: 0; }
+  .toggle-on::after { content: ''; position: absolute; top: 2px; left: 16px; width: 16px; height: 16px; background: #fff; border-radius: 50%; }
+
+  .action-body { padding: 0 18px 18px; border-top: 1px solid #F1F2F4; margin: 0 -18px; padding-top:14px; }
+  .action-card .action-body { margin: 0; padding: 14px 18px 18px; border-top: 1px solid #F1F2F4; }
+
+  .row { display: grid; grid-template-columns: 240px 1fr; gap: 14px; align-items: center; padding: 8px 0; }
+  .row .lbl { font-size: 13px; color: #0E121B; }
+  .row .lbl .s { display:block; font-size: 12px; color: #6B7280; font-weight: 400; margin-top: 1px; }
+  .sel { display:flex; align-items:center; justify-content:space-between; padding: 8px 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; background: #fff; cursor:pointer; }
+  .sel svg { color: #99A0AE; }
+
+  .check-row { display:flex; align-items:center; gap: 10px; padding: 6px 0; font-size: 13px; }
+  .chk { width: 18px; height: 18px; accent-color: #3D64D7; }
+
+  /* Badge */
+  .badge-active { font-size: 10px; font-weight: 700; color: #0E7C3A; background: #E8F8EF; padding: 2px 7px; border-radius: 999px; letter-spacing: 0.4px; }
+  .badge-2way { font-size: 10px; font-weight: 700; color: #3D64D7; background: #EEF2FF; padding: 2px 7px; border-radius: 999px; letter-spacing: 0.4px; }
+
+  /* Conditional triggers */
+  .rule-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 0; border-bottom: 1px dashed #E5E7EB; }
+  .rule-row:last-child { border-bottom: none; }
+  .rule-num { width: 22px; height: 22px; background: #F5F7FA; color: #525866; border-radius: 50%; font-size: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .kw { font-size: 12px; color: #6B7280; }
+  .code-pill { font-size: 12px; padding: 3px 7px; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 6px; font-family: 'SF Mono',ui-monospace,Menlo,monospace; color: #0A0A0A; }
+  .op-pill { font-size: 12px; padding: 3px 7px; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; color: #525866; }
+  .val-pill { font-size: 12px; padding: 3px 8px; background: #EEF2FF; border: 1px solid #C7D4F7; border-radius: 6px; color: #3D64D7; font-weight: 500; }
+  .arrow { color: #99A0AE; font-size: 13px; margin: 0 2px; }
+  .action-pill { font-size: 12px; padding: 3px 9px; background: #E8F8EF; border: 1px solid #C7E9D3; border-radius: 6px; color: #0E7C3A; font-weight: 500; display:inline-flex; align-items:center; gap:4px; }
+  .tag-pill { font-size: 12px; padding: 3px 8px; background: #FEF3C7; border: 1px solid #F7D977; border-radius: 6px; color: #8A5A00; font-weight: 500; }
+  .delete-x { color: #CBD5E1; cursor: pointer; margin-left: auto; padding: 0 4px; font-size: 14px; }
+  .add-rule { margin-top: 10px; font-size: 13px; color: #3D64D7; background: none; border: none; cursor: pointer; padding: 6px 0; }
+
+  /* Custom attribute mapping */
+  .map-row-grid { display:grid; grid-template-columns: 1fr 28px 1fr 28px; gap: 10px; align-items: center; padding: 8px 12px; border: 1px solid #E1E4EA; border-radius: 8px; background: #FAFBFC; margin-bottom: 6px; }
+  .map-field .nm { font-size: 13px; font-weight: 500; color: #0A0A0A; }
+  .map-field .sf-code { font-family: 'SF Mono',ui-monospace,Menlo,monospace; }
+  .map-field .t { font-size: 11px; color: #6B7280; margin-left: 4px; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">● Retell</div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item current">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item">Integrations</li><li class="nav-item">Billing</li><li class="nav-item">Settings</li></ul></div>
+  </div>
+  <div class="footer">
+    <div class="footer-user"><div class="av"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c"></div>brandon@retellai.com</div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="top-bar">
+    <div class="top-breadcrumb">← Agents</div>
+    <div class="top-title">
+      <h1>Enterprise Sales Qualifier · Salesforce</h1>
+      <div class="meta">Single Prompt · Last saved 30 sec ago</div>
+    </div>
+    <div class="top-tabs">
+      <div class="top-tab">Build</div>
+      <div class="top-tab active">Post-call</div>
+      <div class="top-tab">Deploy</div>
+      <div class="top-tab">Analytics</div>
+    </div>
+    <button class="btn-simulate">Simulate</button>
+    <button class="btn-publish">✓ Publish</button>
+  </div>
+
+  <div class="sub-tabs">
+    <div class="sub-tab">General</div>
+    <div class="sub-tab active">Salesforce</div>
+    <div class="sub-tab">Webhooks</div>
+    <div class="sub-tab">Data extraction</div>
+    <div class="sub-tab">Custom attributes</div>
+  </div>
+
+  <div class="content">
+
+    <!-- Auto-log activity -->
+    <div class="action-card">
+      <div class="action-head">
+        <div class="ic"><svg width="16" height="16" viewBox="0 0 20 20"><path fill="#00A1E0" d="M7 2h8a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V5a3 3 0 013-3z"/><path fill="#fff" d="M6.5 7h7v1.5h-7zm0 3h7v1.5h-7zm0 3h5v1.5h-5z"/></svg></div>
+        <div class="titles">
+          <div class="title">Auto-log call activity to Salesforce</div>
+          <div class="subtitle">Creates a Task (or Call record) on the matched Contact, Lead, or Opportunity after every call with transcript, summary, duration, sentiment, and recording URL.</div>
+        </div>
+        <div class="toggle-on"></div>
+      </div>
+      <div class="action-body">
+        <div class="row"><div class="lbl">Record type<span class="s">What Retell creates in Salesforce</span></div><div class="sel">Task — TaskSubtype: Call<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div>
+        <div class="row"><div class="lbl">Associate with<span class="s">Which Salesforce record the activity attaches to</span></div><div class="sel">Matched Contact + primary Opportunity<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div>
+        <div class="row"><div class="lbl">Status mapping<span class="s">Retell call status → Salesforce Task.Status</span></div><div class="sel">Default (5 outcomes mapped)<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div>
+        <div class="row"><div class="lbl">Fallback if no match<span class="s">When caller isn't in Salesforce</span></div><div class="sel">Create new Lead — source: Inbound Call<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div>
+        <div style="margin-top:10px">
+          <label class="check-row"><input type="checkbox" class="chk" checked> Include call recording URL</label>
+          <label class="check-row"><input type="checkbox" class="chk" checked> Include AI conversation summary</label>
+          <label class="check-row"><input type="checkbox" class="chk" checked> Include full transcript (Chatter attachment)</label>
+          <label class="check-row"><input type="checkbox" class="chk"> Include extracted variables as Task custom fields</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Advance opportunity stage -->
+    <div class="action-card">
+      <div class="action-head">
+        <div class="ic" style="background:#FEF3C7"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M3 10l4 4 10-10" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="titles">
+          <div class="title">Advance Opportunity stage based on call outcome</div>
+          <div class="subtitle">Automatically move the associated Opportunity forward when call signals line up. Runs after auto-log.</div>
+        </div>
+        <div class="toggle-on"></div>
+      </div>
+      <div class="action-body">
+        <div class="row"><div class="lbl">Sales pipeline<span class="s">Which Salesforce pipeline this agent advances</span></div><div class="sel">Enterprise Sales Pipeline (default)<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div>
+        <div class="row"><div class="lbl">When call successful AND sentiment positive</div><div class="sel" style="color:#0E7C3A; font-weight:500">→ Advance to Qualification<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div>
+        <div class="row"><div class="lbl">When caller requests demo</div><div class="sel" style="color:#0E7C3A; font-weight:500">→ Advance to Proposal / Price Quote<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div>
+        <div class="row"><div class="lbl">When caller books a meeting</div><div class="sel" style="color:#0E7C3A; font-weight:500">→ Advance to Negotiation / Review<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div>
+        <div class="row"><div class="lbl">When caller declines</div><div class="sel" style="color:#B42318; font-weight:500">→ Closed Lost — reason: Not interested<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div>
+      </div>
+    </div>
+
+    <!-- Custom attribute mapping -->
+    <div class="action-card">
+      <div class="action-head">
+        <div class="ic" style="background:#EEF2FF"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 7h12M4 13h12M13 4l3 3-3 3M7 10l-3 3 3 3" stroke="#3D64D7" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="titles">
+          <div class="title">Custom attribute mapping <span class="badge-2way">2-WAY SYNC</span></div>
+          <div class="subtitle">Extracted variables sync bidirectionally with Salesforce custom fields on Contact and Opportunity. Changes in either system propagate to the other on the next call or Salesforce update.</div>
+        </div>
+        <div class="toggle-on"></div>
+      </div>
+      <div class="action-body">
+        <div class="map-row-grid">
+          <div class="map-field"><span class="nm">Lead Qualified</span><span class="t">Retell · Boolean</span></div>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="justify-self:center"><path d="M4 7h12M4 13h12M13 4l3 3-3 3M7 10l-3 3 3 3" stroke="#3D64D7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="map-field"><span class="nm sf-code">Contact.Lead_Qualified__c</span><span class="t">Salesforce</span></div>
+          <span class="delete-x">×</span>
+        </div>
+        <div class="map-row-grid">
+          <div class="map-field"><span class="nm">Budget Confirmed</span><span class="t">Retell · Number (USD)</span></div>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="justify-self:center"><path d="M4 7h12M4 13h12M13 4l3 3-3 3M7 10l-3 3 3 3" stroke="#3D64D7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="map-field"><span class="nm sf-code">Opportunity.Budget_Stated__c</span><span class="t">Salesforce</span></div>
+          <span class="delete-x">×</span>
+        </div>
+        <div class="map-row-grid">
+          <div class="map-field"><span class="nm">Customer Sentiment</span><span class="t">Retell · String</span></div>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="justify-self:center"><path d="M4 7h12M4 13h12M13 4l3 3-3 3M7 10l-3 3 3 3" stroke="#3D64D7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="map-field"><span class="nm sf-code">Contact.Last_Call_Sentiment__c</span><span class="t">Salesforce</span></div>
+          <span class="delete-x">×</span>
+        </div>
+        <div class="map-row-grid">
+          <div class="map-field"><span class="nm">Decision Timeline</span><span class="t">Retell · String</span></div>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="justify-self:center"><path d="M4 7h12M4 13h12M13 4l3 3-3 3M7 10l-3 3 3 3" stroke="#3D64D7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="map-field"><span class="nm sf-code">Opportunity.Decision_Window__c</span><span class="t">Salesforce</span></div>
+          <span class="delete-x">×</span>
+        </div>
+        <button class="add-rule">+ Add mapping</button>
+      </div>
+    </div>
+
+    <!-- Conditional triggers -->
+    <div class="action-card">
+      <div class="action-head">
+        <div class="ic" style="background:#FEF1F2"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z" stroke="#DC2626" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+        <div class="titles">
+          <div class="title">Conditional triggers <span class="badge-active">4 ACTIVE</span></div>
+          <div class="subtitle">Fire Salesforce actions when extracted call variables meet conditions. Rules evaluate top-to-bottom; first match wins unless marked Continue.</div>
+        </div>
+        <div class="toggle-on"></div>
+      </div>
+      <div class="action-body">
+        <div class="rule-row">
+          <div class="rule-num">1</div>
+          <span class="kw">When</span>
+          <span class="code-pill">lead_qualified</span>
+          <span class="op-pill">=</span>
+          <span class="val-pill">true</span>
+          <span class="arrow">→</span>
+          <span class="action-pill">Convert Lead to Contact</span>
+          <span class="kw">+</span>
+          <span class="action-pill">Create Opportunity</span>
+          <span class="delete-x">×</span>
+        </div>
+        <div class="rule-row">
+          <div class="rule-num">2</div>
+          <span class="kw">When</span>
+          <span class="code-pill">budget_confirmed</span>
+          <span class="op-pill">≥</span>
+          <span class="val-pill">$50,000</span>
+          <span class="arrow">→</span>
+          <span class="action-pill">Assign to Enterprise Queue</span>
+          <span class="kw">+</span>
+          <span class="tag-pill">Notify AE on Slack</span>
+          <span class="delete-x">×</span>
+        </div>
+        <div class="rule-row">
+          <div class="rule-num">3</div>
+          <span class="kw">When</span>
+          <span class="code-pill">sentiment</span>
+          <span class="op-pill">=</span>
+          <span class="val-pill">Negative</span>
+          <span class="arrow">→</span>
+          <span class="action-pill">Create Case — high priority</span>
+          <span class="kw">+</span>
+          <span class="tag-pill">Notify account owner</span>
+          <span class="delete-x">×</span>
+        </div>
+        <div class="rule-row">
+          <div class="rule-num">4</div>
+          <span class="kw">When</span>
+          <span class="code-pill">call_outcome</span>
+          <span class="op-pill">=</span>
+          <span class="val-pill">Voicemail</span>
+          <span class="arrow">→</span>
+          <span class="action-pill">Enroll in Cadence</span>
+          <span class="tag-pill">Voicemail Drop Follow-up</span>
+          <span class="delete-x">×</span>
+        </div>
+        <button class="add-rule">+ Add rule</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>

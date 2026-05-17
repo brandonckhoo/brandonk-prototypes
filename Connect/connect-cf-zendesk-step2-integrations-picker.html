@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — CF Zendesk Flow: Step 2 — Add Integration</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+  .step-banner { background: #ecf3ff; border-bottom: 1px solid #c7d8f8; padding: 7px 20px; font-size: 12px; color: #3d64d7; font-weight: 500; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .step-badge { background: #3d64d7; color: #fff; border-radius: 12px; padding: 1px 8px; font-size: 11px; font-weight: 600; }
+  .step-arrow { color: #99A0AE; margin: 0 2px; }
+  .step-dim { color: #99A0AE; }
+  .top-bar { display: flex; align-items: center; height: 40px; padding: 8px 16px 0; gap: 10px; position: relative; flex-shrink: 0; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; color: #525866; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; white-space: nowrap; }
+  .agent-name-edit { color: #99A0AE; cursor: pointer; margin-left: 4px; display: inline-flex; align-items: center; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+  .top-tab { padding: 4px 8px; font-size: 14px; color: #525866; cursor: pointer; }
+  .top-tab.active { font-weight: 500; color: #0E121B; }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-secondary { height: 30px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; color: #525866; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 5px; }
+  .btn-icon { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; cursor: pointer; color: #525866; }
+  .btn-publish { height: 30px; padding: 0 14px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 5px; }
+  .top-meta { display: flex; align-items: center; height: 20px; padding: 2px 16px 8px 50px; flex-shrink: 0; }
+  .top-meta span { font-size: 12px; color: #99A0AE; }
+  .main-layout { display: flex; flex: 1; overflow: hidden; border-top: 1px solid #E1E4EA; }
+  .node-palette { width: 180px; min-width: 180px; border-right: 1px solid #E1E4EA; display: flex; flex-direction: column; background: #fff; overflow-y: auto; }
+  .palette-tabs { display: flex; border-bottom: 1px solid #E1E4EA; }
+  .palette-tab { flex: 1; padding: 10px 8px; text-align: center; font-size: 13px; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; }
+  .palette-tab.active { font-weight: 500; color: #0E121B; border-bottom-color: #0E121B; }
+  .palette-items { padding: 8px 0; }
+  .palette-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 14px; color: #0E121B; cursor: grab; }
+  .palette-item:hover { background: rgba(0,0,0,0.03); }
+  .p-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; font-weight: 600; }
+  .canvas { flex: 1; background: #FAFAFA; position: relative; overflow: hidden; }
+  .canvas-content { position: absolute; top: 50%; left: 50%; transform: translate(-60%, -55%); filter: blur(1.5px); opacity: 0.5; }
+  .flow-node { position: absolute; border-radius: 8px; background: #fff; border: 1px solid #E1E4EA; }
+  .node-begin { left: 20px; top: 125px; width: 80px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; background: #8B5CF6; border: none; border-radius: 18px; position: relative; }
+  .node-begin::after { content: ''; position: absolute; right: -7px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #C0C7D1; background: #fff; }
+  .node-welcome { left: 160px; top: 120px; width: 300px; border-radius: 14px; border: 1.5px solid #F9A8D4; background: #FDF2F8; }
+  .node-welcome-title { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: #C026D3; padding: 10px 14px 8px; position: relative; }
+  .node-welcome-title .port-left { position: absolute; left: -8px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid #C0C7D1; background: #fff; }
+  .node-welcome-body { margin: 0 12px 10px; padding: 14px; min-height: 80px; font-size: 13px; color: #0E121B; line-height: 1.5; background: #fff; border: 1px solid #F3E8EE; border-radius: 8px; }
+  .conn-line { position: absolute; border-top: 1.5px solid #D1D5DB; }
+  .conn-begin-welcome { left: 100px; top: 140px; width: 52px; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .int-modal { background: #fff; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); width: 960px; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; }
+  .int-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 16px; border-bottom: 1px solid #F3F4F6; flex-shrink: 0; }
+  .int-modal-title { font-size: 18px; font-weight: 600; color: #0E121B; }
+  .int-modal-close { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; border-radius: 6px; color: #6B7280; font-size: 18px; }
+  .int-modal-body { display: flex; flex: 1; overflow: hidden; }
+  .int-sidebar { width: 180px; border-right: 1px solid #F3F4F6; padding: 16px 12px; flex-shrink: 0; overflow-y: auto; }
+  .int-sidebar-label { font-size: 11px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; margin-top: 4px; }
+  .int-sidebar-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 7px; font-size: 13px; color: #374151; cursor: pointer; margin-bottom: 2px; }
+  .int-sidebar-item:hover { background: #F9FAFB; }
+  .int-sidebar-item.active { background: #EEF3FF; color: #3d64d7; font-weight: 500; }
+  .int-sidebar-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+  .int-grid-wrap { flex: 1; padding: 16px 20px; overflow-y: auto; }
+  .int-section-label { font-size: 11px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; margin-top: 4px; }
+  .int-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+  .int-card { border: 1px solid #E5E7EB; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; background: #fff; cursor: pointer; }
+  .int-card:hover { border-color: #D1D5DB; }
+  .int-card.featured { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.12); background: #fafcff; }
+  .int-card-top { display: flex; align-items: center; gap: 10px; }
+  .int-logo { width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #F3F4F6; overflow: hidden; background: #fff; }
+  .int-logo img { width: 22px; height: 22px; object-fit: contain; }
+  .int-name { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .int-desc { font-size: 12px; color: #6B7280; line-height: 1.45; }
+  .int-card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .int-status { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: #6B7280; }
+  .int-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .int-dot.connected { background: #1FC16B; }
+  .int-dot.not-connected { background: #D1D5DB; }
+  .btn-add-tools { height: 30px; padding: 0 12px; border: none; border-radius: 6px; background: #0E121B; color: #fff; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+  .btn-connect { height: 30px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 6px; background: #fff; color: #374151; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .int-modal-footer { display: flex; align-items: center; justify-content: flex-end; padding: 14px 24px; border-top: 1px solid #F3F4F6; flex-shrink: 0; }
+  .btn-modal-cancel { height: 36px; padding: 0 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 14px; color: #374151; cursor: pointer; font-family: inherit; }
+</style>
+</head>
+<body>
+<div class="step-banner">
+  <span class="step-dim">Step 1: Select Function → "+ Add"</span>
+  <span class="step-arrow">→</span>
+  <span class="step-badge">Step 2 of 3</span>
+  Select <strong>Zendesk</strong> → "Add Tools →" to continue
+  <span class="step-arrow">→</span>
+  <span class="step-dim">Step 3: Select Zendesk tools</span>
+</div>
+<div class="top-bar">
+  <div class="home-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+  <span class="agent-name">Customer Support Agent</span>
+  <span class="agent-name-edit"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></span>
+  <span class="top-spacer"></span>
+  <div class="top-tabs"><span class="top-tab active">Create</span><span class="top-tab">Simulation</span></div>
+  <div class="top-actions">
+    <span style="font-size:12px;color:#99A0AE;margin-right:4px;">Auto saved at 05:25</span>
+    <button class="btn-secondary"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10v7H7l-3 2V4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg> Give feedback</button>
+    <button class="btn-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="8" r="1.25" fill="currentColor"/><circle cx="8" cy="8" r="1.25" fill="currentColor"/><circle cx="12" cy="8" r="1.25" fill="currentColor"/></svg></button>
+    <button class="btn-publish"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Publish</button>
+  </div>
+</div>
+<div class="top-meta"><span>Agent ID: ag...c9d &bull; CF ID: cv...Apr3 &bull; $0.115/min &bull; 970-1300ms latency</span></div>
+<div class="main-layout">
+  <div class="node-palette">
+    <div class="palette-tabs"><span class="palette-tab active">Node</span><span class="palette-tab">Components</span></div>
+    <div class="palette-items">
+      <div class="palette-item"><span class="p-icon" style="color:#EF4444;">#</span> Conversation</div>
+      <div class="palette-item"><span class="p-icon" style="color:#22C55E;">+</span> Subagent</div>
+      <div class="palette-item"><span class="p-icon" style="color:#3d64d7;">⚙</span> Function</div>
+      <div class="palette-item"><span class="p-icon" style="color:#22C55E;">☎</span> Call Transfer</div>
+      <div class="palette-item"><span class="p-icon" style="color:#6B7280;font-size:13px;">{ }</span> Extract Variable</div>
+      <div class="palette-item"><span class="p-icon" style="color:#6B7280;font-size:13px;">&lt;&gt;</span> Code</div>
+      <div class="palette-item"><span class="p-icon" style="color:#93C5FD;">▪</span> Ending</div>
+    </div>
+  </div>
+  <div class="canvas">
+    <div class="canvas-content">
+      <div class="node-begin">▶ Begin</div>
+      <div class="conn-line conn-begin-welcome"></div>
+      <div class="flow-node node-welcome">
+        <div class="node-welcome-title"><span class="port-left"></span># Greeting</div>
+        <div class="node-welcome-body">Hi, you've reached customer support. How can I help you today?</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay">
+  <div class="int-modal">
+    <div class="int-modal-header">
+      <span class="int-modal-title">Add Integration</span>
+      <button class="int-modal-close">&#x2715;</button>
+    </div>
+    <div class="int-modal-body">
+      <div class="int-sidebar">
+        <div class="int-sidebar-label">Category</div>
+        <div class="int-sidebar-item active"><span class="int-sidebar-dot"></span> All</div>
+        <div class="int-sidebar-item"><span class="int-sidebar-dot"></span> Support</div>
+        <div class="int-sidebar-item"><span class="int-sidebar-dot"></span> CRM</div>
+        <div class="int-sidebar-item"><span class="int-sidebar-dot"></span> Scheduling</div>
+        <div class="int-sidebar-item"><span class="int-sidebar-dot"></span> Communication</div>
+        <div class="int-sidebar-item"><span class="int-sidebar-dot"></span> Payments</div>
+        <div style="margin-top:16px;">
+          <div class="int-sidebar-label">Connected</div>
+          <div class="int-sidebar-item"><span class="int-sidebar-dot" style="background:#1FC16B;"></span> Zendesk</div>
+          <div class="int-sidebar-item"><span class="int-sidebar-dot" style="background:#1FC16B;"></span> HubSpot</div>
+          <div class="int-sidebar-item"><span class="int-sidebar-dot" style="background:#1FC16B;"></span> Slack</div>
+        </div>
+      </div>
+      <div class="int-grid-wrap">
+        <div class="int-section-label">Connected integrations</div>
+        <div class="int-grid">
+
+          <!-- Zendesk — FEATURED -->
+          <div class="int-card featured">
+            <div class="int-card-top">
+              <div class="int-logo"><img src="https://www.google.com/s2/favicons?domain=zendesk.com&sz=64" alt="Zendesk"></div>
+              <div class="int-name">Zendesk</div>
+            </div>
+            <div class="int-desc">Create and manage support tickets, look up users, and add comments directly from your agent.</div>
+            <div class="int-card-footer">
+              <div class="int-status"><div class="int-dot connected"></div> Connected</div>
+              <a href="connect-cf-zendesk-step3-select-tools.html" class="btn-add-tools">Add Tools →</a>
+            </div>
+          </div>
+
+          <!-- HubSpot -->
+          <div class="int-card">
+            <div class="int-card-top">
+              <div class="int-logo"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=64" alt="HubSpot"></div>
+              <div class="int-name">HubSpot</div>
+            </div>
+            <div class="int-desc">Create and update contacts, deals, and companies in your HubSpot CRM.</div>
+            <div class="int-card-footer">
+              <div class="int-status"><div class="int-dot connected"></div> Connected</div>
+              <button class="btn-add-tools">Add Tools →</button>
+            </div>
+          </div>
+
+          <!-- Slack -->
+          <div class="int-card">
+            <div class="int-card-top">
+              <div class="int-logo"><img src="https://www.google.com/s2/favicons?domain=slack.com&sz=64" alt="Slack"></div>
+              <div class="int-name">Slack</div>
+            </div>
+            <div class="int-desc">Send messages and notifications to Slack channels during or after calls.</div>
+            <div class="int-card-footer">
+              <div class="int-status"><div class="int-dot connected"></div> Connected</div>
+              <button class="btn-add-tools">Add Tools →</button>
+            </div>
+          </div>
+
+          <!-- Cal.com -->
+          <div class="int-card">
+            <div class="int-card-top">
+              <div class="int-logo"><img src="https://www.google.com/s2/favicons?domain=cal.com&sz=64" alt="Cal.com"></div>
+              <div class="int-name">Cal.com</div>
+            </div>
+            <div class="int-desc">Schedule appointments and manage bookings via Cal.com.</div>
+            <div class="int-card-footer">
+              <div class="int-status"><div class="int-dot connected"></div> Connected</div>
+              <button class="btn-add-tools">Add Tools →</button>
+            </div>
+          </div>
+
+        </div>
+        <div class="int-section-label">Available to connect</div>
+        <div class="int-grid">
+          <div class="int-card">
+            <div class="int-card-top">
+              <div class="int-logo"><img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=64" alt="Salesforce"></div>
+              <div class="int-name">Salesforce</div>
+            </div>
+            <div class="int-desc">Sync contacts, leads, and opportunities with Salesforce CRM.</div>
+            <div class="int-card-footer">
+              <div class="int-status"><div class="int-dot not-connected"></div> Not connected</div>
+              <button class="btn-connect">Connect →</button>
+            </div>
+          </div>
+          <div class="int-card">
+            <div class="int-card-top">
+              <div class="int-logo"><img src="https://www.google.com/s2/favicons?domain=intercom.com&sz=64" alt="Intercom"></div>
+              <div class="int-name">Intercom</div>
+            </div>
+            <div class="int-desc">Look up users and create conversations in Intercom.</div>
+            <div class="int-card-footer">
+              <div class="int-status"><div class="int-dot not-connected"></div> Not connected</div>
+              <button class="btn-connect">Connect →</button>
+            </div>
+          </div>
+          <div class="int-card">
+            <div class="int-card-top">
+              <div class="int-logo"><img src="https://www.google.com/s2/favicons?domain=stripe.com&sz=64" alt="Stripe"></div>
+              <div class="int-name">Stripe</div>
+            </div>
+            <div class="int-desc">Look up customers, subscriptions, and payment status.</div>
+            <div class="int-card-footer">
+              <div class="int-status"><div class="int-dot not-connected"></div> Not connected</div>
+              <button class="btn-connect">Connect →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="int-modal-footer">
+      <button class="btn-modal-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

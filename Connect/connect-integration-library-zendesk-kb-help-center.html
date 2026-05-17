@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Knowledge Base: Add Zendesk Help Center</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #f5f7fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: auto; padding: 24px 0; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; overflow: auto; padding: 32px 0; }
+
+  .modal { background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 720px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  .modal-header { display: flex; align-items: center; padding: 18px 24px 14px; border-bottom: 1px solid #E1E4EA; }
+  .modal-title { font-size: 17px; font-weight: 600; color: #0E121B; }
+  .modal-subtitle { font-size: 12.5px; color: #6B7280; margin-top: 3px; }
+  .modal-close { margin-left: auto; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; border-radius: 6px; color: #6B7280; }
+  .modal-close:hover { background: #F3F4F6; }
+
+  .modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+  /* Section title + subtitle */
+  .section-title { font-size: 14px; font-weight: 600; color: #0E121B; margin-bottom: 4px; }
+  .section-desc { font-size: 12.5px; color: #6B7280; margin-bottom: 14px; }
+
+  /* Source grid */
+  .source-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+  .source-card { display: flex; flex-direction: column; align-items: flex-start; padding: 14px; background: #fff; border: 1px solid #E1E4EA; border-radius: 10px; cursor: pointer; transition: all 0.15s; gap: 8px; }
+  .source-card:hover { border-color: #D1D5DB; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .source-card.selected { border: 2px solid #3d64d7; background: #F5F9FF; padding: 13px; }
+  .source-card.selected .source-name { color: #3d64d7; }
+  .source-logo { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .source-logo svg { width: 18px; height: 18px; }
+  .source-logo.web { background: #F3F4F6; color: #525866; }
+  .source-logo.file { background: #EDE9FE; color: #6D28D9; }
+  .source-logo.text { background: #FEF3C7; color: #92400E; }
+  .source-logo.drive { background: #fff; padding: 4px; }
+  .source-logo.sheets { background: #fff; padding: 4px; }
+  .source-logo.docs { background: #fff; padding: 4px; }
+  .source-logo.notion { background: #F3F4F6; padding: 4px; }
+  .source-logo.zendesk { background: #03363D; color: #fff; font-size: 12px; font-weight: 700; }
+  .source-logo.intercom { background: #1F6FEB; color: #fff; font-size: 12px; font-weight: 700; padding: 4px; }
+  .source-name { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .source-desc { font-size: 11.5px; color: #6B7280; line-height: 1.4; }
+
+  /* Selected source config */
+  .config-block { border: 1px solid #E1E4EA; border-radius: 10px; padding: 18px; margin-bottom: 14px; }
+  .config-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .config-logo { width: 32px; height: 32px; background: #03363D; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; }
+  .config-title { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .config-sub { font-size: 11.5px; color: #6B7280; }
+  .config-status { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; padding: 3px 8px; background: #D1FAE5; color: #065F46; font-size: 11px; font-weight: 500; border-radius: 10px; }
+  .config-dot { width: 6px; height: 6px; border-radius: 50%; background: #065F46; }
+
+  .field-group { margin-bottom: 14px; }
+  .field-label { font-size: 12.5px; font-weight: 500; color: #0E121B; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .field-hint { font-size: 11px; color: #99A0AE; font-weight: 400; }
+  .field-input { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0A0A0A; background: #fff; outline: none; font-family: inherit; }
+  .field-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.1); }
+  .field-select { width: 100%; height: 36px; padding: 0 34px 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0A0A0A; background: #fff; outline: none; font-family: inherit; appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%230E121B' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+
+  /* Article preview */
+  .preview-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .preview-count { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .preview-meta { font-size: 11.5px; color: #99A0AE; margin-left: auto; }
+
+  .article-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; }
+  .article-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #F9FAFB; border-radius: 6px; }
+  .article-check { width: 16px; height: 16px; accent-color: #3d64d7; flex-shrink: 0; }
+  .article-title { font-size: 12.5px; color: #0E121B; flex: 1; }
+  .article-section { font-size: 11px; color: #6B7280; padding: 1px 7px; background: #fff; border: 1px solid #E1E4EA; border-radius: 10px; }
+
+  /* Sync row */
+  .sync-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Footer */
+  .modal-footer { display: flex; align-items: center; padding: 14px 24px; border-top: 1px solid #E1E4EA; gap: 8px; justify-content: flex-end; background: #FAFBFC; }
+  .btn { height: 36px; padding: 0 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; border: 1px solid #E1E4EA; background: #fff; color: #0E121B; }
+  .btn:hover { background: #F9FAFB; }
+  .btn-primary { background: #0E121B; color: #fff; border-color: #0E121B; }
+  .btn-primary:hover { background: #000; }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Add Knowledge Base source</div>
+        <div class="modal-subtitle">Connect a source so your agent can reference it during calls.</div>
+      </div>
+      <button class="modal-close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="section-title">Choose a source</div>
+      <div class="section-desc">Pick where your knowledge lives. Content is chunked, embedded, and retrieved via semantic search during calls.</div>
+
+      <div class="source-grid">
+        <div class="source-card">
+          <div class="source-logo web"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h14M10 3c2 2.5 2 11 0 14M10 3c-2 2.5-2 11 0 14" stroke="currentColor" stroke-width="1.6"/></svg></div>
+          <div>
+            <div class="source-name">Web Page</div>
+            <div class="source-desc">Crawl a public URL and keep it synced.</div>
+          </div>
+        </div>
+        <div class="source-card">
+          <div class="source-logo file"><svg viewBox="0 0 20 20" fill="none"><path d="M6 3h6l4 4v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v4h4" stroke="currentColor" stroke-width="1.6"/></svg></div>
+          <div>
+            <div class="source-name">Upload File</div>
+            <div class="source-desc">PDF, DOCX, TXT, or Markdown.</div>
+          </div>
+        </div>
+        <div class="source-card">
+          <div class="source-logo text"><svg viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h12M4 15h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <div>
+            <div class="source-name">Add Text</div>
+            <div class="source-desc">Paste text directly into the agent.</div>
+          </div>
+        </div>
+        <div class="source-card">
+          <div class="source-logo drive"><img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" width="24" height="24" alt="Google Drive"></div>
+          <div>
+            <div class="source-name">Google Drive</div>
+            <div class="source-desc">Sync files from a Drive folder.</div>
+          </div>
+        </div>
+        <div class="source-card">
+          <div class="source-logo sheets"><img src="https://upload.wikimedia.org/wikipedia/commons/a/ae/Google_Sheets_2020_Logo.svg" width="22" height="22" alt="Google Sheets"></div>
+          <div>
+            <div class="source-name">Google Sheets</div>
+            <div class="source-desc">Sync a tab of structured data.</div>
+          </div>
+        </div>
+        <div class="source-card">
+          <div class="source-logo docs"><img src="https://upload.wikimedia.org/wikipedia/commons/0/01/Google_Docs_2020_Logo.svg" width="22" height="22" alt="Google Docs"></div>
+          <div>
+            <div class="source-name">Google Docs</div>
+            <div class="source-desc">Sync narrative docs and SOPs.</div>
+          </div>
+        </div>
+        <div class="source-card selected">
+          <div class="source-logo zendesk">Z</div>
+          <div>
+            <div class="source-name">Zendesk Help Center</div>
+            <div class="source-desc">Sync published help articles.</div>
+          </div>
+        </div>
+        <div class="source-card">
+          <div class="source-logo notion"><img src="https://www.google.com/s2/favicons?domain=notion.so&sz=64" width="24" height="24" alt=""></div>
+          <div>
+            <div class="source-name">Notion</div>
+            <div class="source-desc">Sync a Notion database or page. <i>Coming soon</i></div>
+          </div>
+        </div>
+        <div class="source-card">
+          <div class="source-logo intercom">In</div>
+          <div>
+            <div class="source-name">Intercom Articles</div>
+            <div class="source-desc">Sync Intercom Help articles. <i>Coming soon</i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zendesk-specific config -->
+      <div class="config-block">
+        <div class="config-head">
+          <div class="config-logo">Z</div>
+          <div>
+            <div class="config-title">Zendesk Help Center</div>
+            <div class="config-sub">Sync published articles from your Help Center brand(s).</div>
+          </div>
+          <span class="config-status"><span class="config-dot"></span>Zendesk connected</span>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Help Center brand</div>
+          <select class="field-select">
+            <option>Acme Support — support.acmecorp.com (287 articles)</option>
+            <option>Acme Developer Hub — developers.acmecorp.com (63 articles)</option>
+            <option>All brands (350 articles total)</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Article selection</div>
+          <select class="field-select">
+            <option>Specific sections (recommended)</option>
+            <option>All published articles</option>
+            <option>By label / tag filter</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <div class="preview-head">
+            <span class="preview-count">Selected articles</span>
+            <span class="preview-meta">42 of 287 · updated 12 min ago</span>
+          </div>
+          <div class="article-list">
+            <div class="article-row">
+              <input type="checkbox" class="article-check" checked>
+              <span class="article-title">How to reset your password</span>
+              <span class="article-section">Getting Started</span>
+            </div>
+            <div class="article-row">
+              <input type="checkbox" class="article-check" checked>
+              <span class="article-title">Billing cycles and invoice FAQs</span>
+              <span class="article-section">Billing</span>
+            </div>
+            <div class="article-row">
+              <input type="checkbox" class="article-check" checked>
+              <span class="article-title">Understanding Enterprise plan entitlements</span>
+              <span class="article-section">Plans</span>
+            </div>
+            <div class="article-row">
+              <input type="checkbox" class="article-check" checked>
+              <span class="article-title">Configuring SSO with Okta, Azure AD, or Google Workspace</span>
+              <span class="article-section">Admin</span>
+            </div>
+            <div class="article-row">
+              <input type="checkbox" class="article-check" checked>
+              <span class="article-title">Return policy and refund eligibility</span>
+              <span class="article-section">Billing</span>
+            </div>
+            <div class="article-row">
+              <input type="checkbox" class="article-check">
+              <span class="article-title">Changelog: Q1 2026 release notes</span>
+              <span class="article-section">Release Notes</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sync-row">
+          <div class="field-group" style="margin-bottom: 0;">
+            <div class="field-label">Sync frequency</div>
+            <select class="field-select">
+              <option>Every 30 min</option>
+              <option>Every 15 min</option>
+              <option>Every hour</option>
+              <option>Daily</option>
+            </select>
+          </div>
+          <div class="field-group" style="margin-bottom: 0;">
+            <div class="field-label">Language</div>
+            <select class="field-select">
+              <option>English (en-us)</option>
+              <option>All languages</option>
+              <option>Spanish (es)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #F0F7FF; border: 1px solid #BFDBFE; border-radius: 8px; font-size: 12.5px; color: #1E3A8A;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;"><circle cx="12" cy="12" r="10" stroke="#3d64d7" stroke-width="1.8"/><path d="M12 8v4m0 4h.01" stroke="#3d64d7" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Agents reference these articles via semantic search during calls. Drafts and unpublished articles are never synced.
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn">Cancel</button>
+      <button class="btn">Preview content</button>
+      <button class="btn btn-primary">Add source</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

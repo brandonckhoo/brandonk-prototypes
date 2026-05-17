@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Zendesk Integration Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: #fff; color: #0A0A0A; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 48px; }
+  .page { display: flex; gap: 56px; align-items: flex-start; max-width: 1600px; }
+  .diagram-col { flex: 0 0 auto; width: 1000px; position: relative; }
+  .steps-col { flex: 1; min-width: 400px; max-width: 520px; padding-top: 12px; }
+  .steps-title { font-size: 15px; font-weight: 700; color: #0E121B; margin-bottom: 24px; }
+  .step { display: flex; gap: 14px; margin-bottom: 24px; align-items: flex-start; }
+  .step-num { flex: 0 0 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; background: #6B7280; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.55; color: #374151; }
+  .step-text strong { color: #0E121B; font-weight: 600; }
+  .step-text .highlight { color: #03363D; font-weight: 600; }
+  .caption { font-size: 13px; color: #6B7280; text-align: center; margin-top: 20px; line-height: 1.5; }
+  .customer-emoji { position: absolute; top: 38px; left: 88px; font-size: 32px; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="page">
+<div class="diagram-col">
+<div class="customer-emoji">🗣️</div>
+<svg viewBox="0 0 1000 580" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Actor 1: Customer -->
+  <rect x="50" y="30" width="120" height="90" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="110" y="92" text-anchor="middle" font-size="10" fill="#64748B">Caller</text>
+  <text x="110" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Customer</text>
+
+  <!-- Actor 2: Retell AI -->
+  <rect x="380" y="30" width="170" height="90" rx="12" fill="#0E121B"/>
+  <image href="/Users/brandonkhoo/Documents/Retell AI/Logo.png" x="415" y="55" width="91" height="35" style="filter: brightness(0) invert(1);"/>
+  <text x="465" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Retell AI</text>
+  <text x="465" y="156" text-anchor="middle" font-size="11" fill="#94A3B8">Voice Agent</text>
+
+  <!-- Actor 3: Zendesk -->
+  <rect x="790" y="30" width="160" height="90" rx="12" fill="#03363D"/>
+  <text x="870" y="76" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">Zendesk</text>
+  <text x="870" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Zendesk</text>
+  <text x="870" y="156" text-anchor="middle" font-size="11" fill="#94A3B8">Support Platform</text>
+
+  <!-- Lifelines -->
+  <line x1="110" y1="170" x2="110" y2="560" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="465" y1="170" x2="465" y2="560" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="870" y1="170" x2="870" y2="560" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- Step 1: Caller starts conversation -->
+  <line x1="110" y1="205" x2="465" y2="205" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="462,200 472,205 462,210" fill="#9CA3AF"/>
+  <polygon points="113,200 103,205 113,210" fill="#9CA3AF"/>
+  <rect x="180" y="191" width="210" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="285" y="209" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Voice conversation starts</text>
+
+  <!-- Step 2: Retell looks up existing tickets / user -->
+  <line x1="465" y1="250" x2="870" y2="250" stroke="#3d64d7" stroke-width="2"/>
+  <polygon points="867,245 877,250 867,255" fill="#3d64d7"/>
+  <rect x="540" y="236" width="230" height="26" rx="5" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="655" y="254" text-anchor="middle" font-size="12" font-weight="500" fill="#3730A3">Lookup user + existing tickets</text>
+
+  <!-- Step 3: Zendesk returns context -->
+  <line x1="870" y1="290" x2="465" y2="290" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="468,285 458,290 468,295" fill="#9CA3AF"/>
+  <rect x="560" y="276" width="220" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="670" y="294" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Customer history + open tickets</text>
+
+  <!-- Step 4: AI agent handles conversation -->
+  <rect x="365" y="325" width="200" height="28" rx="6" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="465" y="344" text-anchor="middle" font-size="12" font-weight="600" fill="#166534">AI agent handles call</text>
+
+  <!-- Step 5: Create / update ticket -->
+  <line x1="465" y1="380" x2="870" y2="380" stroke="#3d64d7" stroke-width="2"/>
+  <polygon points="867,375 877,380 867,385" fill="#3d64d7"/>
+  <rect x="505" y="366" width="300" height="26" rx="5" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="655" y="384" text-anchor="middle" font-size="12" font-weight="500" fill="#3730A3">Create or update ticket + add comment</text>
+
+  <!-- Step 6: Zendesk confirms ticket ID -->
+  <line x1="870" y1="420" x2="465" y2="420" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="468,415 458,420 468,425" fill="#9CA3AF"/>
+  <rect x="560" y="406" width="220" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="670" y="424" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Ticket ID + confirmation</text>
+
+  <!-- Step 7: Agent confirms to caller -->
+  <line x1="465" y1="465" x2="110" y2="465" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="113,460 103,465 113,470" fill="#9CA3AF"/>
+  <rect x="175" y="451" width="235" height="26" rx="5" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="292" y="469" text-anchor="middle" font-size="12" font-weight="500" fill="#166534">"Ticket #12345 created"</text>
+
+  <!-- Step 8: Log call outcome -->
+  <line x1="465" y1="515" x2="870" y2="515" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="867,510 877,515 867,520" fill="#9CA3AF"/>
+  <rect x="530" y="501" width="250" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="655" y="519" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Log call summary + outcome</text>
+
+</svg>
+
+<div class="caption">Flowchart illustrating how Retell AI agents connect to Zendesk to look up customer history, create or update tickets,<br>add comments, and log call outcomes back into the system of record.</div>
+</div>
+
+<!-- RIGHT: Step-by-step walkthrough -->
+<div class="steps-col">
+  <div class="steps-title">How it works</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text"><strong>Voice conversation starts.</strong> A customer calls in and speaks with the Retell AI voice agent. Retell handles the conversation in real time using the agent's configured prompt and tools.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>Lookup user and existing tickets.</strong> At the start of the call, Retell queries Zendesk using the caller's phone number or email to find the existing user record and any open tickets. This gives the agent full context on who is calling and what issues they already have.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>Zendesk returns customer history.</strong> Zendesk sends back the user profile, ticket history, tags, and any custom field data. The agent now has context to greet the customer by name, reference prior issues, and avoid asking repeat questions.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-text"><strong>AI agent handles the call.</strong> The agent uses the retrieved context to resolve the issue or gather the information needed for follow up. If the AI can resolve the issue, it does. If not, it collects the details required to create or update a ticket.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-text"><strong>Create or update ticket.</strong> During or after the call, the agent writes back to <span class="highlight">Zendesk</span>, creating a new ticket or updating an existing one with conversation summary, tags, priority, assignee, and custom field values. Multiple ticket forms and custom fields are supported.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">6</div>
+    <div class="step-text"><strong>Zendesk confirms.</strong> Zendesk returns the ticket ID and confirmation. Any Zendesk triggers, automations, or SLA rules fire based on the customer's existing configuration.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">7</div>
+    <div class="step-text"><strong>Agent confirms to caller.</strong> The agent tells the customer their ticket has been created or updated, giving them the ticket number and expected follow up. The customer leaves the call with a clear next step.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">8</div>
+    <div class="step-text"><strong>Log call outcome.</strong> After the call ends, Retell logs the full call summary, duration, recording link, and outcome back to Zendesk as a voice activity or ticket event. Support teams now have a complete interaction history inside Zendesk.</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

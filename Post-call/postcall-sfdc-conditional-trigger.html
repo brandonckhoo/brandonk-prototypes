@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Post-call: Conditional Trigger</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  /* Top bar */
+  .top-bar-wrap { background: #fff; flex-shrink: 0; border-bottom: 1px solid #E1E4EA; }
+  .top-bar-row1 { display: flex; align-items: center; height: 44px; padding: 0 16px; gap: 10px; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; color: #525866; flex-shrink: 0; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 0; }
+  .top-tab { padding: 5px 14px; font-size: 13.5px; font-weight: 400; color: #525866; cursor: pointer; }
+  .top-tab.active { font-weight: 600; color: #0E121B; }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .saved-label { font-size: 12px; color: #99A0AE; }
+  .btn-publish { height: 32px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; }
+
+  /* Builder layout */
+  .builder-layout { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+  /* Prompt panel */
+  .prompt-panel { width: 42%; display: flex; flex-direction: column; border-right: 1px solid #E1E4EA; overflow: hidden; }
+  .model-bar { display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .mb-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 6px; font-size: 13px; font-weight: 500; color: #374151; white-space: nowrap; }
+  .mb-pill .chevron { color: #99A0AE; }
+  .mb-sep { color: #D1D5DB; }
+  .mb-spacer { flex: 1; }
+  .mb-handbook { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12.5px; font-weight: 500; color: #374151; background: #fff; white-space: nowrap; flex-shrink: 0; }
+  .prompt-area { flex: 1; padding: 14px; overflow-y: auto; }
+  .prompt-content { font-size: 13.5px; line-height: 1.75; color: #0A0A0A; }
+  .prompt-content .md-h2 { font-size: 13.5px; font-weight: 700; margin: 12px 0 3px; }
+  .welcome-section { padding: 12px 14px 20px; flex-shrink: 0; border-top: 1px solid #E1E4EA; }
+  .welcome-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .welcome-label { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .welcome-select { height: 36px; padding: 0 28px 0 10px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0A0A0A; background: #fff; width: 100%; appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%2399A0AE' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; outline: none; font-family: inherit; }
+
+  /* Functions panel */
+  .functions-panel { flex: 1; border-right: 1px solid #E1E4EA; overflow-y: auto; background: #fff; }
+  .fn-header { display: flex; align-items: center; gap: 8px; padding: 14px 16px; border-bottom: 1px solid #E1E4EA; position: sticky; top: 0; background: #fff; z-index: 1; }
+  .fn-header-title { font-size: 14px; font-weight: 500; color: #0E121B; flex: 1; }
+  .fn-blurb { padding: 10px 16px 14px; font-size: 13px; color: #6B7280; line-height: 1.45; border-bottom: 1px solid #E1E4EA; }
+  .fn-sub { padding: 12px 16px 0; }
+  .fn-sub-hdr { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .fn-sub-label { font-size: 11px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.04em; }
+  .fn-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid #E5E7EB; border-radius: 8px; margin-bottom: 6px; background: #fff; }
+  .fn-row-icon { width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .fn-row-name { font-size: 13px; color: #0E121B; flex: 1; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
+  .fn-row-badge { font-size: 11px; font-weight: 600; color: #16A34A; white-space: nowrap; flex-shrink: 0; }
+  .fn-row-actions { display: flex; gap: 2px; flex-shrink: 0; }
+  .fn-row-actions button { width: 24px; height: 24px; border: none; background: none; cursor: pointer; color: #C5CAD3; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+  .fn-add-btn-wrap { padding: 4px 0 14px; }
+  .fn-add-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 500; color: #374151; padding: 5px 10px; border: 1px solid #E1E4EA; border-radius: 6px; background: #fff; cursor: pointer; font-family: inherit; }
+  .fn-divider { height: 1px; background: #E1E4EA; margin: 0 16px; }
+  .section { border-bottom: 1px solid #E1E4EA; }
+  .section-header { display: flex; align-items: center; gap: 8px; padding: 14px 16px; cursor: pointer; }
+  .section-icon { width: 18px; height: 18px; color: #525866; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .section-title { font-size: 14px; font-weight: 500; color: #0E121B; flex: 1; }
+  .section-chevron { color: #99A0AE; }
+
+  /* Test panel */
+  .test-panel { width: 22%; border-left: 1px solid #E1E4EA; display: flex; flex-direction: column; background: #FAFAFA; }
+  .test-tabs { display: flex; width: 100%; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .test-tab { flex: 1; padding: 10px; text-align: center; font-size: 13px; color: #525866; border-bottom: 2px solid transparent; }
+  .test-tab.active { font-weight: 500; color: #0E121B; border-bottom-color: #0E121B; }
+  .test-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; }
+  .run-test-btn { height: 36px; padding: 0 20px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 500; color: #0E121B; font-family: inherit; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+
+  /* Modal overlay */
+  .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
+
+  /* Modal */
+  .modal { background: #fff; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.18); width: 680px; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  .modal-header { display: flex; align-items: flex-start; padding: 20px 20px 16px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; gap: 12px; }
+  .modal-header-icon { width: 36px; height: 36px; border-radius: 8px; background: #00A1E0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .modal-title { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .modal-subtitle { font-size: 13px; color: #6B7280; margin-top: 2px; }
+  .modal-close { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: #9CA3AF; cursor: pointer; flex-shrink: 0; border: none; background: none; margin-top: -2px; }
+
+  /* Scroll fade at top of modal body — indicates content above */
+  .modal-body { overflow-y: auto; flex: 1; scroll-behavior: smooth; }
+  .modal-body-fade { position: relative; }
+  .modal-body-fade::before {
+    content: '';
+    position: sticky;
+    top: 0;
+    display: block;
+    height: 36px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%);
+    z-index: 2;
+    pointer-events: none;
+    margin-bottom: -36px;
+  }
+
+  /* Collapsed summary rows — content above the fold */
+  .section-summary { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-bottom: 1px solid #F3F4F6; }
+  .ss-label { font-size: 13px; font-weight: 500; color: #9CA3AF; width: 100px; flex-shrink: 0; }
+  .ss-value { font-size: 13px; color: #525866; flex: 1; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .ss-chip { background: #F3F4F6; color: #374151; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+  .ss-chip.blue { background: #EEF4FF; color: #3d64d7; font-family: ui-monospace, monospace; font-size: 11.5px; }
+  .ss-more { font-size: 12px; color: #9CA3AF; cursor: pointer; }
+  .ss-more:hover { color: #525866; }
+  .ss-edit { font-size: 12px; color: #3d64d7; cursor: pointer; margin-left: auto; }
+
+  /* Enable row */
+  .enable-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px 12px; border-bottom: 1px solid #F3F4F6; }
+  .enable-label { font-size: 14px; font-weight: 500; color: #0E121B; }
+  .enable-hint { font-size: 12.5px; color: #9CA3AF; margin-top: 2px; }
+  .toggle-on { width: 38px; height: 22px; background: #3d64d7; border-radius: 11px; position: relative; cursor: pointer; flex-shrink: 0; }
+  .toggle-on::after { content: ''; position: absolute; top: 3px; right: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.18); }
+
+  /* When to fire section — hero of this screen */
+  .form-section { padding: 16px 20px; border-bottom: 1px solid #F3F4F6; }
+  .form-section-title { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 3px; }
+  .form-section-desc { font-size: 12.5px; color: #9CA3AF; margin-bottom: 14px; line-height: 1.4; }
+
+  .radio-group { display: flex; flex-direction: column; gap: 10px; }
+  .radio-option { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+  .radio-circle { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #D1D5DB; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; }
+  .radio-circle.selected { border-color: #3d64d7; }
+  .radio-circle.selected::after { content: ''; width: 8px; height: 8px; background: #3d64d7; border-radius: 50%; }
+  .radio-label { font-size: 14px; font-weight: 500; color: #0E121B; }
+  .radio-desc { font-size: 12.5px; color: #9CA3AF; margin-top: 2px; }
+
+  /* Condition builder — featured */
+  .condition-builder { margin-top: 12px; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px; background: #FAFAFA; }
+
+  .condition-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .cond-field { height: 34px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; color: #0E121B; background: #fff; font-family: ui-monospace, 'SF Mono', Menlo, monospace; flex: 1; min-width: 0; }
+  .cond-op { height: 34px; padding: 0 8px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; color: #525866; background: #fff; font-family: inherit; width: 52px; text-align: center; flex-shrink: 0; }
+  .cond-val { height: 34px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; color: #0E121B; background: #fff; font-family: inherit; flex: 1; min-width: 0; }
+  .cond-del { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border: none; background: none; color: #CACFD8; cursor: pointer; border-radius: 4px; flex-shrink: 0; }
+  .cond-or { font-size: 11px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 0 6px 2px; }
+  .add-cond-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 500; color: #3d64d7; padding: 4px 0; cursor: pointer; border: none; background: none; font-family: inherit; margin-top: 8px; }
+
+  /* Modal footer */
+  .modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid #E1E4EA; flex-shrink: 0; }
+  .btn-cancel { height: 36px; padding: 0 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 500; color: #374151; cursor: pointer; font-family: inherit; }
+  .btn-save { height: 36px; padding: 0 20px; border: none; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; font-family: inherit; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar-wrap">
+  <div class="top-bar-row1">
+    <div class="home-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+    <span class="agent-name">Enterprise Inbound Agent</span>
+    <span style="font-size:12px;color:#99A0AE;margin-left:4px;">Single Prompt · Version 12</span>
+    <span class="top-spacer"></span>
+    <div class="top-tabs">
+      <span class="top-tab active">Create</span>
+      <span class="top-tab">Simulation</span>
+    </div>
+    <div class="top-actions">
+      <span class="saved-label">Auto saved at 2:32 PM</span>
+      <button class="btn-publish"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Publish</button>
+    </div>
+  </div>
+</div>
+
+<div class="builder-layout">
+
+  <!-- Prompt panel (dimmed behind overlay) -->
+  <div class="prompt-panel">
+    <div class="model-bar">
+      <span class="mb-pill">GPT 4.1 <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="mb-sep">|</span>
+      <span class="mb-pill">Aria <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="mb-sep">|</span>
+      <span class="mb-pill">English <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="mb-spacer"></span>
+      <span class="mb-handbook">Agent Handbook</span>
+    </div>
+    <div class="prompt-area">
+      <div class="prompt-content">
+        <div class="md-h2">## Identity</div>
+        You are Aria, an enterprise inbound agent for Retell AI. Your job is to greet high-value callers quickly, and route renewals or upgrades to the right person.
+        <div class="md-h2">## Style</div>
+        Warm, concise, efficient. Never more than two sentences before pausing for the caller.
+        <div class="md-h2">## Tasks</div>
+        - Identify the caller and pull their account from the CRM.<br>
+        - Confirm intent (renewal, upgrade, support).<br>
+        - Resolve in-call where possible. Escalate via Slack if account ARR &gt; $100K.<br>
+        - Close with clear next steps.
+      </div>
+    </div>
+    <div class="welcome-section">
+      <div class="welcome-label-row"><span class="welcome-label">Welcome Message</span></div>
+      <select class="welcome-select"><option>User speaks first</option></select>
+    </div>
+  </div>
+
+  <!-- Functions panel -->
+  <div class="functions-panel">
+    <div class="fn-header">
+      <span style="color:#525866;display:flex;"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 7h6M7 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="fn-header-title" style="margin-left:8px;">Functions</span>
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="color:#99A0AE;"><path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+    <div class="fn-blurb">Enable your agent with capabilities such as calendar bookings, call transfers, and CRM writes.</div>
+    <div class="fn-sub">
+      <div class="fn-sub-hdr"><span class="fn-sub-label">Pre-Call Functions</span></div>
+      <div class="fn-row"><span class="fn-row-icon" style="background:#EEF4FF;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#3d64d7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="fn-row-name">load_contact_from_sfdc</span><div class="fn-row-actions"><button><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></button><button><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></div></div>
+      <div class="fn-add-btn-wrap"><button class="fn-add-btn"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add</button></div>
+    </div>
+    <div class="fn-divider"></div>
+    <div class="fn-sub" style="padding-top:12px;">
+      <div class="fn-sub-hdr"><span class="fn-sub-label">During-Call Functions</span></div>
+      <div class="fn-row"><span class="fn-row-icon" style="background:#F0FDF4;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="#16A34A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="fn-row-name">end_call</span><div class="fn-row-actions"><button><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></button><button><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></div></div>
+      <div class="fn-add-btn-wrap"><button class="fn-add-btn"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add</button></div>
+    </div>
+    <div class="fn-divider"></div>
+    <div class="fn-sub" style="padding-top:12px;">
+      <div class="fn-sub-hdr"><span class="fn-sub-label">Post-Call Functions</span></div>
+      <div class="fn-row" style="border-color:#BFDBFE;background:#EFF6FF;">
+        <span class="fn-row-icon" style="background:#00A1E0;display:flex;align-items:center;justify-content:center;">
+          <svg width="14" height="10" viewBox="0 0 22 16" fill="none"><path d="M9.1 3.2C9.9 2.4 11 2 12.1 2C13.6 2 14.9 2.8 15.7 3.9C16.2 3.6 16.8 3.5 17.4 3.5C19.4 3.5 21 5.1 21 7.1C21 9.1 19.4 10.7 17.4 10.7H5.6C3.6 10.7 2 9.1 2 7.1C2 5.3 3.3 3.8 5 3.6C5 3.6 5 3.5 5 3.5C5 2.1 6.1 1 7.5 1C8.2 1 8.7 1.3 9.1 1.7" fill="white" opacity="0.9"/></svg>
+        </span>
+        <span class="fn-row-name">sfdc_write_task</span>
+        <span class="fn-row-badge">1 ACTIVE</span>
+        <div class="fn-row-actions"><button><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" stroke="currentColor" stroke-width="1.2"/></svg></button><button><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></div>
+      </div>
+      <div class="fn-add-btn-wrap"><button class="fn-add-btn"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add</button></div>
+    </div>
+    <div style="height:6px;"></div>
+    <div class="fn-divider"></div>
+    <div class="section"><div class="section-header"><span class="section-icon"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><rect x="4" y="3" width="12" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 7h4M8 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="section-title">Knowledge Base</span><span class="section-chevron"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div></div>
+    <div class="section"><div class="section-header"><span class="section-icon"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h8M4 15h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="section-title">Post-call</span><span class="section-chevron"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div></div>
+    <div class="section"><div class="section-header"><span class="section-icon"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M10 2l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V5l7-3z" stroke="currentColor" stroke-width="1.5"/></svg></span><span class="section-title">Security &amp; Fallback Settings</span><span class="section-chevron"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div></div>
+  </div>
+
+  <!-- Test panel -->
+  <div class="test-panel">
+    <div class="test-tabs">
+      <span class="test-tab active">Test Audio</span>
+      <span class="test-tab">Test LLM</span>
+    </div>
+    <div class="test-content">
+      <div style="color:#D1D5DB;"><svg width="44" height="44" viewBox="0 0 48 48" fill="none"><path d="M24 6a6 6 0 0 0-6 6v12a6 6 0 0 0 12 0V12a6 6 0 0 0-6-6z" stroke="currentColor" stroke-width="2"/><path d="M12 22a12 12 0 0 0 24 0M24 34v8M18 42h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <button class="run-test-btn"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M5 3l8 5-8 5V3z" fill="currentColor"/></svg> Run Test</button>
+    </div>
+  </div>
+
+  <!-- MODAL OVERLAY -->
+  <div class="overlay">
+    <div class="modal">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="modal-header-icon">
+          <svg width="22" height="16" viewBox="0 0 28 20" fill="none">
+            <path d="M11.5 4.5C12.6 3.2 14.2 2.4 16 2.4C18.4 2.4 20.4 3.8 21.4 5.8C22.2 5.4 23 5.2 24 5.2C26.2 5.2 28 7 28 9.2C28 11.4 26.2 13.2 24 13.2H5.6C3.4 13.2 2 11.6 2 9.6C2 7.8 3.2 6.2 4.9 5.9C4.9 5.9 4.9 5.8 4.9 5.8C4.9 3.8 6.4 2.2 8.4 2.2C9.6 2.2 10.6 2.7 11.5 3.5" fill="white" opacity="0.95"/>
+          </svg>
+        </div>
+        <div>
+          <div class="modal-title">Write to Salesforce</div>
+          <div class="modal-subtitle">Auto-write call outcomes to Salesforce after this agent's calls end.</div>
+        </div>
+        <button class="modal-close" style="margin-left:auto;">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <!-- Modal body — shows mid-scroll state: fields above collapsed, "When to fire" is hero -->
+      <div class="modal-body" id="modalBody">
+        <div class="modal-body-fade">
+
+          <!-- Enable row (scrolled partially past) -->
+          <div class="enable-row">
+            <div>
+              <div class="enable-label">Enable</div>
+              <div class="enable-hint">Write to Salesforce after each call that meets the condition.</div>
+            </div>
+            <div class="toggle-on"></div>
+          </div>
+
+          <!-- Collapsed summaries of fields already configured above the fold -->
+          <div class="section-summary">
+            <span class="ss-label">Action</span>
+            <span class="ss-value"><span class="ss-chip">Create Task</span></span>
+            <span class="ss-edit">Edit</span>
+          </div>
+          <div class="section-summary">
+            <span class="ss-label">Lookup</span>
+            <span class="ss-value">
+              <span style="font-size:13px;color:#525866;">WhoId (Contact)</span>
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="color:#D1D5DB;flex-shrink:0;"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="ss-chip blue">{{inbound.contact_id}}</span>
+            </span>
+            <span class="ss-edit">Edit</span>
+          </div>
+          <div class="section-summary" style="border-bottom:1px solid #F3F4F6;">
+            <span class="ss-label">Fields</span>
+            <span class="ss-value">
+              <span class="ss-chip">Subject</span>
+              <span class="ss-chip">Status</span>
+              <span class="ss-chip">Priority</span>
+              <span class="ss-more">+2 more</span>
+            </span>
+            <span class="ss-edit">Edit</span>
+          </div>
+
+          <!-- ── HERO: When to fire ── -->
+          <div class="form-section">
+            <div class="form-section-title">When to fire</div>
+            <div class="form-section-desc">Choose whether to run after every call or only when post-call analysis meets a condition.</div>
+
+            <div class="radio-group">
+              <!-- Every call -->
+              <div class="radio-option">
+                <div class="radio-circle"></div>
+                <div>
+                  <div class="radio-label">Every call</div>
+                  <div class="radio-desc">Write to Salesforce after each completed call.</div>
+                </div>
+              </div>
+
+              <!-- Only when condition -->
+              <div class="radio-option">
+                <div class="radio-circle selected"></div>
+                <div style="flex:1;">
+                  <div class="radio-label">Only when condition is met</div>
+                  <div class="radio-desc">Gate on post-call analysis fields. Evaluated on every <code style="font-family:monospace;font-size:12px;background:#F3F4F6;padding:1px 4px;border-radius:3px;">call_analyzed</code> event.</div>
+
+                  <div class="condition-builder">
+
+                    <!-- Row 1 -->
+                    <div class="condition-row">
+                      <input class="cond-field" value="qualification" readonly>
+                      <input class="cond-op" value="=" readonly>
+                      <input class="cond-val" value="qualified" readonly>
+                      <button class="cond-del"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+                    </div>
+
+                    <div class="cond-or">OR</div>
+
+                    <!-- Row 2 -->
+                    <div class="condition-row">
+                      <input class="cond-field" value="sentiment" readonly>
+                      <input class="cond-op" value="=" readonly>
+                      <input class="cond-val" value="negative" readonly>
+                      <button class="cond-del"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+                    </div>
+
+                    <button class="add-cond-btn">
+                      <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                      Add condition
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button class="btn-cancel">Cancel</button>
+        <button class="btn-save">Save</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

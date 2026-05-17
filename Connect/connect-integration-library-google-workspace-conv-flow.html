@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Conversational Flow (Google Drive Nodes)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+  .top-bar { display: flex; align-items: center; height: 40px; padding: 8px 16px 0; gap: 10px; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #525866; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+  .top-tab { padding: 4px 8px; font-size: 14px; color: #525866; }
+  .top-tab.active { font-weight: 500; color: #0E121B; }
+  .btn-icon { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; color: #525866; }
+  .btn-publish { height: 30px; padding: 0 14px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+  .top-meta { display: flex; align-items: center; height: 20px; padding: 2px 16px 8px 50px; font-size: 12px; color: #99A0AE; }
+
+  .main-layout { display: flex; flex: 1; overflow: hidden; border-top: 1px solid #E1E4EA; }
+
+  .node-palette { width: 200px; min-width: 200px; border-right: 1px solid #E1E4EA; background: #fff; overflow-y: auto; }
+  .palette-tabs { display: flex; border-bottom: 1px solid #E1E4EA; }
+  .palette-tab { flex: 1; padding: 10px 8px; text-align: center; font-size: 13px; color: #525866; border-bottom: 2px solid transparent; }
+  .palette-tab.active { font-weight: 500; color: #0E121B; border-bottom-color: #0E121B; }
+  .palette-group-label { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; padding: 12px 16px 4px; }
+  .palette-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 13px; color: #0E121B; cursor: grab; }
+  .palette-item:hover { background: rgba(0,0,0,0.03); }
+  .palette-item .p-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .palette-item .new-dot { width: 5px; height: 5px; background: #3d64d7; border-radius: 50%; margin-left: auto; }
+
+  .canvas { flex: 1; background: #FAFAFA; position: relative; overflow: hidden; background-image: radial-gradient(#E5E7EB 1px, transparent 1px); background-size: 22px 22px; }
+  .canvas-content { position: absolute; top: 60px; left: 60px; }
+
+  .flow-node { position: absolute; border-radius: 10px; background: #fff; border: 1px solid #E1E4EA; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+  .node-begin { left: 100px; top: 0; width: 80px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: #fff; background: #8B5CF6; border-radius: 16px; }
+
+  .node-welcome { left: 0; top: 60px; width: 280px; padding: 14px 16px; }
+  .node-title { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 8px; }
+  .node-title .dot { width: 8px; height: 8px; background: #F59E0B; border-radius: 50%; }
+  .node-body { font-size: 12px; color: #6B7280; line-height: 1.5; margin-bottom: 10px; }
+  .node-transition { border-top: 1px solid #E1E4EA; padding-top: 10px; }
+  .node-transition-label { font-size: 11px; font-weight: 500; color: #0E121B; margin-bottom: 6px; }
+  .node-transition-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #6B7280; padding: 3px 0; }
+  .node-transition-item .bullet { width: 5px; height: 5px; border-radius: 50%; background: #D1D5DB; }
+
+  .node-drive-get { left: 0; top: 300px; width: 260px; padding: 14px 16px; border: 1.5px solid #3d64d7; box-shadow: 0 4px 12px rgba(61,100,215,0.12); }
+  .node-drive-get .node-title .dot { background: none; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; }
+  .drive-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 500; color: #3d64d7; background: #ecf3ff; padding: 2px 6px; border-radius: 4px; margin-left: auto; }
+  .node-arg { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-top: 1px solid #F3F4F6; font-size: 11px; }
+  .node-arg:first-of-type { border-top: none; padding-top: 0; }
+  .arg-label { color: #6B7280; }
+  .arg-value { color: #0E121B; font-weight: 500; font-family: ui-monospace, Menlo, monospace; font-size: 11px; }
+  .node-output-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 7px; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 4px; font-size: 10px; font-family: ui-monospace, Menlo, monospace; color: #374151; margin-top: 6px; }
+
+  .node-search { left: 320px; top: 300px; width: 250px; padding: 14px 16px; }
+  .node-search .node-title .dot { background: none; width: 18px; height: 18px; }
+
+  .node-answer { left: 0; top: 580px; width: 280px; padding: 14px 16px; }
+
+  .node-end { left: 100px; top: 820px; width: 80px; height: 32px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; font-weight: 500; color: #525866; background: #fff; border: 1px solid #E1E4EA; border-radius: 16px; }
+
+  /* Connection SVG layer */
+  .conn-svg { position: absolute; top: 0; left: 0; pointer-events: none; }
+
+  /* Right: settings panel for selected node */
+  .settings-panel { width: 360px; min-width: 360px; border-left: 1px solid #E1E4EA; background: #fff; overflow-y: auto; }
+  .sp-header { display: flex; align-items: center; gap: 10px; padding: 16px 18px 12px; border-bottom: 1px solid #E1E4EA; }
+  .sp-header .icon { width: 28px; height: 28px; border-radius: 6px; background: #fff; border: 1px solid #E1E4EA; display: flex; align-items: center; justify-content: center; }
+  .sp-name { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .sp-sub { font-size: 12px; color: #6B7280; }
+  .sp-tabs { display: flex; border-bottom: 1px solid #E1E4EA; padding: 0 18px; }
+  .sp-tab { padding: 10px 12px; font-size: 13px; color: #525866; border-bottom: 2px solid transparent; cursor: pointer; }
+  .sp-tab.active { color: #0E121B; font-weight: 500; border-bottom-color: #0E121B; }
+  .sp-body { padding: 16px 18px; }
+  .sp-label { font-size: 13px; font-weight: 500; color: #0E121B; margin: 14px 0 4px; }
+  .sp-label:first-child { margin-top: 0; }
+  .sp-input { width: 100%; height: 36px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; font-family: inherit; }
+  .sp-select { width: 100%; height: 36px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; background: #fff; }
+  .sp-textarea { width: 100%; min-height: 60px; padding: 8px 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; line-height: 1.45; font-family: inherit; resize: vertical; }
+  .sp-helper { font-size: 12px; color: #6B7280; margin-top: 4px; line-height: 1.4; }
+  .sp-section-title { font-size: 13px; font-weight: 600; color: #0E121B; text-transform: uppercase; letter-spacing: 0.03em; margin: 20px 0 8px; }
+  .sp-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 6px; margin-bottom: 6px; }
+  .sp-row .code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: #374151; flex: 1; }
+  .sp-row .type { font-size: 11px; color: #6B7280; }
+
+  .canvas-toolbar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; padding: 4px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .canvas-toolbar button { width: 28px; height: 28px; border: none; background: none; color: #525866; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="home-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+  <span class="agent-name">Enterprise Support · Conversation Flow</span>
+  <span class="top-spacer"></span>
+  <div class="top-tabs"><span class="top-tab active">Create</span><span class="top-tab">Simulation</span></div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn-icon">⋯</button>
+    <button class="btn-publish"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Publish</button>
+  </div>
+</div>
+<div class="top-meta">Agent ID: ag...a3a · CF ID: cv...Jul3 · $0.115/min · 970-1300ms latency</div>
+
+<div class="main-layout">
+  <div class="node-palette">
+    <div class="palette-tabs"><span class="palette-tab active">Node</span><span class="palette-tab">Components</span></div>
+
+    <div class="palette-group-label">Core</div>
+    <div class="palette-item"><span class="p-icon" style="color:#EF4444;font-weight:600;">#</span> Conversation</div>
+    <div class="palette-item"><span class="p-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="#3d64d7" stroke-width="1.5"/><circle cx="10" cy="10" r="2" stroke="#3d64d7" stroke-width="1.3"/></svg></span> Function</div>
+    <div class="palette-item"><span class="p-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M17 13.5c0 1-1.5 2.5-2.5 2.5s-3-1.5-5-3.5S6 8 6 6.5 7.5 4 8.5 4" stroke="#22C55E" stroke-width="1.5"/></svg></span> Call Transfer</div>
+    <div class="palette-item"><span class="p-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6 4v12M6 10h8" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round"/></svg></span> Logic Split</div>
+    <div class="palette-item"><span class="p-icon" style="color:#6B7280;font-size:14px;font-weight:500;">{ }</span> Extract Variable</div>
+    <div class="palette-item"><span class="p-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="4" y="4" width="12" height="12" rx="2" stroke="#93C5FD" stroke-width="1.5"/></svg></span> Ending</div>
+
+    <div class="palette-group-label">Google Workspace · Connected</div>
+    <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 87 78" fill="none"><path d="M6.6 66.85L10.45 73.5C11.25 74.9 12.4 76 13.75 76.8L27.5 53H0C0 54.55 0.4 56.1 1.2 57.5L6.6 66.85Z" fill="#0066DA"/><path d="M43.65 25L29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L1.2 48.5C0.414 49.87 0.0003 51.4 0 52.95H27.5L43.65 25Z" fill="#00AC47"/><path d="M73.55 76.8C74.9 76 76.05 74.9 76.85 73.5L78.45 70.75L86.1 57.5C86.9 56.1 87.3 54.55 87.3 53H59.8L65.65 64.5L73.55 76.8Z" fill="#EA4335"/><path d="M43.65 25L57.4 1.2C56.05 0.4 54.5 0 52.9 0H34.4C32.8 0 31.25 0.45 29.9 1.2L43.65 25Z" fill="#00832D"/><path d="M59.8 53H27.5L13.75 76.8C15.1 77.6 16.65 78 18.25 78H69.05C70.65 78 72.2 77.55 73.55 76.8L59.8 53Z" fill="#2684FC"/><path d="M73.4 26.5L60.7 4.5C59.9 3.1 58.75 2 57.4 1.2L43.65 25L59.8 53H87.25C87.25 51.45 86.85 49.9 86.05 48.5L73.4 26.5Z" fill="#FFBA00"/></svg></span> Get File<span class="new-dot"></span></div>
+    <div class="palette-item"><span class="p-icon"><svg width="18" height="18" viewBox="0 0 87 78" fill="none"><path d="M43.65 25L29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L1.2 48.5C0.414 49.87 0.0003 51.4 0 52.95H27.5L43.65 25Z" fill="#00AC47"/><path d="M73.55 76.8C74.9 76 76.05 74.9 76.85 73.5L78.45 70.75L86.1 57.5C86.9 56.1 87.3 54.55 87.3 53H59.8L65.65 64.5L73.55 76.8Z" fill="#EA4335"/><path d="M43.65 25L57.4 1.2C56.05 0.4 54.5 0 52.9 0H34.4C32.8 0 31.25 0.45 29.9 1.2L43.65 25Z" fill="#00832D"/><path d="M6.6 66.85L10.45 73.5C11.25 74.9 12.4 76 13.75 76.8L27.5 53H0C0 54.55 0.4 56.1 1.2 57.5L6.6 66.85Z" fill="#0066DA"/><path d="M59.8 53H27.5L13.75 76.8C15.1 77.6 16.65 78 18.25 78H69.05C70.65 78 72.2 77.55 73.55 76.8L59.8 53Z" fill="#2684FC"/><path d="M73.4 26.5L60.7 4.5C59.9 3.1 58.75 2 57.4 1.2L43.65 25L59.8 53H87.25C87.25 51.45 86.85 49.9 86.05 48.5L73.4 26.5Z" fill="#FFBA00"/></svg></span> Search Drive<span class="new-dot"></span></div>
+    <div class="palette-item"><span class="p-icon"><svg width="16" height="16" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#0F9D58"/></svg></span> Read Sheet Row</div>
+    <div class="palette-item"><span class="p-icon"><svg width="16" height="16" viewBox="0 0 47 65" fill="none"><path d="M29.4 0H4.4C2 0 0 2 0 4.4V60.6C0 63 2 65 4.4 65H42.6C45 65 47 63 47 60.6V17.6L37.2 10.4L29.4 0Z" fill="#4285F4"/></svg></span> Read Doc</div>
+
+    <div class="palette-group-label">Other integrations</div>
+    <div class="palette-item"><span class="p-icon"><img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=32" width="16" height="16"></span> Get Contact (SFDC)</div>
+    <div class="palette-item"><span class="p-icon"><img src="https://www.google.com/s2/favicons?domain=zendesk.com&sz=32" width="16" height="16"></span> Create Ticket</div>
+  </div>
+
+  <div class="canvas">
+    <svg class="conn-svg" width="700" height="900">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#9CA3AF"/></marker>
+        <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#3d64d7"/></marker>
+      </defs>
+      <!-- Begin -> Welcome -->
+      <path d="M 140 92 L 140 120" stroke="#D1D5DB" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+      <!-- Welcome -> Get File (primary, selected, solid blue) -->
+      <path d="M 140 280 C 140 290, 130 290, 130 300" stroke="#3d64d7" stroke-width="1.8" fill="none" marker-end="url(#arrow-blue)"/>
+      <!-- Welcome -> Search Drive (alt path, dashed) -->
+      <path d="M 200 280 C 300 280, 360 290, 445 300" stroke="#9CA3AF" stroke-width="1.5" fill="none" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+      <!-- Get File -> Answer -->
+      <path d="M 130 550 L 140 580" stroke="#3d64d7" stroke-width="1.8" fill="none" marker-end="url(#arrow-blue)"/>
+      <!-- Search Drive -> Answer (dashed converges back) -->
+      <path d="M 445 520 C 445 550, 200 550, 175 580" stroke="#9CA3AF" stroke-width="1.5" fill="none" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+      <!-- Answer -> End -->
+      <path d="M 140 800 L 140 820" stroke="#D1D5DB" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+    </svg>
+
+    <div class="canvas-content">
+      <div class="flow-node node-begin">Begin</div>
+
+      <div class="flow-node node-welcome">
+        <div class="node-title"><span class="dot"></span>Welcome · Support Intake</div>
+        <div class="node-body">"Hi, this is Retell support — how can I help today?"</div>
+        <div class="node-transition">
+          <div class="node-transition-label">Transitions</div>
+          <div class="node-transition-item"><span class="bullet"></span>User asks about a specific contract / SOP / document</div>
+          <div class="node-transition-item"><span class="bullet"></span>User has a general question about product or pricing</div>
+        </div>
+      </div>
+
+      <!-- Get File (selected) -->
+      <div class="flow-node node-drive-get">
+        <div class="node-title">
+          <span class="dot"><svg width="16" height="16" viewBox="0 0 87 78" fill="none"><path d="M6.6 66.85L10.45 73.5C11.25 74.9 12.4 76 13.75 76.8L27.5 53H0C0 54.55 0.4 56.1 1.2 57.5L6.6 66.85Z" fill="#0066DA"/><path d="M43.65 25L29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L1.2 48.5C0.414 49.87 0.0003 51.4 0 52.95H27.5L43.65 25Z" fill="#00AC47"/><path d="M73.55 76.8C74.9 76 76.05 74.9 76.85 73.5L78.45 70.75L86.1 57.5C86.9 56.1 87.3 54.55 87.3 53H59.8L65.65 64.5L73.55 76.8Z" fill="#EA4335"/><path d="M43.65 25L57.4 1.2C56.05 0.4 54.5 0 52.9 0H34.4C32.8 0 31.25 0.45 29.9 1.2L43.65 25Z" fill="#00832D"/><path d="M59.8 53H27.5L13.75 76.8C15.1 77.6 16.65 78 18.25 78H69.05C70.65 78 72.2 77.55 73.55 76.8L59.8 53Z" fill="#2684FC"/><path d="M73.4 26.5L60.7 4.5C59.9 3.1 58.75 2 57.4 1.2L43.65 25L59.8 53H87.25C87.25 51.45 86.85 49.9 86.05 48.5L73.4 26.5Z" fill="#FFBA00"/></svg></span>
+          Get File from Drive
+          <span class="drive-chip">Drive</span>
+        </div>
+        <div class="node-arg"><span class="arg-label">file_title</span><span class="arg-value">{{user.requested_file}}</span></div>
+        <div class="node-arg"><span class="arg-label">scope</span><span class="arg-value">Sales, SOPs, Contracts</span></div>
+        <div class="node-arg"><span class="arg-label">fallback</span><span class="arg-value">search_drive</span></div>
+        <div style="margin-top: 10px; font-size: 11px; color: #6B7280;">Returns:</div>
+        <span class="node-output-chip">file_contents</span>
+        <span class="node-output-chip">file_url</span>
+      </div>
+
+      <!-- Search Drive (alternative path) -->
+      <div class="flow-node node-search">
+        <div class="node-title">
+          <span class="dot"><svg width="16" height="16" viewBox="0 0 87 78" fill="none"><path d="M6.6 66.85L10.45 73.5C11.25 74.9 12.4 76 13.75 76.8L27.5 53H0C0 54.55 0.4 56.1 1.2 57.5L6.6 66.85Z" fill="#0066DA"/><path d="M43.65 25L29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L1.2 48.5C0.414 49.87 0.0003 51.4 0 52.95H27.5L43.65 25Z" fill="#00AC47"/><path d="M73.55 76.8C74.9 76 76.05 74.9 76.85 73.5L78.45 70.75L86.1 57.5C86.9 56.1 87.3 54.55 87.3 53H59.8L65.65 64.5L73.55 76.8Z" fill="#EA4335"/><path d="M43.65 25L57.4 1.2C56.05 0.4 54.5 0 52.9 0H34.4C32.8 0 31.25 0.45 29.9 1.2L43.65 25Z" fill="#00832D"/><path d="M59.8 53H27.5L13.75 76.8C15.1 77.6 16.65 78 18.25 78H69.05C70.65 78 72.2 77.55 73.55 76.8L59.8 53Z" fill="#2684FC"/><path d="M73.4 26.5L60.7 4.5C59.9 3.1 58.75 2 57.4 1.2L43.65 25L59.8 53H87.25C87.25 51.45 86.85 49.9 86.05 48.5L73.4 26.5Z" fill="#FFBA00"/></svg></span>
+          Search Drive
+          <span class="drive-chip">Drive</span>
+        </div>
+        <div class="node-arg"><span class="arg-label">query</span><span class="arg-value">{{user.message}}</span></div>
+        <div class="node-arg"><span class="arg-label">max_results</span><span class="arg-value">3</span></div>
+        <div style="margin-top: 10px; font-size: 11px; color: #6B7280;">Returns:</div>
+        <span class="node-output-chip">matches[]</span>
+      </div>
+
+      <!-- Answer (conversation node) -->
+      <div class="flow-node node-answer">
+        <div class="node-title"><span class="dot" style="background:#F59E0B;"></span>Answer with Document</div>
+        <div class="node-body">"I'm looking at {{file_contents.title}} — the relevant section is [quote]. Would you like me to email this to you?"</div>
+        <div class="node-transition">
+          <div class="node-transition-label">Transitions</div>
+          <div class="node-transition-item"><span class="bullet"></span>User confirms → end call</div>
+          <div class="node-transition-item"><span class="bullet"></span>User has a follow-up → back to Welcome</div>
+        </div>
+      </div>
+
+      <div class="flow-node node-end">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#D1D5DB" stroke-width="1.3"/><path d="M5 8h6" stroke="#D1D5DB" stroke-width="1.3" stroke-linecap="round"/></svg>
+        End Call
+      </div>
+    </div>
+
+    <div class="canvas-toolbar">
+      <button>+</button><button>−</button><button>⌂</button>
+    </div>
+  </div>
+
+  <!-- Settings panel for the selected Get File node -->
+  <div class="settings-panel">
+    <div class="sp-header">
+      <div class="icon"><svg width="20" height="20" viewBox="0 0 87 78" fill="none"><path d="M6.6 66.85L10.45 73.5C11.25 74.9 12.4 76 13.75 76.8L27.5 53H0C0 54.55 0.4 56.1 1.2 57.5L6.6 66.85Z" fill="#0066DA"/><path d="M43.65 25L29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L1.2 48.5C0.414 49.87 0.0003 51.4 0 52.95H27.5L43.65 25Z" fill="#00AC47"/><path d="M73.55 76.8C74.9 76 76.05 74.9 76.85 73.5L78.45 70.75L86.1 57.5C86.9 56.1 87.3 54.55 87.3 53H59.8L65.65 64.5L73.55 76.8Z" fill="#EA4335"/><path d="M43.65 25L57.4 1.2C56.05 0.4 54.5 0 52.9 0H34.4C32.8 0 31.25 0.45 29.9 1.2L43.65 25Z" fill="#00832D"/><path d="M59.8 53H27.5L13.75 76.8C15.1 77.6 16.65 78 18.25 78H69.05C70.65 78 72.2 77.55 73.55 76.8L59.8 53Z" fill="#2684FC"/><path d="M73.4 26.5L60.7 4.5C59.9 3.1 58.75 2 57.4 1.2L43.65 25L59.8 53H87.25C87.25 51.45 86.85 49.9 86.05 48.5L73.4 26.5Z" fill="#FFBA00"/></svg></div>
+      <div style="flex:1;"><div class="sp-name">Get File from Drive</div><div class="sp-sub">Google Drive · Function Node</div></div>
+    </div>
+    <div class="sp-tabs"><span class="sp-tab active">Configure</span><span class="sp-tab">Edges</span></div>
+    <div class="sp-body">
+      <div class="sp-label">Node name</div>
+      <input class="sp-input" value="Get File from Drive">
+
+      <div class="sp-label">When to run</div>
+      <textarea class="sp-textarea">Run when the user references a specific named document (contract, MSA, SOP, policy). Pass the file title they mentioned as file_title.</textarea>
+      <div class="sp-helper">LLM uses this hint to decide whether to call this node on a given turn.</div>
+
+      <div class="sp-label">Scope (folders)</div>
+      <select class="sp-select"><option>Sales, SOPs, Contracts (3 folders)</option><option>All of My Drive</option><option>Custom…</option></select>
+      <div class="sp-helper">Agent can only read files inside the authorized scope.</div>
+
+      <div class="sp-section-title">File matching</div>
+      <div style="border:1px solid #E1E4EA; border-radius:8px; padding:12px; background:#fff;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0;">
+          <div>
+            <div style="font-size:12px; font-weight:500; color:#0E121B;">Primary identifier</div>
+            <div style="font-size:11px; color:#6B7280; margin-top:1px;">What the LLM passes to look up the file</div>
+          </div>
+          <select style="height:28px; padding:0 24px 0 8px; border:1px solid #E1E4EA; border-radius:5px; font-size:12px; background:#fff;">
+            <option>File title</option>
+            <option>File ID</option>
+            <option>File URL</option>
+          </select>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid #F3F4F6;">
+          <div>
+            <div style="font-size:12px; font-weight:500; color:#0E121B;">Fallback identifier</div>
+            <div style="font-size:11px; color:#6B7280; margin-top:1px;">Used if primary returns no match</div>
+          </div>
+          <select style="height:28px; padding:0 24px 0 8px; border:1px solid #E1E4EA; border-radius:5px; font-size:12px; background:#fff;">
+            <option>Fuzzy search</option>
+            <option>File ID</option>
+            <option>None</option>
+          </select>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid #F3F4F6;">
+          <div>
+            <div style="font-size:12px; font-weight:500; color:#0E121B;">When no match found</div>
+            <div style="font-size:11px; color:#6B7280; margin-top:1px;">Action if both primary and fallback fail</div>
+          </div>
+          <select style="height:28px; padding:0 24px 0 8px; border:1px solid #E1E4EA; border-radius:5px; font-size:12px; background:#fff;">
+            <option>Fall through to Search Drive</option>
+            <option>Tell user not available</option>
+            <option>Transfer to human</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sp-section-title">Inputs</div>
+      <div class="sp-row"><span class="code">file_title</span><span class="type">string · from LLM</span></div>
+
+      <div class="sp-section-title">Outputs</div>
+      <div class="sp-row"><span class="code">file_contents</span><span class="type">string</span></div>
+      <div class="sp-row"><span class="code">file_url</span><span class="type">url</span></div>
+      <div class="sp-row"><span class="code">not_found</span><span class="type">boolean</span></div>
+
+      <div class="sp-label">Speak while loading</div>
+      <input class="sp-input" value="One moment — pulling that up for you.">
+
+      <div class="sp-label">On failure</div>
+      <select class="sp-select"><option>Fall back to Search Drive</option><option>Tell user it's not available</option><option>Transfer to human</option></select>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

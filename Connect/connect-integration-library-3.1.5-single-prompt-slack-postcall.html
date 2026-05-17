@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Agent Builder (Post-call settings)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  /* Top bar */
+  .top-bar-wrap { background: #fff; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .top-bar-row1 { display: flex; align-items: center; height: 44px; padding: 0 16px; gap: 10px; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; color: #525866; flex-shrink: 0; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; white-space: nowrap; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+  .top-tab { padding: 4px 12px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; border-radius: 6px; }
+  .top-tab.active { font-weight: 500; color: #0E121B; background: #F3F4F6; }
+  .top-actions { display: flex; gap: 8px; align-items: center; font-size: 12px; color: #99A0AE; }
+  .btn-publish { height: 32px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .top-bar-row2 { display: flex; align-items: center; height: 22px; padding: 0 16px 6px 50px; }
+  .agent-meta { font-size: 12px; color: #99A0AE; }
+
+  /* Model bar */
+  .model-bar { display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .mb-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; white-space: nowrap; }
+  .mb-pill:hover { background: #F3F4F6; }
+  .mb-pill .chevron { color: #99A0AE; margin-left: 2px; }
+  .mb-spacer { flex: 1; }
+  .mb-handbook { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; background: #fff; white-space: nowrap; flex-shrink: 0; }
+
+  /* Main layout */
+  .builder-layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* Left: prompt editor */
+  .prompt-panel { width: 46%; display: flex; flex-direction: column; border-right: 1px solid #E1E4EA; overflow: hidden; }
+  .prompt-area { flex: 1; padding: 16px; overflow-y: auto; }
+  .prompt-textarea { width: 100%; height: calc(100% - 8px); border: 1px solid #E1E4EA; border-radius: 8px; padding: 14px 16px; outline: none; font-size: 14px; color: #0A0A0A; line-height: 1.65; resize: none; font-family: inherit; }
+  .prompt-textarea:focus { border-color: #3d64d7; box-shadow: 0 0 0 2px rgba(61,100,215,0.08); }
+  .welcome-section { padding: 12px 16px 20px; flex-shrink: 0; border-top: 1px solid #E1E4EA; }
+  .welcome-label { font-size: 14px; font-weight: 600; color: #0E121B; margin-bottom: 8px; }
+  .welcome-select { height: 38px; padding: 0 32px 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; color: #0A0A0A; background: #fff; width: 100%; appearance: none; outline: none; font-family: inherit; }
+
+  /* Right: settings panel */
+  .settings-panel { width: 30%; overflow-y: auto; background: #fff; border-right: 1px solid #E1E4EA; }
+
+  /* Collapsible sections */
+  .section { border-bottom: 1px solid #E1E4EA; }
+  .section-header { display: flex; align-items: center; gap: 8px; padding: 13px 16px; cursor: pointer; user-select: none; }
+  .section-header:hover { background: rgba(0,0,0,0.02); }
+  .section-icon { width: 18px; height: 18px; color: #525866; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .section-title { font-size: 14px; font-weight: 500; color: #0E121B; flex: 1; }
+  .section-chevron { color: #99A0AE; flex-shrink: 0; transition: transform 0.2s; }
+  .section-chevron.open { transform: rotate(180deg); }
+  .section-body { padding: 0 16px 16px; }
+  .section-desc { font-size: 13px; color: #6B7280; margin-bottom: 14px; line-height: 1.4; }
+
+  /* Toggle */
+  .toggle-switch { width: 34px; height: 18px; border-radius: 9px; position: relative; cursor: pointer; flex-shrink: 0; transition: background 0.2s; }
+  .toggle-switch.on { background: #3d64d7; }
+  .toggle-switch.off { background: #D1D5DB; }
+  .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: left 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+  .toggle-switch.on::after { left: 18px; }
+
+  /* Post-call card */
+  .postcall-card { border: 1px solid #E1E4EA; border-radius: 10px; overflow: hidden; }
+  .postcall-card-header { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: #fff; border-bottom: 1px solid #E1E4EA; }
+  .postcall-app-logo { width: 28px; height: 28px; border-radius: 6px; background: #4A154B; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .postcall-title-block { flex: 1; }
+  .postcall-title { font-size: 14px; font-weight: 600; color: #0E121B; }
+  .postcall-subtitle { font-size: 12px; color: #6B7280; margin-top: 1px; }
+
+  /* Card body */
+  .postcall-body { padding: 14px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* Field */
+  .pc-field-label { font-size: 12px; font-weight: 500; color: #0E121B; margin-bottom: 6px; }
+  .pc-field-hint { font-size: 12px; color: #6B7280; margin-top: 5px; line-height: 1.4; }
+
+  /* Channel input row */
+  .channel-row { display: flex; align-items: center; gap: 0; border: 1px solid #E1E4EA; border-radius: 8px; overflow: hidden; }
+  .channel-input { flex: 1; padding: 0 12px; height: 36px; font-size: 14px; color: #0A0A0A; background: #fff; display: flex; align-items: center; gap: 5px; }
+  .channel-hash { color: #6B7280; font-weight: 600; }
+  .agent-override-btn { height: 36px; padding: 0 10px; border: none; border-left: 1px solid #E1E4EA; background: #F9FAFB; font-size: 12px; font-weight: 500; color: #525866; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+
+  /* Radio options */
+  .radio-options { display: flex; flex-direction: column; gap: 6px; }
+  .radio-option { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid #E1E4EA; border-radius: 8px; cursor: pointer; background: #fff; }
+  .radio-option.selected { border-color: #3d64d7; background: #F8FAFF; }
+  .radio-circle { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #D1D5DB; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+  .radio-option.selected .radio-circle { border-color: #3d64d7; }
+  .radio-option.selected .radio-circle::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #3d64d7; }
+  .radio-label { font-size: 13px; font-weight: 500; color: #0E121B; }
+  .radio-desc { font-size: 12px; color: #6B7280; margin-top: 2px; line-height: 1.4; }
+  .radio-condition { font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 11px; color: #374151; background: #F3F4F6; border-radius: 4px; padding: 4px 8px; margin-top: 6px; line-height: 1.5; display: block; word-break: break-all; }
+
+  /* Message template */
+  .template-tabs { display: flex; border-bottom: 1px solid #E1E4EA; margin-bottom: 0; }
+  .template-tab { padding: 6px 12px 8px; font-size: 13px; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .template-tab.active { color: #0E121B; font-weight: 500; border-bottom-color: #0E121B; }
+  .template-preview-box { border: 1px solid #E1E4EA; border-top: none; border-radius: 0 0 6px 6px; padding: 12px; background: #fff; }
+  .template-preview-box .tp-line { font-size: 13px; line-height: 1.6; color: #374151; }
+  .tp-var { color: #3d64d7; font-family: 'SF Mono', ui-monospace, monospace; font-size: 12px; }
+  .template-hint { font-size: 12px; color: #6B7280; margin-top: 6px; }
+  .template-hint a { color: #3d64d7; text-decoration: none; cursor: pointer; }
+  .template-hint a:hover { text-decoration: underline; }
+
+  /* Include in message checkboxes */
+  .include-options { display: flex; flex-direction: column; gap: 8px; }
+  .include-row { display: flex; align-items: flex-start; gap: 10px; }
+  .checkbox { width: 15px; height: 15px; border-radius: 4px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+  .checkbox.checked { background: #3d64d7; border: 1.5px solid #3d64d7; }
+  .checkbox.unchecked { background: #fff; border: 1.5px solid #D1D5DB; }
+  .include-label { font-size: 13px; font-weight: 500; color: #0E121B; }
+  .include-desc { font-size: 12px; color: #6B7280; margin-top: 1px; }
+
+  /* Live preview */
+  .preview-section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: #9CA3AF; text-transform: uppercase; margin-bottom: 6px; }
+  .preview-channel-name { font-size: 12px; font-weight: 600; color: #0E121B; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+  .preview-channel-name .hash { color: #525866; font-weight: 400; }
+  .slack-preview { background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; padding: 12px; }
+  .slack-msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .slack-avatar { width: 28px; height: 28px; background: #0E121B; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .slack-sender { font-size: 13px; font-weight: 700; color: #0E121B; }
+  .slack-app-badge { font-size: 10px; font-weight: 600; background: #E8EAF6; color: #3949AB; padding: 1px 4px; border-radius: 3px; margin-left: 2px; vertical-align: middle; }
+  .slack-time { font-size: 11px; color: #9CA3AF; }
+  .slack-msg-body { font-size: 13px; line-height: 1.55; color: #0E121B; }
+  .slack-msg-body b { font-weight: 700; }
+  .slack-msg-body .link { color: #3d64d7; text-decoration: underline; cursor: pointer; }
+  .slack-metadata-card { border: 1px solid #E1E4EA; border-radius: 6px; margin-top: 8px; overflow: hidden; }
+  .slack-meta-row { display: flex; align-items: center; padding: 6px 10px; border-bottom: 1px solid #F3F4F6; gap: 10px; }
+  .slack-meta-row:last-child { border-bottom: none; }
+  .slack-meta-key { font-size: 12px; font-weight: 600; color: #374151; width: 90px; flex-shrink: 0; }
+  .slack-meta-val { font-size: 12px; color: #374151; }
+  .slack-open-btn { display: inline-block; margin-top: 8px; padding: 5px 12px; border: 1px solid #D1D5DB; border-radius: 4px; font-size: 12px; font-weight: 500; color: #374151; cursor: pointer; background: #fff; }
+  .slack-open-btn:hover { background: #F9FAFB; }
+
+  /* Add button */
+  .add-postcall-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #3d64d7; cursor: pointer; background: none; border: none; padding: 6px 0; font-family: inherit; margin-top: 10px; }
+  .add-postcall-btn:hover { color: #2d4fb3; }
+
+  /* Test panel */
+  .test-panel { width: 24%; border-left: 1px solid #E1E4EA; display: flex; flex-direction: column; background: #FAFAFA; }
+  .test-tabs { display: flex; width: 100%; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .test-tab { flex: 1; padding: 10px; text-align: center; font-size: 13px; font-weight: 400; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; }
+  .test-tab.active { font-weight: 500; color: #0E121B; border-bottom-color: #0E121B; }
+  .test-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px 20px; }
+  .run-test-btn { height: 36px; padding: 0 20px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 500; color: #0E121B; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar-wrap">
+  <div class="top-bar-row1">
+    <div class="home-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+    <span class="agent-name">Enterprise Inbound Agent</span>
+    <span class="top-spacer"></span>
+    <div class="top-tabs">
+      <span class="top-tab active">Create</span>
+      <span class="top-tab">Simulation</span>
+    </div>
+    <div class="top-actions">
+      <span>Auto saved at 2:32 PM</span>
+      <button class="btn-publish">Publish</button>
+    </div>
+  </div>
+  <div class="top-bar-row2">
+    <span class="agent-meta">Single Prompt &middot; Version 12</span>
+  </div>
+</div>
+
+<!-- Builder layout -->
+<div class="builder-layout">
+
+  <!-- Prompt panel (left) -->
+  <div class="prompt-panel">
+    <div class="model-bar">
+      <span class="mb-pill">GPT-4.1 <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span style="color:#D1D5DB;font-size:14px;">|</span>
+      <span class="mb-pill">Aria <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span style="color:#D1D5DB;font-size:14px;">|</span>
+      <span class="mb-pill">&#x1F1FA;&#x1F1F8; English <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="mb-spacer"></span>
+      <span class="mb-handbook"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="#525866" stroke-width="1.3"/><path d="M6 5h4M6 7.5h4M6 10h2" stroke="#525866" stroke-width="1.2" stroke-linecap="round"/></svg> Agent Handbook</span>
+    </div>
+    <div class="prompt-area">
+      <textarea class="prompt-textarea">## Identity
+You are Aria, an enterprise inbound agent for Retell AI. Your job is to greet high-value callers, qualify them quickly, and route renewals or upgrades to the right person.
+
+## Style
+Warm, concise, efficient. Never more than two sentences before pausing for the caller.
+
+## Tasks
+1. Identify the caller and pull their account from the CRM.
+2. Confirm intent (renewal, upgrade, support).
+3. Resolve in-call where possible. Escalate via Slack if account ARR &gt; $100K.
+4. Close with clear next steps.</textarea>
+    </div>
+    <div class="welcome-section">
+      <div class="welcome-label">Welcome Message</div>
+      <select class="welcome-select"><option>User speaks first</option></select>
+    </div>
+  </div>
+
+  <!-- Settings panel (middle-right) -->
+  <div class="settings-panel">
+
+    <!-- Functions -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/></svg></span>
+        <span class="section-title">Functions</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+
+    <!-- Knowledge Base -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="4" y="3" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M7.5 3v14" stroke="currentColor" stroke-width="1.5"/></svg></span>
+        <span class="section-title">Knowledge Base</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+
+    <!-- Speech Settings -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 4a3 3 0 0 0-3 3v4a3 3 0 0 0 6 0V7a3 3 0 0 0-3-3z" stroke="currentColor" stroke-width="1.5"/><path d="M5 11a5 5 0 0 0 10 0M10 16v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        <span class="section-title">Speech Settings</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+
+    <!-- Call Settings -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M4 4c0 7.5 4.5 12 11.5 12L17 14.5l-3.5-2.5-1.5 1.5A9.5 9.5 0 0 1 8 9L9.5 7.5 7 4 5.5 4A1.5 1.5 0 0 0 4 4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+        <span class="section-title">Call Settings</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+
+    <!-- Post-call settings (EXPANDED) -->
+    <div class="section">
+      <div class="section-header" onclick="toggleSection(this)">
+        <span class="section-icon" style="color:#1FC16B;"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M4 10l4.5 4.5 7.5-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="section-title">Post-call settings</span>
+        <span class="section-chevron open"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+      <div class="section-body">
+        <div class="section-desc">Actions that fire automatically after every call this agent completes.</div>
+
+        <!-- Post summary to Slack card -->
+        <div class="postcall-card">
+          <div class="postcall-card-header">
+            <div class="postcall-app-logo">
+              <svg width="16" height="16" viewBox="0 0 54 54" fill="none"><path d="M19.7 33.5a4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1h4.1v4.1zM21.7 33.5a4.1 4.1 0 0 1 4.1-4.1 4.1 4.1 0 0 1 4.1 4.1v10.3a4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1V33.5z" fill="#E01E5A"/><path d="M25.8 19.7a4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1 4.1 4.1 0 0 1 4.1 4.1v4.1H25.8zM25.8 21.7a4.1 4.1 0 0 1 4.1 4.1 4.1 4.1 0 0 1-4.1 4.1H15.5a4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1h10.3z" fill="#36C5F0"/><path d="M39.6 25.8a4.1 4.1 0 0 1 4.1 4.1 4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1V25.8h4.1zM37.6 25.8a4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1H48a4.1 4.1 0 0 1 4.1 4.1 4.1 4.1 0 0 1-4.1 4.1H37.6z" fill="#2EB67D"/><path d="M33.5 39.6a4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1 4.1 4.1 0 0 1 4.1-4.1h4.1v4.1zM33.5 37.6a4.1 4.1 0 0 1 4.1-4.1 4.1 4.1 0 0 1 4.1 4.1V48a4.1 4.1 0 0 1-4.1 4.1 4.1 4.1 0 0 1-4.1-4.1V37.6z" fill="#ECB22E"/></svg>
+            </div>
+            <div class="postcall-title-block">
+              <div class="postcall-title">Post summary to Slack</div>
+              <div class="postcall-subtitle">Auto-post a call summary after this agent's calls end.</div>
+            </div>
+            <div class="toggle-switch on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></div>
+          </div>
+
+          <div class="postcall-body">
+
+            <!-- Channel -->
+            <div>
+              <div class="pc-field-label">Channel</div>
+              <div class="channel-row">
+                <div class="channel-input"><span class="channel-hash">#</span> enterprise-calls</div>
+                <button class="agent-override-btn">Agent override <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+              </div>
+              <div class="pc-field-hint">Workspace default is <strong style="color:#0E121B;">#ai-call-summaries</strong>. This agent posts to a dedicated channel instead.</div>
+            </div>
+
+            <!-- When to send -->
+            <div>
+              <div class="pc-field-label">When to send</div>
+              <div class="radio-options">
+                <div class="radio-option" onclick="selectRadio(this)">
+                  <div class="radio-circle"></div>
+                  <div>
+                    <div class="radio-label">Every call</div>
+                    <div class="radio-desc">Post a summary after each completed call.</div>
+                  </div>
+                </div>
+                <div class="radio-option selected" onclick="selectRadio(this)">
+                  <div class="radio-circle"></div>
+                  <div style="flex:1;">
+                    <div class="radio-label">Only when condition is met</div>
+                    <code class="radio-condition">sentiment = negative OR account_arr &gt; 100000 OR lead_qualified = true</code>
+                  </div>
+                </div>
+                <div class="radio-option" onclick="selectRadio(this)">
+                  <div class="radio-circle"></div>
+                  <div>
+                    <div class="radio-label">Never</div>
+                    <div class="radio-desc">Disable post-call summaries for this agent.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Message template -->
+            <div>
+              <div class="pc-field-label">Message template</div>
+              <div style="border: 1px solid #E1E4EA; border-radius: 6px; overflow: hidden;">
+                <div class="template-tabs">
+                  <div class="template-tab active">Default summary</div>
+                  <div class="template-tab">Custom</div>
+                </div>
+                <div class="template-preview-box">
+                  <div class="tp-line">&#128222; <b>Call summary</b> &mdash; <span class="tp-var">{{caller_name}}</span>, <span class="tp-var">{{account_name}}</span></div>
+                  <div class="tp-line">Outcome: <span class="tp-var">{{call_outcome}}</span>. Sentiment: <span class="tp-var">{{sentiment}}</span>. Duration: <span class="tp-var">{{duration}}</span>.</div>
+                  <div class="tp-line">Next step: <span class="tp-var">{{next_step}}</span>. <span style="color:#3d64d7;cursor:pointer;">Open call &#8599;</span></div>
+                </div>
+              </div>
+              <div class="template-hint">Use <code style="font-family:'SF Mono',monospace;font-size:11px;background:#F3F4F6;padding:1px 4px;border-radius:3px;">{{variable}}</code> to insert extracted call data. <a>See all variables</a></div>
+            </div>
+
+            <!-- Include in message -->
+            <div>
+              <div class="pc-field-label">Include in message</div>
+              <div class="include-options">
+                <div class="include-row">
+                  <div class="checkbox checked"><svg width="9" height="9" viewBox="0 0 10 10" fill="none"><path d="M1.5 5L4 7.5L8.5 2.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <div><div class="include-label">Call details block</div><div class="include-desc">Caller, account, agent, duration as a formatted block.</div></div>
+                </div>
+                <div class="include-row">
+                  <div class="checkbox checked"><svg width="9" height="9" viewBox="0 0 10 10" fill="none"><path d="M1.5 5L4 7.5L8.5 2.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <div><div class="include-label">Recording &amp; transcript links</div><div class="include-desc">"Open call" jumps into Retell Call History.</div></div>
+                </div>
+                <div class="include-row">
+                  <div class="checkbox checked"><svg width="9" height="9" viewBox="0 0 10 10" fill="none"><path d="M1.5 5L4 7.5L8.5 2.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <div><div class="include-label">Extracted variables</div><div class="include-desc">Lead Qualified, Customer Sentiment, Next Step.</div></div>
+                </div>
+                <div class="include-row">
+                  <div class="checkbox unchecked"></div>
+                  <div><div class="include-label">Attach recording as a file</div><div class="include-desc">Uploads MP3 directly to the Slack message.</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live preview -->
+            <div>
+              <div class="preview-section-label">Live Preview</div>
+              <div class="preview-channel-name"><span class="hash">#</span> enterprise-calls</div>
+              <div class="slack-preview">
+                <div class="slack-msg-header">
+                  <div class="slack-avatar">R</div>
+                  <div>
+                    <span class="slack-sender">Retell AI</span>
+                    <span class="slack-app-badge">APP</span>
+                    <span class="slack-time" style="margin-left:6px;">2:28 PM</span>
+                  </div>
+                </div>
+                <div class="slack-msg-body">
+                  <div>&#128222; <b>Call summary &mdash; Sarah Chen, Acme Corp</b></div>
+                  <div>Outcome: <b>Renewal confirmed</b>. Sentiment: Positive. Duration: 4:08.</div>
+                  <div>Next step: contract sent to sarah@acme.com. <span class="link">Open call &#8599;</span></div>
+                </div>
+                <div class="slack-metadata-card">
+                  <div class="slack-meta-row"><span class="slack-meta-key">Caller</span><span class="slack-meta-val">Sarah Chen &middot; +1 (555) 555-1234</span></div>
+                  <div class="slack-meta-row"><span class="slack-meta-key">Account</span><span class="slack-meta-val">Acme Corp &middot; Enterprise &middot; $240K ARR</span></div>
+                  <div class="slack-meta-row"><span class="slack-meta-key">Agent</span><span class="slack-meta-val">Aria (Enterprise Inbound) v12</span></div>
+                  <div class="slack-meta-row"><span class="slack-meta-key">Lead qualified</span><span class="slack-meta-val">Yes</span></div>
+                </div>
+                <button class="slack-open-btn">Open call</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <button class="add-postcall-btn">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Add post-call action
+        </button>
+      </div>
+    </div>
+
+    <!-- Post-Call Data Extraction -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3 15l4-4 3 3 5-6 2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 3v14h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        <span class="section-title">Post-Call Data Extraction</span>
+        <span class="section-chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Test panel (far right) -->
+  <div class="test-panel">
+    <div class="test-tabs">
+      <span class="test-tab active">Test Audio</span>
+      <span class="test-tab">Test LLM</span>
+    </div>
+    <div class="test-content">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style="color:#D1D5DB;"><path d="M24 6a6 6 0 0 0-6 6v12a6 6 0 0 0 12 0V12a6 6 0 0 0-6-6z" stroke="currentColor" stroke-width="2"/><path d="M12 22a12 12 0 0 0 24 0M24 34v8M18 42h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <button class="run-test-btn">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 3l8 5-8 5V3z" fill="currentColor"/></svg>
+        Run Test
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggleSection(header) {
+  var section = header.closest('.section');
+  var body = section.querySelector('.section-body');
+  var chevron = header.querySelector('.section-chevron');
+  if (!body) return;
+  if (chevron.classList.contains('open')) {
+    chevron.classList.remove('open');
+    body.style.display = 'none';
+  } else {
+    chevron.classList.add('open');
+    body.style.display = '';
+  }
+}
+
+function selectRadio(el) {
+  var options = el.closest('.radio-options').querySelectorAll('.radio-option');
+  options.forEach(function(o) { o.classList.remove('selected'); });
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>

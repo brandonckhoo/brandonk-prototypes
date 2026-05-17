@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — WhatsApp Integration</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 280px; background: #F5F7FA; display: flex; flex-direction: column; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { padding: 8px; height: 36px; font-size: 14px; color: #525866; border-radius: 6px; display: flex; align-items: center; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+  .footer { padding: 16px 14px; }
+  .main { flex: 1; overflow: auto; }
+
+  .page-content { padding: 40px 32px 48px; max-width: 1080px; margin: 0 auto; }
+  .breadcrumb { font-size: 13px; color: #6B7280; margin-bottom: 16px; }
+  .breadcrumb a { color: #3d64d7; text-decoration: none; }
+  .page-head { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+  .page-logo { width: 56px; height: 56px; border-radius: 12px; background: #fff; border: 1px solid #E1E4EA; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .page-logo img { width: 40px; height: 40px; }
+  .page-title-block { flex: 1; }
+  .page-title { font-size: 22px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+  .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #ECFDF3; border: 1px solid #ABEFC6; color: #067647; font-size: 12px; font-weight: 500; border-radius: 999px; }
+  .status-pill .dot { width: 6px; height: 6px; background: #17B26A; border-radius: 50%; }
+  .page-sub { font-size: 13px; color: #6B7280; margin-top: 4px; }
+  .page-actions { display: flex; gap: 8px; }
+  .btn { height: 36px; padding: 0 14px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid transparent; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-secondary { background: #fff; border-color: #E1E4EA; color: #0E121B; }
+  .btn-danger { background: #fff; border-color: #EF4444; color: #EF4444; }
+
+  .flow-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; padding: 16px; background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 12px; }
+  .flow-step { display: flex; flex-direction: column; gap: 6px; padding: 12px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; }
+  .flow-step .num { font-size: 11px; color: #99A0AE; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+  .flow-step .label { font-size: 13px; font-weight: 600; color: #0E121B; }
+  .flow-step .meta { font-size: 12px; color: #6B7280; line-height: 1.4; }
+  .flow-step.done { border-color: #17B26A; background: #F0FDF4; }
+  .flow-step.done .num { color: #17B26A; }
+  .flow-step.active { border-color: #0E121B; box-shadow: 0 0 0 2px #0E121B22; }
+  .flow-step.active .num { color: #0E121B; }
+
+  .section { margin-bottom: 32px; }
+  .section-title { font-size: 15px; font-weight: 600; color: #0E121B; margin-bottom: 4px; }
+  .section-desc { font-size: 13px; color: #6B7280; margin-bottom: 14px; line-height: 1.5; }
+
+  .acct-card { background: #fff; border: 1px solid #E1E4EA; border-radius: 12px; overflow: hidden; }
+  .acct-head { display: flex; align-items: center; gap: 16px; padding: 18px 20px; border-bottom: 1px solid #E1E4EA; background: #FAFBFC; }
+  .acct-avatar { width: 44px; height: 44px; border-radius: 10px; background: #25D366; color: #fff; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+  .acct-name { font-size: 15px; font-weight: 600; }
+  .acct-sub { font-size: 13px; color: #6B7280; margin-top: 2px; }
+  .acct-badge { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; background: #F0FDF4; color: #17B26A; border: 1px solid #BBF7D0; border-radius: 999px; font-size: 11px; font-weight: 500; }
+  .acct-badge .dot { width: 5px; height: 5px; background: #17B26A; border-radius: 50%; }
+
+  .acct-meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+  .meta-cell { padding: 16px 20px; border-right: 1px solid #E1E4EA; }
+  .meta-cell:last-child { border-right: none; }
+  .meta-label { font-size: 11px; color: #99A0AE; text-transform: uppercase; font-weight: 500; margin-bottom: 4px; letter-spacing: 0.03em; }
+  .meta-value { font-size: 13px; color: #0E121B; font-weight: 500; }
+  .meta-value code { font-family: 'SF Mono', Menlo, monospace; font-size: 12px; }
+
+  .row { padding: 16px 20px; border-top: 1px solid #E1E4EA; display: flex; align-items: center; gap: 16px; }
+  .row:first-child { border-top: none; }
+  .row-body { flex: 1; }
+  .row-label { font-size: 14px; font-weight: 500; color: #0E121B; display: flex; align-items: center; gap: 6px; }
+  .row-desc { font-size: 13px; color: #6B7280; margin-top: 3px; line-height: 1.4; }
+
+  .toggle { width: 40px; height: 22px; background: #E1E4EA; border-radius: 12px; position: relative; cursor: pointer; transition: background 0.15s; flex-shrink: 0; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: left 0.15s; }
+  .toggle.on { background: #17B26A; }
+  .toggle.on::after { left: 20px; }
+
+  .select { height: 36px; padding: 0 34px 0 12px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 20 20' fill='none'><path d='M10 13.75L3.75 7.5H16.25L10 13.75Z' fill='%2399A0AE'/></svg>") no-repeat right 10px center; -webkit-appearance: none; appearance: none; cursor: pointer; min-width: 220px; }
+
+  .handoff-group { padding: 16px 20px; border-top: 1px solid #E1E4EA; }
+  .handoff-title { font-size: 14px; font-weight: 500; color: #0E121B; margin-bottom: 8px; }
+  .handoff-opts { display: flex; gap: 8px; }
+  .handoff-opt { flex: 1; padding: 10px; border: 1px solid #E1E4EA; border-radius: 8px; cursor: pointer; font-size: 12px; }
+  .handoff-opt.active { border-color: #0E121B; background: #0E121B; color: #fff; }
+  .handoff-opt .t { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+  .handoff-opt .d { font-size: 11px; opacity: 0.7; }
+
+  .webhook-row { padding: 16px 20px; border-top: 1px solid #E1E4EA; display: flex; align-items: center; gap: 12px; font-size: 13px; }
+  .webhook-url { flex: 1; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; background: #F9FAFB; border: 1px solid #E1E4EA; border-radius: 6px; padding: 6px 10px; color: #525866; overflow: hidden; text-overflow: ellipsis; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo"><svg width="73" height="20" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg></div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Deploy</div><ul class="nav-items"><li class="nav-item">Phone Numbers</li><li class="nav-item">Batch Call</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item">Call History</li><li class="nav-item">Chat History</li><li class="nav-item">Analytics</li><li class="nav-item">AI Quality Assurance</li><li class="nav-item">Alerting</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item current">Integrations</li><li class="nav-item">Billing</li><li class="nav-item">Settings</li></ul></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-content">
+    <div class="breadcrumb"><a href="connect-integration-library-3.1.1-whatsapp-in-library.html">Integrations</a> / WhatsApp</div>
+
+    <div class="page-head">
+      <div class="page-logo"><img src="https://www.google.com/s2/favicons?domain=whatsapp.com&sz=64" alt=""></div>
+      <div class="page-title-block">
+        <div class="page-title">WhatsApp <span class="status-pill"><span class="dot"></span>Live</span></div>
+        <div class="page-sub">Cream Digital Clinics · Meta Business API · Connected 2 minutes ago</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary">Logs</button>
+        <button class="btn btn-danger">Disconnect</button>
+      </div>
+    </div>
+
+    <div class="flow-strip">
+      <div class="flow-step done"><span class="num">1 · Done</span><span class="label">Provider chosen</span><span class="meta">Meta Business API</span></div>
+      <div class="flow-step done"><span class="num">2 · Done</span><span class="label">Account linked</span><span class="meta">Cream Digital Clinics · +55 11 4040-0122</span></div>
+      <div class="flow-step active"><span class="num">3 · Active</span><span class="label">Agent bound</span><span class="meta">Clinic Front Desk Agent</span></div>
+      <div class="flow-step"><span class="num">4 · Running</span><span class="label">Live traffic</span><span class="meta">First message usually within 15 min</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Connected account</div>
+      <div class="section-desc">One Retell agent bound to this WhatsApp number handles voice calls <em>and</em> WhatsApp text with the same prompt, tools and KB.</div>
+
+      <div class="acct-card">
+        <div class="acct-head">
+          <div class="acct-avatar">CD</div>
+          <div>
+            <div class="acct-name">Cream Digital Clinics</div>
+            <div class="acct-sub">Display name verified by Meta · Messaging window: Unlimited</div>
+          </div>
+          <span class="acct-badge"><span class="dot"></span>Healthy</span>
+        </div>
+
+        <div class="acct-meta">
+          <div class="meta-cell">
+            <div class="meta-label">Phone number</div>
+            <div class="meta-value">+55 11 4040-0122</div>
+          </div>
+          <div class="meta-cell">
+            <div class="meta-label">Phone number ID</div>
+            <div class="meta-value"><code>1039221847…</code></div>
+          </div>
+          <div class="meta-cell">
+            <div class="meta-label">WABA ID</div>
+            <div class="meta-value"><code>87711930020…</code></div>
+          </div>
+          <div class="meta-cell">
+            <div class="meta-label">Meta verification</div>
+            <div class="meta-value">Verified</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-body">
+            <div class="row-label">Bound agent</div>
+            <div class="row-desc">Which Retell agent handles inbound messages and outbound escalations on this number. Same agent can handle voice on a PSTN number.</div>
+          </div>
+          <select class="select">
+            <option>Clinic Front Desk Agent (Production)</option>
+            <option>Clinic Legal Intake Agent</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <div class="row-body">
+            <div class="row-label">Enable messaging</div>
+            <div class="row-desc">Agent responds to inbound WhatsApp text. Quick reply buttons, inbound media, voice-note transcription all follow this toggle.</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+
+        <div class="row">
+          <div class="row-body">
+            <div class="row-label">Allow escalate to PSTN voice</div>
+            <div class="row-desc">Lets the agent invoke <code>Initiate Voice Call with Chat Context</code> from inside a thread to place an outbound call carrying the full WhatsApp transcript.</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+
+        <div class="row">
+          <div class="row-body">
+            <div class="row-label">Enable voice calling <span style="background:#F3F4F6;color:#525866;font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;margin-left:4px;">PHASE 2</span></div>
+            <div class="row-desc">In-app WhatsApp voice via Meta's Business Calling API (Opus-over-RTP). Not yet available in your workspace.</div>
+          </div>
+          <div class="toggle"></div>
+        </div>
+
+        <div class="handoff-group">
+          <div class="handoff-title">Human handoff default</div>
+          <div class="handoff-opts">
+            <div class="handoff-opt"><div class="t">AI always on</div><div class="d">Agent answers every message unless rep takes over mid-thread</div></div>
+            <div class="handoff-opt active"><div class="t">AI on until rep takes over</div><div class="d">Default. Rep typing in the thread silences the AI until they toggle back</div></div>
+            <div class="handoff-opt"><div class="t">AI off by default</div><div class="d">Human-first. AI only responds when toggled on inside the thread</div></div>
+          </div>
+        </div>
+
+        <div class="webhook-row">
+          <div>
+            <div style="font-size:11px;color:#99A0AE;text-transform:uppercase;font-weight:500;letter-spacing:0.03em;margin-bottom:4px;">Inbound webhook (auto-registered with Meta)</div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <code class="webhook-url">https://api.retellai.com/v2/webhooks/whatsapp/wa_3f2a9c88e/inbound</code>
+              <button class="btn btn-secondary">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">What happens next</div>
+      <div class="section-desc">Three places to go from here.</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <a href="connect-integration-library-3.1.6-whatsapp-inbound-thread.html" style="text-decoration:none;color:inherit;padding:16px;background:#fff;border:1px solid #E1E4EA;border-radius:10px;display:block;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Test an inbound message →</div>
+          <div style="font-size:12px;color:#6B7280;line-height:1.4;">Send a WhatsApp to your new number and watch the agent respond using the same config as voice.</div>
+        </a>
+        <a href="connect-integration-library-3.1.6-call-history-whatsapp.html" style="text-decoration:none;color:inherit;padding:16px;background:#fff;border:1px solid #E1E4EA;border-radius:10px;display:block;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Monitor in Call History →</div>
+          <div style="font-size:12px;color:#6B7280;line-height:1.4;">Threads and voice calls land in the same feed with a channel badge.</div>
+        </a>
+        <a href="#" style="text-decoration:none;color:inherit;padding:16px;background:#fff;border:1px solid #E1E4EA;border-radius:10px;display:block;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Review agent prompt →</div>
+          <div style="font-size:12px;color:#6B7280;line-height:1.4;">Clinic Front Desk Agent will now answer on text. Consider any voice-only phrasing.</div>
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retell AI — Maria Santos · Escalating to Voice</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 240px; background: #F5F7FA; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .nav-scroll { padding: 4px 0; flex: 1; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { padding: 8px; height: 36px; font-size: 14px; color: #525866; border-radius: 6px; display: flex; align-items: center; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+
+  .app { flex: 1; display: flex; min-width: 0; }
+
+  /* Left: thread */
+  .conv { flex: 1.3; display: flex; flex-direction: column; background: #ECE5DD; min-width: 0; }
+  .conv-head { background: #F0F2F5; border-bottom: 1px solid #E1E4EA; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  .conv-avatar { width: 40px; height: 40px; border-radius: 50%; background: #25D366; color: #fff; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  .conv-name { font-size: 15px; font-weight: 600; }
+  .conv-sub { font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 8px; }
+  .conv-sub .dot { width: 6px; height: 6px; background: #17B26A; border-radius: 50%; }
+
+  .messages { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 10px; }
+  .msg-row { display: flex; max-width: 70%; }
+  .msg-row.in { align-self: flex-start; }
+  .msg-row.out { align-self: flex-end; }
+  .bubble { padding: 8px 12px; border-radius: 8px; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); }
+  .msg-row.in .bubble { background: #fff; border-top-left-radius: 2px; }
+  .msg-row.out .bubble { background: #D9FDD3; border-top-right-radius: 2px; }
+  .bubble .time { font-size: 10px; color: #6B7280; text-align: right; margin-top: 4px; }
+  .tick { color: #53BDEB; }
+  .day-divider { align-self: center; background: rgba(255,255,255,0.8); padding: 4px 10px; border-radius: 6px; font-size: 11px; color: #525866; font-weight: 500; }
+  .system-row { align-self: center; padding: 6px 12px; background: rgba(255,255,255,0.7); border-radius: 6px; font-size: 11px; color: #525866; display: flex; align-items: center; gap: 6px; }
+  .system-row.hot { background: #FEF3C7; color: #92400E; font-weight: 500; }
+  .system-row.hot .dot { width: 6px; height: 6px; background: #F59E0B; border-radius: 50%; animation: pulse 1.4s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .composer { background: #F0F2F5; border-top: 1px solid #E1E4EA; padding: 10px 16px; display: flex; gap: 10px; align-items: center; }
+  .composer-input { flex: 1; height: 40px; padding: 0 14px; background: #fff; border: none; border-radius: 20px; font-size: 14px; outline: none; font-family: inherit; }
+
+  /* Center: voice call overlay */
+  .voice-panel { flex: 1; background: linear-gradient(180deg, #0E121B 0%, #1a2340 100%); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; position: relative; min-width: 0; }
+  .vp-badge { padding: 4px 12px; background: rgba(255,255,255,0.1); border-radius: 999px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 24px; color: #93C5FD; }
+  .vp-avatar { width: 120px; height: 120px; border-radius: 50%; background: #25D366; color: #fff; font-weight: 700; font-size: 40px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 4px solid rgba(255,255,255,0.2); animation: ring 2s infinite; }
+  @keyframes ring { 0%, 100% { box-shadow: 0 0 0 0 rgba(37,211,102,0.4); } 50% { box-shadow: 0 0 0 20px rgba(37,211,102,0); } }
+  .vp-name { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .vp-phone { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
+  .vp-status { font-size: 13px; color: #FCD34D; margin-bottom: 32px; display: flex; align-items: center; gap: 8px; }
+  .vp-status .dot { width: 8px; height: 8px; background: #FCD34D; border-radius: 50%; animation: blink 1s infinite; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .vp-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 16px 20px; max-width: 420px; width: 100%; margin-bottom: 16px; }
+  .vp-card-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.5); font-weight: 600; margin-bottom: 10px; }
+  .vp-card-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .vp-card-row .lbl { color: rgba(255,255,255,0.6); }
+  .vp-card-row .val { color: #fff; font-weight: 500; }
+  .vp-card.preload { border-color: rgba(37,211,102,0.4); background: rgba(37,211,102,0.08); }
+
+  .vp-preload-items { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .vp-preload-item { font-size: 12px; color: #D9FDD3; padding: 4px 0; display: flex; gap: 8px; }
+  .vp-preload-item::before { content: '✓'; color: #86EFAC; font-weight: 700; }
+
+  .vp-actions { display: flex; gap: 12px; margin-top: 16px; }
+  .vp-btn { height: 44px; padding: 0 20px; border-radius: 22px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: inherit; }
+  .vp-btn-cancel { background: rgba(255,255,255,0.1); color: #fff; }
+  .vp-btn-mute { background: rgba(255,255,255,0.1); color: #fff; }
+
+  /* Right: context panel */
+  .context { width: 300px; border-left: 1px solid #E1E4EA; background: #FAFBFC; overflow-y: auto; flex-shrink: 0; }
+  .ctx-section { padding: 16px 20px; border-bottom: 1px solid #E1E4EA; }
+  .ctx-title { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 10px; }
+  .ctx-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .ctx-row .lbl { color: #6B7280; }
+  .ctx-row .val { font-weight: 500; }
+
+  .transfer-flow { display: flex; flex-direction: column; gap: 0; background: #fff; border: 1px solid #E1E4EA; border-radius: 10px; padding: 12px 14px; }
+  .tf-item { display: flex; gap: 12px; padding: 6px 0; font-size: 13px; color: #0E121B; position: relative; }
+  .tf-item .tf-dot { width: 12px; height: 12px; border-radius: 50%; background: #E1E4EA; flex-shrink: 0; margin-top: 3px; z-index: 2; }
+  .tf-item.done .tf-dot { background: #17B26A; }
+  .tf-item.active .tf-dot { background: #F59E0B; box-shadow: 0 0 0 3px #FEF3C7; }
+  .tf-item .tf-body { flex: 1; }
+  .tf-item .tf-label { font-weight: 500; font-size: 13px; }
+  .tf-item .tf-meta { font-size: 11px; color: #6B7280; margin-top: 1px; }
+  .tf-item:not(:last-child)::before { content: ''; position: absolute; left: 5px; top: 18px; bottom: -4px; width: 2px; background: #E1E4EA; z-index: 1; }
+  .tf-item.done:not(:last-child)::before { background: #17B26A; }
+
+  .tool-row { padding: 10px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; margin-bottom: 6px; font-size: 12px; }
+  .tool-row .name { font-weight: 600; color: #0E121B; display: flex; align-items: center; gap: 6px; }
+  .tool-row.firing { border-color: #F59E0B; background: #FFFBEB; }
+  .tool-row .args { margin-top: 4px; font-family: 'SF Mono', Menlo, monospace; font-size: 11px; color: #525866; background: #F9FAFB; padding: 6px 8px; border-radius: 4px; }
+  .tool-row .pulse { width: 6px; height: 6px; background: #F59E0B; border-radius: 50%; animation: blink 1s infinite; }
+  .breadcrumb { font-size: 12px; color: #6B7280; margin-bottom: 8px; }
+  .breadcrumb a { color: #3d64d7; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo"><svg width="73" height="20" viewBox="0 0 414 114" fill="none"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg></div>
+  <div class="workspace"><div class="workspace-avatar">B</div><span class="workspace-name">Brandon K... Workspace</span></div>
+  <div class="nav-scroll">
+    <div class="section-group"><div class="section-label">Build</div><ul class="nav-items"><li class="nav-item">Agents</li><li class="nav-item">Knowledge Base</li></ul></div>
+    <div class="section-group"><div class="section-label">Monitor</div><ul class="nav-items"><li class="nav-item current">Call History</li><li class="nav-item">Chat History</li></ul></div>
+    <div class="section-group"><div class="section-label">System</div><ul class="nav-items"><li class="nav-item">Integrations</li></ul></div>
+  </div>
+</aside>
+
+<div class="app">
+  <div class="conv">
+    <div class="conv-head">
+      <div class="conv-avatar">MS</div>
+      <div>
+        <div class="conv-name">Maria Santos</div>
+        <div class="conv-sub"><span class="dot"></span>+55 11 98732-4411 · Channel: WhatsApp → Voice</div>
+      </div>
+    </div>
+    <div class="messages">
+      <div class="day-divider">Today</div>
+      <div class="msg-row in"><div class="bubble">Thursday 10am works.<div class="time">14:03</div></div></div>
+      <div class="msg-row out"><div class="bubble">Done ✅ Booked with Dr. Chen Thursday 10am.<div class="time">14:03 <span class="tick">✓✓</span></div></div></div>
+      <div class="msg-row in"><div class="bubble">Thanks! Quick question — I have AMIL One. Does the consultation copay apply?<div class="time">14:04</div></div></div>
+      <div class="msg-row out"><div class="bubble">Easier to walk through verbally. Want me to call you right now?<div class="time">14:04 <span class="tick">✓✓</span></div></div></div>
+      <div class="msg-row in"><div class="bubble">Yes, please call me.<div class="time">14:05</div></div></div>
+      <div class="system-row hot"><span class="dot"></span>Agent is invoking <strong style="margin-left:4px;">Initiate Voice Call with Chat Context</strong></div>
+      <div class="system-row">Thread paused. Follow-up message will land here after the call ends.</div>
+    </div>
+    <div class="composer">
+      <input type="text" class="composer-input" placeholder="Thread paused during voice call" disabled>
+    </div>
+  </div>
+
+  <div class="voice-panel">
+    <div class="vp-badge">Outbound voice call · Initiated by agent</div>
+    <div class="vp-avatar">MS</div>
+    <div class="vp-name">Maria Santos</div>
+    <div class="vp-phone">+55 11 98732-4411</div>
+    <div class="vp-status"><span class="dot"></span>Ringing · 3 seconds</div>
+
+    <div class="vp-card">
+      <div class="vp-card-title">Placing via</div>
+      <div class="vp-card-row"><span class="lbl">From number</span><span class="val">+55 11 5562-0001</span></div>
+      <div class="vp-card-row"><span class="lbl">Agent</span><span class="val">Clinic Front Desk Agent</span></div>
+      <div class="vp-card-row"><span class="lbl">Record ID</span><span class="val">conv_e8a…22f</span></div>
+      <div class="vp-card-row"><span class="lbl">Same as WhatsApp</span><span class="val" style="color:#86EFAC;">✓ linked</span></div>
+    </div>
+
+    <div class="vp-card preload">
+      <div class="vp-card-title" style="color:#86EFAC;">Context preloaded into voice agent</div>
+      <div class="vp-preload-items">
+        <div class="vp-preload-item">Full WhatsApp transcript (7 turns, 3 min)</div>
+        <div class="vp-preload-item">Patient record (HubSpot: contact 00428)</div>
+        <div class="vp-preload-item">Just-rescheduled Cal.com booking (Dr. Chen, Thu 10am)</div>
+        <div class="vp-preload-item">Known insurer: AMIL One</div>
+        <div class="vp-preload-item">Open question: copay for consultation</div>
+      </div>
+    </div>
+
+    <div class="vp-actions">
+      <button class="vp-btn vp-btn-mute">🔇 Mute</button>
+      <button class="vp-btn vp-btn-cancel">✕ Cancel escalation</button>
+    </div>
+  </div>
+
+  <div class="context">
+    <div class="ctx-section">
+      <div class="breadcrumb"><a href="connect-integration-library-3.1.6-whatsapp-inbound-thread.html">← Back to thread</a></div>
+      <div class="ctx-title">Escalation flow</div>
+      <div class="transfer-flow">
+        <div class="tf-item done"><span class="tf-dot"></span><div class="tf-body"><div class="tf-label">Patient messaged WhatsApp</div><div class="tf-meta">14:02 — booking + copay Q</div></div></div>
+        <div class="tf-item done"><span class="tf-dot"></span><div class="tf-body"><div class="tf-label">Agent handled text</div><div class="tf-meta">Rescheduled via Cal.com</div></div></div>
+        <div class="tf-item done"><span class="tf-dot"></span><div class="tf-body"><div class="tf-label">Agent offered voice</div><div class="tf-meta">Patient accepted</div></div></div>
+        <div class="tf-item active"><span class="tf-dot"></span><div class="tf-body"><div class="tf-label">Outbound call placed</div><div class="tf-meta">Ringing now</div></div></div>
+        <div class="tf-item"><span class="tf-dot"></span><div class="tf-body"><div class="tf-label">Voice agent picks up</div><div class="tf-meta">Opens with continuity</div></div></div>
+        <div class="tf-item"><span class="tf-dot"></span><div class="tf-body"><div class="tf-label">Follow-up message back in WhatsApp</div><div class="tf-meta">Policy summary link</div></div></div>
+      </div>
+    </div>
+
+    <div class="ctx-section">
+      <div class="ctx-title">Tool firing</div>
+      <div class="tool-row firing">
+        <div class="name"><span class="pulse"></span>Initiate Voice Call with Chat Context</div>
+        <div class="args">{
+  "to": "+5511987324411",
+  "from": "+551155620001",
+  "agent_id": "agt_7a2e…",
+  "context_ref": "conv_e8a…22f",
+  "preload_transcript": true
+}</div>
+      </div>
+      <div style="font-size:12px;color:#6B7280;margin-top:8px;line-height:1.4;">Under the hood — two Retell sessions (WhatsApp + voice) stitched together by the shared conversation record. Caller hears no difference.</div>
+    </div>
+
+    <div class="ctx-section">
+      <div class="ctx-title">Same agent, two channels</div>
+      <div style="font-size:13px;color:#525866;line-height:1.5;">Clinic Front Desk Agent is about to open the voice call with: <em>"Hi Maria, picking up from your WhatsApp about the copay question…"</em> No repeat of name, intent, or prior context.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

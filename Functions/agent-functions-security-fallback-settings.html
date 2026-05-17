@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — 4.10 Global function defaults (Speech + Security)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 1440px; }
+
+  /* Top bar */
+  .top-bar-wrap { background: #fff; flex-shrink: 0; border-bottom: 1px solid #E1E4EA; }
+  .top-bar-row1 { display: flex; align-items: center; height: 44px; padding: 0 16px; gap: 10px; position: relative; }
+  .home-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #525866; flex-shrink: 0; }
+  .agent-name { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .top-spacer { flex: 1; }
+  .top-tabs { position: absolute; left: 50%; transform: translateX(-50%); display: flex; border: 1px solid #E1E4EA; border-radius: 8px; overflow: hidden; }
+  .top-tab { padding: 5px 16px; font-size: 13px; font-weight: 400; color: #525866; cursor: pointer; background: #fff; }
+  .top-tab.active { font-weight: 500; color: #0E121B; background: #F5F7FA; }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-publish { height: 32px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; }
+  .saved-label { font-size: 12px; color: #99A0AE; }
+
+  /* Builder layout */
+  .builder-layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* Prompt panel */
+  .prompt-panel { width: 58%; display: flex; flex-direction: column; border-right: 1px solid #E1E4EA; overflow: hidden; }
+  .model-bar { display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .mb-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 6px; font-size: 13px; font-weight: 500; color: #374151; white-space: nowrap; cursor: pointer; }
+  .mb-pill .chevron { color: #99A0AE; }
+  .mb-spacer { flex: 1; }
+  .mb-handbook { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12.5px; font-weight: 500; color: #374151; background: #fff; cursor: pointer; }
+  .prompt-area { flex: 1; padding: 14px; overflow-y: auto; }
+  .prompt-content { font-size: 13.5px; line-height: 1.75; color: #0A0A0A; }
+  .prompt-content .md-h2 { font-size: 13.5px; font-weight: 700; margin: 12px 0 3px; }
+  .prompt-content .md-li { padding-left: 12px; position: relative; }
+  .prompt-content .md-li::before { content: '-'; position: absolute; left: 0; color: #99A0AE; }
+  .welcome-section { padding: 12px 14px 20px; flex-shrink: 0; border-top: 1px solid #E1E4EA; }
+  .welcome-label { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 6px; }
+  .welcome-select { height: 36px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0A0A0A; background: #fff; width: 100%; outline: none; font-family: inherit; }
+
+  /* Right panel */
+  .settings-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff; }
+  .panel-tabs { display: flex; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; }
+  .panel-tab { padding: 10px 16px; font-size: 13px; font-weight: 400; color: #525866; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .panel-tab.active { font-weight: 600; color: #0E121B; border-bottom-color: #0E121B; }
+  .panel-body { flex: 1; overflow-y: auto; }
+
+  /* Accordion sections — match production exactly */
+  .acc-section { border-bottom: 1px solid #E1E4EA; }
+  .acc-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; cursor: pointer; user-select: none; }
+  .acc-header:hover { background: #FAFAFA; }
+  .acc-icon { color: #525866; flex-shrink: 0; display: flex; align-items: center; }
+  .acc-title { font-size: 13.5px; font-weight: 600; color: #0E121B; flex: 1; }
+  .acc-chevron { color: #99A0AE; flex-shrink: 0; transition: transform 0.15s; }
+  .acc-chevron.open { transform: rotate(180deg); }
+  .acc-body { padding: 0 16px 16px; display: none; }
+  .acc-body.open { display: block; }
+
+  /* Settings within accordion */
+  .setting-block { padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
+  .setting-block:last-child { border-bottom: none; padding-bottom: 0; }
+  .setting-label { font-size: 13px; font-weight: 600; color: #0E121B; margin-bottom: 4px; }
+  .setting-desc { font-size: 12px; color: #6B7280; line-height: 1.45; margin-bottom: 8px; }
+  .setting-desc:last-child { margin-bottom: 0; }
+
+  /* Toggles */
+  .toggle { width: 36px; height: 20px; border-radius: 10px; position: relative; flex-shrink: 0; cursor: pointer; }
+  .toggle.on { background: #3d64d7; }
+  .toggle.off { background: #D1D5DB; }
+  .toggle::after { content: ''; position: absolute; top: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .toggle.on::after { right: 2px; }
+  .toggle.off::after { left: 2px; }
+  .toggle-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+
+  /* Radio buttons — native production style */
+  .radio-option { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; cursor: pointer; }
+  .radio-option:last-child { margin-bottom: 0; }
+  .radio-circle { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid #D1D5DB; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; }
+  .radio-circle.selected { border-color: #0E121B; }
+  .radio-circle.selected::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #0E121B; display: block; }
+  .radio-text { font-size: 13px; color: #0E121B; }
+  .radio-sub { font-size: 12px; color: #6B7280; margin-top: 2px; line-height: 1.35; }
+
+  /* Sub-indent for nested radio option */
+  .radio-sub-option { margin-left: 23px; margin-top: 6px; margin-bottom: 8px; }
+  .sub-select { height: 30px; padding: 0 24px 0 8px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 12.5px; color: #0E121B; font-family: inherit; outline: none; background: #fff url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%2399A0AE' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 6px center; appearance: none; }
+
+  /* Setup button */
+  .btn-setup { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12.5px; font-weight: 500; color: #374151; background: #fff; cursor: pointer; font-family: inherit; margin-top: 4px; }
+  .btn-setup:hover { background: #F9FAFB; }
+
+  /* Voice chip */
+  .voice-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 12.5px; color: #0E121B; background: #F9FAFB; margin-top: 6px; margin-bottom: 4px; }
+  .voice-chip-del { color: #D1D5DB; cursor: pointer; display: flex; align-items: center; }
+  .voice-chip-del:hover { color: #EF4444; }
+  .btn-add-voice { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: #525866; background: none; border: none; cursor: pointer; font-family: inherit; padding: 0; margin-top: 6px; }
+  .btn-add-voice:hover { color: #0E121B; }
+
+  /* NEW badge for Function Failure Behavior */
+  .new-badge { display: inline-flex; align-items: center; padding: 1px 6px; border-radius: 10px; font-size: 10.5px; font-weight: 600; background: #DBEAFE; color: #1D4ED8; margin-left: 6px; vertical-align: middle; }
+
+  /* Collapsed section hint */
+  .acc-hint { font-size: 11.5px; color: #99A0AE; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar-wrap">
+  <div class="top-bar-row1">
+    <div class="home-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10.5L10 4l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6.5z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+    <span class="agent-name">4Refuel Dispatch Agent</span>
+    <span style="color:#99A0AE;margin-left:4px;font-size:12px;">Single Prompt · Version 7</span>
+    <span class="top-spacer"></span>
+    <div class="top-tabs">
+      <span class="top-tab active">Create</span>
+      <span class="top-tab">Simulation</span>
+    </div>
+    <div class="top-actions">
+      <span class="saved-label">Auto saved at 11:42 AM</span>
+      <button class="btn-publish"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Publish</button>
+    </div>
+  </div>
+</div>
+
+<div class="builder-layout">
+
+  <!-- Prompt panel -->
+  <div class="prompt-panel">
+    <div class="model-bar">
+      <span class="mb-pill">GPT 4.1 <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span style="color:#E1E4EA;">|</span>
+      <span class="mb-pill">Jordan <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span style="color:#E1E4EA;">|</span>
+      <span class="mb-pill">English <svg class="chevron" width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="mb-spacer"></span>
+      <span class="mb-handbook"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="#525866" stroke-width="1.3"/><path d="M6 5h4M6 7.5h4M6 10h2" stroke="#525866" stroke-width="1.2" stroke-linecap="round"/></svg> Agent Handbook</span>
+    </div>
+    <div class="prompt-area">
+      <div class="prompt-content">
+        <div class="md-h2">## Identity</div>
+        You are Jordan, a dispatch agent for 4Refuel. You call fleet operators to confirm scheduled on-site refueling appointments and update the booking record.<br><br>
+        <div class="md-h2">## Tasks</div>
+        <div class="md-li">Confirm the operator is available for the scheduled window.</div>
+        <div class="md-li">Capture any site access changes (gate code, contact name).</div>
+        <div class="md-li">Update the Salesforce opportunity with confirmed status.</div>
+        <div class="md-li">If rescheduling is needed, book a new slot via Cal.com.</div><br>
+        <div class="md-h2">## Style</div>
+        Professional and efficient. Confirm details clearly, read them back once.
+      </div>
+    </div>
+    <div class="welcome-section">
+      <div class="welcome-label">Welcome Message</div>
+      <select class="welcome-select"><option>AI starts speaking after silence</option></select>
+    </div>
+  </div>
+
+  <!-- Settings panel -->
+  <div class="settings-panel">
+    <div class="panel-tabs">
+      <span class="panel-tab">Functions</span>
+      <span class="panel-tab active">Setting</span>
+      <span class="panel-tab">Test</span>
+    </div>
+    <div class="panel-body">
+
+      <!-- Functions (collapsed) -->
+      <div class="acc-section">
+        <div class="acc-header">
+          <span class="acc-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="#525866" stroke-width="1.3"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="#525866" stroke-width="1.3"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="#525866" stroke-width="1.3"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="#525866" stroke-width="1.3"/></svg></span>
+          <span class="acc-title">Functions</span>
+          <svg class="acc-chevron" width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+      <!-- Knowledge Base (collapsed) -->
+      <div class="acc-section">
+        <div class="acc-header">
+          <span class="acc-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 3h10v10H3z" rx="1" stroke="#525866" stroke-width="1.3"/><path d="M6 6h4M6 8.5h4M6 11h2" stroke="#525866" stroke-width="1.2" stroke-linecap="round"/></svg></span>
+          <span class="acc-title">Knowledge Base</span>
+          <svg class="acc-chevron" width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+      <!-- Speech Settings (expanded to show During Function Execution) -->
+      <div class="acc-section">
+        <div class="acc-header" onclick="var b=this.nextElementSibling;var c=this.querySelector('.acc-chevron');b.classList.toggle('open');c.classList.toggle('open')">
+          <span class="acc-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 0 1 3 3v4a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" stroke="#525866" stroke-width="1.3"/><path d="M3.5 9a4.5 4.5 0 0 0 9 0M8 13.5v1.5" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+          <span class="acc-title">Speech Settings</span>
+          <svg class="acc-chevron open" width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="acc-body open">
+
+          <!-- Existing settings (collapsed summary) -->
+          <div class="setting-block">
+            <div class="setting-label" style="color:#6B7280;font-weight:500;font-size:12px;">Background Sound, Response Eagerness, Interruption Sensitivity, Pronunciation...</div>
+          </div>
+
+          <!-- During Function Execution (new) -->
+          <div class="setting-block" style="border-bottom:none;padding-bottom:0;">
+            <div class="setting-label">During Function Execution <span class="new-badge">NEW</span></div>
+            <div class="setting-desc" style="margin-bottom:10px;">Default behavior for all functions while they are processing. Override per-function in its configuration if needed.</div>
+
+            <div class="toggle-row" style="padding:8px 0;border-bottom:1px solid #F3F4F6;">
+              <div>
+                <div style="font-size:13px;font-weight:500;color:#0E121B;">Play typing sound</div>
+                <div style="font-size:12px;color:#6B7280;margin-top:2px;">Play a subtle typing sound while the function is processing.</div>
+              </div>
+              <div class="toggle off"></div>
+            </div>
+
+            <div class="toggle-row" style="padding:8px 0;">
+              <div>
+                <div style="font-size:13px;font-weight:500;color:#0E121B;">Talk After Action Completed</div>
+                <div style="font-size:12px;color:#6B7280;margin-top:2px;">Enable to speak after the action is completed. Disable to execute silently.</div>
+              </div>
+              <div class="toggle on"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Realtime Transcription Settings (collapsed) -->
+      <div class="acc-section">
+        <div class="acc-header">
+          <span class="acc-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h5" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+          <span class="acc-title">Realtime Transcription Settings</span>
+          <svg class="acc-chevron" width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+      <!-- Call Settings (collapsed) -->
+      <div class="acc-section">
+        <div class="acc-header">
+          <span class="acc-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 3.5A1.5 1.5 0 0 1 4.5 2h.879a1 1 0 0 1 .949.684l.674 2.023a1 1 0 0 1-.23 1.04L5.5 6.5s.8 2 4 4l.753-1.272a1 1 0 0 1 1.04-.23l2.023.674A1 1 0 0 1 14 10.621V11.5A1.5 1.5 0 0 1 12.5 13C6.701 13 3 8.8 3 3.5z" stroke="#525866" stroke-width="1.3"/></svg></span>
+          <span class="acc-title">Call Settings</span>
+          <svg class="acc-chevron" width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+      <!-- Post-Call Data Extraction (collapsed) -->
+      <div class="acc-section">
+        <div class="acc-header">
+          <span class="acc-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M4 10l4 4 4-4" stroke="#525866" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="acc-title">Post-Call Data Extraction</span>
+          <svg class="acc-chevron" width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+      <!-- ===== Security & Fallback Settings (EXPANDED) ===== -->
+      <div class="acc-section">
+        <div class="acc-header" onclick="var b=this.nextElementSibling;var c=this.querySelector('.acc-chevron');b.classList.toggle('open');c.classList.toggle('open')">
+          <span class="acc-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L2.5 4v4c0 3.5 2.5 5.5 5.5 6.5 3-1 5.5-3 5.5-6.5V4L8 1.5z" stroke="#525866" stroke-width="1.3" stroke-linejoin="round"/></svg></span>
+          <span class="acc-title">Security &amp; Fallback Settings</span>
+          <svg class="acc-chevron open" width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="acc-body open">
+
+          <!-- Data Storage Settings -->
+          <div class="setting-block">
+            <div class="setting-label">Data Storage Settings</div>
+            <div class="setting-desc">Choose how Retell stores sensitive data <span style="color:#3d64d7;cursor:pointer;font-size:12px;">(Learn more)</span></div>
+            <div class="radio-option">
+              <div class="radio-circle"></div>
+              <div>
+                <div class="radio-text">Everything <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="vertical-align:middle;margin-left:2px;"><circle cx="8" cy="8" r="6" stroke="#9CA3AF" stroke-width="1.3"/><path d="M8 7v5M8 5.5v.5" stroke="#9CA3AF" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+              </div>
+            </div>
+            <div class="radio-option">
+              <div class="radio-circle selected"></div>
+              <div>
+                <div class="radio-text">Everything except PII <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="vertical-align:middle;margin-left:2px;"><circle cx="8" cy="8" r="6" stroke="#9CA3AF" stroke-width="1.3"/><path d="M8 7v5M8 5.5v.5" stroke="#9CA3AF" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+                <div class="radio-sub-option">
+                  <select class="sub-select"><option>Retention: Keep forever</option><option>Retention: 90 days</option><option>Retention: 1 year</option></select>
+                </div>
+              </div>
+            </div>
+            <div class="radio-option">
+              <div class="radio-circle"></div>
+              <div>
+                <div class="radio-text">Basic Attributes Only <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="vertical-align:middle;margin-left:2px;"><circle cx="8" cy="8" r="6" stroke="#9CA3AF" stroke-width="1.3"/><path d="M8 7v5M8 5.5v.5" stroke="#9CA3AF" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Personal Info Redaction -->
+          <div class="setting-block">
+            <div class="setting-label">Personal Info Redaction (PII)</div>
+            <div class="setting-desc">Only redact the specific categories of sensitive data you choose, while preserving other call recordings, transcripts, and analytics.</div>
+            <button class="btn-setup"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 0 0-6 6c0 3.3 2.7 6 6 6s6-2.7 6-6-2.7-6-6-6zm0 9v-4m0-2v.5" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg> Set Up (6)</button>
+          </div>
+
+          <!-- Safety Guardrails -->
+          <div class="setting-block">
+            <div class="setting-label">Safety Guardrails <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="vertical-align:middle;"><path d="M8 2l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10l-3 1.5.5-3.5L3 5.5l3.5-.5L8 2z" stroke="#525866" stroke-width="1.2"/></svg></div>
+            <div class="setting-desc">Control which categories of risky or sensitive content are restricted in AI interactions.</div>
+            <button class="btn-setup"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 0 0-6 6c0 3.3 2.7 6 6 6s6-2.7 6-6-2.7-6-6-6zm0 9v-4m0-2v.5" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg> Set Up</button>
+          </div>
+
+          <!-- Opt In Secure URLs -->
+          <div class="setting-block">
+            <div class="toggle-row">
+              <div>
+                <div class="setting-label">Opt In Secure URLs</div>
+                <div class="setting-desc" style="margin-bottom:0;">Add security signatures to URLs. The URLs expire after 24 hours. <span style="color:#3d64d7;cursor:pointer;font-size:12px;">(Learn more)</span></div>
+              </div>
+              <div class="toggle off" style="margin-top:2px;"></div>
+            </div>
+          </div>
+
+          <!-- Fallback Voice ID -->
+          <div class="setting-block">
+            <div class="setting-label">Fallback Voice ID</div>
+            <div class="setting-desc">If the current voice provider fails, assign a fallback voice to continue the call.</div>
+            <div class="radio-option">
+              <div class="radio-circle selected"></div>
+              <div><div class="radio-text">Automatic fallback</div></div>
+            </div>
+            <div class="radio-option">
+              <div class="radio-circle"></div>
+              <div><div class="radio-text">Select a fallback voice</div></div>
+            </div>
+            <div style="margin-left:23px;">
+              <div class="voice-chip">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 0 1 3 3v4a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" stroke="#525866" stroke-width="1.3"/></svg>
+                retell-Marissa
+                <span class="voice-chip-del"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+              </div>
+              <div><button class="btn-add-voice"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Add</button></div>
+            </div>
+          </div>
+
+          <!-- Variable Defaults -->
+          <div class="setting-block" style="border-bottom:none;padding-bottom:0;">
+            <div class="setting-label">Variable Defaults</div>
+            <div class="setting-desc">Set fallback values for variables across all endpoints. When a variable has no value — either because it was not provided at call setup or a function failed to respond — the fallback is used automatically. Failures are logged in the call's Transcription tab.</div>
+            <button class="btn-setup"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 0 0-6 6c0 3.3 2.7 6 6 6s6-2.7 6-6-2.7-6-6-6zm0 9v-4m0-2v.5" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg> Set Up</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Webhook Settings (collapsed) -->
+      <div class="acc-section">
+        <div class="acc-header">
+          <span class="acc-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="12" r="2" stroke="#525866" stroke-width="1.3"/><circle cx="12" cy="4" r="2" stroke="#525866" stroke-width="1.3"/><path d="M6 12h2a4 4 0 0 0 4-4V8" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="12" r="1.5" stroke="#525866" stroke-width="1.1"/></svg></span>
+          <span class="acc-title">Webhook Settings</span>
+          <svg class="acc-chevron" width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+      <!-- MCPs (collapsed) -->
+      <div class="acc-section">
+        <div class="acc-header">
+          <span class="acc-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 8h3l2-5 3 10 2-5h2" stroke="#525866" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="acc-title">MCPs</span>
+          <svg class="acc-chevron" width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

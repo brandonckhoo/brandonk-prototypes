@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — NICE CXone Integration Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: #fff; color: #0A0A0A; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 48px; }
+  .page { display: flex; gap: 56px; align-items: flex-start; max-width: 1600px; }
+  .diagram-col { flex: 0 0 auto; width: 1000px; }
+  .steps-col { flex: 1; min-width: 400px; max-width: 520px; padding-top: 12px; }
+  .steps-title { font-size: 15px; font-weight: 700; color: #0E121B; margin-bottom: 24px; }
+  .step { display: flex; gap: 14px; margin-bottom: 24px; align-items: flex-start; }
+  .step-num { flex: 0 0 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; background: #6B7280; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.55; color: #374151; }
+  .step-text strong { color: #0E121B; font-weight: 600; }
+  .step-text .highlight { color: #3d64d7; font-weight: 600; }
+  .caption { font-size: 13px; color: #6B7280; text-align: center; margin-top: 20px; line-height: 1.5; }
+  .diagram-col { position: relative; }
+  .customer-emoji { position: absolute; top: 38px; left: 88px; font-size: 32px; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="page">
+<div class="diagram-col">
+<div class="customer-emoji">🗣️</div>
+<svg viewBox="0 0 1000 580" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Actor 1: Customer / Caller -->
+  <rect x="50" y="30" width="120" height="90" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="110" y="90" text-anchor="middle" font-size="10" fill="#64748B">Caller</text>
+  <text x="110" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Customer</text>
+
+  <!-- Actor 2: NICE CXone -->
+  <rect x="380" y="30" width="160" height="90" rx="12" fill="#0B1F3F"/>
+  <text x="460" y="68" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">NICE</text>
+  <text x="460" y="86" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.7)">CXone Platform</text>
+  <text x="460" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">NICE CXone</text>
+  <text x="460" y="156" text-anchor="middle" font-size="11" fill="#94A3B8">Contact Center</text>
+
+  <!-- Actor 3: Retell AI -->
+  <rect x="790" y="30" width="170" height="90" rx="12" fill="#0E121B"/>
+  <image href="/Users/brandonkhoo/Documents/Retell AI/Logo.png" x="825" y="55" width="91" height="35" style="filter: brightness(0) invert(1);"/>
+  <text x="870" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Retell AI</text>
+  <text x="870" y="156" text-anchor="middle" font-size="11" fill="#94A3B8">Voice Agent</text>
+
+  <!-- Lifelines -->
+  <line x1="110" y1="170" x2="110" y2="560" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="460" y1="170" x2="460" y2="560" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="870" y1="170" x2="870" y2="560" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- Step 1: Customer calls in -->
+  <line x1="110" y1="205" x2="460" y2="205" stroke="#9CA3AF" stroke-width="1.5"/>
+  <polygon points="457,200 467,205 457,210" fill="#9CA3AF"/>
+  <rect x="200" y="191" width="160" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="280" y="209" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Inbound call arrives</text>
+
+  <!-- Step 2: NICE routes to queue / IVR -->
+  <rect x="370" y="240" width="195" height="28" rx="6" fill="#DBEAFE" stroke="#93C5FD"/>
+  <text x="467" y="259" text-anchor="middle" font-size="12" font-weight="600" fill="#1E40AF">IVR + queue routing logic</text>
+
+  <!-- SIP Trunk bridge -->
+  <rect x="610" y="278" width="100" height="80" rx="8" fill="#fff" stroke="#3d64d7" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="660" y="312" text-anchor="middle" font-size="11" font-weight="600" fill="#3d64d7">SIP</text>
+  <text x="660" y="326" text-anchor="middle" font-size="11" font-weight="600" fill="#3d64d7">TRUNK</text>
+  <text x="660" y="348" text-anchor="middle" font-size="9" fill="#94A3B8">Auto provisioned</text>
+
+  <!-- Step 3: NICE routes call through SIP trunk to Retell -->
+  <line x1="460" y1="300" x2="610" y2="300" stroke="#3d64d7" stroke-width="2"/>
+  <line x1="710" y1="300" x2="870" y2="300" stroke="#3d64d7" stroke-width="2"/>
+  <polygon points="867,295 877,300 867,305" fill="#3d64d7"/>
+  <rect x="480" y="282" width="110" height="22" rx="4" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="535" y="297" text-anchor="middle" font-size="10" font-weight="500" fill="#3730A3">Routes audio</text>
+
+  <!-- Step 3b: Passes metadata through SIP trunk -->
+  <line x1="460" y1="340" x2="610" y2="340" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="710" y1="340" x2="870" y2="340" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="867,335 877,340 867,345" fill="#9CA3AF"/>
+  <rect x="740" y="328" width="120" height="22" rx="4" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="800" y="343" text-anchor="middle" font-size="10" font-weight="500" fill="#475569">Context + metadata</text>
+
+  <!-- Step 4: Retell AI handles conversation -->
+  <rect x="780" y="370" width="195" height="28" rx="6" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="877" y="389" text-anchor="middle" font-size="12" font-weight="600" fill="#166534">AI agent handles call</text>
+
+  <!-- Step 5: Transfer back to human agent -->
+  <line x1="870" y1="430" x2="460" y2="430" stroke="#3d64d7" stroke-width="2"/>
+  <polygon points="463,425 453,430 463,435" fill="#3d64d7"/>
+  <rect x="560" y="416" width="250" height="26" rx="5" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="685" y="434" text-anchor="middle" font-size="12" font-weight="500" fill="#3730A3">Transfers to human agent + context</text>
+
+  <!-- Step 6: Human agent picks up -->
+  <line x1="460" y1="480" x2="110" y2="480" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="113,475 103,480 113,485" fill="#9CA3AF"/>
+  <polygon points="457,475 467,480 457,485" fill="#9CA3AF"/>
+  <rect x="190" y="466" width="210" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="295" y="484" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Human agent continues call</text>
+
+  <!-- Step 7: Call outcome logged -->
+  <line x1="870" y1="530" x2="460" y2="530" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="463,525 453,530 463,535" fill="#9CA3AF"/>
+  <rect x="570" y="516" width="220" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="680" y="534" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Logs call outcome + analytics</text>
+
+</svg>
+
+<div class="caption">Flowchart illustrating how calls are routed from NICE CXone to a Retell AI voice agent via SIP trunk,<br>with call context passed in both directions and outcomes logged back to NICE for unified reporting.</div>
+</div>
+
+<!-- RIGHT: Step-by-step walkthrough -->
+<div class="steps-col">
+  <div class="steps-title">How it works</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text"><strong>Inbound call arrives.</strong> A customer calls into the contact center. The call lands on the NICE CXone platform as it does today.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>NICE runs IVR and queue routing.</strong> The call passes through NICE's existing IVR flow and skills based routing logic. Based on the queue or skill assignment, NICE determines this call should be handled by a Retell AI agent.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>Call routes to Retell via SIP trunk.</strong> NICE sends the call audio to Retell through an <span class="highlight">auto provisioned SIP trunk</span>, along with call context and metadata such as caller ID, account number, queue name, and IVR selections.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-text"><strong>AI agent handles the call.</strong> The Retell AI voice agent conducts the conversation, uses connected integrations (CRM lookup, ticket creation, booking), and resolves the customer's request.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-text"><strong>Transfer to human if needed.</strong> If the AI agent cannot resolve the issue, it transfers the call back to a human agent in NICE with full conversation context, summary, and collected data so the human can pick up seamlessly.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">6</div>
+    <div class="step-text"><strong>Human agent continues.</strong> The human agent in NICE takes over the call with full context. From the customer's perspective, it is one continuous conversation.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">7</div>
+    <div class="step-text"><strong>Call outcome logged back to NICE.</strong> After the call ends, Retell logs the outcome, disposition, and analytics back to NICE so the enterprise has unified reporting across both human and AI handled calls.</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

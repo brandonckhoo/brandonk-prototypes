@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Workspace Roles (Updated)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+
+  /* Main Retell sidebar */
+  .sidebar { width: 180px; min-width: 180px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; padding: 0; border-right: 1px solid #E1E4EA; }
+  .sidebar-logo { padding: 16px 16px 10px; }
+  .sidebar-logo svg { display: block; }
+  .workspace { display: flex; align-items: center; gap: 6px; padding: 8px 10px; margin: 0 10px 4px; height: 36px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; color: #0A0A0A; }
+  .workspace-avatar { width: 16px; height: 16px; background: #3d64d7; border-radius: 3px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 8px; font-weight: 600; flex-shrink: 0; }
+  .nav-scroll { flex: 1; overflow-y: auto; padding: 4px 0; }
+  .nav-back { display: flex; align-items: center; gap: 4px; padding: 6px 14px; font-size: 12px; font-weight: 500; color: #525866; cursor: pointer; margin-bottom: 4px; }
+  .nav-back:hover { color: #0A0A0A; }
+  .nav-item { display: flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 13px; font-weight: 400; color: #525866; cursor: pointer; white-space: nowrap; }
+  .nav-item:hover { background: rgba(0,0,0,0.03); }
+  .nav-item.active { color: #0A0A0A; font-weight: 500; background: #fff; }
+  .nav-item svg { flex-shrink: 0; width: 16px; height: 16px; }
+  .footer { padding: 10px; overflow: hidden; border-top: 1px solid #E1E4EA; }
+  .footer-card { display: flex; align-items: center; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; width: 100%; padding: 8px; gap: 6px; margin-bottom: 6px; font-size: 12px; }
+  .footer-badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 6px; background: #ecf3ff; border-radius: 4px; font-size: 11px; font-weight: 500; color: #3d64d7; }
+  .footer-user { display: flex; align-items: center; gap: 6px; padding: 8px; font-size: 12px; color: #525866; }
+  .footer-user .avatar { width: 16px; height: 16px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+  .footer-user .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .footer-links { display: flex; align-items: center; gap: 4px; padding: 4px 0; }
+  .footer-link { font-size: 12px; color: #525866; padding: 4px 8px; cursor: pointer; text-decoration: none; }
+  .footer-divider { width: 1px; height: 10px; background: #D1D5DB; }
+
+  /* Settings sub-nav (inside content area) */
+  .settings-panel { display: flex; flex: 1; overflow: hidden; }
+  .settings-subnav { width: 180px; min-width: 180px; border-right: 1px solid #E1E4EA; padding: 24px 0; background: #fff; }
+  .subnav-label { padding: 4px 20px; font-size: 11px; font-weight: 500; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .subnav-item { display: flex; align-items: center; gap: 8px; padding: 8px 20px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; }
+  .subnav-item:hover { background: rgba(0,0,0,0.03); }
+  .subnav-item.active { color: #0A0A0A; font-weight: 500; background: #F5F7FA; }
+  .subnav-item svg { flex-shrink: 0; width: 16px; height: 16px; color: #525866; }
+
+  /* Main content */
+  .main-content { flex: 1; overflow: auto; padding: 32px 40px; background: #fff; }
+  .page-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .page-title { font-size: 18px; font-weight: 600; color: #0A0A0A; }
+  .add-role-btn { display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; font-family: inherit; }
+  .add-role-btn:hover { background: #F9FAFB; }
+
+  /* Roles table */
+  .roles-table { width: 100%; border-collapse: collapse; }
+  .roles-table thead th { padding: 10px 16px; font-size: 13px; font-weight: 500; color: #6B7280; text-align: left; border-bottom: 1px solid #E1E4EA; }
+  .roles-table tbody tr { cursor: pointer; transition: background 0.1s; }
+  .roles-table tbody tr:hover { background: rgba(0,0,0,0.02); }
+  .roles-table tbody td { padding: 14px 16px; font-size: 14px; color: #0E121B; border-bottom: 1px solid #E1E4EA; vertical-align: top; line-height: 1.5; }
+  .role-name { font-weight: 500; }
+  .role-type { color: #6B7280; }
+  .role-desc { color: #525866; }
+  .role-new { display: inline-block; font-size: 11px; font-weight: 500; color: #3d64d7; background: #ecf3ff; padding: 2px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<!-- Main Retell sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="60" height="16" viewBox="0 0 414 114" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#rl2)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#0A0A0A"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73ZM205.22 49.69C202.9 52 199.43 52.58 195.38 52.58H176.28V26.54H193.64C198.85 26.54 201.74 27.12 204.64 28.86C208.11 30.59 209.85 34.64 209.85 39.27C209.85 43.9 208.11 47.38 205.22 49.69Z" fill="#0A0A0A"/><path d="M255.56 34.65C238.2 34.65 226.63 47.95 226.63 66.47C226.63 84.99 242.25 98.3 256.14 98.3C270.03 98.3 279.86 90.19 283.33 78.62H269.45C267.71 82.67 264.82 87.3 256.14 87.3C247.46 87.3 239.94 81.52 239.94 69.94H283.91C283.91 49.69 272.92 34.65 255.56 34.65ZM240.51 60.11C241.09 51.43 246.88 45.06 255.56 45.06C264.24 45.06 270.02 51.43 270.02 60.11H240.51Z" fill="#0A0A0A"/><path d="M344.09 34.65C326.73 34.65 315.16 47.95 315.16 66.47C315.16 85.15 330.78 98.3 344.67 98.3C358.56 98.3 368.39 90.19 371.87 78.62H357.98C356.24 82.67 353.35 87.3 344.67 87.3C335.99 87.3 328.47 81.52 328.47 69.94H372.44C372.44 49.69 361.45 34.65 344.09 34.65ZM329.05 60.11C329.62 51.43 335.41 45.06 344.09 45.06C352.77 45.06 358.56 51.43 358.56 60.11H329.05Z" fill="#0A0A0A"/><path d="M390.96 14.97H377.65V95.92H390.96V14.97Z" fill="#0A0A0A"/><path d="M413.53 14.97H400.22V95.92H413.53V14.97Z" fill="#0A0A0A"/><path d="M304.17 17.28L290.84 17.28L290.85 34.65H282.76V45H290.85V82.82C290.85 87.58 291.8 90.43 294.66 93.29C297.51 96.14 300.37 97.09 305.13 97.09H315.14V85.67H309.88C308.16 85.67 306.96 85.37 306.13 85.11C305.27 84.84 304.61 84.16 304.4 83.29C304.17 82.33 304.17 81.09 304.17 79.9V45H315.14V34.65H304.17V17.28Z" fill="#0A0A0A"/></g><defs><clipPath id="rl2"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="workspace">
+    <div class="workspace-avatar">B</div>
+    Brandon K... Workspace
+  </div>
+  <div class="nav-scroll">
+    <div class="nav-back"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> GO BACK</div>
+    <div class="nav-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4h8M4 8h8M4 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Limits</div>
+    <div class="nav-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.5"/></svg>Reliability</div>
+    <div class="nav-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6h8M4 10h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="6" cy="6" r="1.5" fill="currentColor"/><circle cx="10" cy="10" r="1.5" fill="currentColor"/></svg>API Keys</div>
+    <div class="nav-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4l6 4 6-4M2 12l6-4 6 4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Webhooks</div>
+    <div class="nav-item active"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Workspace</div>
+  </div>
+  <div class="footer">
+    <div class="footer-card"><div class="footer-badge"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 14C4.686 14 2 11.314 2 8C2 4.686 4.686 2 8 2C11.314 2 14 4.686 14 8C14 11.314 11.314 14 8 14ZM7.402 10.4L11.644 6.157L10.795 5.309L7.402 8.703L5.704 7.006L4.856 7.854L7.402 10.4Z" fill="#3d64d7"/></svg> Pay As You Go</div></div>
+    <div class="footer-user"><div class="avatar"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c" alt=""></div>brandoncharlesk...</div>
+    <div class="footer-links"><a class="footer-link">Help</a><div class="footer-divider"></div><a class="footer-link">Updates</a></div>
+  </div>
+</aside>
+
+<!-- Settings content area -->
+<div class="settings-panel">
+  <!-- Select Menu sub-nav -->
+  <div class="settings-subnav">
+    <div class="subnav-label">Select Menu</div>
+    <div class="subnav-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>General</div>
+    <div class="subnav-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M3 14c0-2.8 2.2-5 5-5s5 2.2 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Users</div>
+    <div class="subnav-item active"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 5h10M3 8h7M3 11h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Roles</div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main-content">
+    <div class="page-title-row">
+      <h1 class="page-title">Roles</h1>
+      <button class="add-role-btn">+ Add Role</button>
+    </div>
+
+    <table class="roles-table">
+      <thead>
+        <tr>
+          <th style="width: 120px;">Role Name</th>
+          <th>Description</th>
+          <th style="width: 100px;">Role Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="role-name">Admin</td>
+          <td class="role-desc">Full control over workspace resources and members. Complete access to all features including billing, user management, organization settings, and integrations (connect, configure, disconnect).<span class="role-new">Updated</span></td>
+          <td class="role-type">System</td>
+        </tr>
+        <tr>
+          <td class="role-name">Developer</td>
+          <td class="role-desc">Full functional access to build and test agents, view raw data, manage analytics and settings. Can connect, configure, and disconnect integrations, and add integration tools to agents. Cannot manage billing or organization users.<span class="role-new">Updated</span></td>
+          <td class="role-type">System</td>
+        </tr>
+        <tr>
+          <td class="role-name">Member</td>
+          <td class="role-desc">Read-only access to agents, testing, scrubbed history, and analytics. Can view connected integrations but cannot add tools, connect, or configure integrations. Cannot test, make changes, or view sensitive data.</td>
+          <td class="role-type">System</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

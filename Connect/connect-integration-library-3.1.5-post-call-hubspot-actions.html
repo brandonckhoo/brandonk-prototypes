@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Post-call Settings (HubSpot actions)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+
+  .sidebar { width: 280px; min-width: 280px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; }
+  .sidebar-logo { padding: 20px 10px 12px 20px; font-weight: 800; font-size: 18px; color: #0A0A0A; letter-spacing: -0.02em; }
+  .workspace { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; }
+  .workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; }
+  .workspace-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; }
+  .nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+  .section-group { margin-top: 8px; }
+  .section-group:first-child { margin-top: 0; }
+  .section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; height: 24px; }
+  .nav-items { list-style: none; padding: 0 14px; }
+  .nav-items .nav-item + .nav-item { margin-top: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; color: #525866; cursor: pointer; border-radius: 6px; }
+  .nav-item.current { color: #0A0A0A; font-weight: 500; background: #FFFFFF; }
+  .nav-item.new-item::after { content: ''; display: inline-block; width: 6px; height: 6px; background: #3d64d7; border-radius: 50%; margin-left: 6px; }
+  .footer { padding: 16px 14px; }
+  .footer-card.user { display: flex; align-items: center; padding: 10px 12px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; height: 40px; margin-bottom: 12px; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .footer-user .avatar { width: 20px; height: 20px; border-radius: 50%; background: #DBE4FF; color: #3d64d7; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+  .footer-user .name { font-size: 14px; color: #525866; flex: 1; }
+  .footer-links { display: flex; gap: 4px; }
+  .footer-link { padding: 8px 12px; font-size: 14px; color: #525866; }
+  .footer-divider { width: 1px; height: 12px; background: #D1D5DB; align-self: center; }
+
+  .main-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { display: flex; align-items: center; gap: 16px; padding: 10px 20px; border-bottom: 1px solid #E5E7EB; height: 56px; flex-shrink: 0; }
+  .back-btn { font-size: 13px; color: #6B7280; cursor: pointer; }
+  .agent-title { font-size: 15px; font-weight: 600; color: #0E121B; }
+  .agent-meta { font-size: 12px; color: #6B7280; }
+  .tabs { display: flex; gap: 4px; margin-left: 24px; }
+  .tab { padding: 6px 14px; font-size: 13px; color: #525866; border-radius: 6px; cursor: pointer; }
+  .tab.active { background: #F3F4F6; color: #0E121B; font-weight: 500; }
+  .tb-spacer { flex: 1; }
+  .tb-btn { height: 32px; padding: 0 14px; border: 1px solid #E1E4EA; background: #fff; border-radius: 8px; font-size: 13px; color: #374151; cursor: pointer; font-family: inherit; }
+  .tb-btn.primary { background: #0E121B; color: #fff; border: none; }
+
+  .content { flex: 1; overflow-y: auto; background: #FAFBFC; }
+  .inner { max-width: 900px; margin: 0 auto; padding: 28px 32px 48px; }
+
+  .sub-tabs { display: flex; gap: 6px; margin-bottom: 22px; border-bottom: 1px solid #E5E7EB; }
+  .sub-tab { padding: 10px 14px; font-size: 13px; color: #6B7280; border-bottom: 2px solid transparent; cursor: pointer; margin-bottom: -1px; }
+  .sub-tab.active { color: #0E121B; font-weight: 500; border-bottom-color: #3d64d7; }
+
+  .panel { background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+  .panel-hdr { padding: 16px 20px; border-bottom: 1px solid #F0F1F3; display: flex; align-items: flex-start; gap: 12px; }
+  .panel-hdr .icon-wrap { width: 32px; height: 32px; background: #FFF3EE; border: 1px solid #FFD3BF; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ff7a59; font-weight: 800; font-size: 13px; flex-shrink: 0; }
+  .panel-hdr .titles { flex: 1; }
+  .panel-title { font-size: 14px; font-weight: 600; color: #0E121B; margin-bottom: 2px; }
+  .panel-sub { font-size: 12.5px; color: #6B7280; line-height: 1.5; }
+  .panel-body { padding: 18px 20px; }
+
+  /* Toggle */
+  .toggle { position: relative; width: 36px; height: 20px; background: #D1D5DB; border-radius: 20px; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+  .toggle.on { background: #10B981; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: left 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .toggle.on::after { left: 18px; }
+
+  .field-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F3F4F6; }
+  .field-row:last-child { border-bottom: none; }
+  .field-label { font-size: 13px; color: #374151; flex: 1; }
+  .field-label .hint { font-size: 12px; color: #6B7280; margin-top: 2px; display: block; }
+  .selectish { min-width: 200px; height: 32px; padding: 0 30px 0 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; color: #0E121B; background: #fff url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2399A0AE' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center; appearance: none; }
+
+  /* Rule rows */
+  .rule-row { display: flex; align-items: center; gap: 8px; padding: 12px; border: 1px solid #E5E7EB; background: #FAFBFC; border-radius: 10px; margin-bottom: 8px; font-size: 13px; color: #374151; flex-wrap: wrap; }
+  .rule-row .chunk { display: inline-flex; align-items: center; height: 28px; padding: 0 10px; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 12.5px; color: #0E121B; gap: 4px; }
+  .rule-row .op { color: #6B7280; font-size: 12px; font-weight: 500; }
+  .rule-row .arrow { color: #6B7280; }
+  .rule-row .chunk.action { background: #FFF3EE; border-color: #FFD3BF; color: #C2410C; }
+  .rule-row .chunk.value { background: #EEF4FF; border-color: #C7D6F5; color: #3d64d7; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+  .rule-row .del { margin-left: auto; color: #9CA3AF; cursor: pointer; font-size: 14px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+  .rule-row .del:hover { background: #F3F4F6; color: #EF4444; }
+  .rule-num { width: 22px; height: 22px; background: #fff; border: 1px solid #E1E4EA; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #525866; }
+
+  .add-row { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border: 1px dashed #CBD5E1; background: #fff; border-radius: 8px; font-size: 13px; color: #3d64d7; cursor: pointer; font-family: inherit; font-weight: 500; }
+  .add-row:hover { background: #EEF4FF; }
+
+  /* Property mapping */
+  .prop-row { display: grid; grid-template-columns: 1fr 20px 1fr 28px; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; margin-bottom: 8px; }
+  .prop-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 12.5px; background: #FAFBFC; color: #0E121B; }
+  .prop-chip.hs { background: #FFF3EE; border-color: #FFD3BF; color: #C2410C; }
+  .prop-chip .hsdot { width: 12px; height: 12px; background: #ff7a59; border-radius: 3px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 7px; font-weight: 800; }
+  .arrow-right { text-align: center; color: #9CA3AF; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">Retell</div>
+  <div class="workspace">
+    <div class="workspace-avatar">B</div>
+    <span class="workspace-name">Brandon K... Workspace</span>
+  </div>
+  <div class="nav-scroll">
+    <div class="section-group">
+      <div class="section-label">Build</div>
+      <ul class="nav-items">
+        <li class="nav-item current">Agents</li>
+        <li class="nav-item">Knowledge Base</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Deploy</div>
+      <ul class="nav-items">
+        <li class="nav-item">Phone Numbers</li>
+        <li class="nav-item">Batch Call</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Monitor</div>
+      <ul class="nav-items">
+        <li class="nav-item">Contacts</li>
+        <li class="nav-item">Call History</li>
+        <li class="nav-item">Chat History</li>
+        <li class="nav-item">Analytics</li>
+        <li class="nav-item">AI Quality Assurance</li>
+        <li class="nav-item">Alerting</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">System</div>
+      <ul class="nav-items">
+        <li class="nav-item new-item">Integrations</li>
+        <li class="nav-item">Billing</li>
+        <li class="nav-item">Settings</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="footer-card user footer-user">
+      <div class="avatar">B</div>
+      <span class="name">brandon@retellai.com</span>
+    </div>
+    <div class="footer-links">
+      <span class="footer-link">Help</span>
+      <div class="footer-divider"></div>
+      <span class="footer-link">Updates</span>
+    </div>
+  </div>
+</aside>
+
+<div class="main-col">
+  <div class="topbar">
+    <div class="back-btn">← Agents</div>
+    <div>
+      <div class="agent-title">Inbound Sales Concierge · HubSpot</div>
+      <div class="agent-meta">Single Prompt · Last saved 30 sec ago</div>
+    </div>
+    <div class="tabs">
+      <div class="tab">Build</div>
+      <div class="tab active">Post-call</div>
+      <div class="tab">Deploy</div>
+      <div class="tab">Analytics</div>
+    </div>
+    <div class="tb-spacer"></div>
+    <button class="tb-btn">Simulate</button>
+    <button class="tb-btn primary">Publish</button>
+  </div>
+
+  <div class="content">
+    <div class="inner">
+      <div class="sub-tabs">
+        <div class="sub-tab">General</div>
+        <div class="sub-tab active">HubSpot</div>
+        <div class="sub-tab">Webhooks</div>
+        <div class="sub-tab">Data extraction</div>
+      </div>
+
+      <!-- Auto log -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="icon-wrap">H</div>
+          <div class="titles">
+            <div class="panel-title">Auto log call activity to HubSpot</div>
+            <div class="panel-sub">Creates a call engagement on the contact and associated deal after every call, with transcript, summary, duration, sentiment, and recording URL.</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="panel-body">
+          <div class="field-row">
+            <div class="field-label">Associate with<span class="hint">Which HubSpot objects to attach the call engagement to.</span></div>
+            <div class="selectish">Contact + primary deal</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Call outcome mapping<span class="hint">How Retell's call outcome maps to HubSpot's call outcome field.</span></div>
+            <div class="selectish">Default mapping (5 outcomes)</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Include recording link</div>
+            <div class="toggle on"></div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Include AI summary</div>
+            <div class="toggle on"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advance deal stage -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="icon-wrap">H</div>
+          <div class="titles">
+            <div class="panel-title">Advance deal stage based on call outcome</div>
+            <div class="panel-sub">Automatically move the associated deal forward when call signals line up. Runs after auto-log.</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="panel-body">
+          <div class="field-row">
+            <div class="field-label">Pipeline</div>
+            <div class="selectish">Sales Pipeline (default)</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">When call successful AND sentiment positive</div>
+            <div class="selectish">→ Advance to Qualified</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">When caller books a meeting</div>
+            <div class="selectish">→ Advance to Proposal Sent</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">When caller declines</div>
+            <div class="selectish">→ Hold stage, tag "Needs follow-up"</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conditional triggers -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="icon-wrap">H</div>
+          <div class="titles">
+            <div class="panel-title">Conditional triggers</div>
+            <div class="panel-sub">Fire HubSpot actions when extracted call variables meet conditions. Rules evaluate top-to-bottom.</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="rule-row">
+            <div class="rule-num">1</div>
+            <span class="op">When</span>
+            <span class="chunk value">lead_qualified</span>
+            <span class="op">=</span>
+            <span class="chunk value">true</span>
+            <span class="arrow">→</span>
+            <span class="chunk action">Advance deal stage</span>
+            <span class="op">to</span>
+            <span class="chunk">Qualified to Buy</span>
+            <span class="del">×</span>
+          </div>
+
+          <div class="rule-row">
+            <div class="rule-num">2</div>
+            <span class="op">When</span>
+            <span class="chunk value">deal_won</span>
+            <span class="op">=</span>
+            <span class="chunk value">true</span>
+            <span class="arrow">→</span>
+            <span class="chunk action">Move deal stage</span>
+            <span class="op">to</span>
+            <span class="chunk">Closed Won</span>
+            <span class="op">+</span>
+            <span class="chunk action">Add note</span>
+            <span class="del">×</span>
+          </div>
+
+          <div class="rule-row">
+            <div class="rule-num">3</div>
+            <span class="op">When</span>
+            <span class="chunk value">sentiment</span>
+            <span class="op">=</span>
+            <span class="chunk value">Positive</span>
+            <span class="arrow">→</span>
+            <span class="chunk action">Enroll contact in workflow</span>
+            <span class="chunk">Post-sale Nurture</span>
+            <span class="del">×</span>
+          </div>
+
+          <div class="rule-row">
+            <div class="rule-num">4</div>
+            <span class="op">When</span>
+            <span class="chunk value">call_outcome</span>
+            <span class="op">=</span>
+            <span class="chunk value">Voicemail</span>
+            <span class="arrow">→</span>
+            <span class="chunk action">Add to list</span>
+            <span class="chunk">Retry — Voicemail drop</span>
+            <span class="del">×</span>
+          </div>
+
+          <button class="add-row">+ Add rule</button>
+        </div>
+      </div>
+
+      <!-- Update custom properties -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="icon-wrap">H</div>
+          <div class="titles">
+            <div class="panel-title">Update custom properties</div>
+            <div class="panel-sub">Map extracted call variables to HubSpot custom properties on the contact or deal record.</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="panel-body">
+          <div class="prop-row">
+            <div><span class="prop-chip">budget_tier</span> <span style="font-size:11px;color:#6B7280;margin-left:4px">Retell var</span></div>
+            <div class="arrow-right">→</div>
+            <div><span class="prop-chip hs"><span class="hsdot">H</span>budget_tier__c</span> <span style="font-size:11px;color:#6B7280;margin-left:4px">Contact</span></div>
+            <div style="text-align:right;color:#9CA3AF;cursor:pointer">×</div>
+          </div>
+          <div class="prop-row">
+            <div><span class="prop-chip">use_case</span> <span style="font-size:11px;color:#6B7280;margin-left:4px">Retell var</span></div>
+            <div class="arrow-right">→</div>
+            <div><span class="prop-chip hs"><span class="hsdot">H</span>primary_use_case</span> <span style="font-size:11px;color:#6B7280;margin-left:4px">Deal</span></div>
+            <div style="text-align:right;color:#9CA3AF;cursor:pointer">×</div>
+          </div>
+          <div class="prop-row">
+            <div><span class="prop-chip">tech_stack</span> <span style="font-size:11px;color:#6B7280;margin-left:4px">Retell var</span></div>
+            <div class="arrow-right">→</div>
+            <div><span class="prop-chip hs"><span class="hsdot">H</span>current_tools</span> <span style="font-size:11px;color:#6B7280;margin-left:4px">Contact</span></div>
+            <div style="text-align:right;color:#9CA3AF;cursor:pointer">×</div>
+          </div>
+          <div class="prop-row">
+            <div><span class="prop-chip">next_step_date</span> <span style="font-size:11px;color:#6B7280;margin-left:4px">Retell var</span></div>
+            <div class="arrow-right">→</div>
+            <div><span class="prop-chip hs"><span class="hsdot">H</span>next_activity_date</span> <span style="font-size:11px;color:#6B7280;margin-left:4px">Deal</span></div>
+            <div style="text-align:right;color:#9CA3AF;cursor:pointer">×</div>
+          </div>
+          <div class="prop-row">
+            <div><span class="prop-chip">decision_maker_confirmed</span> <span style="font-size:11px;color:#6B7280;margin-left:4px">Retell var</span></div>
+            <div class="arrow-right">→</div>
+            <div><span class="prop-chip hs"><span class="hsdot">H</span>dm_confirmed__c</span> <span style="font-size:11px;color:#6B7280;margin-left:4px">Contact</span></div>
+            <div style="text-align:right;color:#9CA3AF;cursor:pointer">×</div>
+          </div>
+          <button class="add-row" style="margin-top:4px">+ Map property</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

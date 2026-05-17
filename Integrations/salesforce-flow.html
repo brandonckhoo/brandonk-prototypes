@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Salesforce Integration Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: #fff; color: #0A0A0A; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 48px; }
+  .page { display: flex; gap: 56px; align-items: flex-start; max-width: 1600px; }
+  .diagram-col { flex: 0 0 auto; width: 1000px; position: relative; }
+  .steps-col { flex: 1; min-width: 400px; max-width: 520px; padding-top: 12px; }
+  .steps-title { font-size: 15px; font-weight: 700; color: #0E121B; margin-bottom: 24px; }
+  .step { display: flex; gap: 14px; margin-bottom: 24px; align-items: flex-start; }
+  .step-num { flex: 0 0 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; background: #6B7280; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.55; color: #374151; }
+  .step-text strong { color: #0E121B; font-weight: 600; }
+  .step-text .highlight { color: #00A1E0; font-weight: 600; }
+  .caption { font-size: 13px; color: #6B7280; text-align: center; margin-top: 20px; line-height: 1.5; }
+  .customer-emoji { position: absolute; top: 38px; left: 88px; font-size: 32px; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="page">
+<div class="diagram-col">
+<div class="customer-emoji">🗣️</div>
+<svg viewBox="0 0 1000 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Actor 1: Customer -->
+  <rect x="50" y="30" width="120" height="90" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="110" y="92" text-anchor="middle" font-size="10" fill="#64748B">Caller</text>
+  <text x="110" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Customer</text>
+
+  <!-- Actor 2: Retell AI -->
+  <rect x="380" y="30" width="170" height="90" rx="12" fill="#0E121B"/>
+  <image href="/Users/brandonkhoo/Documents/Retell AI/Logo.png" x="415" y="55" width="91" height="35" style="filter: brightness(0) invert(1);"/>
+  <text x="465" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Retell AI</text>
+  <text x="465" y="156" text-anchor="middle" font-size="11" fill="#94A3B8">Voice Agent</text>
+
+  <!-- Actor 3: Salesforce -->
+  <rect x="790" y="30" width="160" height="90" rx="12" fill="#00A1E0"/>
+  <text x="870" y="78" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">Salesforce</text>
+  <text x="870" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#0E121B">Salesforce</text>
+  <text x="870" y="156" text-anchor="middle" font-size="11" fill="#94A3B8">CRM Platform</text>
+
+  <!-- Lifelines -->
+  <line x1="110" y1="170" x2="110" y2="600" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="465" y1="170" x2="465" y2="600" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="870" y1="170" x2="870" y2="600" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- BACKGROUND SYNC (every 30 min) -->
+  <line x1="870" y1="205" x2="465" y2="205" stroke="#22C55E" stroke-width="2" stroke-dasharray="6,4"/>
+  <polygon points="468,200 458,205 468,210" fill="#22C55E"/>
+  <rect x="480" y="191" width="360" height="26" rx="5" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="660" y="209" text-anchor="middle" font-size="12" font-weight="500" fill="#166534">Background sync every 30 min (contacts, leads)</text>
+
+  <!-- Step 1: Inbound call -->
+  <line x1="110" y1="255" x2="465" y2="255" stroke="#9CA3AF" stroke-width="1.5"/>
+  <polygon points="462,250 472,255 462,260" fill="#9CA3AF"/>
+  <rect x="200" y="241" width="170" height="26" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="285" y="259" text-anchor="middle" font-size="12" font-weight="500" fill="#475569">Inbound call arrives</text>
+
+  <!-- Step 2: Retell reads from local contact cache -->
+  <rect x="340" y="290" width="250" height="28" rx="6" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="465" y="309" text-anchor="middle" font-size="12" font-weight="600" fill="#166534">Read cached contact data</text>
+
+  <!-- Step 3: AI agent handles call -->
+  <rect x="340" y="345" width="250" height="28" rx="6" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="465" y="364" text-anchor="middle" font-size="12" font-weight="600" fill="#166534">AI agent handles call with context</text>
+
+  <!-- Step 4: Agent confirms to caller -->
+  <line x1="465" y1="405" x2="110" y2="405" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="113,400 103,405 113,410" fill="#9CA3AF"/>
+  <rect x="175" y="391" width="230" height="26" rx="5" fill="#DCFCE7" stroke="#BBF7D0"/>
+  <text x="290" y="409" text-anchor="middle" font-size="12" font-weight="500" fill="#166534">"You're all set, a rep will follow up"</text>
+
+  <!-- Call ends marker -->
+  <rect x="340" y="440" width="250" height="28" rx="6" fill="#FEF3C7" stroke="#FDE68A"/>
+  <text x="465" y="459" text-anchor="middle" font-size="12" font-weight="600" fill="#92400E">Call ends</text>
+
+  <!-- Step 5: Post-call batch sync -->
+  <line x1="465" y1="505" x2="870" y2="505" stroke="#3d64d7" stroke-width="2"/>
+  <polygon points="867,500 877,505 867,510" fill="#3d64d7"/>
+  <rect x="455" y="491" width="395" height="26" rx="5" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="655" y="509" text-anchor="middle" font-size="12" font-weight="500" fill="#3730A3">Batch write: lead, contact, task, case, activity</text>
+
+</svg>
+
+<div class="caption">Flowchart illustrating how Retell AI syncs with Salesforce on a 30 minute background interval to keep<br>contact records fresh, then batches all writes post call to minimize latency during live conversations.</div>
+</div>
+
+<!-- RIGHT: Step-by-step walkthrough -->
+<div class="steps-col">
+  <div class="steps-title">How it works</div>
+
+  <div class="step">
+    <div class="step-num">0</div>
+    <div class="step-text"><strong>Background sync every 30 min (runs continuously).</strong> In Phase 1, Retell does not query <span class="highlight">Salesforce</span> on every inbound call. Instead, contact and lead data syncs from Salesforce into Retell on a 30 minute interval in the background. The rationale: (1) querying Salesforce on every call adds API latency that hurts the caller experience, (2) every inbound call would generate extra API calls, and enterprise customers with high call volume would quickly hit Salesforce API rate limits (the 15k daily limit on most orgs), (3) contact data does not change frequently enough to justify the cost of per call fetches, and (4) a scheduled sync keeps the architecture simpler for Phase 1 launch. Real time per call lookups are a Phase 2 upgrade for workflows that need the freshest data.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text"><strong>Inbound call arrives.</strong> A customer calls into Retell. The agent begins the conversation with the caller's phone number captured from the incoming call metadata.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>Read cached contact data.</strong> Retell looks up the caller in its own local contact store, which was synced from Salesforce within the last 30 minutes. The lookup is instant, no external API call required. If the caller is <strong>known</strong>, the agent has the caller's name, account, custom fields, and any related records from the last sync. If the caller is <strong>unknown</strong> (no match on phone number), the agent treats it as a first time contact and will create a new lead or contact record post call.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>AI agent handles call with context.</strong> For known callers, the agent greets them by name, references account history, and uses custom objects and fields specific to the customer's Salesforce configuration. For unknown callers, the agent uses a generic greeting, asks for name, email, and purpose naturally during conversation, and captures the data needed to create a new lead or contact. Either way, the experience feels personalized.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-text"><strong>Agent confirms next steps to caller.</strong> The agent tells the customer what will happen next, then ends the call. All new information collected during the call is held in memory but not yet written to Salesforce. This keeps the conversation fast with zero API latency mid call.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-text"><strong>Post call batch write to Salesforce.</strong> After the call ends, Retell writes everything back to Salesforce in a single batched call. For <strong>known callers</strong>: updates existing lead or contact, writes custom fields, creates tasks or events, updates cases, and logs call activity to the correct records. For <strong>unknown callers</strong>: creates a new lead (or contact, based on configuration) with the data collected during the call (name, email, phone, company if captured), marked with Lead Source "Retell AI inbound call", and logs the first call activity attached to that record. Batching keeps calls fast, reduces API usage to stay within Salesforce limits, and lets validation rules and workflow triggers fire once at the end rather than multiple times mid conversation.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num" style="background: #22C55E;">→</div>
+    <div class="step-text"><strong>Phase 2 upgrade: real time lookups.</strong> A future phase will add the option to query Salesforce directly on inbound call for the freshest data. This matters for workflows where a contact was created or updated in the last 30 minutes, for example a lead that just filled out a web form and called in immediately after. Phase 1 scope uses the 30 minute sync to keep complexity and latency low at launch.</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

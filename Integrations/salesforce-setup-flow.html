@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salesforce Integration Setup — Retell AI</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:#fff;color:#0E121B;height:100vh;overflow:hidden;display:flex}
+button{font-family:inherit;cursor:pointer;border:none;background:transparent}
+
+/* PROTO NAV */
+#pnav{position:fixed;top:0;left:280px;right:0;height:34px;background:#0d0d1c;display:flex;align-items:center;gap:4px;padding:0 14px;z-index:9000}
+.plab{font-size:10px;font-weight:700;color:#444;letter-spacing:.1em;text-transform:uppercase;margin-right:8px}
+#pnav button{height:22px;padding:0 9px;border-radius:11px;border:1px solid #252540;background:transparent;color:#777;font-size:10.5px;white-space:nowrap}
+#pnav button:hover{border-color:#3a3a60;color:#bbb}
+#pnav button.on{background:#3d64d7;border-color:#3d64d7;color:#fff}
+
+/* SIDEBAR */
+#sb{width:280px;min-width:280px;background:#F5F7FA;display:flex;flex-direction:column;height:100vh;position:fixed;left:0;top:0;z-index:600}
+.sb-logo{padding:20px 10px 12px 20px}
+.sb-ws{margin:8px 14px 0;padding:10px 10px 10px 12px;height:40px;background:#F5F7FA;border:1px solid #E5E7EB;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.05);display:flex;align-items:center;gap:8px}
+.sb-av{width:20px;height:20px;background:#3d64d7;border-radius:4px;flex-shrink:0}
+.sb-wsnm{font-size:13px;font-weight:500;color:#0A0A0A;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-nav{padding:4px 0 16px;flex:1;overflow-y:auto}
+.sb-sec{margin-top:8px}
+.sb-slbl{padding:4px;margin:0 14px;font-size:12px;font-weight:500;color:#99A0AE;text-transform:uppercase;letter-spacing:.06em;height:24px;display:flex;align-items:center}
+.sb-its{padding:0 14px}
+.sbi{height:36px;padding:8px;border-radius:6px;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#525866;margin-top:4px;position:relative;user-select:none}
+.sbi:first-child{margin-top:0}
+.sbi:hover{background:rgba(0,0,0,.03)}
+.sbi.cur{background:#fff;font-weight:500;color:#0A0A0A}
+.ndot{width:6px;height:6px;background:#3d64d7;border-radius:50%;margin-left:4px;flex-shrink:0}
+.sb-ft{padding:16px 14px}
+.sb-card{background:#fff;border:1px solid #E1E4EA;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.sb-payg{height:58px;padding:16px;display:flex;align-items:center;margin-bottom:8px}
+.sb-pgb{background:#ecf3ff;color:#3d64d7;font-size:12px;font-weight:500;padding:4px 10px 4px 8px;border-radius:20px;display:flex;align-items:center;gap:4px}
+.sb-user{height:40px;padding:10px 10px 10px 12px;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.sb-uav{width:20px;height:20px;border-radius:50%;background:#8B5CF6;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
+.sb-unm{font-size:14px;color:#525866;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-help{display:flex;align-items:center}
+.sb-hbtn{padding:8px 12px;font-size:14px;color:#525866;display:flex;align-items:center;gap:5px;border-radius:6px}
+.sb-hbtn:hover{background:rgba(0,0,0,.03)}
+.sb-hd{width:1px;height:12px;background:#D1D5DB;margin:0 2px}
+
+/* MAIN */
+#main{margin-left:280px;flex:1;overflow-y:auto;padding-top:34px}
+.screen{display:none;min-height:calc(100vh - 34px);position:relative;background:#fff}
+.screen.on{display:block}
+.pg{padding:24px 32px}
+
+/* PAGE HEADER */
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.pht{font-size:16px;font-weight:600;color:#0A0A0A}
+.btn-pri{height:36px;padding:0 16px;background:#0E121B;color:#fff;border-radius:8px;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.btn-pri:hover{background:#1d2535}
+.btn-sec{height:36px;padding:0 16px;background:#fff;color:#0E121B;border:1px solid #E1E4EA;border-radius:8px;font-size:14px;font-weight:500}
+.btn-sec:hover{background:#F9FAFB}
+
+/* SEARCH ROW */
+.sr{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.sr-in{flex:1;height:36px;border:1px solid #E1E4EA;border-radius:8px;padding:0 12px;font-size:14px;color:#99A0AE;display:flex;align-items:center;gap:8px;background:#fff}
+.sr-btn{height:36px;padding:0 12px;border:1px solid #E1E4EA;border-radius:8px;background:#fff;display:flex;align-items:center;gap:6px;font-size:14px;color:#525866;white-space:nowrap}
+
+/* TABLE */
+.t-hdr{display:grid;grid-template-columns:1fr 160px 160px 40px;padding:8px 0;border-bottom:1px solid #E1E4EA}
+.th{font-size:12px;font-weight:500;color:#6B7280;text-transform:uppercase;letter-spacing:.04em}
+.t-row{display:grid;grid-template-columns:1fr 160px 160px 40px;padding:14px 0;border-bottom:1px solid #E1E4EA;align-items:center}
+.t-row:hover{background:rgba(0,0,0,.02)}
+.ic{display:flex;align-items:center;gap:12px}
+.ii{width:32px;height:32px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.inm{font-size:14px;font-weight:500;color:#0E121B}
+.isub{font-size:13px;color:#6B7280;margin-top:1px}
+.tc{font-size:14px;color:#525866}
+.t-more{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#99A0AE;border-radius:6px}
+.t-more:hover{background:#F3F4F6;color:#525866}
+
+/* EMPTY STATE */
+.es{text-align:center;padding:48px 0 28px}
+.es-ic{width:48px;height:48px;border:2px dashed #D1D5DB;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center}
+.es-t{font-size:15px;font-weight:600;color:#0E121B;margin-bottom:6px}
+.es-s{font-size:14px;color:#6B7280}
+
+/* BROWSE GRID */
+.brhdr{font-size:12px;font-weight:500;color:#6B7280;letter-spacing:.06em;text-transform:uppercase;margin:24px 0 12px}
+.brgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.brcard{border:1px solid #E1E4EA;border-radius:10px;padding:16px;background:#fff;cursor:pointer;display:flex;align-items:flex-start;gap:12px}
+.brcard:hover{border-color:#BFDBFE;box-shadow:0 2px 8px rgba(61,100,215,.08)}
+.brcard-ic{width:32px;height:32px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.brcard-nm{font-size:14px;font-weight:500;color:#0E121B;margin-bottom:3px}
+.brcard-ds{font-size:12px;color:#6B7280;line-height:1.4}
+
+/* EDUCATION BANNER */
+.edu{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:16px 20px;margin-bottom:20px;display:flex;gap:14px}
+.edu-i{width:20px;height:20px;background:#3B82F6;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px;font-size:11px;font-weight:700;color:#fff}
+.edu-b{flex:1}
+.edu-t{font-size:14px;font-weight:600;color:#1E40AF;margin-bottom:4px}
+.edu-s{font-size:13px;color:#3B82F6;margin-bottom:12px}
+.edu-bks{display:flex;flex-direction:column;gap:8px}
+.edu-bk{display:flex;align-items:flex-start;gap:10px}
+.edu-bn{width:18px;height:18px;background:#3B82F6;border-radius:50%;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.edu-bt{font-size:13px;color:#1D4ED8;line-height:1.45}
+.edu-bt strong{font-weight:600}
+.edu-x{width:24px;height:24px;color:#93C5FD;display:flex;align-items:center;justify-content:center;border-radius:4px;flex-shrink:0;font-size:18px;line-height:1;margin-top:-2px}
+.edu-x:hover{background:rgba(59,130,246,.15);color:#1E40AF}
+
+/* MODAL OVERLAY */
+.ovl{position:fixed;top:34px;left:280px;right:0;bottom:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:500}
+
+/* ADD INTEGRATION MODAL */
+.madd{background:#fff;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.25);width:820px;height:600px;display:flex;flex-direction:column;overflow:hidden}
+.mhdr{padding:20px 24px 16px;border-bottom:1px solid #E1E4EA;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.mhdr-t{font-size:16px;font-weight:600;color:#0A0A0A}
+.mx{width:28px;height:28px;border-radius:6px;color:#99A0AE;font-size:18px;display:flex;align-items:center;justify-content:center}
+.mx:hover{background:#F3F4F6;color:#525866}
+.madd-body{display:flex;flex:1;overflow:hidden}
+.madd-nav{width:176px;min-width:176px;border-right:1px solid #E1E4EA;padding:12px 8px;display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+.mnav-i{height:32px;padding:0 12px;border-radius:6px;font-size:14px;color:#525866;display:flex;align-items:center}
+.mnav-i:hover{background:#F3F4F6}
+.mnav-i.on{background:#EEF2FF;color:#3d64d7;font-weight:500}
+.madd-ct{flex:1;padding:16px 20px;overflow-y:auto}
+.mct-h{font-size:14px;font-weight:600;color:#0E121B;margin-bottom:12px}
+.msearch{width:100%;height:36px;border:1px solid #E1E4EA;border-radius:8px;padding:0 12px 0 36px;font-size:14px;color:#99A0AE;font-family:inherit;margin-bottom:14px;background:#fff url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='7' cy='7' r='4.5' stroke='%2399A0AE' stroke-width='1.5'/%3E%3Cpath d='M10.5 10.5L13 13' stroke='%2399A0AE' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat 12px center}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mcard{border:1px solid #E1E4EA;border-radius:8px;padding:14px;cursor:pointer;display:flex;gap:10px;align-items:flex-start}
+.mcard:hover{border-color:#3d64d7;box-shadow:0 0 0 3px rgba(61,100,215,.08)}
+.mcard.sel{border-color:#3d64d7;background:#EEF2FF}
+.mcard-ic{width:36px;height:36px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.mcard-nm{font-size:14px;font-weight:500;color:#0E121B;margin-bottom:2px}
+.mcard-ds{font-size:12px;color:#6B7280;line-height:1.4}
+.mcard.soon{opacity:.55;cursor:default}
+.sbadge{display:inline-block;font-size:11px;color:#6B7280;background:#F3F4F6;padding:2px 6px;border-radius:4px;margin-top:2px}
+
+/* DETAIL MODAL */
+.mdet{background:#fff;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.25);width:640px;max-height:640px;display:flex;flex-direction:column;overflow:hidden}
+.md-hdr{padding:20px 24px 0;display:flex;align-items:flex-start;gap:14px;flex-shrink:0}
+.md-ic{width:40px;height:40px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.md-info{flex:1}
+.md-nm{font-size:18px;font-weight:600;color:#0A0A0A;margin-bottom:3px}
+.md-stat{display:flex;align-items:center;gap:6px;font-size:13px;color:#525866}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sdot.g{background:#1FC16B}
+.sdot.gr{background:#C7CDD5}
+.md-tabs{display:flex;padding:14px 24px 0;border-bottom:1px solid #E1E4EA;flex-shrink:0}
+.md-tab{height:34px;padding:0 14px;font-size:14px;color:#525866;cursor:pointer;display:flex;align-items:center;border-bottom:2px solid transparent;margin-bottom:-1px}
+.md-tab:hover{color:#0E121B}
+.md-tab.on{color:#0E121B;font-weight:500;border-bottom-color:#0E121B}
+.md-body{flex:1;overflow-y:auto;padding:20px 24px}
+
+/* INFO BAR */
+.ibar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#E1E4EA;border:1px solid #E1E4EA;border-radius:8px;overflow:hidden;margin-bottom:20px}
+.ib-c{background:#F9FAFB;padding:10px 14px}
+.ib-l{font-size:11px;font-weight:500;color:#6B7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.ib-v{font-size:13px;font-weight:500;color:#0E121B}
+
+/* FORM */
+.ff{margin-bottom:16px}
+.fl{font-size:14px;font-weight:500;color:#0E121B;margin-bottom:6px;display:block}
+.fi{width:100%;height:38px;border:1px solid #E1E4EA;border-radius:8px;padding:0 12px;font-size:14px;color:#0E121B;font-family:inherit;background:#fff}
+.fh{font-size:12px;color:#6B7280;margin-top:4px}
+
+/* PAGE TABS */
+.pg-tabs{display:flex;border-bottom:1px solid #E1E4EA;margin:-4px 0 24px;gap:0}
+.pg-tab{padding:0 16px 12px;font-size:14px;color:#525866;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.pg-tab:hover{color:#0E121B}
+.pg-tab.cur{color:#0E121B;font-weight:500;border-bottom:2px solid #0E121B}
+
+/* BILLING PAGE */
+.bcard{border:1px solid #E1E4EA;border-radius:10px;padding:20px 24px;margin-bottom:16px}
+.bcard-t{font-size:12px;font-weight:500;color:#99A0AE;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.bcard-plan{font-size:20px;font-weight:600;color:#0E121B;margin-bottom:4px}
+.bcard-sub{font-size:13px;color:#6B7280}
+.bcard-row{display:flex;gap:40px;margin-top:20px;padding-top:20px;border-top:1px solid #E1E4EA}
+.bcard-stat{display:flex;flex-direction:column;gap:4px}
+.bcard-sv{font-size:22px;font-weight:600;color:#0E121B}
+.bcard-sl{font-size:12px;color:#6B7280}
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.busg{border:1px solid #E1E4EA;border-radius:10px;padding:20px 24px}
+.busg-t{font-size:12px;font-weight:500;color:#99A0AE;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.busg-v{font-size:24px;font-weight:600;color:#0E121B;margin-bottom:2px}
+.busg-s{font-size:12px;color:#6B7280;margin-bottom:12px}
+.busg-bar{height:6px;background:#F3F4F6;border-radius:3px;overflow:hidden}
+.busg-fill{height:100%;border-radius:3px;background:#3d64d7}
+
+.dz-ar{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid #FCA5A5}
+.dz-an{font-size:13px;color:#7F1D1D;display:flex;align-items:center;gap:6px}
+.adot{width:6px;height:6px;border-radius:50%;background:#1FC16B}
+.bp{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500}
+.bp-p{background:#DBEAFE;color:#1D4ED8}
+.bp-s{background:#F3F4F6;color:#374151}
+
+/* CALLOUT */
+.clt{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;padding:12px 14px;font-size:13px;color:#0C4A6E;display:flex;gap:10px;margin-bottom:18px;line-height:1.5}
+.clt-i{width:18px;height:18px;background:#0284C7;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;margin-top:1px}
+
+/* DATA TABLE */
+.dt{border:1px solid #E1E4EA;border-radius:8px;overflow:hidden}
+.dt-hdr{background:#F5F7FA;display:grid;grid-template-columns:160px 1fr;padding:10px 16px;border-bottom:1px solid #E1E4EA}
+.dtth{font-size:12px;font-weight:500;color:#6B7280;text-transform:uppercase;letter-spacing:.04em}
+.dt-row{display:grid;grid-template-columns:160px 1fr;padding:12px 16px;border-bottom:1px solid #E1E4EA;align-items:start}
+.dt-row:last-child{border-bottom:none}
+.dtf{font-size:14px;font-weight:500;color:#0E121B;line-height:1.3}
+.dtfv{font-size:11px;color:#6B7280;font-family:'SF Mono','Fira Code',monospace;margin-top:3px;background:#F5F7FA;border-radius:3px;padding:1px 5px;display:inline-block}
+.dtd{font-size:13px;color:#525866;line-height:1.5}
+
+/* MEMORY */
+.memsec{margin-top:20px;padding-top:20px;border-top:1px solid #E1E4EA}
+.memt{font-size:14px;font-weight:600;color:#0E121B;margin-bottom:6px}
+.memd{font-size:13px;color:#525866;line-height:1.5;margin-bottom:8px}
+.memv{font-size:12px;font-family:'SF Mono','Fira Code',monospace;background:#F5F7FA;border:1px solid #E1E4EA;border-radius:4px;padding:4px 8px;color:#525866;display:inline-block}
+
+/* TOOLS */
+.tsl{font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;margin:20px 0 8px;display:flex;align-items:center;gap:8px}
+.tsl:first-child{margin-top:0}
+.tsl::after{content:'';flex:1;height:1px;background:#E1E4EA}
+.trow{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #E1E4EA;gap:8px}
+.trow:last-child{border-bottom:none}
+.tnm{font-size:14px;font-weight:500;color:#0E121B;flex-shrink:0}
+.tds{font-size:13px;color:#6B7280}
+.tbdg{margin-left:auto;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0}
+.br{background:#D1FAE5;color:#065F46}
+.bw{background:#FEF3C7;color:#92400E}
+
+/* MODAL FOOTER */
+.mft{padding:14px 24px;border-top:1px solid #E1E4EA;display:flex;align-items:center;justify-content:flex-end;gap:8px;background:#fff;flex-shrink:0}
+.mft-l{flex:1;font-size:13px;color:#99A0AE;display:flex;align-items:center;gap:5px}
+
+/* SF CONNECT BUTTON */
+.sf-connect{width:100%;height:40px;background:#00A1E0;color:#fff;border-radius:8px;font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px}
+.sf-connect:hover{background:#0090c8}
+.sf-scopes{margin-top:16px;padding:14px 16px;background:#F9FAFB;border:1px solid #E1E4EA;border-radius:8px}
+.sf-scopes-t{font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.sf-scope{display:flex;align-items:center;gap:8px;font-size:13px;color:#525866;padding:4px 0}
+.sf-scope::before{content:'';width:6px;height:6px;border-radius:50%;background:#1FC16B;flex-shrink:0}
+
+/* ABOUT */
+.abt-logo{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.abt-d{font-size:14px;color:#525866;line-height:1.6;margin-bottom:20px}
+.abt-m{display:grid;grid-template-columns:1fr 1fr;gap:1px;border:1px solid #E1E4EA;border-radius:8px;overflow:hidden;background:#E1E4EA;margin-bottom:20px}
+.am-c{background:#F9FAFB;padding:12px 16px}
+.am-l{font-size:11px;font-weight:500;color:#6B7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.am-v{font-size:13px;font-weight:500;color:#0E121B}
+.res-t{font-size:13px;font-weight:600;color:#0E121B;margin-bottom:8px}
+.res-r{display:flex;align-items:center;padding:10px 14px;border:1px solid #E1E4EA;border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:14px;color:#0E121B}
+.res-r:hover{background:#F9FAFB}
+.res-r svg{margin-left:auto;color:#99A0AE}
+
+.bg-wrap{filter:blur(1px) brightness(.97);pointer-events:none;overflow:hidden}
+</style>
+</head>
+<body>
+
+<!-- Prototype nav -->
+<div id="pnav">
+  <span class="plab">Prototype</span>
+  <button onclick="go(1)" class="on">1 · Integrations</button>
+  <button onclick="go(2)">2 · Add modal</button>
+  <button onclick="go(3)">3 · Authorize</button>
+  <button onclick="go(4)">4 · Preview: Data</button>
+  <button onclick="go(5)">5 · Preview: Tools</button>
+  <button onclick="go(6)">6 · Connected</button>
+  <button onclick="go(7)">7 · Manage: Configure</button>
+  <button onclick="go(8)">8 · Manage: Data</button>
+  <button onclick="go(9)">9 · Manage: Tools</button>
+  <button onclick="go(10)">10 · Billing</button>
+</div>
+
+<!-- Sidebar (shared, always visible) -->
+<aside id="sb">
+  <div class="sb-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#a)"><path d="M40.4 92.7c-5.7 0-10.2 4.3-10.2 10.2s4.5 10.2 10.2 10.2 10.2-4.3 10.2-10.2-4.5-10.2-10.2-10.2z" fill="#0A0A0A"/><path d="M69.9 92.7c-5.7 0-10.2 4.3-10.2 10.2s4.5 10.2 10.2 10.2 10.2-4.3 10.2-10.2-4.5-10.2-10.2-10.2z" fill="#0A0A0A"/><path d="M40.4 0c-5.7 0-10.2 4.3-10.2 10.2S34.7 20.5 40.4 20.5s10.2-4.3 10.2-10.2S46.1 0 40.4 0z" fill="#0A0A0A"/><path d="M69.9 0c-5.7 0-10.2 4.3-10.2 10.2s4.5 10.2 10.2 10.2 10.2-4.3 10.2-10.2S75.6 0 69.9 0z" fill="#0A0A0A"/><path d="M10.2 31.3C4.5 31.3 0 35.6 0 41.5s4.5 10.2 10.2 10.2 10.2-4.3 10.2-10.2-4.5-10.2-10.2-10.2z" fill="#0A0A0A"/><path d="M10.2 61.4C4.5 61.4 0 65.7 0 71.6s4.5 10.2 10.2 10.2 10.2-4.3 10.2-10.2-4.5-10.2-10.2-10.2z" fill="#0A0A0A"/><path d="M100.1 31.3c-5.7 0-10.2 4.3-10.2 10.2s4.5 10.2 10.2 10.2 10.2-4.3 10.2-10.2-4.5-10.2-10.2-10.2z" fill="#0A0A0A"/><path d="M100.1 61.4c-5.7 0-10.2 4.3-10.2 10.2s4.5 10.2 10.2 10.2 10.2-4.3 10.2-10.2-4.5-10.2-10.2-10.2z" fill="#0A0A0A"/><path d="M222 75.7c-.6-12.2-5.8-16.8-12.7-18.5 8.1-2.3 15-6.9 15-20.2 0-13.3-9.3-22-27.8-22h-33.6V96h13.3V63h14.5c14.5 0 17.9 5.2 17.9 20.3 0 6.3 1.2 9.8 2.3 12.7h13.9c-2.3-3-2.9-11.4-2.9-17.4v-2.9z" fill="#0A0A0A"/><path d="M205.2 49.7c-2.3 2.3-5.8 2.9-9.8 2.9H176.3v-26h17.4c5.2 0 8.1.6 11 2.3 3.5 1.7 5.2 5.8 5.2 10.4 0 4.6-1.7 8.1-4.7 10.4z" fill="#0A0A0A"/><path d="M255.6 34.6c-17.4 0-28.9 13.3-28.9 31.8 0 18.5 15.6 31.8 29.5 31.8s19.9-8.1 23.3-19.6h-13.9c-1.7 4-4.6 8.7-13.3 8.7s-12.7-5.8-12.7-17.3H284c0-20.2-11-35.4-28.4-35.4zm-15.6 25.5c.6-8.7 6.4-15 15-15s15 6.3 15 15h-30z" fill="#0A0A0A"/><path d="M344.1 34.6c-17.4 0-28.9 13.3-28.9 31.8 0 18.7 15.6 31.8 29.5 31.8s19.9-8.1 23.3-19.6h-13.9c-1.7 4-4.6 8.7-13.3 8.7s-12.7-5.8-12.7-17.3h44.5c0-20.2-11-35.4-28.5-35.4zm-15.6 25.5c.6-8.7 6.4-15 15-15s15 6.3 15 15h-30z" fill="#0A0A0A"/><path d="M391 15H377.7V96H391V15z" fill="#0A0A0A"/><path d="M413.5 15H400.2V96h13.3V15z" fill="#0A0A0A"/><path d="M304.2 17.3l-13.3-.1.1 17.4h-8.1v10.4h8.1v37.8c0 4.8 1 7.6 3.8 10.5 2.9 2.9 5.8 3.8 10.5 3.8h10v-11.4h-5.2c-1.7 0-2.9-.3-3.7-.6-.9-.3-1.5-1-1.7-1.9-.2-.9-.5-2.2-.5-3.3V45h11v-10.4h-11V17.3z" fill="#0A0A0A"/></g><defs><clipPath id="a"><rect width="413.5" height="113.2" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="sb-ws">
+    <div class="sb-av"></div>
+    <span class="sb-wsnm">Brandon K... Workspace</span>
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 9.5l4-4 4 4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">
+      <div class="sb-slbl">Build</div>
+      <div class="sb-its">
+        <div class="sbi"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="#525866" stroke-width="1.3"/><path d="M3 14v-1c0-2 2.2-3.5 5-3.5s5 1.5 5 3.5v1" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg>Agents</div>
+        <div class="sbi"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2.5" y="1.5" width="11" height="13" rx="1.5" stroke="#525866" stroke-width="1.3"/><path d="M5 5.5h6M5 8h6M5 10.5h3" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg>Knowledge Base</div>
+      </div>
+    </div>
+    <div class="sb-sec">
+      <div class="sb-slbl">Deploy</div>
+      <div class="sb-its">
+        <div class="sbi"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 3h2L7 6.5 5.5 7.5C6.4 9.8 8.2 11.6 10.5 12.5L11.5 11l3.5 1.5V15a1.5 1.5 0 01-1.5 1C5.5 16 0 10.5 0 3.5A1.5 1.5 0 011.5 2l2 1z" fill="none" stroke="#525866" stroke-width="1.3"/></svg>Phone Numbers</div>
+        <div class="sbi"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="7" height="5" rx="1" stroke="#525866" stroke-width="1.3"/><rect x="1" y="10" width="7" height="3" rx="1" stroke="#525866" stroke-width="1.3"/><rect x="10" y="3" width="5" height="5" rx="1" stroke="#525866" stroke-width="1.3"/><rect x="10" y="10" width="5" height="3" rx="1" stroke="#525866" stroke-width="1.3"/></svg>Batch Call</div>
+      </div>
+    </div>
+    <div class="sb-sec">
+      <div class="sb-slbl">Monitor</div>
+      <div class="sb-its">
+        <div class="sbi"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#525866" stroke-width="1.3"/><path d="M8 5v3.5l2 1.5" stroke="#525866" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Call History</div>
+        <div class="sbi"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12a1 1 0 011 1v7a1 1 0 01-1 1H9l-2 2-2-2H2a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="#525866" stroke-width="1.3"/></svg>Chat History</div>
+        <div class="sbi"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="9" width="3" height="5" rx="1" fill="#525866"/><rect x="6" y="6" width="3" height="8" rx="1" fill="#525866"/><rect x="11" y="3" width="3" height="11" rx="1" fill="#525866"/></svg>Analytics</div>
+        <div class="sbi"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L2 4v4.5C2 11.5 4.6 14.5 8 15.5c3.4-1 6-4 6-7V4L8 1.5z" stroke="#525866" stroke-width="1.3"/><path d="M5.5 8l2 2L11 6" stroke="#525866" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>AI Quality Assurance</div>
+        <div class="sbi"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a5 5 0 00-5 5v3L2 11.5V13h12v-1.5L13 10V7a5 5 0 00-5-5z" stroke="#525866" stroke-width="1.3"/><path d="M6.5 13.5a1.5 1.5 0 003 0" stroke="#525866" stroke-width="1.3"/></svg>Alerting</div>
+      </div>
+    </div>
+    <div class="sb-sec">
+      <div class="sb-slbl">System</div>
+      <div class="sb-its">
+        <div id="sb-billing" class="sbi" onclick="go(10)" style="cursor:pointer"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5" stroke="#525866" stroke-width="1.3"/><path d="M1.5 6.5h13" stroke="#525866" stroke-width="1.3"/><path d="M4 10h2" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg>Billing</div>
+        <div id="sb-integrations" class="sbi cur"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 2H4.5A1.5 1.5 0 003 3.5V5H2a1 1 0 000 2h1v1H2a1 1 0 000 2h1v1.5A1.5 1.5 0 004.5 13H6v1a1 1 0 002 0v-1h1v1a1 1 0 002 0v-1h1.5A1.5 1.5 0 0014 11.5V10h1a1 1 0 000-2h-1V7h1a1 1 0 000-2h-1V3.5A1.5 1.5 0 0012.5 2H11V1a1 1 0 00-2 0v1H8V1a1 1 0 00-2 0v1z" stroke="#3d64d7" stroke-width="1.3"/><circle cx="8" cy="8" r="2" fill="#3d64d7"/></svg>Integrations<span class="ndot"></span></div>
+        <div class="sbi"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" stroke="#525866" stroke-width="1.3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M3.2 12.8l1.4-1.4M11.4 4.6l1.4-1.4" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg>Settings</div>
+      </div>
+    </div>
+  </nav>
+  <div class="sb-ft">
+    <div class="sb-card sb-payg">
+      <span class="sb-pgb">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" fill="#3d64d7"/><path d="M6 3v3l2 1" stroke="white" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Pay As You Go
+      </span>
+    </div>
+    <div class="sb-card sb-user">
+      <div class="sb-uav">BK</div>
+      <span class="sb-unm">brandon@retellai.com</span>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 9.5l4-4 4 4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="sb-help">
+      <div class="sb-hbtn"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#525866" stroke-width="1.3"/><path d="M7 9v.5M5.5 5.5a1.5 1.5 0 113 0c0 1-1.5 1.5-1.5 2.5" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg>Help</div>
+      <div class="sb-hd"></div>
+      <div class="sb-hbtn"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#525866" stroke-width="1.3"/><path d="M7 4v3l2 1" stroke="#525866" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Updates</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 1 — Empty integrations page
+     ═══════════════════════════════════════════════════════════ -->
+<div class="screen on" id="s1">
+<div class="pg">
+  <div class="ph">
+    <span class="pht">Integrations</span>
+    <button class="btn-pri" onclick="go(2)">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      Add integration
+    </button>
+  </div>
+  <div class="sr">
+    <div class="sr-in">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="#99A0AE" stroke-width="1.5"/><path d="M10 10l2 2" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Search integrations...</span>
+    </div>
+    <button class="sr-btn">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4h10M4 7h6M6 10h2" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Recent
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="#525866" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+  <div class="t-hdr">
+    <div class="th">Name</div>
+    <div class="th">Created by</div>
+    <div class="th" style="display:flex;align-items:center;gap:4px">Date created <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M3 7l3 3 3-3" stroke="#6B7280" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div></div>
+  </div>
+  <div class="es">
+    <div class="es-ic">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#D1D5DB" stroke-width="1.5"><path d="M4 11a7 7 0 017-7 7 7 0 015 2.1" stroke-linecap="round"/><path d="M18 11a7 7 0 01-7 7 7 7 0 01-5-2.1" stroke-linecap="round"/><path d="M15 6.5l2.5-2.5 2.5 2.5M7 15.5L4.5 18 2 15.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="es-t">No integrations configured</div>
+    <div class="es-s">Create a new custom MCP server or browse our library of integrations below.</div>
+  </div>
+  <div class="brhdr">Browse integrations</div>
+  <div class="brgrid">
+    <div class="brcard" onclick="go(2)">
+      <div class="brcard-ic" style="background:#00A1E0">
+        <svg width="20" height="14" viewBox="0 0 50 34" fill="white"><path d="M17 5C12.6 5 9 8.6 9 13c0 1.2.3 2.4.8 3.4C7.1 17.8 5.5 20.3 5.5 23.5c0 4.9 4 8.5 9 8.5H37.5c5 0 9-3.7 9-8.5 0-3.2-1.7-5.7-4.3-7.1.5-1 .8-2.2.8-3.4 0-4.4-3.6-8-8-8-1.7 0-3.3.5-4.6 1.4C28.8 5.8 26.2 5 23.5 5c-2.5 0-4.8.8-6.5 2.1V5z"/></svg>
+      </div>
+      <div><div class="brcard-nm">Salesforce</div><div class="brcard-ds">CRM and customer success platform</div></div>
+    </div>
+    <div class="brcard">
+      <div class="brcard-ic" style="background:#FF7A59"><span style="color:white;font-size:15px;font-weight:700">H</span></div>
+      <div><div class="brcard-nm">HubSpot</div><div class="brcard-ds">Marketing, sales, and service platform</div></div>
+    </div>
+    <div class="brcard">
+      <div class="brcard-ic" style="background:#00C897"><span style="color:white;font-size:10px;font-weight:700">GHL</span></div>
+      <div><div class="brcard-nm">GoHighLevel</div><div class="brcard-ds">CRM and marketing automation for agencies</div></div>
+    </div>
+    <div class="brcard">
+      <div class="brcard-ic" style="background:#111827"><span style="color:white;font-size:11px;font-weight:700">cal</span></div>
+      <div><div class="brcard-nm">Cal.com</div><div class="brcard-ds">Open-source scheduling and calendar platform</div></div>
+    </div>
+    <div class="brcard">
+      <div class="brcard-ic" style="background:#03363D"><span style="color:white;font-size:14px;font-weight:700">Z</span></div>
+      <div><div class="brcard-nm">Zendesk</div><div class="brcard-ds">Customer support platform</div></div>
+    </div>
+    <div class="brcard">
+      <div class="brcard-ic" style="background:#0F9D58">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="white"><rect x="2" y="2" width="5" height="3" rx=".5"/><rect x="9" y="2" width="5" height="3" rx=".5"/><rect x="2" y="7" width="5" height="3" rx=".5"/><rect x="9" y="7" width="5" height="3" rx=".5"/><rect x="2" y="12" width="5" height="2" rx=".5"/><rect x="9" y="12" width="5" height="2" rx=".5"/></svg>
+      </div>
+      <div><div class="brcard-nm">Google Sheets</div><div class="brcard-ds">Spreadsheet and data management</div></div>
+    </div>
+    <div class="brcard">
+      <div class="brcard-ic" style="background:#4A154B">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="8" r="2.5" fill="#E01E5A"/><circle cx="12" cy="8" r="2.5" fill="#E01E5A"/><circle cx="8" cy="4" r="2.5" fill="#36C5F0"/><circle cx="8" cy="12" r="2.5" fill="#2EB67D"/></svg>
+      </div>
+      <div><div class="brcard-nm">Slack</div><div class="brcard-ds">Team communication and notifications</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 2 — Add integration modal
+     ═══════════════════════════════════════════════════════════ -->
+<div class="screen" id="s2">
+<div class="bg-wrap pg">
+  <div class="ph"><span class="pht">Integrations</span><button class="btn-pri">+ Add integration</button></div>
+  <div class="sr"><div class="sr-in" style="color:#99A0AE">Search integrations...</div><button class="sr-btn">Recent ↓</button></div>
+  <div class="t-hdr"><div class="th">Name</div><div class="th">Created by</div><div class="th">Date created</div><div></div></div>
+  <div class="es"><div class="es-ic"></div><div class="es-t">No integrations configured</div><div class="es-s">Create a new custom MCP server or browse our library of integrations below.</div></div>
+</div>
+<div class="ovl">
+  <div class="madd">
+    <div class="mhdr">
+      <span class="mhdr-t">Add integration</span>
+      <button class="mx" onclick="go(1)">✕</button>
+    </div>
+    <div class="madd-body">
+      <div class="madd-nav">
+        <div class="mnav-i">All integrations</div>
+        <div class="mnav-i on">CRM</div>
+        <div class="mnav-i">Calendar</div>
+        <div class="mnav-i">CX Platform</div>
+        <div class="mnav-i">Knowledge Base</div>
+        <div class="mnav-i">Communication</div>
+        <div class="mnav-i">Payment</div>
+        <div class="mnav-i">CCaaS</div>
+      </div>
+      <div class="madd-ct">
+        <div class="mct-h">CRM</div>
+        <input class="msearch" placeholder="Search integrations...">
+        <div class="mgrid">
+          <div class="mcard sel" onclick="go(3)">
+            <div class="mcard-ic" style="background:#00A1E0">
+              <svg width="20" height="14" viewBox="0 0 50 34" fill="white"><path d="M17 5C12.6 5 9 8.6 9 13c0 1.2.3 2.4.8 3.4C7.1 17.8 5.5 20.3 5.5 23.5c0 4.9 4 8.5 9 8.5H37.5c5 0 9-3.7 9-8.5 0-3.2-1.7-5.7-4.3-7.1.5-1 .8-2.2.8-3.4 0-4.4-3.6-8-8-8-1.7 0-3.3.5-4.6 1.4C28.8 5.8 26.2 5 23.5 5c-2.5 0-4.8.8-6.5 2.1V5z"/></svg>
+            </div>
+            <div><div class="mcard-nm">Salesforce</div><div class="mcard-ds">CRM and customer success platform</div></div>
+          </div>
+          <div class="mcard">
+            <div class="mcard-ic" style="background:#FF7A59"><span style="color:white;font-size:14px;font-weight:700">H</span></div>
+            <div><div class="mcard-nm">HubSpot</div><div class="mcard-ds">Marketing, sales, and service platform</div></div>
+          </div>
+          <div class="mcard">
+            <div class="mcard-ic" style="background:#00C897"><span style="color:white;font-size:10px;font-weight:700">GHL</span></div>
+            <div><div class="mcard-nm">GoHighLevel</div><div class="mcard-ds">All-in-one CRM and marketing platform</div></div>
+          </div>
+          <div class="mcard soon">
+            <div class="mcard-ic" style="background:#F3F4F6"><span style="color:#6B7280;font-size:12px;font-weight:600">Zo</span></div>
+            <div><div class="mcard-nm">Zoho</div><div class="mcard-ds">Business apps suite and CRM</div><span class="sbadge">Coming soon</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 3 — Salesforce setup: Authorize (Configure tab)
+     ═══════════════════════════════════════════════════════════ -->
+<div class="screen" id="s3">
+<div class="bg-wrap pg">
+  <div class="ph"><span class="pht">Integrations</span><button class="btn-pri">+ Add integration</button></div>
+  <div class="sr"><div class="sr-in" style="color:#99A0AE">Search integrations...</div><button class="sr-btn">Recent ↓</button></div>
+  <div class="t-hdr"><div class="th">Name</div><div class="th">Created by</div><div class="th">Date created</div><div></div></div>
+  <div class="es"><div class="es-ic"></div><div class="es-t">No integrations configured</div><div class="es-s">Create a new custom MCP server or browse our library of integrations below.</div></div>
+</div>
+<div class="ovl">
+  <div class="mdet">
+    <div class="md-hdr">
+      <div class="md-ic" style="background:#00A1E0">
+        <svg width="24" height="16" viewBox="0 0 50 34" fill="white"><path d="M17 5C12.6 5 9 8.6 9 13c0 1.2.3 2.4.8 3.4C7.1 17.8 5.5 20.3 5.5 23.5c0 4.9 4 8.5 9 8.5H37.5c5 0 9-3.7 9-8.5 0-3.2-1.7-5.7-4.3-7.1.5-1 .8-2.2.8-3.4 0-4.4-3.6-8-8-8-1.7 0-3.3.5-4.6 1.4C28.8 5.8 26.2 5 23.5 5c-2.5 0-4.8.8-6.5 2.1V5z"/></svg>
+      </div>
+      <div class="md-info">
+        <div class="md-nm">Salesforce</div>
+        <div class="md-stat"><span class="sdot gr"></span>Not connected</div>
+      </div>
+      <button class="mx" onclick="go(2)">✕</button>
+    </div>
+    <div class="md-tabs">
+      <div class="md-tab on">Configure</div>
+      <div class="md-tab" onclick="go(4)">Data</div>
+      <div class="md-tab" onclick="go(5)">Tools</div>
+      <div class="md-tab">About</div>
+    </div>
+    <div class="md-body">
+      <div class="clt">
+        <span class="clt-i">i</span>
+        <span>Authorizing once gives every agent in this workspace access to your Salesforce data. When a call arrives, Retell looks up the caller's Contact record in real time so the agent knows who is calling before the first word is spoken. Retell also keeps Contact records in sync, pulling updates from Salesforce so the agent always has current information. When Memory is enabled, Retell persists what the agent learned from each call back to the Contact record so future calls can pick up where the last one left off.<br><br>You can also add pre-call functions on a per-agent basis to fetch Leads, Opportunities, Cases, and Accounts in real time, and post-call functions to log tasks, update records, and create new leads. The OAuth token is stored securely and never shown again after this step.</span>
+      </div>
+      <div class="ff">
+        <label class="fl">Connection name</label>
+        <input class="fi" value="Salesforce – OAuth">
+        <div class="fh">Shown in the integrations list and in the agent editor.</div>
+      </div>
+      <div class="ff">
+        <label class="fl">Authentication</label>
+        <div class="fi" style="background:#F9FAFB;color:#525866;display:flex;align-items:center">OAuth 2.0</div>
+      </div>
+      <button class="sf-connect" onclick="go(6)">
+        <svg width="18" height="12" viewBox="0 0 50 34" fill="white"><path d="M17 5C12.6 5 9 8.6 9 13c0 1.2.3 2.4.8 3.4C7.1 17.8 5.5 20.3 5.5 23.5c0 4.9 4 8.5 9 8.5H37.5c5 0 9-3.7 9-8.5 0-3.2-1.7-5.7-4.3-7.1.5-1 .8-2.2.8-3.4 0-4.4-3.6-8-8-8-1.7 0-3.3.5-4.6 1.4C28.8 5.8 26.2 5 23.5 5c-2.5 0-4.8.8-6.5 2.1V5z"/></svg>
+        Connect with Salesforce
+      </button>
+      <div class="sf-scopes">
+        <div class="sf-scopes-t">Permissions Retell will request</div>
+        <div class="sf-scope">Read and write Contact records</div>
+        <div class="sf-scope">Read Lead, Opportunity, Account, and Case records</div>
+        <div class="sf-scope">Create Tasks and Activity records</div>
+        <div class="sf-scope">Access basic org information</div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn-sec" onclick="go(2)">Back</button>
+      <button class="btn-pri" onclick="go(6)">Connect</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 4 — Salesforce setup: Preview Data tab
+     ═══════════════════════════════════════════════════════════ -->
+<div class="screen" id="s4">
+<div class="bg-wrap pg">
+  <div class="ph"><span class="pht">Integrations</span><button class="btn-pri">+ Add integration</button></div>
+  <div class="sr"><div class="sr-in" style="color:#99A0AE">Search integrations...</div><button class="sr-btn">Recent ↓</button></div>
+  <div class="t-hdr"><div class="th">Name</div><div class="th">Created by</div><div class="th">Date created</div><div></div></div>
+  <div class="es"><div class="es-ic"></div><div class="es-t">No integrations configured</div></div>
+</div>
+<div class="ovl">
+  <div class="mdet">
+    <div class="md-hdr">
+      <div class="md-ic" style="background:#00A1E0">
+        <svg width="24" height="16" viewBox="0 0 50 34" fill="white"><path d="M17 5C12.6 5 9 8.6 9 13c0 1.2.3 2.4.8 3.4C7.1 17.8 5.5 20.3 5.5 23.5c0 4.9 4 8.5 9 8.5H37.5c5 0 9-3.7 9-8.5 0-3.2-1.7-5.7-4.3-7.1.5-1 .8-2.2.8-3.4 0-4.4-3.6-8-8-8-1.7 0-3.3.5-4.6 1.4C28.8 5.8 26.2 5 23.5 5c-2.5 0-4.8.8-6.5 2.1V5z"/></svg>
+      </div>
+      <div class="md-info">
+        <div class="md-nm">Salesforce</div>
+        <div class="md-stat"><span class="sdot gr"></span>Not connected</div>
+      </div>
+      <button class="mx" onclick="go(2)">✕</button>
+    </div>
+    <div class="md-tabs">
+      <div class="md-tab" onclick="go(3)">Configure</div>
+      <div class="md-tab on">Data</div>
+      <div class="md-tab" onclick="go(5)">Tools</div>
+      <div class="md-tab">About</div>
+    </div>
+    <div class="md-body">
+      <div class="clt">
+        <span class="clt-i">i</span>
+        <span>Retell syncs Contact records from your Salesforce org every 5 minutes. Fields are available as <code>{{contact.*}}</code> variables across every agent automatically. No per-agent setup required.</span>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:#0E121B;margin-bottom:10px">What Retell reads from your Salesforce org</div>
+      <div class="dt">
+        <div class="dt-hdr"><div class="dtth">Field</div><div class="dtth">Description</div></div>
+        <div class="dt-row">
+          <div><div class="dtf">First Name</div><div class="dtfv">{{contact.first_name}}</div></div>
+          <div class="dtd">Standard Contact field. Available before the call connects.</div>
+        </div>
+        <div class="dt-row">
+          <div><div class="dtf">Last Name</div><div class="dtfv">{{contact.last_name}}</div></div>
+          <div class="dtd">Standard Contact field. Available before the call connects.</div>
+        </div>
+        <div class="dt-row">
+          <div><div class="dtf">Email</div><div class="dtfv">{{contact.email}}</div></div>
+          <div class="dtd">Standard Contact field.</div>
+        </div>
+        <div class="dt-row">
+          <div><div class="dtf">Phone</div><div class="dtfv">{{contact.phone}}</div></div>
+          <div class="dtd">Standard Contact field.</div>
+        </div>
+        <div class="dt-row">
+          <div><div class="dtf">Account Name</div><div class="dtfv">{{contact.account_name}}</div></div>
+          <div class="dtd">Resolved from the related Account record.</div>
+        </div>
+        <div class="dt-row">
+          <div><div class="dtf">Lead Source</div><div class="dtfv">{{contact.lead_source}}</div></div>
+          <div class="dtd">Standard Contact field.</div>
+        </div>
+        <div class="dt-row">
+          <div><div class="dtf">Contact Owner</div><div class="dtfv">{{contact.owner_name}}</div></div>
+          <div class="dtd">Resolved from the related User record.</div>
+        </div>
+      </div>
+      <div class="memsec">
+        <div class="memt">Memory</div>
+        <div class="memd">After every call, Retell writes a structured memory note back to the Contact record automatically. On future calls from the same contact, conversation history is available in the prompt. This context does not exist in Salesforce natively unless you build a pipeline to create it.</div>
+        <span class="memv">{{contact.memory}}</span>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn-sec" onclick="go(3)">Back</button>
+      <button class="btn-pri" onclick="go(6)">Connect</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 5 — Salesforce setup: Preview Tools tab
+     ═══════════════════════════════════════════════════════════ -->
+<div class="screen" id="s5">
+<div class="bg-wrap pg">
+  <div class="ph"><span class="pht">Integrations</span><button class="btn-pri">+ Add integration</button></div>
+  <div class="sr"><div class="sr-in" style="color:#99A0AE">Search integrations...</div><button class="sr-btn">Recent ↓</button></div>
+  <div class="t-hdr"><div class="th">Name</div><div class="th">Created by</div><div class="th">Date created</div><div></div></div>
+  <div class="es"><div class="es-ic"></div><div class="es-t">No integrations configured</div></div>
+</div>
+<div class="ovl">
+  <div class="mdet">
+    <div class="md-hdr">
+      <div class="md-ic" style="background:#00A1E0">
+        <svg width="24" height="16" viewBox="0 0 50 34" fill="white"><path d="M17 5C12.6 5 9 8.6 9 13c0 1.2.3 2.4.8 3.4C7.1 17.8 5.5 20.3 5.5 23.5c0 4.9 4 8.5 9 8.5H37.5c5 0 9-3.7 9-8.5 0-3.2-1.7-5.7-4.3-7.1.5-1 .8-2.2.8-3.4 0-4.4-3.6-8-8-8-1.7 0-3.3.5-4.6 1.4C28.8 5.8 26.2 5 23.5 5c-2.5 0-4.8.8-6.5 2.1V5z"/></svg>
+      </div>
+      <div class="md-info">
+        <div class="md-nm">Salesforce</div>
+        <div class="md-stat"><span class="sdot gr"></span>Not connected</div>
+      </div>
+      <button class="mx" onclick="go(2)">✕</button>
+    </div>
+    <div class="md-tabs">
+      <div class="md-tab" onclick="go(3)">Configure</div>
+      <div class="md-tab" onclick="go(4)">Data</div>
+      <div class="md-tab on">Tools</div>
+      <div class="md-tab">About</div>
+    </div>
+    <div class="md-body">
+      <div style="font-size:13px;color:#525866;margin-bottom:16px">Actions available once Salesforce is connected. Enable per agent in the Agent Builder.</div>
+      <div class="tsl">Pre-call</div>
+      <div class="trow"><span class="tnm">Get Contact</span><span class="tds">Read a Contact record by ID before the call connects</span><span class="tbdg br">Read</span></div>
+      <div class="trow"><span class="tnm">Get Lead</span><span class="tds">Read a Lead record by ID before the call connects</span><span class="tbdg br">Read</span></div>
+      <div class="trow"><span class="tnm">Get Opportunity</span><span class="tds">Read an Opportunity record by ID before the call connects</span><span class="tbdg br">Read</span></div>
+      <div class="trow"><span class="tnm">Get Account</span><span class="tds">Read an Account record by ID before the call connects</span><span class="tbdg br">Read</span></div>
+      <div class="trow"><span class="tnm">Get Case</span><span class="tds">Read a Case record by ID before the call connects</span><span class="tbdg br">Read</span></div>
+      <div class="tsl">Post-call</div>
+      <div class="trow"><span class="tnm">Create Task</span><span class="tds">Create a Task linked to a Contact, Lead, or Opportunity after the call</span><span class="tbdg bw">Write</span></div>
+      <div class="trow"><span class="tnm">Create Lead</span><span class="tds">Create a new Lead record from call data</span><span class="tbdg bw">Write</span></div>
+      <div class="trow"><span class="tnm">Update Lead</span><span class="tds">Update fields on an existing Lead record after the call</span><span class="tbdg bw">Write</span></div>
+      <div class="trow"><span class="tnm">Update Contact</span><span class="tds">Update fields on an existing Contact record after the call</span><span class="tbdg bw">Write</span></div>
+    </div>
+    <div class="mft">
+      <button class="btn-sec" onclick="go(4)">Back</button>
+      <button class="btn-pri" onclick="go(6)">Connect</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 6 — Integrations list + education banner (post-OAuth)
+     ═══════════════════════════════════════════════════════════ -->
+<div class="screen" id="s6">
+<div class="pg">
+  <div class="ph">
+    <span class="pht">Integrations</span>
+    <button class="btn-pri">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      Add integration
+    </button>
+  </div>
+  <div class="edu">
+    <div class="edu-i">i</div>
+    <div class="edu-b">
+      <div class="edu-t">Salesforce is connected</div>
+      <div class="edu-s">Your Contacts are now syncing. Retell gives you three ways to use this connection.</div>
+      <div class="edu-bks">
+        <div class="edu-bk">
+          <div class="edu-bn">1</div>
+          <div class="edu-bt"><strong>Contacts and Memory are active.</strong> Contact fields sync every 5 minutes and are available as <code style="font-size:12px;background:rgba(59,130,246,.15);padding:1px 4px;border-radius:3px">{{contact.*}}</code> variables across every agent with no per-agent setup. Memory captures what the agent learns on each call and writes it back to the Contact record automatically.</div>
+        </div>
+        <div class="edu-bk">
+          <div class="edu-bn">2</div>
+          <div class="edu-bt"><strong>Add pre-call functions for other records.</strong> Fetch Leads, Opportunities, Cases, and Accounts right before a call connects using this same Salesforce connection. No second OAuth needed.</div>
+        </div>
+        <div class="edu-bk">
+          <div class="edu-bn">3</div>
+          <div class="edu-bt"><strong>Add post-call functions to write outcomes.</strong> Log tasks, update records, and create leads after every call automatically. Configure in the Functions panel of any agent.</div>
+        </div>
+      </div>
+    </div>
+    <button class="edu-x">✕</button>
+  </div>
+  <div class="sr">
+    <div class="sr-in">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="#99A0AE" stroke-width="1.5"/><path d="M10 10l2 2" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Search integrations...</span>
+    </div>
+    <button class="sr-btn">Recent ↓</button>
+  </div>
+  <div class="t-hdr">
+    <div class="th">Name</div>
+    <div class="th">Created by</div>
+    <div class="th" style="display:flex;align-items:center;gap:4px">Date created <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M3 7l3 3 3-3" stroke="#6B7280" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div></div>
+  </div>
+  <div class="t-row" onclick="go(7)">
+    <div class="ic">
+      <div class="ii" style="background:#00A1E0">
+        <svg width="18" height="12" viewBox="0 0 50 34" fill="white"><path d="M17 5C12.6 5 9 8.6 9 13c0 1.2.3 2.4.8 3.4C7.1 17.8 5.5 20.3 5.5 23.5c0 4.9 4 8.5 9 8.5H37.5c5 0 9-3.7 9-8.5 0-3.2-1.7-5.7-4.3-7.1.5-1 .8-2.2.8-3.4 0-4.4-3.6-8-8-8-1.7 0-3.3.5-4.6 1.4C28.8 5.8 26.2 5 23.5 5c-2.5 0-4.8.8-6.5 2.1V5z"/></svg>
+      </div>
+      <div><div class="inm">Salesforce</div><div class="isub">Salesforce – OAuth</div></div>
+    </div>
+    <div class="tc">Brandon Khoo</div>
+    <div class="tc">Just now</div>
+    <div><button class="t-more">···</button></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 7 — Manage: Configure tab (post-connection)
+     ═══════════════════════════════════════════════════════════ -->
+<div class="screen" id="s7">
+<div class="bg-wrap pg">
+  <div class="ph"><span class="pht">Integrations</span><button class="btn-pri">+ Add integration</button></div>
+  <div class="sr"><div class="sr-in" style="color:#99A0AE">Search integrations...</div><button class="sr-btn">Recent ↓</button></div>
+  <div class="t-hdr"><div class="th">Name</div><div class="th">Created by</div><div class="th">Date created</div><div></div></div>
+  <div class="t-row">
+    <div class="ic"><div class="ii" style="background:#00A1E0"><svg width="18" height="12" viewBox="0 0 50 34" fill="white"><path d="M17 5C12.6 5 9 8.6 9 13c0 1.2.3 2.4.8 3.4C7.1 17.8 5.5 20.3 5.5 23.5c0 4.9 4 8.5 9 8.5H37.5c5 0 9-3.7 9-8.5 0-3.2-1.7-5.7-4.3-7.1.5-1 .8-2.2.8-3.4 0-4.4-3.6-8-8-8-1.7 0-3.3.5-4.6 1.4C28.8 5.8 26.2 5 23.5 5c-2.5 0-4.8.8-6.5 2.1V5z"/></svg></div><div><div class="inm">Salesforce</div><div class="isub">Salesforce – OAuth</div></div></div>
+    <div class="tc">Brandon Khoo</div><div class="tc">Just now</div><div></div>
+  </div>
+</div>
+<div class="ovl">
+  <div class="mdet">
+    <div class="md-hdr">
+      <div class="md-ic" style="background:#00A1E0">
+        <svg width="24" height="16" viewBox="0 0 50 34" fill="white"><path d="M17 5C12.6 5 9 8.6 9 13c0 1.2.3 2.4.8 3.4C7.1 17.8 5.5 20.3 5.5 23.5c0 4.9 4 8.5 9 8.5H37.5c5 0 9-3.7 9-8.5 0-3.2-1.7-5.7-4.3-7.1.5-1 .8-2.2.8-3.4 0-4.4-3.6-8-8-8-1.7 0-3.3.5-4.6 1.4C28.8 5.8 26.2 5 23.5 5c-2.5 0-4.8.8-6.5 2.1V5z"/></svg>
+      </div>
+      <div class="md-info">
+        <div class="md-nm">Salesforce</div>
+        <div class="md-stat"><span class="sdot g"></span>Connected · OAuth · Used by 2 agents</div>
+      </div>
+      <button class="mx" onclick="go(6)">✕</button>
+    </div>
+    <div class="md-tabs">
+      <div class="md-tab on">Configure</div>
+      <div class="md-tab" onclick="go(8)">Data</div>
+      <div class="md-tab" onclick="go(9)">Tools</div>
+      <div class="md-tab">About</div>
+    </div>
+    <div class="md-body">
+      <div class="ibar">
+        <div class="ib-c"><div class="ib-l">Account</div><div class="ib-v">acme.salesforce.com</div></div>
+        <div class="ib-c"><div class="ib-l">Connected by</div><div class="ib-v">Brandon Khoo</div></div>
+        <div class="ib-c"><div class="ib-l">Connected on</div><div class="ib-v">May 10, 2026</div></div>
+      </div>
+      <div class="ff">
+        <label class="fl">Name</label>
+        <input class="fi" value="Salesforce – OAuth">
+        <div class="fh">Internal name for this integration connection. Shown in the integrations list and in the agent editor.</div>
+      </div>
+      <div class="ff">
+        <label class="fl">Credential type</label>
+        <div class="fi" style="background:#F9FAFB;color:#525866;display:flex;align-items:center">OAuth 2.0</div>
+      </div>
+    </div>
+    <div class="mft">
+      <div class="mft-l">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="#C7CDD5" stroke-width="1.2"/><path d="M6.5 3.5v3.5l2 1" stroke="#C7CDD5" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Last sync: just now
+      </div>
+      <button class="btn-sec" onclick="go(6)">Cancel</button>
+      <button class="btn-pri">Save changes</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 8 — Manage: Data tab (post-connection)
+     ═══════════════════════════════════════════════════════════ -->
+<div class="screen" id="s8">
+<div class="bg-wrap pg">
+  <div class="ph"><span class="pht">Integrations</span><button class="btn-pri">+ Add integration</button></div>
+  <div class="sr"><div class="sr-in" style="color:#99A0AE">Search integrations...</div><button class="sr-btn">Recent ↓</button></div>
+  <div class="t-hdr"><div class="th">Name</div><div class="th">Created by</div><div class="th">Date created</div><div></div></div>
+  <div class="t-row">
+    <div class="ic"><div class="ii" style="background:#00A1E0"><svg width="18" height="12" viewBox="0 0 50 34" fill="white"><path d="M17 5C12.6 5 9 8.6 9 13c0 1.2.3 2.4.8 3.4C7.1 17.8 5.5 20.3 5.5 23.5c0 4.9 4 8.5 9 8.5H37.5c5 0 9-3.7 9-8.5 0-3.2-1.7-5.7-4.3-7.1.5-1 .8-2.2.8-3.4 0-4.4-3.6-8-8-8-1.7 0-3.3.5-4.6 1.4C28.8 5.8 26.2 5 23.5 5c-2.5 0-4.8.8-6.5 2.1V5z"/></svg></div><div><div class="inm">Salesforce</div><div class="isub">Salesforce – OAuth</div></div></div>
+    <div class="tc">Brandon Khoo</div><div class="tc">Just now</div><div></div>
+  </div>
+</div>
+<div class="ovl">
+  <div class="mdet">
+    <div class="md-hdr">
+      <div class="md-ic" style="background:#00A1E0">
+        <svg width="24" height="16" viewBox="0 0 50 34" fill="white"><path d="M17 5C12.6 5 9 8.6 9 13c0 1.2.3 2.4.8 3.4C7.1 17.8 5.5 20.3 5.5 23.5c0 4.9 4 8.5 9 8.5H37.5c5 0 9-3.7 9-8.5 0-3.2-1.7-5.7-4.3-7.1.5-1 .8-2.2.8-3.4 0-4.4-3.6-8-8-8-1.7 0-3.3.5-4.6 1.4C28.8 5.8 26.2 5 23.5 5c-2.5 0-4.8.8-6.5 2.1V5z"/></svg>
+      </div>
+      <div class="md-info">
+        <div class="md-nm">Salesforce</div>
+        <div class="md-stat"><span class="sdot g"></span>Connected · OAuth · Used by 2 agents</div>
+      </div>
+      <button class="mx" onclick="go(6)">✕</button>
+    </div>
+    <div class="md-tabs">
+      <div class="md-tab" onclick="go(7)">Configure</div>
+      <div class="md-tab on">Data</div>
+      <div class="md-tab" onclick="go(9)">Tools</div>
+      <div class="md-tab">About</div>
+    </div>
+    <div class="md-body">
+      <div class="clt">
+        <span class="clt-i">i</span>
+        <span>Retell syncs Contact records from your Salesforce org every 5 minutes. Changes in Salesforce take effect on the next call automatically.</span>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:#0E121B;margin-bottom:10px">What Retell reads from your Salesforce org</div>
+      <div class="dt">
+        <div class="dt-hdr"><div class="dtth">Field</div><div class="dtth">Description</div></div>
+        <div class="dt-row">
+          <div><div class="dtf">First Name</div><div class="dtfv">{{contact.first_name}}</div></div>
+          <div class="dtd">Standard Contact field. Available before the call connects.</div>
+        </div>
+        <div class="dt-row">
+          <div><div class="dtf">Last Name</div><div class="dtfv">{{contact.last_name}}</div></div>
+          <div class="dtd">Standard Contact field. Available before the call connects.</div>
+        </div>
+        <div class="dt-row">
+          <div><div class="dtf">Email</div><div class="dtfv">{{contact.email}}</div></div>
+          <div class="dtd">Standard Contact field.</div>
+        </div>
+        <div class="dt-row">
+          <div><div class="dtf">Phone</div><div class="dtfv">{{contact.phone}}</div></div>
+          <div class="dtd">Standard Contact field.</div>
+        </div>
+        <div class="dt-row">
+          <div><div class="dtf">Account Name</div><div class="dtfv">{{contact.account_name}}</div></div>
+          <div class="dtd">Resolved from the related Account record.</div>
+        </div>
+        <div class="dt-row">
+          <div><div class="dtf">Lead Source</div><div class="dtfv">{{contact.lead_source}}</div></div>
+          <div class="dtd">Standard Contact field.</div>
+        </div>
+        <div class="dt-row">
+          <div><div class="dtf">Contact Owner</div><div class="dtfv">{{contact.owner_name}}</div></div>
+          <div class="dtd">Resolved from the related User record.</div>
+        </div>
+      </div>
+      <div class="memsec">
+        <div class="memt">Memory</div>
+        <div class="memd">After every call, Retell writes a structured memory note back to the Contact record in Salesforce. On future calls from the same contact, conversation history is available in the prompt automatically. This context does not exist in Salesforce natively.</div>
+        <span class="memv">{{contact.memory}}</span>
+      </div>
+    </div>
+    <div class="mft">
+      <div class="mft-l">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="#C7CDD5" stroke-width="1.2"/><path d="M6.5 3.5v3.5l2 1" stroke="#C7CDD5" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Last sync: just now
+      </div>
+      <button class="btn-sec" onclick="go(6)">Cancel</button>
+      <button class="btn-pri">Save changes</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 9 — Manage: Tools tab (post-connection)
+     ═══════════════════════════════════════════════════════════ -->
+<div class="screen" id="s9">
+<div class="bg-wrap pg">
+  <div class="ph"><span class="pht">Integrations</span><button class="btn-pri">+ Add integration</button></div>
+  <div class="sr"><div class="sr-in" style="color:#99A0AE">Search integrations...</div><button class="sr-btn">Recent ↓</button></div>
+  <div class="t-hdr"><div class="th">Name</div><div class="th">Created by</div><div class="th">Date created</div><div></div></div>
+  <div class="t-row">
+    <div class="ic"><div class="ii" style="background:#00A1E0"><svg width="18" height="12" viewBox="0 0 50 34" fill="white"><path d="M17 5C12.6 5 9 8.6 9 13c0 1.2.3 2.4.8 3.4C7.1 17.8 5.5 20.3 5.5 23.5c0 4.9 4 8.5 9 8.5H37.5c5 0 9-3.7 9-8.5 0-3.2-1.7-5.7-4.3-7.1.5-1 .8-2.2.8-3.4 0-4.4-3.6-8-8-8-1.7 0-3.3.5-4.6 1.4C28.8 5.8 26.2 5 23.5 5c-2.5 0-4.8.8-6.5 2.1V5z"/></svg></div><div><div class="inm">Salesforce</div><div class="isub">Salesforce – OAuth</div></div></div>
+    <div class="tc">Brandon Khoo</div><div class="tc">Just now</div><div></div>
+  </div>
+</div>
+<div class="ovl">
+  <div class="mdet">
+    <div class="md-hdr">
+      <div class="md-ic" style="background:#00A1E0">
+        <svg width="24" height="16" viewBox="0 0 50 34" fill="white"><path d="M17 5C12.6 5 9 8.6 9 13c0 1.2.3 2.4.8 3.4C7.1 17.8 5.5 20.3 5.5 23.5c0 4.9 4 8.5 9 8.5H37.5c5 0 9-3.7 9-8.5 0-3.2-1.7-5.7-4.3-7.1.5-1 .8-2.2.8-3.4 0-4.4-3.6-8-8-8-1.7 0-3.3.5-4.6 1.4C28.8 5.8 26.2 5 23.5 5c-2.5 0-4.8.8-6.5 2.1V5z"/></svg>
+      </div>
+      <div class="md-info">
+        <div class="md-nm">Salesforce</div>
+        <div class="md-stat"><span class="sdot g"></span>Connected · OAuth · Used by 2 agents</div>
+      </div>
+      <button class="mx" onclick="go(6)">✕</button>
+    </div>
+    <div class="md-tabs">
+      <div class="md-tab" onclick="go(7)">Configure</div>
+      <div class="md-tab" onclick="go(8)">Data</div>
+      <div class="md-tab on">Tools</div>
+      <div class="md-tab">About</div>
+    </div>
+    <div class="md-body">
+      <div style="font-size:13px;color:#525866;margin-bottom:16px">Actions available in the Agent Builder. Enable per agent in the Functions panel.</div>
+      <div class="tsl">Pre-call</div>
+      <div class="trow"><span class="tnm">Get Contact</span><span class="tds">Read a Contact record by ID before the call connects</span><span class="tbdg br">Read</span></div>
+      <div class="trow"><span class="tnm">Get Lead</span><span class="tds">Read a Lead record by ID before the call connects</span><span class="tbdg br">Read</span></div>
+      <div class="trow"><span class="tnm">Get Opportunity</span><span class="tds">Read an Opportunity record by ID before the call connects</span><span class="tbdg br">Read</span></div>
+      <div class="trow"><span class="tnm">Get Account</span><span class="tds">Read an Account record by ID before the call connects</span><span class="tbdg br">Read</span></div>
+      <div class="trow"><span class="tnm">Get Case</span><span class="tds">Read a Case record by ID before the call connects</span><span class="tbdg br">Read</span></div>
+      <div class="tsl">Post-call</div>
+      <div class="trow"><span class="tnm">Create Task</span><span class="tds">Create a Task linked to a Contact, Lead, or Opportunity after the call</span><span class="tbdg bw">Write</span></div>
+      <div class="trow"><span class="tnm">Create Lead</span><span class="tds">Create a new Lead record from call data</span><span class="tbdg bw">Write</span></div>
+      <div class="trow"><span class="tnm">Update Lead</span><span class="tds">Update fields on an existing Lead record after the call</span><span class="tbdg bw">Write</span></div>
+      <div class="trow"><span class="tnm">Update Contact</span><span class="tds">Update fields on an existing Contact record after the call</span><span class="tbdg bw">Write</span></div>
+    </div>
+    <div class="mft">
+      <div class="mft-l">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="#C7CDD5" stroke-width="1.2"/><path d="M6.5 3.5v3.5l2 1" stroke="#C7CDD5" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Last sync: just now
+      </div>
+      <button class="btn-sec" onclick="go(6)">Cancel</button>
+      <button class="btn-pri">Save changes</button>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 10 — Billing page (with Integrations tab)
+     ═══════════════════════════════════════════════════════════ -->
+<div class="screen" id="s10">
+<div class="pg">
+  <div class="ph">
+    <span class="pht">Billing</span>
+  </div>
+  <div class="pg-tabs">
+    <div class="pg-tab cur">Overview</div>
+    <div class="pg-tab" onclick="go(1)">Integrations</div>
+  </div>
+
+  <!-- Plan card -->
+  <div class="bcard">
+    <div class="bcard-t">Current plan</div>
+    <div class="bcard-plan">Pay As You Go</div>
+    <div class="bcard-sub">Billed monthly based on usage. No seat fees.</div>
+    <div class="bcard-row">
+      <div class="bcard-stat">
+        <span class="bcard-sv">$0.07</span>
+        <span class="bcard-sl">per minute (voice)</span>
+      </div>
+      <div class="bcard-stat">
+        <span class="bcard-sv">$0.004</span>
+        <span class="bcard-sl">per message (SMS)</span>
+      </div>
+      <div class="bcard-stat">
+        <span class="bcard-sv">May 1</span>
+        <span class="bcard-sl">billing cycle start</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Usage grid -->
+  <div class="bgrid">
+    <div class="busg">
+      <div class="busg-t">Minutes used</div>
+      <div class="busg-v">3,412 min</div>
+      <div class="busg-s">This billing period</div>
+      <div class="busg-bar"><div class="busg-fill" style="width:68%"></div></div>
+    </div>
+    <div class="busg">
+      <div class="busg-t">Calls made</div>
+      <div class="busg-v">847</div>
+      <div class="busg-s">This billing period</div>
+      <div class="busg-bar"><div class="busg-fill" style="width:42%"></div></div>
+    </div>
+  </div>
+
+  <!-- Estimated invoice -->
+  <div class="bcard" style="margin-bottom:0">
+    <div class="bcard-t">Estimated invoice</div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline">
+      <div>
+        <div class="bcard-plan" style="font-size:28px">$238.84</div>
+        <div class="bcard-sub">Based on usage to date · renews Jun 1</div>
+      </div>
+      <button class="btn-sec" style="height:32px;font-size:13px">View invoices</button>
+    </div>
+  </div>
+</div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+function go(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.getElementById('s' + n).classList.add('on');
+  document.querySelectorAll('#pnav button').forEach((b, i) => b.classList.toggle('on', i + 1 === n));
+  document.getElementById('main').scrollTop = 0;
+  document.getElementById('sb-billing').classList.toggle('cur', n === 10);
+  document.getElementById('sb-integrations').classList.toggle('cur', n !== 10);
+}
+</script>
+</body>
+</html>

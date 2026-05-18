@@ -256,6 +256,10 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .mix-info::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%); background: #0E121B; color: #fff; font-size: 11px; font-weight: 400; white-space: nowrap; padding: 4px 8px; border-radius: 5px; pointer-events: none; opacity: 0; transition: opacity 0.12s; z-index: 200; }
 .mix-info::before { content: ''; position: absolute; bottom: calc(100% + 3px); left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: #0E121B; pointer-events: none; opacity: 0; transition: opacity 0.12s; z-index: 200; }
 .mix-info:hover::after, .mix-info:hover::before { opacity: 1; }
+.mix-clickable { cursor: pointer; border-radius: 5px; margin: 0 -6px; padding: 0 6px; }
+.mix-clickable:hover { background: rgba(0,0,0,0.03); }
+.mix-back-btn { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; color: #3d64d7; background: none; border: none; cursor: pointer; font-family: inherit; padding: 0; white-space: nowrap; }
+.mix-back-btn:hover { color: #2a4fb0; }
 </style>
 </head>
 <body>
@@ -617,47 +621,24 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
       </div>
 
-      <!-- Cost Mix donut -->
+      <!-- Cost Mix donut (dynamic) -->
       <div class="chart-card">
         <div class="chart-card-header">
           <span class="chart-card-title">Cost Mix</span>
+          <button id="cost-mix-back" onclick="drillBack()" class="mix-back-btn" style="display:none;">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            All categories
+          </button>
         </div>
         <div class="cost-mix-body">
           <div class="donut-wrap">
-            <svg viewBox="0 0 100 100" class="donut-svg">
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#F3F4F6" stroke-width="15"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#F5A623" stroke-width="15"
-                stroke-dasharray="90.9 238.76" stroke-dashoffset="0"
-                transform="rotate(-90 50 50)"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#E05252" stroke-width="15"
-                stroke-dasharray="82.4 238.76" stroke-dashoffset="-90.9"
-                transform="rotate(-90 50 50)"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#3d64d7" stroke-width="15"
-                stroke-dasharray="35.4 238.76" stroke-dashoffset="-173.3"
-                transform="rotate(-90 50 50)"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#8B8FA8" stroke-width="15"
-                stroke-dasharray="19.9 238.76" stroke-dashoffset="-208.7"
-                transform="rotate(-90 50 50)"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#9B59B6" stroke-width="15"
-                stroke-dasharray="6.9 238.76" stroke-dashoffset="-228.6"
-                transform="rotate(-90 50 50)"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#1FC16B" stroke-width="15"
-                stroke-dasharray="3.3 238.76" stroke-dashoffset="-235.5"
-                transform="rotate(-90 50 50)"/>
-            </svg>
+            <svg viewBox="0 0 100 100" class="donut-svg" id="cost-mix-svg"></svg>
             <div class="donut-center">
-              <span class="donut-total">$210,366</span>
-              <span class="donut-sublabel">total cost</span>
+              <span class="donut-total" id="donut-total-text"></span>
+              <span class="donut-sublabel" id="donut-sub-text"></span>
             </div>
           </div>
-          <div class="cost-mix-legend">
-            <div class="mix-row"><span class="mix-dot" style="background:#F5A623;"></span><span class="mix-name">Telephony</span><span class="mix-amt">$80,084</span><span class="mix-pct">38%</span></div>
-            <div class="mix-row"><span class="mix-dot" style="background:#E05252;"></span><span class="mix-name">LLM</span><span class="mix-amt">$72,594</span><span class="mix-pct">35%</span></div>
-            <div class="mix-row"><span class="mix-dot" style="background:#3d64d7;"></span><span class="mix-name">Voice Engine</span><span class="mix-amt">$31,205</span><span class="mix-pct">15%</span></div>
-            <div class="mix-row"><span class="mix-dot" style="background:#8B8FA8;"></span><span class="mix-name">TTS</span><span class="mix-info" data-tip="Text to Speech"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#C4C9D4" stroke-width="1.3"/><path d="M8 7.5v3.5M8 5v.5" stroke="#C4C9D4" stroke-width="1.3" stroke-linecap="round"/></svg></span><span class="mix-amt">$17,551</span><span class="mix-pct">&nbsp;8%</span></div>
-            <div class="mix-row"><span class="mix-dot" style="background:#9B59B6;"></span><span class="mix-name">Add-ons</span><span class="mix-amt">$6,051</span><span class="mix-pct">&nbsp;3%</span></div>
-            <div class="mix-row"><span class="mix-dot" style="background:#1FC16B;"></span><span class="mix-name">Messaging</span><span class="mix-amt">$2,881</span><span class="mix-pct">&nbsp;1%</span></div>
-          </div>
+          <div class="cost-mix-legend" id="cost-mix-legend"></div>
         </div>
       </div>
 
@@ -1028,6 +1009,129 @@ document.addEventListener('click', function(e) {
   }
 });
 
+// ── Cost Mix drilldown ──────────────────────────────────────
+var DONUT_C = 238.761;
+var mixLevel = 'top';
+
+var costCategories = [
+  { name: 'Telephony',    color: '#F5A623', amt: 80084.42 },
+  { name: 'LLM',          color: '#E05252', amt: 72594.08 },
+  { name: 'Voice Engine', color: '#3d64d7', amt: 31204.50 },
+  { name: 'TTS',          color: '#8B8FA8', amt: 17551.42, tip: 'Text to Speech' },
+  { name: 'Add-ons',      color: '#9B59B6', amt:  6050.74 },
+  { name: 'Messaging',    color: '#1FC16B', amt:  2880.98 },
+];
+
+var costDrilldown = {
+  'Telephony': [
+    { name: 'Branded Outbound Calling', amt: 58420.12 },
+    { name: 'US Twilio Telephony',      amt:  9871.40 },
+    { name: 'Short Call Surcharge',     amt:  7340.22 },
+    { name: 'Australia Twilio',         amt:  1190.44 },
+    { name: 'Canada Twilio',            amt:   980.33 },
+    { name: 'UK Twilio',               amt:   870.12 },
+    { name: 'US Toll-Free Telephony',  amt:   610.44 },
+    { name: 'Malaysia Twilio',          amt:   410.55 },
+    { name: 'India Twilio',            amt:   390.80 },
+  ],
+  'LLM': [
+    { name: 'LLM Token Surcharge',         amt: 42310.88 },
+    { name: 'LLM (gpt-4.1 high)',          amt: 24891.33 },
+    { name: 'Text Testing (gpt-4.1 mini)', amt:  1640.80 },
+    { name: 'LLM (gpt-4.1 mini)',          amt:  1420.55 },
+    { name: 'LLM (claude-3.5)',            amt:  1310.20 },
+    { name: 'Text Testing (claude-3.5)',   amt:   540.22 },
+    { name: 'LLM (gpt-4o mini)',           amt:   480.10 },
+  ],
+  'Voice Engine': [
+    { name: 'Retell Voice Engine', amt: 31204.50 },
+  ],
+  'TTS': [
+    { name: 'ElevenLabs TTS', amt: 12430.77 },
+    { name: 'Platform TTS',   amt:  5120.65 },
+  ],
+  'Add-ons': [
+    { name: 'Knowledge Base Usage',  amt: 3890.44 },
+    { name: 'Verified Phone Number', amt: 1820.30 },
+    { name: 'Phone Number',          amt:  340.00 },
+  ],
+  'Messaging': [
+    { name: 'SMS Subscription', amt: 2140.10 },
+    { name: 'SMS Message',      amt:  740.88 },
+  ],
+};
+
+function mixShades(hex, n) {
+  var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  var out = [];
+  for (var i = 0; i < n; i++) {
+    var t = n > 1 ? (i / (n - 1)) * 0.52 : 0;
+    var c = function(ch) { return Math.round(ch + (255 - ch) * t).toString(16).padStart(2,'0'); };
+    out.push('#' + c(r) + c(g) + c(b));
+  }
+  return out;
+}
+
+function fmtMix(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+
+function renderCostMix(segs) {
+  var total = segs.reduce(function(s,x){ return s + x.amt; }, 0);
+  var cumArc = 0;
+  var infoSVG = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#C4C9D4" stroke-width="1.3"/><path d="M8 7.5v3.5M8 5v.5" stroke="#C4C9D4" stroke-width="1.3" stroke-linecap="round"/></svg>';
+  var chevSVG = '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" style="flex-shrink:0;margin-left:2px;color:#C4C9D4;"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  var svgParts = ['<circle cx="50" cy="50" r="38" fill="none" stroke="#F3F4F6" stroke-width="15"/>'];
+  segs.forEach(function(seg) {
+    var arc = DONUT_C * seg.amt / total;
+    var drillable = mixLevel === 'top' && !!costDrilldown[seg.name];
+    svgParts.push(
+      '<circle cx="50" cy="50" r="38" fill="none" stroke="' + seg.color + '" stroke-width="15"' +
+      ' stroke-dasharray="' + arc.toFixed(2) + ' ' + DONUT_C + '"' +
+      ' stroke-dashoffset="' + (-cumArc).toFixed(2) + '"' +
+      ' transform="rotate(-90 50 50)"' +
+      (drillable ? ' style="cursor:pointer;" onclick="drillMix(\'' + seg.name + '\')"' : '') + '/>'
+    );
+    cumArc += arc;
+  });
+  document.getElementById('cost-mix-svg').innerHTML = svgParts.join('');
+  document.getElementById('donut-total-text').textContent = fmtMix(total);
+  document.getElementById('donut-sub-text').textContent = mixLevel === 'top' ? 'total cost' : mixLevel;
+
+  var rows = segs.map(function(seg) {
+    var pct = Math.round(seg.amt / total * 100);
+    var drillable = mixLevel === 'top' && !!costDrilldown[seg.name];
+    var tipHTML = seg.tip ? '<span class="mix-info" data-tip="' + seg.tip + '">' + infoSVG + '</span>' : '';
+    return '<div class="mix-row' + (drillable ? ' mix-clickable' : '') + '"' +
+      (drillable ? ' onclick="drillMix(\'' + seg.name + '\')"' : '') + '>' +
+      '<span class="mix-dot" style="background:' + seg.color + ';"></span>' +
+      '<span class="mix-name">' + seg.name + tipHTML + '</span>' +
+      (drillable ? chevSVG : '') +
+      '<span class="mix-amt">' + fmtMix(seg.amt) + '</span>' +
+      '<span class="mix-pct">' + (pct < 10 ? '&nbsp;' : '') + pct + '%</span>' +
+      '</div>';
+  });
+  document.getElementById('cost-mix-legend').innerHTML = rows.join('');
+  document.getElementById('cost-mix-back').style.display = mixLevel === 'top' ? 'none' : '';
+}
+
+function drillMix(catName) {
+  var cat = null;
+  for (var i = 0; i < costCategories.length; i++) {
+    if (costCategories[i].name === catName) { cat = costCategories[i]; break; }
+  }
+  var providers = costDrilldown[catName];
+  if (!providers || !cat) return;
+  mixLevel = catName;
+  var shades = mixShades(cat.color, providers.length);
+  renderCostMix(providers.map(function(p, i) { return { name: p.name, color: shades[i], amt: p.amt }; }));
+}
+
+function drillBack() {
+  mixLevel = 'top';
+  renderCostMix(costCategories);
+}
+
+renderCostMix(costCategories);
 renderProviders(heavyProviders);
 </script>
 

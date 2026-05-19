@@ -854,8 +854,8 @@ function renderProviders(data) {
     var amtFormatted = '$' + p.amt.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2});
     var tipContent = '<strong>' + p.name + '</strong><br>Cost by Provider: ' + amtFormatted;
     return '<div class="provider-row" onmouseenter="showInfoTip(event,\'' + tipContent + '\')" onmouseleave="hideInfoTip()">' +
-      '<div style="display:flex;align-items:center;width:190px;flex-shrink:0;gap:3px;">' +
-        '<span style="flex:1;min-width:0;font-size:13px;' + color + 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.name + '</span>' +
+      '<div style="display:flex;align-items:center;width:190px;flex-shrink:0;">' +
+        '<span style="min-width:0;font-size:13px;' + color + 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:168px;">' + p.name + '</span>' +
         infoIcon +
       '</div>' +
       '<div class="provider-bar-wrap"><div class="provider-bar" style="width:' + w + '%;' + (dimmed ? 'background:#D1D5DB;' : '') + '"></div></div>' +

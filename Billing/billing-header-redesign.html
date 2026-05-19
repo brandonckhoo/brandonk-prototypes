@@ -1119,10 +1119,13 @@ function renderCostMix(segs) {
     var pct = Math.round(seg.amt / total * 100);
     var drillable = mixLevel === 'top' && !!costDrilldown[seg.name];
     var tipHTML = seg.tip ? '<span class="mix-info" data-tip="' + seg.tip + '">' + infoSVG + '</span>' : '';
+    var infoTip = (seg.name === 'LLM Token Surcharge')
+      ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event)" onmouseleave="hideInfoTip()">ⓘ</span></span>'
+      : '';
     return '<div class="mix-row' + (drillable ? ' mix-clickable' : '') + '"' +
       (drillable ? ' onclick="drillMix(\'' + seg.name + '\')"' : '') + '>' +
       '<span class="mix-dot" style="background:' + seg.color + ';"></span>' +
-      '<span class="mix-name">' + seg.name + tipHTML + '</span>' +
+      '<span class="mix-name">' + seg.name + tipHTML + infoTip + '</span>' +
       (drillable ? chevSVG : '') +
       '<span class="mix-amt">' + fmtMix(seg.amt) + '</span>' +
       '<span class="mix-pct">' + (pct < 10 ? '&nbsp;' : '') + pct + '%</span>' +

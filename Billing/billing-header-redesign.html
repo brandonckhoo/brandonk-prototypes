@@ -851,10 +851,12 @@ function renderProviders(data) {
     var infoIcon = tip
       ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event,' + JSON.stringify(tip) + ')" onmouseleave="hideInfoTip()">ⓘ</span></span>'
       : '';
-    return '<div class="provider-row">' +
+    var amtFormatted = '$' + p.amt.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2});
+    var rowTip = JSON.stringify('<strong>' + p.name + '</strong><br>Cost by Provider: ' + amtFormatted);
+    return '<div class="provider-row" onmouseenter="showInfoTip(event,' + rowTip + ')" onmouseleave="hideInfoTip()">' +
       '<div class="provider-name" style="' + color + '">' + p.name + infoIcon + '</div>' +
       '<div class="provider-bar-wrap"><div class="provider-bar" style="width:' + w + '%;' + (dimmed ? 'background:#D1D5DB;' : '') + '"></div></div>' +
-      '<div class="provider-meta"><span class="provider-amt" style="' + color + '">$' + p.amt.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</span>' +
+      '<div class="provider-meta"><span class="provider-amt" style="' + color + '">' + amtFormatted + '</span>' +
       '<span class="provider-pct">' + pct + '%</span></div>' +
       '</div>';
   }

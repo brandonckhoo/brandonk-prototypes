@@ -1346,6 +1346,7 @@ var infoTipEl = document.getElementById('info-tip-popup');
 var INFO_TIP_TEXT = 'Charged at $0.001 per token beyond the 3,500-token threshold per call. Reduce by shortening your system prompt or trimming conversation history. <a href="https://docs.retellai.com/accounts/billing-exceptions" target="_blank">Learn more →</a>';
 
 function showInfoTip(e, text) {
+  clearTimeout(infoTipHideTimer);
   infoTipEl.innerHTML = text || INFO_TIP_TEXT;
   infoTipEl.style.display = 'block';
   var x = e.clientX + 12;
@@ -1356,12 +1357,19 @@ function showInfoTip(e, text) {
   infoTipEl.style.top  = y + 'px';
 }
 
+var infoTipHideTimer = null;
+
 function hideInfoTip() {
-  infoTipEl.style.display = 'none';
+  infoTipHideTimer = setTimeout(function() { infoTipEl.style.display = 'none'; }, 180);
 }
 
-infoTipEl.addEventListener('mouseenter', function() { infoTipEl.style.display = 'block'; });
-infoTipEl.addEventListener('mouseleave', function() { infoTipEl.style.display = 'none'; });
+infoTipEl.addEventListener('mouseenter', function() {
+  clearTimeout(infoTipHideTimer);
+  infoTipEl.style.display = 'block';
+});
+infoTipEl.addEventListener('mouseleave', function() {
+  infoTipHideTimer = setTimeout(function() { infoTipEl.style.display = 'none'; }, 180);
+});
 
 document.addEventListener('mousemove', function(e) {
   if (tooltip.style.display !== 'none') {

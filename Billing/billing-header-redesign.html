@@ -921,6 +921,39 @@ function showProviderFilter() {
   document.getElementById('filter-provider-view').style.display = 'block';
 }
 
+function rerenderAll(indices) {
+  activeAgentIndices = (indices && indices.length > 0) ? indices : null;
+
+  var allTotal = agentTotal.reduce(function(s,a){ return s + a.amt; }, 0);
+  var filtAgents = activeAgentIndices
+    ? agentTotal.filter(function(a){ return activeAgentIndices.indexOf(AGENT_NAMES.indexOf(a.name)) >= 0; })
+    : agentTotal;
+  var filtTotal = filtAgents.reduce(function(s,a){ return s + a.amt; }, 0);
+  var ratio = allTotal > 0 ? filtTotal / allTotal : 1;
+
+  // KPIs
+  var allMins = 88731;
+  var filtMins = Math.round(allMins * ratio);
+  document.getElementById('kpi-spend').textContent = '$' + Math.round(filtTotal).toLocaleString('en-US');
+  document.getElementById('kpi-mins').innerHTML = filtMins.toLocaleString('en-US') + ' <span class="kpi-sub">min</span>';
+  document.getElementById('kpi-avg').textContent = filtMins > 0 ? '$' + (filtTotal / filtMins).toFixed(2) : '$0.00';
+
+  // Stacked bar chart
+  requestAnimationFrame(function(){ renderStackedChart(); });
+
+  // Cost by Agent
+  var filtPerMin = activeAgentIndices
+    ? agentPerMin.filter(function(a){ return activeAgentIndices.indexOf(AGENT_NAMES.indexOf(a.name)) >= 0; })
+    : agentPerMin;
+  renderAgents(agentView === 'total' ? filtAgents : filtPerMin, agentView === 'permin');
+
+  // Cost by Provider — scale proportionally
+  renderProviders(heavyProviders.map(function(p){ return { name: p.name, amt: p.amt * ratio }; }));
+
+  // Cost Mix — scale proportionally
+  renderCostMix(costCategories.map(function(c){ return { name: c.name, color: c.color, amt: c.amt * ratio }; }));
+}
+
 function applyAgentFilter() {
   var checked = Array.from(document.querySelectorAll('#filter-agent-view input[type=checkbox]:checked'));
   closeFilterPanel();
@@ -929,9 +962,9 @@ function applyAgentFilter() {
   var label = n === 1 ? checked[0].value : n + ' agents';
   document.getElementById('agent-tag-label').textContent = label;
   document.getElementById('agent-filter-tag').style.display = 'inline-flex';
-  document.getElementById('kpi-spend').textContent = '$105,183';
-  document.getElementById('kpi-mins').innerHTML = '44,366 <span class="kpi-sub">min</span>';
-  document.getElementById('kpi-avg').textContent = '$2.37';
+  var selectedNames = checked.map(function(cb){ return cb.value; });
+  var selectedIndices = selectedNames.map(function(name){ return AGENT_NAMES.indexOf(name); }).filter(function(i){ return i >= 0; });
+  rerenderAll(selectedIndices);
 }
 
 function applyProviderFilter() {
@@ -952,9 +985,7 @@ function clearProviderFilter() {
 function clearAgentFilter() {
   document.querySelectorAll('#filter-agent-view input[type=checkbox]').forEach(function(cb){ cb.checked = false; });
   document.getElementById('agent-filter-tag').style.display = 'none';
-  document.getElementById('kpi-spend').textContent = '$210,366';
-  document.getElementById('kpi-mins').innerHTML = '88,731 <span class="kpi-sub">min</span>';
-  document.getElementById('kpi-avg').textContent = '$2.37';
+  rerenderAll(null);
 }
 
 // ── Subscription items expand/collapse ─────────────────────
@@ -1147,7 +1178,11 @@ function setAgentView(view, btn) {
   agentView = view;
   btn.parentElement.querySelectorAll('.chart-toggle-btn').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
-  renderAgents(view === 'total' ? agentTotal : agentPerMin, view === 'permin');
+  var base = view === 'total' ? agentTotal : agentPerMin;
+  var data = activeAgentIndices
+    ? base.filter(function(a){ return activeAgentIndices.indexOf(AGENT_NAMES.indexOf(a.name)) >= 0; })
+    : base;
+  renderAgents(data, view === 'permin');
 }
 
 // ── Stacked bar chart ───────────────────────────────────────
@@ -1181,14 +1216,22 @@ var DAILY_AGENT = [
 var DAY_LABELS = ['May 1','May 2','May 3','May 4','May 5','May 6','May 7','May 8','May 9','May 10','May 11','May 12','May 13','May 14','May 15','May 16'];
 
 var currentGroupBy = 'agent';
+var activeAgentIndices = null; // null = all agents
 
 function getStackData() {
   if (currentGroupBy === 'agent') {
-    return DAILY_AGENT.map(function(d) { return d.slice(); });
+    return DAILY_AGENT.map(function(d) {
+      return d.map(function(v, i) {
+        return (!activeAgentIndices || activeAgentIndices.indexOf(i) >= 0) ? v : 0;
+      });
+    });
   } else {
     return DAILY_AGENT.map(function(d) {
-      var tot = d.reduce(function(s,v){ return s+v; },0);
-      return COMP_PROPS.map(function(p){ return tot * p; });
+      var allTot = d.reduce(function(s,v){ return s+v; },0);
+      var filtTot = activeAgentIndices
+        ? d.reduce(function(s,v,i){ return s + (activeAgentIndices.indexOf(i) >= 0 ? v : 0); }, 0)
+        : allTot;
+      return COMP_PROPS.map(function(p){ return filtTot * p; });
     });
   }
 }

@@ -596,7 +596,7 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
             </div>
           </div>
           <!-- Stacked chart container -->
-          <div style="height:180px;position:relative;" id="stacked-chart-container"></div>
+          <div style="height:280px;position:relative;" id="stacked-chart-container"></div>
           <!-- Legend -->
           <div class="chart-legend" id="stacked-legend"></div>
         </div>
@@ -1218,7 +1218,7 @@ function renderStackedChart() {
     if (s > maxTotal) maxTotal = s;
   });
 
-  var CHART_H = 160; // px height of bars area
+  var CHART_H = 260; // px height of bars area
 
   var container = document.getElementById('stacked-chart-container');
   // Build HTML

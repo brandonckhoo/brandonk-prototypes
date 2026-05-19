@@ -852,8 +852,8 @@ function renderProviders(data) {
       ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event,' + JSON.stringify(tip) + ')" onmouseleave="hideInfoTip()">ⓘ</span></span>'
       : '';
     var amtFormatted = '$' + p.amt.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2});
-    var rowTip = JSON.stringify('<strong>' + p.name + '</strong><br>Cost by Provider: ' + amtFormatted);
-    return '<div class="provider-row" onmouseenter="showInfoTip(event,' + rowTip + ')" onmouseleave="hideInfoTip()">' +
+    var tipContent = '<strong>' + p.name + '</strong><br>Cost by Provider: ' + amtFormatted;
+    return '<div class="provider-row" onmouseenter="showInfoTip(event,\'' + tipContent + '\')" onmouseleave="hideInfoTip()">' +
       '<div class="provider-name" style="' + color + '">' + p.name + infoIcon + '</div>' +
       '<div class="provider-bar-wrap"><div class="provider-bar" style="width:' + w + '%;' + (dimmed ? 'background:#D1D5DB;' : '') + '"></div></div>' +
       '<div class="provider-meta"><span class="provider-amt" style="' + color + '">' + amtFormatted + '</span>' +

@@ -271,6 +271,7 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 /* ── Credit display in table ──────────────────────────────── */
 .amt-gross { font-size: 11px; color: #99A0AE; display: block; margin-bottom: 3px; }
 .amt-credit { font-size: 11px; color: #1FC16B; display: block; margin-bottom: 4px; }
+.amt-refund { font-size: 11px; color: #FF9147; display: block; margin-bottom: 4px; }
 .amt-net { font-size: 14px; font-weight: 500; color: #0A0A0A; display: block; }
 </style>
 </head>
@@ -537,7 +538,11 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         <tr>
           <td></td>
           <td style="font-size:14px;">Jan 1, 2026</td>
-          <td style="font-size:14px;">$15,240.30</td>
+          <td style="font-size:14px;padding-top:10px;padding-bottom:10px;">
+            <span class="amt-gross">Gross $15,240.30</span>
+            <span class="amt-refund">−$2,500.00 refund</span>
+            <span class="amt-net">$12,740.30</span>
+          </td>
           <td></td>
           <td><span class="status-dot"><span class="dot dot-orange"></span>Partial Refund</span></td>
           <td><button class="invoice-btn">↗ Invoice</button></td>

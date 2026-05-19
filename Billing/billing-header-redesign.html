@@ -245,11 +245,10 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
 /* ── Tooltip ──────────────────────────────────────────────── */
 #bar-tooltip { position: fixed; background: #0E121B; color: #fff; border-radius: 8px; padding: 10px 14px; font-size: 12px; pointer-events: none; z-index: 1000; display: none; min-width: 190px; box-shadow: 0 4px 16px rgba(0,0,0,0.25); line-height: 1; }
-.info-tip-wrap { position: relative; display: inline-flex; align-items: center; vertical-align: middle; margin-left: 4px; }
+.info-tip-wrap { display: inline-flex; align-items: center; vertical-align: middle; margin-left: 4px; }
 .info-tip-icon { font-size: 12px; color: #99A0AE; cursor: help; line-height: 1; font-style: normal; }
 .info-tip-icon:hover { color: #525866; }
-.info-tip-popup { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #0E121B; color: #fff; border-radius: 6px; padding: 8px 10px; font-size: 12px; line-height: 1.5; width: 260px; z-index: 500; box-shadow: 0 4px 16px rgba(0,0,0,0.25); pointer-events: none; font-weight: 400; }
-.info-tip-wrap:hover .info-tip-popup { display: block; }
+#info-tip-popup { display: none; position: fixed; background: #0E121B; color: #fff; border-radius: 6px; padding: 8px 10px; font-size: 12px; line-height: 1.5; width: 260px; z-index: 2000; box-shadow: 0 4px 16px rgba(0,0,0,0.25); pointer-events: none; font-weight: 400; }
 .btt-date { font-size: 11px; color: rgba(255,255,255,0.55); margin-bottom: 9px; }
 .btt-row { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
 .btt-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
@@ -274,6 +273,9 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 </style>
 </head>
 <body>
+
+<!-- Info tip popup -->
+<div id="info-tip-popup"></div>
 
 <!-- Tooltip -->
 <div id="bar-tooltip">
@@ -839,7 +841,7 @@ function renderProviders(data) {
     var w = Math.round(p.amt / maxAmt * 100);
     var color = dimmed ? 'color:#525866;' : '';
     var infoIcon = (p.name === 'LLM Token Surcharge')
-      ? '<span class="info-tip-wrap"><span class="info-tip-icon">ⓘ</span><span class="info-tip-popup">' + TOKEN_SURCHARGE_TIP + '</span></span>'
+      ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event)" onmouseleave="hideInfoTip()">ⓘ</span></span>'
       : '';
     return '<div class="provider-row">' +
       '<div class="provider-name" style="' + color + '">' + p.name + infoIcon + '</div>' +
@@ -1325,6 +1327,24 @@ function showTooltip(e, di) {
 
 function hideTooltip() {
   tooltip.style.display = 'none';
+}
+
+var infoTipEl = document.getElementById('info-tip-popup');
+var INFO_TIP_TEXT = 'Charged at $0.001 per token beyond the 3,500-token threshold per call. Reduce by shortening your system prompt or trimming conversation history.';
+
+function showInfoTip(e) {
+  infoTipEl.textContent = INFO_TIP_TEXT;
+  infoTipEl.style.display = 'block';
+  var x = e.clientX + 12;
+  var y = e.clientY - infoTipEl.offsetHeight - 8;
+  if (x + 260 > window.innerWidth) x = e.clientX - 272;
+  if (y < 8) y = e.clientY + 16;
+  infoTipEl.style.left = x + 'px';
+  infoTipEl.style.top  = y + 'px';
+}
+
+function hideInfoTip() {
+  infoTipEl.style.display = 'none';
 }
 
 document.addEventListener('mousemove', function(e) {

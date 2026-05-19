@@ -138,7 +138,7 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .panel-save:hover { background: #1a2030; }
 
 /* ── Usage tab ──────────────────────────────────────────── */
-.usage-layout { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+.usage-layout { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; }
 .chart-card { background: #fff; border: 1px solid #E1E4EA; border-radius: 10px; padding: 20px 20px 16px; }
 .chart-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .chart-card-title { font-size: 14px; font-weight: 600; color: #0A0A0A; }
@@ -149,7 +149,7 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 /* Cost by Provider */
 .provider-list { display: flex; flex-direction: column; gap: 12px; }
 .provider-row { display: flex; align-items: center; gap: 10px; }
-.provider-name { font-size: 13px; color: #0A0A0A; width: 160px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.provider-name { font-size: 13px; color: #0A0A0A; width: 175px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .provider-bar-wrap { flex: 1; height: 8px; background: #F3F4F6; border-radius: 4px; overflow: hidden; }
 .provider-bar { height: 100%; background: #93B4F0; border-radius: 4px; }
 .provider-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
@@ -854,7 +854,8 @@ function renderProviders(data) {
     var amtFormatted = '$' + p.amt.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2});
     var tipContent = '<strong>' + p.name + '</strong><br>Cost by Provider: ' + amtFormatted;
     return '<div class="provider-row" onmouseenter="showInfoTip(event,\'' + tipContent + '\')" onmouseleave="hideInfoTip()">' +
-      '<div class="provider-name" style="' + color + '">' + p.name + infoIcon + '</div>' +
+      '<div class="provider-name" style="' + color + '">' + p.name + '</div>' +
+      infoIcon +
       '<div class="provider-bar-wrap"><div class="provider-bar" style="width:' + w + '%;' + (dimmed ? 'background:#D1D5DB;' : '') + '"></div></div>' +
       '<div class="provider-meta"><span class="provider-amt" style="' + color + '">' + amtFormatted + '</span>' +
       '<span class="provider-pct">' + pct + '%</span></div>' +

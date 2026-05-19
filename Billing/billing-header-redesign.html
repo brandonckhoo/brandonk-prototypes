@@ -138,9 +138,8 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .panel-save:hover { background: #1a2030; }
 
 /* ── Usage tab ──────────────────────────────────────────── */
-.usage-layout { display: flex; gap: 16px; }
+.usage-layout { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
 .chart-card { background: #fff; border: 1px solid #E1E4EA; border-radius: 10px; padding: 20px 20px 16px; }
-.usage-layout > .chart-card { flex: 1.4; }
 .chart-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .chart-card-title { font-size: 14px; font-weight: 600; color: #0A0A0A; }
 .chart-toggle { display: flex; border: 1px solid #E1E4EA; border-radius: 6px; overflow: hidden; }
@@ -206,8 +205,7 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .subs-footnote { font-size: 12px; color: #99A0AE; margin-top: 10px; line-height: 1.6; }
 
 /* ── Cost Mix donut ──────────────────────────────────────── */
-.usage-col-left  { flex: 1.4; display: flex; flex-direction: column; gap: 16px; }
-.usage-col-right { flex: 1;   display: flex; flex-direction: column; gap: 16px; }
+.chart-card-flex { display: flex; flex-direction: column; }
 .agent-name { font-size: 13px; color: #0A0A0A; width: 180px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cost-mix-body { display: flex; align-items: center; gap: 28px; }
 .donut-wrap { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
@@ -569,97 +567,87 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
     <div class="usage-layout">
 
-      <!-- Left column: stacked bar chart + cost by agent -->
-      <div class="usage-col-left">
-
-        <!-- Stacked bar chart -->
-        <div class="chart-card">
-          <div class="chart-card-header">
-            <span class="chart-card-title">Call + Chat Cost</span>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <!-- Group by dropdown -->
-              <div style="position:relative;" id="groupby-wrap">
-                <button class="groupby-btn" onclick="toggleGroupBy(event)">
-                  Group by: <strong id="groupby-label">Agent</strong>
-                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="#525866" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-                <div class="groupby-panel" id="groupby-panel">
-                  <div class="groupby-option active" id="gbo-agent" onclick="setGroupBy('agent',this)">Agent</div>
-                  <div class="groupby-option" id="gbo-component" onclick="setGroupBy('component',this)">Cost Component</div>
-                </div>
-              </div>
-              <!-- Day / Week toggle -->
-              <div class="chart-toggle">
-                <span class="chart-toggle-btn active">Day</span>
-                <span class="chart-toggle-btn">Week</span>
+      <!-- Row 1 left: Stacked bar chart -->
+      <div class="chart-card chart-card-flex">
+        <div class="chart-card-header">
+          <span class="chart-card-title">Call + Chat Cost</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <!-- Group by dropdown -->
+            <div style="position:relative;" id="groupby-wrap">
+              <button class="groupby-btn" onclick="toggleGroupBy(event)">
+                Group by: <strong id="groupby-label">Agent</strong>
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="#525866" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="groupby-panel" id="groupby-panel">
+                <div class="groupby-option active" id="gbo-agent" onclick="setGroupBy('agent',this)">Agent</div>
+                <div class="groupby-option" id="gbo-component" onclick="setGroupBy('component',this)">Cost Component</div>
               </div>
             </div>
-          </div>
-          <!-- Stacked chart container -->
-          <div style="height:280px;position:relative;" id="stacked-chart-container"></div>
-          <!-- Legend -->
-          <div class="chart-legend" id="stacked-legend"></div>
-        </div>
-
-        <!-- Cost by Agent -->
-        <div class="chart-card">
-          <div class="chart-card-header">
-            <span class="chart-card-title">Cost by Agent</span>
+            <!-- Day / Week toggle -->
             <div class="chart-toggle">
-              <span class="chart-toggle-btn active" onclick="setAgentView('total',this)">Total</span>
-              <span class="chart-toggle-btn" onclick="setAgentView('permin',this)">Cost / min</span>
+              <span class="chart-toggle-btn active">Day</span>
+              <span class="chart-toggle-btn">Week</span>
             </div>
           </div>
-          <div class="provider-list" id="agent-list"></div>
         </div>
+        <!-- Stacked chart container fills remaining card height -->
+        <div style="flex:1;min-height:220px;position:relative;" id="stacked-chart-container"></div>
+        <!-- Legend -->
+        <div class="chart-legend" id="stacked-legend"></div>
+      </div>
 
-      </div><!-- /usage-col-left -->
+      <!-- Row 1 right: Cost by Provider -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">Cost by Provider</span>
+        </div>
+        <div class="provider-list" id="provider-top"></div>
+        <div id="provider-other-row" class="provider-row provider-other" style="display:none;">
+          <div class="provider-name" style="color:#525866;">Other (<span id="other-count">0</span> more)</div>
+          <div class="provider-bar-wrap"><div class="provider-bar" id="other-bar" style="width:0%;background:#D1D5DB;"></div></div>
+          <div class="provider-meta"><span class="provider-amt" id="other-amt" style="color:#525866;">$0</span><span class="provider-pct" id="other-pct" style="color:#99A0AE;">0%</span></div>
+        </div>
+        <div id="provider-expanded" style="display:none;">
+          <div class="provider-list" id="provider-all"></div>
+          <button class="view-all-btn" onclick="toggleAllProviders()" style="margin-top:10px;">Collapse</button>
+        </div>
+        <div id="view-all-wrap" style="display:none;margin-top:10px;">
+          <button class="view-all-btn" onclick="toggleAllProviders()">View all <span id="view-all-count">0</span> providers</button>
+        </div>
+      </div>
 
-      <!-- Right column: Cost by Provider + Cost Mix -->
-      <div class="usage-col-right">
-
-        <!-- Cost by Provider -->
-        <div class="chart-card">
-          <div class="chart-card-header">
-            <span class="chart-card-title">Cost by Provider</span>
-          </div>
-          <div class="provider-list" id="provider-top"></div>
-          <div id="provider-other-row" class="provider-row provider-other" style="display:none;">
-            <div class="provider-name" style="color:#525866;">Other (<span id="other-count">0</span> more)</div>
-            <div class="provider-bar-wrap"><div class="provider-bar" id="other-bar" style="width:0%;background:#D1D5DB;"></div></div>
-            <div class="provider-meta"><span class="provider-amt" id="other-amt" style="color:#525866;">$0</span><span class="provider-pct" id="other-pct" style="color:#99A0AE;">0%</span></div>
-          </div>
-          <div id="provider-expanded" style="display:none;">
-            <div class="provider-list" id="provider-all"></div>
-            <button class="view-all-btn" onclick="toggleAllProviders()" style="margin-top:10px;">Collapse</button>
-          </div>
-          <div id="view-all-wrap" style="display:none;margin-top:10px;">
-            <button class="view-all-btn" onclick="toggleAllProviders()">View all <span id="view-all-count">0</span> providers</button>
+      <!-- Row 2 left: Cost by Agent -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">Cost by Agent</span>
+          <div class="chart-toggle">
+            <span class="chart-toggle-btn active" onclick="setAgentView('total',this)">Total</span>
+            <span class="chart-toggle-btn" onclick="setAgentView('permin',this)">Cost / min</span>
           </div>
         </div>
+        <div class="provider-list" id="agent-list"></div>
+      </div>
 
-        <!-- Cost Mix donut -->
-        <div class="chart-card">
-          <div class="chart-card-header">
-            <span class="chart-card-title">Cost Mix</span>
-            <button id="cost-mix-back" onclick="drillBack()" class="mix-back-btn" style="display:none;">
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              All categories
-            </button>
-          </div>
-          <div class="cost-mix-body">
-            <div class="donut-wrap">
-              <svg viewBox="0 0 100 100" class="donut-svg" id="cost-mix-svg"></svg>
-              <div class="donut-center">
-                <span class="donut-total" id="donut-total-text"></span>
-                <span class="donut-sublabel" id="donut-sub-text"></span>
-              </div>
+      <!-- Row 2 right: Cost Mix donut -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">Cost Mix</span>
+          <button id="cost-mix-back" onclick="drillBack()" class="mix-back-btn" style="display:none;">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            All categories
+          </button>
+        </div>
+        <div class="cost-mix-body">
+          <div class="donut-wrap">
+            <svg viewBox="0 0 100 100" class="donut-svg" id="cost-mix-svg"></svg>
+            <div class="donut-center">
+              <span class="donut-total" id="donut-total-text"></span>
+              <span class="donut-sublabel" id="donut-sub-text"></span>
             </div>
-            <div class="cost-mix-legend" id="cost-mix-legend"></div>
           </div>
+          <div class="cost-mix-legend" id="cost-mix-legend"></div>
         </div>
-
-      </div><!-- /usage-col-right -->
+      </div>
 
     </div><!-- /usage-layout -->
 
@@ -1218,9 +1206,9 @@ function renderStackedChart() {
     if (s > maxTotal) maxTotal = s;
   });
 
-  var CHART_H = 260; // px height of bars area
-
   var container = document.getElementById('stacked-chart-container');
+  var CHART_H = Math.max(220, container.offsetHeight - 10);
+
   // Build HTML
   var html = '<div class="stacked-chart-wrap" style="height:' + CHART_H + 'px;align-items:flex-end;">';
   data.forEach(function(d, di) {
@@ -1321,7 +1309,7 @@ function setGroupBy(val, el) {
 renderCostMix(costCategories);
 renderAgents(agentTotal, false);
 renderProviders(heavyProviders);
-renderStackedChart();
+requestAnimationFrame(function() { renderStackedChart(); });
 
 // usage-filters starts hidden (Billing History is default tab)
 document.getElementById('usage-filters').style.display = 'none';

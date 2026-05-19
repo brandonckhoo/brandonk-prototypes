@@ -849,7 +849,7 @@ function renderProviders(data) {
     var color = dimmed ? 'color:#525866;' : '';
     var tip = TIPS[p.name];
     var infoIcon = tip
-      ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event,\'' + tip.replace(/"/g, '&quot;') + '\')" onmouseleave="hideInfoTip()">ⓘ</span></span>'
+      ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event,\'' + tip.replace(/"/g, '&quot;') + '\',this)" onmouseleave="hideInfoTip()">ⓘ</span></span>'
       : '';
     var amtFormatted = '$' + p.amt.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2});
     var tipContent = '<strong>' + p.name + '</strong><br>Cost by Provider: ' + amtFormatted;
@@ -1137,9 +1137,9 @@ function renderCostMix(segs) {
   var rows = segs.map(function(seg) {
     var pct = Math.round(seg.amt / total * 100);
     var drillable = mixLevel === 'top' && !!costDrilldown[seg.name];
-    var tipHTML = seg.tip ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event,\'' + seg.tip + '\')" onmouseleave="hideInfoTip()">ⓘ</span></span>' : '';
+    var tipHTML = seg.tip ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event,\'' + seg.tip + '\',this)" onmouseleave="hideInfoTip()">ⓘ</span></span>' : '';
     var infoTip = (seg.name === 'LLM Token Surcharge')
-      ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event,INFO_TIP_TEXT)" onmouseleave="hideInfoTip()">ⓘ</span></span>'
+      ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event,INFO_TIP_TEXT,this)" onmouseleave="hideInfoTip()">ⓘ</span></span>'
       : '';
     return '<div class="mix-row' + (drillable ? ' mix-clickable' : '') + '"' +
       (drillable ? ' onclick="drillMix(\'' + seg.name + '\')"' : '') + '>' +
@@ -1354,14 +1354,24 @@ function hideTooltip() {
 var infoTipEl = document.getElementById('info-tip-popup');
 var INFO_TIP_TEXT = 'Charged at $0.001 per token beyond the 3,500-token threshold per call. Reduce by shortening your system prompt or trimming conversation history. <a href="https://docs.retellai.com/accounts/billing-exceptions" target="_blank">Learn more →</a>';
 
-function showInfoTip(e, text) {
+function showInfoTip(e, text, anchorEl) {
   clearTimeout(infoTipHideTimer);
   infoTipEl.innerHTML = text || INFO_TIP_TEXT;
   infoTipEl.style.display = 'block';
-  var x = e.clientX + 12;
-  var y = e.clientY - infoTipEl.offsetHeight - 8;
-  if (x + 260 > window.innerWidth) x = e.clientX - 272;
-  if (y < 8) y = e.clientY + 16;
+  var x, y;
+  if (anchorEl) {
+    var rect = anchorEl.getBoundingClientRect();
+    x = rect.right + 10;
+    y = rect.top + rect.height / 2 - infoTipEl.offsetHeight / 2;
+    if (x + 260 > window.innerWidth) x = rect.left - 270;
+  } else {
+    x = e.clientX + 12;
+    y = e.clientY - infoTipEl.offsetHeight - 8;
+    if (x + 260 > window.innerWidth) x = e.clientX - 272;
+    if (y < 8) y = e.clientY + 16;
+  }
+  if (y < 8) y = 8;
+  if (y + infoTipEl.offsetHeight > window.innerHeight - 8) y = window.innerHeight - infoTipEl.offsetHeight - 8;
   infoTipEl.style.left = x + 'px';
   infoTipEl.style.top  = y + 'px';
 }
@@ -1369,7 +1379,7 @@ function showInfoTip(e, text) {
 var infoTipHideTimer = null;
 
 function hideInfoTip() {
-  infoTipHideTimer = setTimeout(function() { infoTipEl.style.display = 'none'; }, 180);
+  infoTipHideTimer = setTimeout(function() { infoTipEl.style.display = 'none'; }, 500);
 }
 
 infoTipEl.addEventListener('mouseenter', function() {
@@ -1377,7 +1387,7 @@ infoTipEl.addEventListener('mouseenter', function() {
   infoTipEl.style.display = 'block';
 });
 infoTipEl.addEventListener('mouseleave', function() {
-  infoTipHideTimer = setTimeout(function() { infoTipEl.style.display = 'none'; }, 180);
+  infoTipHideTimer = setTimeout(function() { infoTipEl.style.display = 'none'; }, 500);
 });
 
 document.addEventListener('mousemove', function(e) {

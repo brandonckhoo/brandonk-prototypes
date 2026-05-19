@@ -343,8 +343,8 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     </div>
   </div>
 
-  <!-- ── Filters (shared — time range always visible) ───── -->
-  <div class="billing-controls">
+  <!-- ── Filters (Usage tab only) ───── -->
+  <div class="billing-controls" id="filter-row-wrap" style="display:none;">
     <div class="filter-row">
       <!-- Time range filter — Usage tab only -->
       <span id="time-range-filter" style="display:none;">
@@ -896,10 +896,13 @@ function switchTab(tab) {
   });
   var uf = document.getElementById('usage-filters');
   var tr = document.getElementById('time-range-filter');
+  var fr = document.getElementById('filter-row-wrap');
   if (tab === 'usage') {
+    fr.style.display = '';
     uf.style.display = 'inline-flex';
     tr.style.display = 'inline-flex';
   } else {
+    fr.style.display = 'none';
     uf.style.display = 'none';
     tr.style.display = 'none';
   }

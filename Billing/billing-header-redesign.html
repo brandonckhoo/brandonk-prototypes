@@ -248,7 +248,9 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .info-tip-wrap { display: inline-flex; align-items: center; vertical-align: middle; margin-left: 4px; }
 .info-tip-icon { font-size: 12px; color: #99A0AE; cursor: help; line-height: 1; font-style: normal; }
 .info-tip-icon:hover { color: #525866; }
-#info-tip-popup { display: none; position: fixed; background: #0E121B; color: #fff; border-radius: 6px; padding: 8px 10px; font-size: 12px; line-height: 1.5; width: 260px; z-index: 2000; box-shadow: 0 4px 16px rgba(0,0,0,0.25); pointer-events: none; font-weight: 400; }
+#info-tip-popup { display: none; position: fixed; background: #0E121B; color: #fff; border-radius: 6px; padding: 8px 10px; font-size: 12px; line-height: 1.5; width: 260px; z-index: 2000; box-shadow: 0 4px 16px rgba(0,0,0,0.25); font-weight: 400; }
+#info-tip-popup a { color: #93B4FF; text-decoration: none; white-space: nowrap; }
+#info-tip-popup a:hover { text-decoration: underline; }
 .btt-date { font-size: 11px; color: rgba(255,255,255,0.55); margin-bottom: 9px; }
 .btt-row { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
 .btt-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
@@ -1341,10 +1343,10 @@ function hideTooltip() {
 }
 
 var infoTipEl = document.getElementById('info-tip-popup');
-var INFO_TIP_TEXT = 'Charged at $0.001 per token beyond the 3,500-token threshold per call. Reduce by shortening your system prompt or trimming conversation history.';
+var INFO_TIP_TEXT = 'Charged at $0.001 per token beyond the 3,500-token threshold per call. Reduce by shortening your system prompt or trimming conversation history. <a href="https://docs.retellai.com/accounts/billing-exceptions" target="_blank">Learn more →</a>';
 
 function showInfoTip(e, text) {
-  infoTipEl.textContent = text || INFO_TIP_TEXT;
+  infoTipEl.innerHTML = text || INFO_TIP_TEXT;
   infoTipEl.style.display = 'block';
   var x = e.clientX + 12;
   var y = e.clientY - infoTipEl.offsetHeight - 8;
@@ -1357,6 +1359,9 @@ function showInfoTip(e, text) {
 function hideInfoTip() {
   infoTipEl.style.display = 'none';
 }
+
+infoTipEl.addEventListener('mouseenter', function() { infoTipEl.style.display = 'block'; });
+infoTipEl.addEventListener('mouseleave', function() { infoTipEl.style.display = 'none'; });
 
 document.addEventListener('mousemove', function(e) {
   if (tooltip.style.display !== 'none') {

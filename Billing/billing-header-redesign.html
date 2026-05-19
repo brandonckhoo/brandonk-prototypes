@@ -1274,8 +1274,9 @@ function renderStackedChart() {
   html += '</div>';
   container.innerHTML = html;
 
-  // Legend
+  // Legend — only show agents that are visible (not zeroed out by filter)
   var legendHTML = names.map(function(n, i) {
+    if (currentGroupBy === 'agent' && activeAgentIndices && activeAgentIndices.indexOf(i) < 0) return '';
     return '<div class="legend-item"><span class="legend-dot" style="background:' + colors[i] + ';"></span>' + n + '</div>';
   }).join('');
   document.getElementById('stacked-legend').innerHTML = legendHTML;
@@ -1294,6 +1295,7 @@ function showTooltip(e, di) {
   document.getElementById('btt-date').textContent = DAY_LABELS[di];
   var rowsHTML = '';
   d.forEach(function(v, si) {
+    if (v === 0) return; // skip filtered-out agents
     rowsHTML += '<div class="btt-row">' +
       '<span class="btt-dot" style="background:' + colors[si] + ';"></span>' +
       '<span class="btt-name">' + names[si] + '</span>' +

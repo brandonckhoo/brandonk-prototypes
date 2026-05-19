@@ -595,7 +595,7 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
               </div>
             </div>
             <!-- Day / Week toggle -->
-            <div class="chart-toggle">
+            <div class="chart-toggle" style="margin-left:8px;">
               <span class="chart-toggle-btn active">Day</span>
               <span class="chart-toggle-btn">Week</span>
             </div>
@@ -838,14 +838,18 @@ function renderProviders(data) {
   var top = data.slice(0, TOP);
   var rest = data.slice(TOP);
 
-  var TOKEN_SURCHARGE_TIP = 'Charged at $0.001 per token beyond the 3,500-token threshold per call. Reduce by shortening your system prompt or trimming conversation history.';
+  var TIPS = {
+    'LLM Token Surcharge': 'Charged at $0.001 per token beyond the 3,500-token threshold per call. Reduce by shortening your system prompt or trimming conversation history. <a href="https://docs.retellai.com/accounts/billing-exceptions" target="_blank">Learn more →</a>',
+    'Short Call Surcharge': 'Applied when a call ends in under 10 seconds with a dynamic opening message. The call is billed at a 10-second minimum to cover AI conversation overhead. <a href="https://docs.retellai.com/accounts/billing-exceptions" target="_blank">Learn more →</a>'
+  };
 
   function rowHTML(p, dimmed) {
     var pct = Math.round(p.amt / total * 100);
     var w = Math.round(p.amt / maxAmt * 100);
     var color = dimmed ? 'color:#525866;' : '';
-    var infoIcon = (p.name === 'LLM Token Surcharge')
-      ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event,INFO_TIP_TEXT)" onmouseleave="hideInfoTip()">ⓘ</span></span>'
+    var tip = TIPS[p.name];
+    var infoIcon = tip
+      ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event,' + JSON.stringify(tip) + ')" onmouseleave="hideInfoTip()">ⓘ</span></span>'
       : '';
     return '<div class="provider-row">' +
       '<div class="provider-name" style="' + color + '">' + p.name + infoIcon + '</div>' +

@@ -843,7 +843,7 @@ function renderProviders(data) {
     var w = Math.round(p.amt / maxAmt * 100);
     var color = dimmed ? 'color:#525866;' : '';
     var infoIcon = (p.name === 'LLM Token Surcharge')
-      ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event)" onmouseleave="hideInfoTip()">ⓘ</span></span>'
+      ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event,INFO_TIP_TEXT)" onmouseleave="hideInfoTip()">ⓘ</span></span>'
       : '';
     return '<div class="provider-row">' +
       '<div class="provider-name" style="' + color + '">' + p.name + infoIcon + '</div>' +
@@ -1126,9 +1126,9 @@ function renderCostMix(segs) {
   var rows = segs.map(function(seg) {
     var pct = Math.round(seg.amt / total * 100);
     var drillable = mixLevel === 'top' && !!costDrilldown[seg.name];
-    var tipHTML = seg.tip ? '<span class="mix-info" data-tip="' + seg.tip + '">' + infoSVG + '</span>' : '';
+    var tipHTML = seg.tip ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event,\'' + seg.tip + '\')" onmouseleave="hideInfoTip()">ⓘ</span></span>' : '';
     var infoTip = (seg.name === 'LLM Token Surcharge')
-      ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event)" onmouseleave="hideInfoTip()">ⓘ</span></span>'
+      ? '<span class="info-tip-wrap"><span class="info-tip-icon" onmouseenter="showInfoTip(event,INFO_TIP_TEXT)" onmouseleave="hideInfoTip()">ⓘ</span></span>'
       : '';
     return '<div class="mix-row' + (drillable ? ' mix-clickable' : '') + '"' +
       (drillable ? ' onclick="drillMix(\'' + seg.name + '\')"' : '') + '>' +
@@ -1343,8 +1343,8 @@ function hideTooltip() {
 var infoTipEl = document.getElementById('info-tip-popup');
 var INFO_TIP_TEXT = 'Charged at $0.001 per token beyond the 3,500-token threshold per call. Reduce by shortening your system prompt or trimming conversation history.';
 
-function showInfoTip(e) {
-  infoTipEl.textContent = INFO_TIP_TEXT;
+function showInfoTip(e, text) {
+  infoTipEl.textContent = text || INFO_TIP_TEXT;
   infoTipEl.style.display = 'block';
   var x = e.clientX + 12;
   var y = e.clientY - infoTipEl.offsetHeight - 8;

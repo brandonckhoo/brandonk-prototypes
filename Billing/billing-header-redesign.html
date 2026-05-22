@@ -347,7 +347,13 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     </div>
   </div>
 
-  <!-- ── Filters (Usage tab only) ───── -->
+  <!-- ── Tabs ───────────────────────────────────────────── -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('billing')">Billing History</div>
+    <div class="tab" onclick="switchTab('usage')">Usage</div>
+  </div>
+
+  <!-- ── Filters (Usage tab only — sits below tab bar to show it controls Usage content) ───── -->
   <div class="billing-controls" id="filter-row-wrap" style="display:none;">
     <div class="filter-row">
       <!-- Time range filter — Usage tab only -->
@@ -450,12 +456,6 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     </div><!-- /filter-row -->
   </div><!-- /billing-controls -->
 
-  <!-- ── Tabs ───────────────────────────────────────────── -->
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('billing')">Billing History</div>
-    <div class="tab" onclick="switchTab('usage')">Usage</div>
-  </div>
-
   <!-- ── Content: Billing History ──────────────────────── -->
   <div class="content" id="billing-content">
     <table class="billing-table">
@@ -495,7 +495,11 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         <tr>
           <td><span class="row-chev"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
           <td style="font-size:14px;">Apr 1, 2026</td>
-          <td style="font-size:14px;" class="amt-apr">$48,819.86</td>
+          <td class="amt-apr">
+            <span class="amt-gross">$50,819.86</span>
+            <span class="amt-credit">− $2,000.00 credit applied</span>
+            <span class="amt-net">$48,819.86</span>
+          </td>
           <td></td>
           <td><span class="status-dot"><span class="dot dot-green"></span>Paid</span></td>
           <td><button class="invoice-btn">↗ Invoice</button></td>
@@ -505,7 +509,11 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         <tr>
           <td><span class="row-chev"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
           <td style="font-size:14px;">Mar 1, 2026</td>
-          <td style="font-size:14px;" class="amt-mar">$38,306.98</td>
+          <td class="amt-mar">
+            <span class="amt-gross">$38,306.98</span>
+            <span class="amt-refund">− $38,306.98 refunded</span>
+            <span class="amt-net">$0.00</span>
+          </td>
           <td></td>
           <td><span class="status-dot"><span class="dot dot-grey"></span>Refunded</span></td>
           <td><button class="invoice-btn">↗ Invoice</button></td>
@@ -535,7 +543,11 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         <tr>
           <td><span class="row-chev"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
           <td style="font-size:14px;">Jan 1, 2026</td>
-          <td style="font-size:14px;">$12,740.30</td>
+          <td>
+            <span class="amt-gross">$14,740.30</span>
+            <span class="amt-refund">− $2,000.00 partial refund</span>
+            <span class="amt-net">$12,740.30</span>
+          </td>
           <td></td>
           <td><span class="status-dot"><span class="dot dot-orange"></span>Partial Refund</span></td>
           <td><button class="invoice-btn">↗ Invoice</button></td>
@@ -565,8 +577,12 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         <div class="kpi-value" id="kpi-spend">$210,366</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Call Minutes</div>
-        <div class="kpi-value" id="kpi-mins">88,731 <span class="kpi-sub">min</span></div>
+        <div class="kpi-label">Total Call Charge</div>
+        <div class="kpi-value" id="kpi-call">$198,254</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Total Chat Charge</div>
+        <div class="kpi-value" id="kpi-chat">$12,112</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Avg Cost / Min</div>
@@ -959,7 +975,8 @@ function rerenderAll(indices) {
   var allMins = 88731;
   var filtMins = Math.round(allMins * ratio);
   document.getElementById('kpi-spend').textContent = '$' + Math.round(filtTotal).toLocaleString('en-US');
-  document.getElementById('kpi-mins').innerHTML = filtMins.toLocaleString('en-US') + ' <span class="kpi-sub">min</span>';
+  document.getElementById('kpi-call').textContent  = '$' + Math.round(filtTotal * 0.943).toLocaleString('en-US');
+  document.getElementById('kpi-chat').textContent  = '$' + Math.round(filtTotal * 0.057).toLocaleString('en-US');
   document.getElementById('kpi-avg').textContent = filtMins > 0 ? '$' + (filtTotal / filtMins).toFixed(2) : '$0.00';
 
   // Stacked bar chart

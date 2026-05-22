@@ -585,8 +585,12 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         <div class="kpi-value" id="kpi-chat">$12,112</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Avg Cost / Min</div>
+        <div class="kpi-label">Avg Call Cost / Min</div>
         <div class="kpi-value" id="kpi-avg">$2.37</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg Chat Cost / Thread</div>
+        <div class="kpi-value" id="kpi-chat-avg">$2.33</div>
       </div>
     </div>
 
@@ -978,6 +982,7 @@ function rerenderAll(indices) {
   document.getElementById('kpi-call').textContent  = '$' + Math.round(filtTotal * 0.943).toLocaleString('en-US');
   document.getElementById('kpi-chat').textContent  = '$' + Math.round(filtTotal * 0.057).toLocaleString('en-US');
   document.getElementById('kpi-avg').textContent = filtMins > 0 ? '$' + (filtTotal / filtMins).toFixed(2) : '$0.00';
+  document.getElementById('kpi-chat-avg').textContent = '$2.33';
 
   // Stacked bar chart
   requestAnimationFrame(function(){ renderStackedChart(); });

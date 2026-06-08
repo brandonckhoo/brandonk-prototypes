@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell Copilot 2.0 — Prototypes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --blue:#3d64d7; --text:#0E121B; --muted:#525866; --soft:#99A0AE; --border:#E1E4EA; --page:#F5F7FA; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif; background:var(--page); color:var(--text); min-height:100vh; padding:48px 20px; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size:24px; font-weight:700; letter-spacing:-0.01em; }
+  .sub { font-size:14px; color:var(--muted); margin-top:6px; margin-bottom:28px; }
+  .grp { font-size:11px; font-weight:600; color:var(--soft); text-transform:uppercase; letter-spacing:0.04em; margin:22px 4px 8px; }
+  a.card { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:8px; text-decoration:none; color:var(--text); transition:box-shadow .12s, transform .12s; }
+  a.card:hover { box-shadow:0 4px 14px rgba(16,24,40,0.08); transform:translateY(-1px); }
+  .card .nm { font-size:14px; font-weight:600; }
+  .card .ds { font-size:12.5px; color:var(--soft); margin-top:2px; }
+  .card .main { flex:1; min-width:0; }
+  .card .arr { color:var(--soft); }
+  .dot { width:30px; height:30px; border-radius:8px; background:#ecf3ff; color:var(--blue); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Retell Copilot 2.0</h1>
+  <div class="sub">Interactive prototypes. Click any screen to open it.</div>
+
+  <div class="grp">Copilot</div>
+  <a class="card" href="copilot-create-skill.html"><span class="dot">C</span><span class="main"><div class="nm">Copilot composer + create a skill</div><div class="ds">+ menu, Plan/Build/Ask, model selector, KB picker, External upload</div></span><span class="arr">→</span></a>
+  <a class="card" href="copilot-suggestion-chips-drilldown.html"><span class="dot">C</span><span class="main"><div class="nm">Suggestion chips</div><div class="ds">Category chips with drill-down</div></span><span class="arr">→</span></a>
+
+  <div class="grp">Settings → Copilot</div>
+  <a class="card" href="copilot-settings-skills.html"><span class="dot">S</span><span class="main"><div class="nm">Skills & Integrations</div><div class="ds">Manage skills, House Rules, Phase 1 integrations + custom MCP</div></span><span class="arr">→</span></a>
+
+  <div class="grp">Context</div>
+  <a class="card" href="copilot-add-knowledge-base-posthog.html"><span class="dot">K</span><span class="main"><div class="nm">Add a knowledge base</div><div class="ds">Context picker</div></span><span class="arr">→</span></a>
+
+  <div class="grp">Surfaces</div>
+  <a class="card" href="copilot-callhistory-surface-patterns.html"><span class="dot">H</span><span class="main"><div class="nm">Call History</div><div class="ds">Diagnose failures</div></span><span class="arr">→</span></a>
+  <a class="card" href="copilot-analytics-surface-breakdown.html"><span class="dot">A</span><span class="main"><div class="nm">Analytics</div><div class="ds">Generate a custom breakdown or chart</div></span><span class="arr">→</span></a>
+  <a class="card" href="copilot-aiqa-surface-review-calls.html"><span class="dot">Q</span><span class="main"><div class="nm">AI QA · Review failed calls</div><div class="ds">Walk failures one at a time, approve/edit/skip + remediate entry</div></span><span class="arr">→</span></a>
+  <a class="card" href="copilot-aiqa-surface-fixes.html"><span class="dot">Q</span><span class="main"><div class="nm">AI QA · Remediate metrics</div><div class="ds">Cohort-level fix for a weak metric</div></span><span class="arr">→</span></a>
+</div>
+</body>
+</html>

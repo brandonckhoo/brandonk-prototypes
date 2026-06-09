@@ -136,6 +136,12 @@
   .crit .cr-tag { font-size: 9.5px; font-weight: 600; color: #525866; background: #F1F3F5; border-radius: 5px; padding: 2px 6px; text-transform: uppercase; letter-spacing: 0.03em; }
   .crit .cr-prompt { font-size: 11.5px; color: #525866; margin-top: 5px; line-height: 1.5; }
   .crit .cr-rule { font-size: 12px; font-weight: 600; color: #0E121B; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .ef { border: 1px solid #E1E4EA; border-radius: 6px; padding: 3px 8px; background: #fff; font-size: 12px; color: #0E121B; display: inline-flex; align-items: center; gap: 6px; cursor: text; }
+  .ef:hover { border-color: #C9D6F5; }
+  .ef .pen { color: #C2C7D0; flex-shrink: 0; }
+  .ef.block { display: flex; line-height: 1.5; align-items: flex-start; font-family: inherit; font-weight: 400; }
+  .seg { display: inline-flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .seg .ef { font-weight: 600; padding: 3px 7px; }
   .toggle-off { font-size: 11px; color: #99A0AE; }
   .cost { display: flex; align-items: center; gap: 7px; padding: 10px 12px; border-top: 1px solid #F1F3F5; background: #FAFBFC; font-size: 11.5px; color: #525866; }
   .cost svg { color: #99A0AE; flex-shrink: 0; }
@@ -381,30 +387,30 @@
       <div class="ai-avatar"><svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M10 2L11.6 6.4L16 8L11.6 9.6L10 14L8.4 9.6L4 8L8.4 6.4L10 2Z" fill="#fff"/></svg></div>
       <div class="ai-content">
         <div class="step-tag">Step 3 · Draft setup</div>
-        <p>Drafted the two setup steps. Edit anything inline, then run.</p>
+        <p>Drafted the two setup steps. Every field is editable — change it here, ask in chat, or open the full editor.</p>
 
         <div class="card">
           <div class="card-head"><span class="ct">New QA cohort</span></div>
 
           <div class="draft-sec">
             <div class="ds-title">Define QA Cohort</div>
-            <div class="df"><span class="dk">Name</span><span class="dv">AI Translation — resolution + latency</span></div>
+            <div class="df"><span class="dk">Name</span><span class="dv"><span class="ef" style="flex:1;">AI Translation — resolution + latency<span style="flex:1;"></span><svg class="pen" width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M3 15.5V17h1.5l8.1-8.1-1.5-1.5L3 15.5zM16.7 6.3c.4-.4.4-1 0-1.4l-1.6-1.6c-.4-.4-1-.4-1.4 0l-1.1 1.1 3 3 1.1-1.1z" fill="currentColor"/></svg></span></span></div>
             <div class="df"><span class="dk">Agents</span><span class="dv">7 AI Translation agents, each on its prod version <span style="color:#99A0AE;">(v11, v8, v5, v4, v6, v9, v3)</span></span></div>
             <div class="df"><span class="dk">Date range</span><span class="dv">Custom · last 30 days (May 10 – Jun 9, 2026) · full day · fixed</span></div>
             <div class="df"><span class="dk">Filters</span><span class="dv">Call duration, disconnection reason, post-call analysis — <span style="color:#99A0AE;">none set (not in your goal)</span></span></div>
-            <div class="df"><span class="dk">Sampling</span><span class="dv">100%</span></div>
-            <div class="df"><span class="dk">Weekly max</span><span class="dv">100 calls</span></div>
+            <div class="df"><span class="dk">Sampling</span><span class="dv"><span class="ef">100</span> %</span></div>
+            <div class="df"><span class="dk">Weekly max</span><span class="dv"><span class="ef">100</span> calls</span></div>
           </div>
 
           <div class="draft-sec">
             <div class="ds-title">Define resolution criteria</div>
             <div class="crit">
               <div class="cr-top"><span class="cr-name">Call resolved</span><span class="cr-tag">AI Evaluated Condition</span></div>
-              <div class="cr-prompt">“Evaluate whether the agent resolved the caller's request before the call ended.”</div>
+              <div class="cr-prompt ef block" style="margin-top:6px;color:#0E121B;">“Evaluate whether the agent resolved the caller's request before the call ended.”<svg class="pen" width="11" height="11" viewBox="0 0 20 20" fill="none" style="margin-left:6px;margin-top:2px;"><path d="M3 15.5V17h1.5l8.1-8.1-1.5-1.5L3 15.5zM16.7 6.3c.4-.4.4-1 0-1.4l-1.6-1.6c-.4-.4-1-.4-1.4 0l-1.1 1.1 3 3 1.1-1.1z" fill="currentColor"/></svg></div>
             </div>
             <div class="crit">
               <div class="cr-top"><span class="cr-name">Latency</span><span class="cr-tag">Performance Metric</span></div>
-              <div class="cr-rule" style="margin-top:6px;">Latency · P50 &nbsp;≤&nbsp; 2s</div>
+              <div class="cr-rule seg" style="margin-top:6px;"><span class="ef">Latency</span><span class="ef">P50</span><span class="ef">≤</span><span class="ef">2</span><span style="color:#99A0AE;font-family:inherit;font-weight:400;">s</span></div>
             </div>
             <div class="df" style="margin-top:8px;"><span class="dk">Weighted Scoring</span><span class="dv toggle-off">Off · a call must meet every criterion</span></div>
           </div>
@@ -417,6 +423,7 @@
 
         <div class="actions">
           <button class="fx-btn edit">Edit in chat</button>
+          <button class="fx-btn"><svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M3 3H8V5H5V8H3V3ZM17 3V8H15V5H12V3H17ZM17 17H12V15H15V12H17V17ZM3 17V12H5V15H8V17H3Z" fill="#525866"/></svg>Open in full editor</button>
           <button class="fx-btn run">Save and Run QA</button>
         </div>
         <div class="approve-note">

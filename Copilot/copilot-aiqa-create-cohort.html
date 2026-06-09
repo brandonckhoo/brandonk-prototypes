@@ -334,11 +334,16 @@
     <div class="msg-ai">
       <div class="ai-avatar"><svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M10 2L11.6 6.4L16 8L11.6 9.6L10 14L8.4 9.6L4 8L8.4 6.4L10 2Z" fill="#fff"/></svg></div>
       <div class="ai-content">
-        <div class="step-tag">Step 1 · A few quick picks</div>
-        <p>I pulled the agents, dates, and sampling from your goal. Confirm these, then tell me what success looks like.</p>
+        <div class="step-tag">Step 1 · Quick setup · 6 cards</div>
+        <p>I filled what I could from your goal. Confirm each card or change it — paged one at a time in the product, shown together here.</p>
 
-        <div class="clarify">
-          <div class="cq">Which agents and versions?</div>
+        <div class="qcard">
+          <div class="qcard-head">
+            <span class="qt">Which agents and versions?</span>
+            <span class="pager"><span class="nav">‹</span> 1 of 6 <span class="nav">›</span></span>
+            <span class="qx"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
+          </div>
+          <div style="padding:2px 12px 11px;">
           <div class="acheck-head">9 agents match “AI Translation” · <b>7 selected, each on its prod version</b></div>
           <div class="acheck">
             <div class="ack on"><span class="cb"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M8 13.2L4.8 10L3.7 11.1L8 15.4L16.3 7.1L15.2 6L8 13.2Z" fill="#fff"/></svg></span><span class="an">AI Translation Service - Router</span><span class="vtag">v11 · prod <svg width="9" height="9" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="#3d64d7" stroke-width="1.6" fill="none"/></svg></span></div>
@@ -351,41 +356,41 @@
             <div class="ack off"><span class="cb"></span><span class="an">AI Translation | GPT Realtime 2 | Test</span><span class="atag">Test</span></div>
             <div class="ack off"><span class="cb"></span><span class="an">AI Translation - fastAPI Test</span><span class="atag">Test</span></div>
           </div>
-          <div class="clarify-note">Defaulted to each agent's prod version — change a version above, or say “all versions” / “latest”. Test variants unchecked.</div>
+          <div class="clarify-note">Defaulted to each agent's prod version — change a version, or say “all versions” / “latest”. Test variants unchecked.</div>
+          </div>
         </div>
 
-        <div class="clarify">
-          <div class="cq">Date window</div>
-          <div class="opts">
-            <span class="opt sel">Custom · last 30 days</span>
-            <span class="opt">Last 4 weeks</span>
-            <span class="opt">Last 3 months</span>
-            <span class="opt">All time</span>
+        <div class="qcard">
+          <div class="qcard-head">
+            <span class="qt">Date window</span>
+            <span class="pager"><span class="nav">‹</span> 2 of 6 <span class="nav">›</span></span>
+            <span class="qx"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
           </div>
-          <div class="opts" style="margin-top:6px;">
-            <span class="opt sel">Fixed</span>
-            <span class="opt">Ongoing (dynamic)</span>
-          </div>
-          <div class="clarify-note">No exact “last 30 days” preset, so I set a custom range, full day (00:00–23:59). Nearest preset: Last 4 weeks.</div>
+          <div class="qopt sel"><span class="num">1</span><span class="ql">Last 30 days · custom range, full day</span><span class="qarrow"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10h11M11 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></span></div>
+          <div class="qopt"><span class="num">2</span><span class="ql">Last 4 weeks</span></div>
+          <div class="qopt"><span class="num">3</span><span class="ql">Last 3 months</span></div>
+          <div class="qopt"><span class="num">4</span><span class="ql">All time</span></div>
+          <div class="qopt"><span class="num">5</span><span class="ql">Ongoing · dynamic, no end date</span></div>
+          <div class="qopt other"><span class="num penbox"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M3 15.5V17h1.5l8.1-8.1-1.5-1.5L3 15.5zM16.7 6.3c.4-.4.4-1 0-1.4l-1.6-1.6c-.4-.4-1-.4-1.4 0l-1.1 1.1 3 3 1.1-1.1z" fill="currentColor"/></svg></span><span class="ql">Custom dates</span><button class="qskip">Skip</button></div>
         </div>
 
-        <div class="clarify">
-          <div class="cq">Sampling</div>
-          <div class="opts">
-            <span class="opt sel">100% · full coverage</span>
-            <span class="opt">50%</span>
-            <span class="opt">25%</span>
-            <span class="opt">Weekly max only</span>
+        <div class="qcard">
+          <div class="qcard-head">
+            <span class="qt">Sampling</span>
+            <span class="pager"><span class="nav">‹</span> 3 of 6 <span class="nav">›</span></span>
+            <span class="qx"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
           </div>
-          <div class="clarify-note">Keep 100% for full coverage, or sample down to cut cost.</div>
+          <div class="qopt sel"><span class="num">1</span><span class="ql">100% · full coverage</span><span class="qarrow"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10h11M11 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></span></div>
+          <div class="qopt"><span class="num">2</span><span class="ql">50%</span></div>
+          <div class="qopt"><span class="num">3</span><span class="ql">25%</span></div>
+          <div class="qopt"><span class="num">4</span><span class="ql">Weekly max only</span></div>
+          <div class="qopt other"><span class="num penbox"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M3 15.5V17h1.5l8.1-8.1-1.5-1.5L3 15.5zM16.7 6.3c.4-.4.4-1 0-1.4l-1.6-1.6c-.4-.4-1-.4-1.4 0l-1.1 1.1 3 3 1.1-1.1z" fill="currentColor"/></svg></span><span class="ql">Custom %</span><button class="qskip">Skip</button></div>
         </div>
-
-        <div class="step-tag" style="margin-top:16px;">Now the criteria · pick and I'll write the eval</div>
 
         <div class="qcard">
           <div class="qcard-head">
             <span class="qt">What counts as a successful call?</span>
-            <span class="pager"><span class="nav">‹</span> 1 of 3 <span class="nav">›</span></span>
+            <span class="pager"><span class="nav">‹</span> 4 of 6 <span class="nav">›</span></span>
             <span class="qx"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
           </div>
           <div class="qopt sel"><span class="num">1</span><span class="ql">The caller's request was resolved on the call</span><span class="qarrow"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10h11M11 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></span></div>
@@ -397,7 +402,7 @@
         <div class="qcard">
           <div class="qcard-head">
             <span class="qt">Any speed or quality bars?</span>
-            <span class="pager"><span class="nav">‹</span> 2 of 3 <span class="nav">›</span></span>
+            <span class="pager"><span class="nav">‹</span> 5 of 6 <span class="nav">›</span></span>
             <span class="qx"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
           </div>
           <div class="qopt sel"><span class="num">1</span><span class="ql">Latency · keep P50 under 2s</span><span class="qarrow"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10h11M11 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></span></div>
@@ -410,7 +415,7 @@
         <div class="qcard">
           <div class="qcard-head">
             <span class="qt">Does any criterion matter more?</span>
-            <span class="pager"><span class="nav">‹</span> 3 of 3 <span class="nav">›</span></span>
+            <span class="pager"><span class="nav">‹</span> 6 of 6 <span class="nav">›</span></span>
             <span class="qx"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
           </div>
           <div class="qopt sel"><span class="num">1</span><span class="ql">Treat them equally</span><span class="qarrow"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10h11M11 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></span></div>
@@ -419,7 +424,7 @@
           <div class="qopt other"><span class="num penbox"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M3 15.5V17h1.5l8.1-8.1-1.5-1.5L3 15.5zM16.7 6.3c.4-.4.4-1 0-1.4l-1.6-1.6c-.4-.4-1-.4-1.4 0l-1.1 1.1 3 3 1.1-1.1z" fill="currentColor"/></svg></span><span class="ql">Custom weights</span><button class="qskip">Skip</button></div>
         </div>
 
-        <div class="qhint">Pick from the options and Copilot writes the criteria. Or reply directly below.</div>
+        <div class="qhint">Cards 1–3 are pre-filled scope, just confirm. Cards 4–6 are the criteria — pick and Copilot writes the eval. Or reply directly below.</div>
       </div>
     </div>
 

@@ -380,10 +380,12 @@
           <div class="clarify-note">Keep 100% for full coverage, or sample down to cut cost.</div>
         </div>
 
+        <div class="step-tag" style="margin-top:16px;">Now the criteria · pick and I'll write the eval</div>
+
         <div class="qcard">
           <div class="qcard-head">
             <span class="qt">What counts as a successful call?</span>
-            <span class="pager"><span class="nav">‹</span> 1 of 2 <span class="nav">›</span></span>
+            <span class="pager"><span class="nav">‹</span> 1 of 3 <span class="nav">›</span></span>
             <span class="qx"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
           </div>
           <div class="qopt sel"><span class="num">1</span><span class="ql">The caller's request was resolved on the call</span><span class="qarrow"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10h11M11 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></span></div>
@@ -392,7 +394,32 @@
           <div class="qopt"><span class="num">4</span><span class="ql">The caller confirmed they were satisfied</span></div>
           <div class="qopt other"><span class="num penbox"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M3 15.5V17h1.5l8.1-8.1-1.5-1.5L3 15.5zM16.7 6.3c.4-.4.4-1 0-1.4l-1.6-1.6c-.4-.4-1-.4-1.4 0l-1.1 1.1 3 3 1.1-1.1z" fill="currentColor"/></svg></span><span class="ql">Something else</span><button class="qskip">Skip</button></div>
         </div>
-        <div class="qhint">Pick what success means and Copilot writes the evaluation prompt. Or reply directly below.</div>
+        <div class="qcard">
+          <div class="qcard-head">
+            <span class="qt">Any speed or quality bars?</span>
+            <span class="pager"><span class="nav">‹</span> 2 of 3 <span class="nav">›</span></span>
+            <span class="qx"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
+          </div>
+          <div class="qopt sel"><span class="num">1</span><span class="ql">Latency · keep P50 under 2s</span><span class="qarrow"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10h11M11 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></span></div>
+          <div class="qopt"><span class="num">2</span><span class="ql">Hallucination rate stays low</span></div>
+          <div class="qopt"><span class="num">3</span><span class="ql">Tool calls succeed</span></div>
+          <div class="qopt"><span class="num">4</span><span class="ql">No hard bars</span></div>
+          <div class="qopt other"><span class="num penbox"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M3 15.5V17h1.5l8.1-8.1-1.5-1.5L3 15.5zM16.7 6.3c.4-.4.4-1 0-1.4l-1.6-1.6c-.4-.4-1-.4-1.4 0l-1.1 1.1 3 3 1.1-1.1z" fill="currentColor"/></svg></span><span class="ql">Something else</span><button class="qskip">Skip</button></div>
+        </div>
+
+        <div class="qcard">
+          <div class="qcard-head">
+            <span class="qt">Does any criterion matter more?</span>
+            <span class="pager"><span class="nav">‹</span> 3 of 3 <span class="nav">›</span></span>
+            <span class="qx"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
+          </div>
+          <div class="qopt sel"><span class="num">1</span><span class="ql">Treat them equally</span><span class="qarrow"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10h11M11 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></span></div>
+          <div class="qopt"><span class="num">2</span><span class="ql">Weight resolution higher</span></div>
+          <div class="qopt"><span class="num">3</span><span class="ql">Weight latency higher</span></div>
+          <div class="qopt other"><span class="num penbox"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M3 15.5V17h1.5l8.1-8.1-1.5-1.5L3 15.5zM16.7 6.3c.4-.4.4-1 0-1.4l-1.6-1.6c-.4-.4-1-.4-1.4 0l-1.1 1.1 3 3 1.1-1.1z" fill="currentColor"/></svg></span><span class="ql">Custom weights</span><button class="qskip">Skip</button></div>
+        </div>
+
+        <div class="qhint">Pick from the options and Copilot writes the criteria. Or reply directly below.</div>
       </div>
     </div>
 

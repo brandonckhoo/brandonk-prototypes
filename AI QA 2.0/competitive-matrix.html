@@ -22,9 +22,7 @@
   .stage{display:flex;gap:28px;align-items:flex-start;}
   .plotwrap{flex:0 0 auto;}
   /* axis frame */
-  .frame{position:relative;width:720px;}
-  .yaxis-label{position:absolute;left:-30px;top:50%;transform:rotate(-90deg) translateX(50%);
-    transform-origin:left center;white-space:nowrap;font-size:12px;font-weight:600;color:var(--muted);}
+  .frame{position:relative;width:720px;margin-left:54px;}
   .plot{position:relative;width:720px;height:720px;background:
       linear-gradient(0deg,rgba(79,70,229,0.04),rgba(79,70,229,0.04));
     border:1px solid var(--line);border-radius:14px;overflow:hidden;}
@@ -47,12 +45,14 @@
   .qlabel.br{bottom:12px;right:14px;text-align:right;}
   .qlabel.bl{bottom:12px;left:14px;}
 
-  /* edge axis captions */
-  .cap{position:absolute;font-size:12px;font-weight:600;color:var(--muted);}
-  .cap.top{top:-26px;left:50%;transform:translateX(-50%);}
-  .cap.bottom{bottom:-26px;left:50%;transform:translateX(-50%);}
-  .cap.left{left:8px;top:-26px;font-size:11px;color:#94a3b8;}
-  .cap.right{right:8px;top:-26px;font-size:11px;color:#94a3b8;text-align:right;}
+  /* axis titles: one per axis, X at bottom, Y rotated on the left */
+  .xaxis{width:720px;margin-top:16px;text-align:center;font-size:12.5px;font-weight:600;color:#334155;}
+  .yaxis{position:absolute;left:-36px;top:0;height:720px;writing-mode:vertical-rl;transform:rotate(180deg);
+    display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:#334155;white-space:nowrap;}
+  .achip{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:#fff;background:#475569;padding:2px 8px;border-radius:999px;margin-right:9px;}
+  .arr{color:#4f46e5;font-weight:800;margin:0 7px;}
+  .axhint{color:#94a3b8;font-weight:500;}
 
   /* markers */
   .node{position:absolute;transform:translate(-50%,-50%);text-align:center;width:96px;}
@@ -101,10 +101,7 @@
   <div class="stage">
     <div class="plotwrap">
       <div class="frame">
-        <div class="cap top">Voice-native</div>
-        <div class="cap bottom">Text / generic LLM</div>
-        <div class="cap left">Detect &amp; score</div>
-        <div class="cap right">Closed-loop optimize</div>
+        <div class="yaxis"><b>Y axis &middot; Voice depth:</b>&nbsp;&nbsp;Text / generic LLM&nbsp;&nbsp;to&nbsp;&nbsp;Voice-native</div>
         <div class="plot" id="plot">
           <div class="q tr"></div><div class="q tl"></div><div class="q br"></div><div class="q bl"></div>
           <div class="grid"></div>
@@ -121,14 +118,14 @@
               marker-end="url(#ah)" opacity="0.7"></path>
           </svg>
         </div>
-        <div class="yaxis-label">Voice fidelity</div>
+        <div class="xaxis"><span class="achip">X axis &middot; Capability</span>Detect &amp; score <span class="arr">&#8594;</span> Closed-loop optimize <span class="axhint">(root cause &middot; fixes &middot; self-improve)</span></div>
       </div>
     </div>
 
     <div class="side">
       <div class="legend">
         <h3>Categories</h3>
-        <div class="lg"><span class="dot" style="--c:var(--platform)"></span>Voice / agent platform peers</div>
+        <div class="lg"><span class="dot" style="--c:var(--platform)"></span>Voice / agent platforms (incl. Retell)</div>
         <div class="lg"><span class="dot" style="--c:var(--specialist)"></span>Voice agent QA specialists</div>
         <div class="lg"><span class="dot" style="--c:var(--llm)"></span>LLM observability &amp; eval</div>
         <div class="lg"><span class="dot" style="--c:var(--ccaas)"></span>Contact center auto-QA</div>
@@ -146,23 +143,23 @@
 
 <script>
 const NODES = [
-  {name:'Decagon', cat:'platform', x:82, y:42, domain:'decagon.ai'},
-  {name:'Vapi', cat:'platform', x:27, y:69, domain:'vapi.ai'},
-  {name:'Synthflow', cat:'platform', x:39, y:73, domain:'synthflow.ai'},
-  {name:'ElevenLabs', cat:'platform', x:23, y:62, domain:'elevenlabs.io'},
-  {name:'Hamming', cat:'specialist', x:45, y:83, domain:'hamming.ai'},
-  {name:'Cekura', cat:'specialist', x:76, y:80, domain:'cekura.ai'},
-  {name:'Coval', cat:'specialist', x:33, y:78, domain:'coval.dev'},
-  {name:'Arize', cat:'llm', x:53, y:45, domain:'arize.com'},
-  {name:'LangSmith', cat:'llm', x:21, y:35, domain:'langchain.com'},
-  {name:'Braintrust', cat:'llm', x:44, y:56, domain:'braintrust.dev'},
-  {name:'Galileo', cat:'llm', x:65, y:30, domain:'galileo.ai'},
-  {name:'Langfuse', cat:'llm', x:17, y:24, domain:'langfuse.com'},
-  {name:'Fiddler', cat:'llm', x:57, y:21, domain:'fiddler.ai'},
-  {name:'Observe.AI', cat:'ccaas', x:63, y:63, domain:'observe.ai'},
-  {name:'Level AI', cat:'ccaas', x:48, y:61, domain:'thelevel.ai'},
-  {name:'MaestroQA', cat:'ccaas', x:55, y:50, domain:'maestroqa.com'},
-  {name:'Retell AI QA (today)', short:'Retell today', cat:'retell-today', x:18, y:85, domain:'retellai.com', tag:'today'},
+  {name:'Decagon', cat:'platform', x:82, y:40, domain:'decagon.ai'},
+  {name:'Vapi', cat:'platform', x:28, y:69, domain:'vapi.ai'},
+  {name:'Synthflow', cat:'platform', x:41, y:72, domain:'synthflow.ai'},
+  {name:'ElevenLabs', cat:'platform', x:19, y:59, domain:'elevenlabs.io'},
+  {name:'Hamming', cat:'specialist', x:46, y:85, domain:'hamming.ai'},
+  {name:'Cekura', cat:'specialist', x:77, y:81, domain:'cekura.ai'},
+  {name:'Coval', cat:'specialist', x:30, y:80, domain:'coval.dev'},
+  {name:'Arize', cat:'llm', x:49, y:43, domain:'arize.com'},
+  {name:'LangSmith', cat:'llm', x:21, y:37, domain:'langchain.com'},
+  {name:'Braintrust', cat:'llm', x:38, y:55, domain:'braintrust.dev'},
+  {name:'Galileo', cat:'llm', x:67, y:31, domain:'galileo.ai'},
+  {name:'Langfuse', cat:'llm', x:15, y:25, domain:'langfuse.com'},
+  {name:'Fiddler', cat:'llm', x:56, y:21, domain:'fiddler.ai'},
+  {name:'Observe.AI', cat:'ccaas', x:69, y:62, domain:'observe.ai'},
+  {name:'Level AI', cat:'ccaas', x:49, y:62, domain:'thelevel.ai'},
+  {name:'MaestroQA', cat:'ccaas', x:61, y:50, domain:'maestroqa.com'},
+  {name:'Retell AI QA (today)', short:'Retell today', cat:'retell-today', x:16, y:87, domain:'retellai.com', tag:'today'},
   {name:'Retell AI QA 2.0', short:'Retell AI QA 2.0', cat:'retell-2', x:88, y:88, domain:'retellai.com', tag:'target'},
 ];
 const COLORS = {platform:'var(--platform)',specialist:'var(--specialist)',llm:'var(--llm)',

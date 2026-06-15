@@ -14,7 +14,7 @@
   body{margin:0;background:var(--bg);color:var(--ink);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
     -webkit-font-smoothing:antialiased;padding:40px 32px 56px;}
-  .wrap{max-width:1200px;margin:0 auto;}
+  .wrap{max-width:1320px;margin:0 auto;}
   h1{font-size:24px;font-weight:700;margin:0 0 4px;letter-spacing:-0.01em;}
   .sub{color:var(--muted);font-size:14px;margin:0 0 28px;}
   .sub b{color:var(--ink);font-weight:600;}
@@ -22,7 +22,7 @@
   .stage{display:flex;gap:28px;align-items:flex-start;}
   .plotwrap{flex:0 0 auto;}
   /* axis frame */
-  .frame{position:relative;width:720px;margin-left:54px;}
+  .frame{display:flex;gap:18px;align-items:stretch;}
   .plot{position:relative;width:720px;height:720px;background:
       linear-gradient(0deg,rgba(79,70,229,0.04),rgba(79,70,229,0.04));
     border:1px solid var(--line);border-radius:14px;overflow:hidden;}
@@ -45,14 +45,14 @@
   .qlabel.br{bottom:12px;right:14px;text-align:right;}
   .qlabel.bl{bottom:12px;left:14px;}
 
-  /* axis titles: one per axis, X at bottom, Y rotated on the left */
-  .xaxis{width:720px;margin-top:16px;text-align:center;font-size:12.5px;font-weight:600;color:#334155;}
-  .yaxis{position:absolute;left:-36px;top:0;height:720px;writing-mode:vertical-rl;transform:rotate(180deg);
-    display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:#334155;white-space:nowrap;}
-  .achip{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-    color:#fff;background:#475569;padding:2px 8px;border-radius:999px;margin-right:9px;}
-  .arr{color:#4f46e5;font-weight:800;margin:0 7px;}
-  .axhint{color:#94a3b8;font-weight:500;}
+  /* axis explainers: name + sentence sit on each axis */
+  .yexplain{width:194px;flex:0 0 auto;display:flex;flex-direction:column;justify-content:center;}
+  .yexplain .axn{align-self:flex-start;}
+  .plotcol{flex:0 0 auto;}
+  .yexplain p,.xexplain p{margin:0 0 8px;font-size:12.5px;line-height:1.45;color:#334155;}
+  .xexplain{width:720px;margin-top:18px;text-align:center;}
+  .xexplain p{max-width:680px;margin:0 auto;}
+  .hi{color:var(--retell);font-weight:700;}
 
   /* markers */
   .node{position:absolute;transform:translate(-50%,-50%);text-align:center;width:96px;}
@@ -111,7 +111,12 @@
   <div class="stage">
     <div class="plotwrap">
       <div class="frame">
-        <div class="yaxis"><b>Y axis &middot; Voice depth:</b>&nbsp;&nbsp;Text / generic LLM&nbsp;&nbsp;to&nbsp;&nbsp;Voice-native</div>
+        <div class="yexplain">
+          <div class="axn" style="--c:#475569">Y axis &middot; Voice depth</div>
+          <p>Is the tool actually built for voice (audio, latency, interruptions, turn-taking), or does it only read the text transcript?</p>
+          <p class="hi">&#8593;&nbsp; Higher = more voice-native</p>
+        </div>
+        <div class="plotcol">
         <div class="plot" id="plot">
           <div class="q tr"></div><div class="q tl"></div><div class="q br"></div><div class="q bl"></div>
           <div class="grid"></div>
@@ -128,18 +133,15 @@
               marker-end="url(#ah)" opacity="0.7"></path>
           </svg>
         </div>
-        <div class="xaxis"><span class="achip">X axis &middot; Capability</span>Detect &amp; score <span class="arr">&#8594;</span> Closed-loop optimize <span class="axhint">(root cause &middot; fixes &middot; self-improve)</span></div>
+        <div class="xexplain">
+          <div class="axn" style="--c:#4f46e5">X axis &middot; Capability</div>
+          <p>Does it just score and grade calls, or close the loop with root-cause clustering, fix recommendations, and a self-improving agent? <span class="hi">&#8594; Further right = closer to the full loop.</span></p>
+        </div>
+        </div>
       </div>
     </div>
 
     <div class="side">
-      <div class="read">
-        <h3>How to read this</h3>
-        <div class="ax"><span class="axn" style="--c:#475569">Y axis &middot; Voice depth</span>
-          <p>Is the tool actually built for voice (audio, latency, interruptions, turn-taking), or does it only read the text transcript? Higher up = more voice-native.</p></div>
-        <div class="ax"><span class="axn" style="--c:#4f46e5">X axis &middot; Capability</span>
-          <p>Does it just score and grade calls, or close the loop with root-cause clustering, fix recommendations, and a self-improving agent? Further right = closer to the full loop.</p></div>
-      </div>
       <div class="read">
         <h3>The 4 quadrants</h3>
         <div class="quad"><b>Top left &middot; Voice, score only.</b> Hears the call but only grades it. <i>Retell today.</i></div>
@@ -170,7 +172,7 @@ const NODES = [
   {name:'Synthflow', cat:'platform', x:41, y:72, domain:'synthflow.ai'},
   {name:'ElevenLabs', cat:'platform', x:19, y:59, domain:'elevenlabs.io'},
   {name:'Hamming', cat:'specialist', x:46, y:85, domain:'hamming.ai'},
-  {name:'Cekura', cat:'specialist', x:77, y:81, domain:'cekura.ai'},
+  {name:'Cekura', cat:'specialist', x:73, y:82, domain:'cekura.ai'},
   {name:'Coval', cat:'specialist', x:30, y:80, domain:'coval.dev'},
   {name:'Arize', cat:'llm', x:49, y:43, domain:'arize.com'},
   {name:'LangSmith', cat:'llm', x:21, y:37, domain:'langchain.com'},
@@ -182,7 +184,7 @@ const NODES = [
   {name:'Level AI', cat:'ccaas', x:49, y:62, domain:'thelevel.ai'},
   {name:'MaestroQA', cat:'ccaas', x:61, y:50, domain:'maestroqa.com'},
   {name:'Retell AI QA (today)', short:'Retell today', cat:'retell-today', x:16, y:87, domain:'retellai.com', tag:'today'},
-  {name:'Retell AI QA 2.0', short:'Retell AI QA 2.0', cat:'retell-2', x:88, y:88, domain:'retellai.com', tag:'target'},
+  {name:'Retell AI QA 2.0', short:'Retell AI QA 2.0', cat:'retell-2', x:89, y:79, domain:'retellai.com', tag:'target'},
 ];
 const COLORS = {platform:'var(--platform)',specialist:'var(--specialist)',llm:'var(--llm)',
   ccaas:'var(--ccaas)','retell-today':'var(--retell-today)','retell-2':'var(--retell)'};

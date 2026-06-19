@@ -6,10 +6,6 @@
 <title>Retell AI — Functions Library</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  /* view toggle — class-based so Artifact CSP can't block it */
-  #view-extractors { display: none; }
-  #view-extractors.view-active { display: block; }
-  #view-functions.view-hidden { display: none; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
 
   /* ============ PRIMARY SIDEBAR (copied from 3.1.1 template) ============ */
@@ -683,7 +679,7 @@
 </div><!-- /view-functions -->
 
 <!-- VIEW: Information Extractors -->
-<div id="view-extractors">
+<div id="view-extractors" hidden>
   <div class="main-header">
     <div class="dot" style="background:#CA8A04"></div>
     <h1>Post-call Data Retrieval</h1>
@@ -1065,11 +1061,11 @@
       var el = document.getElementById('cat-' + c);
       if (el) el.classList.toggle('active', c === cat);
     });
-    // toggle views via CSS classes (avoids Artifact inline-style restrictions)
+    // toggle views using the HTML hidden attribute
     var fnView = document.getElementById('view-functions');
     var exView = document.getElementById('view-extractors');
-    if (fnView) fnView.classList.toggle('view-hidden', cat === 'extractors');
-    if (exView) exView.classList.toggle('view-active', cat === 'extractors');
+    if (fnView) fnView.hidden = (cat === 'extractors');
+    if (exView) exView.hidden = (cat !== 'extractors');
   }
   function togglePcaDropdown(e) {
     e.stopPropagation();

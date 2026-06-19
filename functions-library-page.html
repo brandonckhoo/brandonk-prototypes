@@ -371,7 +371,7 @@
 <aside class="subnav">
   <div class="subnav-group" style="margin-top:0">
     <div class="subnav-group-label">Category</div>
-    <div class="subnav-item" id="cat-extractors" onclick="var fn=document.getElementById('view-functions'),ex=document.getElementById('view-extractors');fn.hidden=true;ex.hidden=false;alert('fn.hidden='+fn.hidden+' fn.display='+getComputedStyle(fn).display+'\nex.hidden='+ex.hidden+' ex.display='+getComputedStyle(ex).display)"><span class="subnav-dot" style="background:#CA8A04"></span> Post-call Data Retrieval <span class="count">4</span></div>
+    <div class="subnav-item" id="cat-extractors" onclick="setCategory('extractors')"><span class="subnav-dot" style="background:#CA8A04"></span> Post-call Data Retrieval <span class="count">4</span></div>
     <div class="subnav-item active" id="cat-pre" onclick="setCategory('pre')"><span class="subnav-dot" style="background:#1D4ED8"></span> Pre-conversation <span class="count">2</span></div>
     <div class="subnav-item" id="cat-during" onclick="setCategory('during')"><span class="subnav-dot" style="background:#166534"></span> During-conversation <span class="count">3</span></div>
     <div class="subnav-item" id="cat-post" onclick="setCategory('post')"><span class="subnav-dot" style="background:#9A3412"></span> Post-conversation <span class="count">3</span></div>
@@ -382,7 +382,6 @@
 </aside>
 
 <!-- ===================== MAIN ===================== -->
-<div id="dbg" style="position:fixed;top:4px;right:4px;background:#ff0;color:#000;font-size:11px;font-family:monospace;padding:4px 8px;border-radius:4px;z-index:9999;pointer-events:none">dbg: waiting</div>
 <main class="main">
 
 <!-- VIEW: Functions (default) -->
@@ -1067,9 +1066,6 @@
     var exView = document.getElementById('view-extractors');
     if (fnView) fnView.hidden = (cat === 'extractors');
     if (exView) exView.hidden = (cat !== 'extractors');
-    // debug panel
-    var dbg = document.getElementById('dbg');
-    if (dbg) dbg.textContent = 'cat:' + cat + ' | fn:' + (fnView ? 'found,hidden='+fnView.hidden : 'NULL') + ' | ex:' + (exView ? 'found,hidden='+exView.hidden : 'NULL');
   }
   function togglePcaDropdown(e) {
     e.stopPropagation();

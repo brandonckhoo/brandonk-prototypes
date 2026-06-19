@@ -581,10 +581,13 @@
 
   .tmpl-card-type {
     font-size: 11px; font-weight: 500;
-    background: #F5F7FA; color: #525866;
-    border: 1px solid #E9EAEC;
     padding: 2px 7px; border-radius: 5px; white-space: nowrap; flex-shrink: 0;
   }
+
+  .tmpl-card-type-text     { background: #F5F7FA; color: #525866; border: 1px solid #E9EAEC; }
+  .tmpl-card-type-selector { background: #EEF2FF; color: #3d64d7; border: 1px solid #C7D2FE; }
+  .tmpl-card-type-boolean  { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
+  .tmpl-card-type-number   { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
 
   .tmpl-card-desc { font-size: 12px; color: #9CA3AF; line-height: 1.4; }
 
@@ -1121,15 +1124,15 @@
         <div class="tmpl-group-label">Recommended</div>
         <div class="tmpl-grid">
           <div class="tmpl-card" onclick="useTemplate('call_summary')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">call_summary</span><span class="tmpl-card-type">Text</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">call_summary</span><span class="tmpl-card-type tmpl-card-type-text">Text</span></div>
             <div class="tmpl-card-desc">2 to 3 sentence recap of what happened on the call.</div>
           </div>
           <div class="tmpl-card" onclick="useTemplate('user_sentiment')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">user_sentiment</span><span class="tmpl-card-type">Selector</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">user_sentiment</span><span class="tmpl-card-type tmpl-card-type-selector">Selector</span></div>
             <div class="tmpl-card-desc">The caller's overall sentiment: positive, neutral, or negative.</div>
           </div>
           <div class="tmpl-card" onclick="useTemplate('call_outcome')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">call_outcome</span><span class="tmpl-card-type">Selector</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">call_outcome</span><span class="tmpl-card-type tmpl-card-type-selector">Selector</span></div>
             <div class="tmpl-card-desc">How the call ended: booked, transferred, not qualified, follow up, or not interested.</div>
           </div>
         </div>
@@ -1139,19 +1142,19 @@
         <div class="tmpl-group-label">Contact details</div>
         <div class="tmpl-grid">
           <div class="tmpl-card" onclick="useTemplate('customer_name')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">customer_name</span><span class="tmpl-card-type">Text</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">customer_name</span><span class="tmpl-card-type tmpl-card-type-text">Text</span></div>
             <div class="tmpl-card-desc">The full name of the caller as stated during the call.</div>
           </div>
           <div class="tmpl-card" onclick="useTemplate('customer_email')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">customer_email</span><span class="tmpl-card-type">Text</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">customer_email</span><span class="tmpl-card-type tmpl-card-type-text">Text</span></div>
             <div class="tmpl-card-desc">The email address provided by the caller.</div>
           </div>
           <div class="tmpl-card" onclick="useTemplate('customer_company')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">customer_company</span><span class="tmpl-card-type">Text</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">customer_company</span><span class="tmpl-card-type tmpl-card-type-text">Text</span></div>
             <div class="tmpl-card-desc">The company or organization the caller represents.</div>
           </div>
           <div class="tmpl-card" onclick="useTemplate('reason_for_call')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">reason_for_call</span><span class="tmpl-card-type">Text</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">reason_for_call</span><span class="tmpl-card-type tmpl-card-type-text">Text</span></div>
             <div class="tmpl-card-desc">The primary reason the caller reached out.</div>
           </div>
         </div>
@@ -1161,19 +1164,19 @@
         <div class="tmpl-group-label">Sales</div>
         <div class="tmpl-grid">
           <div class="tmpl-card" onclick="useTemplate('lead_qualification')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">lead_qualification</span><span class="tmpl-card-type">Selector</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">lead_qualification</span><span class="tmpl-card-type tmpl-card-type-selector">Selector</span></div>
             <div class="tmpl-card-desc">Whether the caller qualifies as a lead: yes, no, or maybe.</div>
           </div>
           <div class="tmpl-card" onclick="useTemplate('interest_level')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">interest_level</span><span class="tmpl-card-type">Selector</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">interest_level</span><span class="tmpl-card-type tmpl-card-type-selector">Selector</span></div>
             <div class="tmpl-card-desc">How interested the caller was: very interested, interested, neutral, or not interested.</div>
           </div>
           <div class="tmpl-card" onclick="useTemplate('budget_range')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">budget_range</span><span class="tmpl-card-type">Text</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">budget_range</span><span class="tmpl-card-type tmpl-card-type-text">Text</span></div>
             <div class="tmpl-card-desc">The budget range mentioned by the caller during the conversation.</div>
           </div>
           <div class="tmpl-card" onclick="useTemplate('objection_handled')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">objection_handled</span><span class="tmpl-card-type">Text</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">objection_handled</span><span class="tmpl-card-type tmpl-card-type-text">Text</span></div>
             <div class="tmpl-card-desc">The main objection raised and how it was addressed.</div>
           </div>
         </div>
@@ -1183,19 +1186,19 @@
         <div class="tmpl-group-label">Support and compliance</div>
         <div class="tmpl-grid">
           <div class="tmpl-card" onclick="useTemplate('issue_description')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">issue_description</span><span class="tmpl-card-type">Text</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">issue_description</span><span class="tmpl-card-type tmpl-card-type-text">Text</span></div>
             <div class="tmpl-card-desc">A short description of the issue the caller reported.</div>
           </div>
           <div class="tmpl-card" onclick="useTemplate('callback_requested')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">callback_requested</span><span class="tmpl-card-type">Boolean</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">callback_requested</span><span class="tmpl-card-type tmpl-card-type-boolean">Boolean</span></div>
             <div class="tmpl-card-desc">Whether the caller asked to be called back.</div>
           </div>
           <div class="tmpl-card" onclick="useTemplate('do_not_contact')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">do_not_contact</span><span class="tmpl-card-type">Boolean</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">do_not_contact</span><span class="tmpl-card-type tmpl-card-type-boolean">Boolean</span></div>
             <div class="tmpl-card-desc">Whether the caller requested no further contact.</div>
           </div>
           <div class="tmpl-card" onclick="useTemplate('satisfaction_score')">
-            <div class="tmpl-card-top"><span class="tmpl-card-name">satisfaction_score</span><span class="tmpl-card-type">Number</span></div>
+            <div class="tmpl-card-top"><span class="tmpl-card-name">satisfaction_score</span><span class="tmpl-card-type tmpl-card-type-number">Number</span></div>
             <div class="tmpl-card-desc">Inferred CSAT score from 1 to 5 based on the caller's tone and statements.</div>
           </div>
         </div>

@@ -1050,18 +1050,22 @@
     el.parentElement.remove();
   }
   function setCategory(cat) {
-    // close any open panels so the nav always works in one click
-    closePcaPanel();
-    closeFnPanel();
-    closeTemplatesModal();
+    // close any open panels (with null guards so errors never block the view switch)
+    try { document.getElementById('pcaPanel').classList.remove('open'); } catch(e){}
+    try { document.getElementById('pcaOverlay').classList.remove('open'); } catch(e){}
+    try { document.getElementById('fnPanel').classList.remove('open'); } catch(e){}
+    try { document.getElementById('fnOverlay').classList.remove('open'); } catch(e){}
+    try { document.getElementById('tmplOverlay').classList.remove('open'); } catch(e){}
     // update active state
     ['extractors','pre','during','post','custom'].forEach(function(c) {
       var el = document.getElementById('cat-' + c);
       if (el) el.classList.toggle('active', c === cat);
     });
     // toggle views
-    document.getElementById('view-functions').style.display = cat === 'extractors' ? 'none' : 'block';
-    document.getElementById('view-extractors').style.display = cat === 'extractors' ? 'block' : 'none';
+    var fnView = document.getElementById('view-functions');
+    var exView = document.getElementById('view-extractors');
+    if (fnView) fnView.style.display = cat === 'extractors' ? 'none' : 'block';
+    if (exView) exView.style.display = cat === 'extractors' ? 'block' : 'none';
   }
   function togglePcaDropdown(e) {
     e.stopPropagation();

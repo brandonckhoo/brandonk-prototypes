@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post-call Data Extraction — Retell AI</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    background: #F5F7FA;
+    color: #0A0A0A;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ── */
+  .shell { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: #fff;
+    border-right: 1px solid #E9EAEC;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .sidebar-logo {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid #E9EAEC;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logo-mark {
+    width: 26px; height: 26px;
+    background: #3d64d7;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .logo-mark svg { display: block; }
+
+  .logo-name { font-size: 14px; font-weight: 600; color: #0A0A0A; }
+
+  .sidebar-section { padding: 10px 10px 4px; }
+  .sidebar-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #9CA3AF;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 0 6px;
+    margin-bottom: 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #525866;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .nav-item:hover { background: #F5F7FA; color: #0A0A0A; }
+  .nav-item.active { background: #EEF2FF; color: #3d64d7; font-weight: 500; }
+
+  .nav-item svg { flex-shrink: 0; opacity: .7; }
+  .nav-item.active svg { opacity: 1; }
+
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* ── Topbar ── */
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid #E9EAEC;
+    padding: 0 28px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .breadcrumb {
+    font-size: 13px;
+    color: #9CA3AF;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .breadcrumb .sep { color: #D1D5DB; }
+  .breadcrumb .current { color: #0A0A0A; font-weight: 500; }
+
+  /* ── Sub-nav ── */
+  .subnav {
+    background: #fff;
+    border-bottom: 1px solid #E9EAEC;
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .subnav-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #525866;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .subnav-item:hover { color: #0A0A0A; }
+  .subnav-item.active { color: #3d64d7; border-bottom-color: #3d64d7; font-weight: 500; }
+
+  .subnav-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .count { background: #E9EAEC; color: #525866; font-size: 11px; font-weight: 500; padding: 1px 6px; border-radius: 10px; }
+  .subnav-item.active .count { background: #E0E7FF; color: #3d64d7; }
+
+  /* ── Main ── */
+  main { padding: 28px 28px 48px; flex: 1; }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .page-dot { width: 10px; height: 10px; border-radius: 50%; background: #CA8A04; }
+
+  h1 { font-size: 20px; font-weight: 600; color: #0A0A0A; }
+
+  .h-count {
+    font-size: 13px;
+    font-weight: 500;
+    color: #525866;
+    background: #E9EAEC;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .subtitle { font-size: 13px; color: #9CA3AF; margin-bottom: 20px; margin-top: 2px; }
+
+  /* ── Action bar ── */
+  .actionbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .pill-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    background: #fff;
+    border: 1px solid #E9EAEC;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #525866;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .pill-btn:hover { border-color: #CBD5E0; color: #0A0A0A; }
+
+  .spacer { flex: 1; }
+
+  .btn-primary-wrap { position: relative; }
+
+  .btn-primary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: #3d64d7;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-primary:hover { background: #3358c4; }
+
+  /* ── Dropdown ── */
+  .create-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: #fff;
+    border: 1px solid #E9EAEC;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.09);
+    width: 270px;
+    display: none;
+    z-index: 200;
+    overflow: hidden;
+  }
+
+  .create-dropdown.open { display: block; }
+
+  .dd-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+  }
+
+  .dd-item:hover { background: #F5F7FA; }
+
+  .dd-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .dd-item-title { font-size: 13px; font-weight: 500; color: #0A0A0A; }
+  .dd-item-sub { font-size: 12px; color: #9CA3AF; margin-top: 1px; }
+
+  .dd-divider { height: 1px; background: #F0F1F3; margin: 0; }
+
+  /* ── Table ── */
+  .table-wrap { background: #fff; border: 1px solid #E9EAEC; border-radius: 10px; overflow: hidden; }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead tr { border-bottom: 1px solid #E9EAEC; }
+
+  th {
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #9CA3AF;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  th:first-child { padding-left: 20px; }
+  th:last-child { padding-right: 16px; width: 36px; }
+
+  tbody tr {
+    border-bottom: 1px solid #F0F1F3;
+    cursor: pointer;
+    transition: background .1s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #F8F9FB; }
+
+  td { padding: 14px 16px; vertical-align: middle; }
+  td:first-child { padding-left: 20px; }
+  td:last-child { padding-right: 16px; }
+
+  .fn-name { font-size: 13px; font-weight: 500; color: #0A0A0A; }
+  .fn-sub { font-size: 12px; color: #9CA3AF; margin-top: 2px; font-family: 'SF Mono', 'Fira Mono', monospace; }
+
+  .fn-desc { font-size: 13px; color: #525866; max-width: 340px; line-height: 1.45; }
+
+  .type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    background: #F5F7FA;
+    color: #525866;
+    border: 1px solid #E9EAEC;
+    white-space: nowrap;
+  }
+
+  .avatars { display: flex; }
+
+  .av {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #fff;
+    margin-right: -6px;
+    flex-shrink: 0;
+  }
+
+  .av.more { background: #E9EAEC; color: #525866; font-size: 9px; }
+
+  .used-by { display: flex; align-items: center; gap: 10px; }
+  .used-count { font-size: 13px; color: #525866; white-space: nowrap; }
+
+  .row-menu {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    color: #9CA3AF;
+    cursor: pointer;
+  }
+
+  .row-menu:hover { background: #F0F1F3; color: #525866; }
+
+  /* ── Pagination ── */
+  .pagination {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    border-top: 1px solid #E9EAEC;
+    font-size: 13px;
+    color: #9CA3AF;
+  }
+
+  .page-nav { display: flex; gap: 4px; }
+
+  .page-btn {
+    min-width: 28px; height: 28px;
+    padding: 0 6px;
+    border: 1px solid #E9EAEC;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 13px;
+    color: #525866;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page-btn:hover:not(:disabled) { border-color: #CBD5E0; color: #0A0A0A; }
+  .page-btn.active { background: #3d64d7; border-color: #3d64d7; color: #fff; }
+  .page-btn:disabled { opacity: .35; cursor: default; }
+
+  .per-page select {
+    border: 1px solid #E9EAEC;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 13px;
+    color: #525866;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  /* ── Side panel ── */
+  .panel-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.18);
+    z-index: 300;
+    display: none;
+    backdrop-filter: blur(1px);
+  }
+
+  .panel-overlay.open { display: block; }
+
+  .side-panel {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 420px;
+    background: #fff;
+    border-left: 1px solid #E9EAEC;
+    box-shadow: -8px 0 32px rgba(0,0,0,.08);
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform .22s cubic-bezier(.4,0,.2,1);
+  }
+
+  .side-panel.open { transform: translateX(0); }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #E9EAEC;
+    flex-shrink: 0;
+  }
+
+  .panel-title { font-size: 14px; font-weight: 600; color: #0A0A0A; }
+
+  .panel-close {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    color: #9CA3AF;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .panel-close:hover { background: #F5F7FA; color: #525866; }
+
+  .panel-body { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+
+  .field-label { font-size: 12px; font-weight: 500; color: #525866; }
+
+  .field-input {
+    padding: 8px 12px;
+    border: 1px solid #E9EAEC;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #0A0A0A;
+    outline: none;
+    width: 100%;
+    background: #fff;
+    font-family: inherit;
+    transition: border-color .15s;
+  }
+
+  .field-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,.1); }
+
+  .field-textarea {
+    padding: 8px 12px;
+    border: 1px solid #E9EAEC;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #0A0A0A;
+    outline: none;
+    width: 100%;
+    background: #fff;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 72px;
+    line-height: 1.5;
+    transition: border-color .15s;
+  }
+
+  .field-textarea:focus { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,.1); }
+
+  .field-hint { font-size: 12px; color: #9CA3AF; line-height: 1.4; }
+
+  /* Type tabs */
+  .type-tabs { display: flex; gap: 0; border: 1px solid #E9EAEC; border-radius: 8px; overflow: hidden; }
+
+  .type-tab {
+    flex: 1;
+    padding: 7px 0;
+    text-align: center;
+    font-size: 13px;
+    color: #525866;
+    cursor: pointer;
+    border-right: 1px solid #E9EAEC;
+    transition: background .1s, color .1s;
+    user-select: none;
+  }
+
+  .type-tab:last-child { border-right: none; }
+  .type-tab:hover { background: #F5F7FA; color: #0A0A0A; }
+  .type-tab.active { background: #EEF2FF; color: #3d64d7; font-weight: 500; }
+
+  /* Choices */
+  .choices-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+
+  .choice-row { display: flex; align-items: center; gap: 6px; }
+
+  .choice-input {
+    flex: 1;
+    padding: 7px 10px;
+    border: 1px solid #E9EAEC;
+    border-radius: 7px;
+    font-size: 13px;
+    color: #0A0A0A;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .choice-input:focus { border-color: #3d64d7; }
+
+  .choice-del {
+    width: 24px; height: 24px;
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; line-height: 1;
+    color: #9CA3AF;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .choice-del:hover { background: #FEF2F2; color: #E5484D; }
+
+  .add-choice {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 13px; color: #3d64d7;
+    cursor: pointer;
+    width: fit-content;
+  }
+
+  .add-choice:hover { text-decoration: underline; }
+
+  /* Section divider */
+  .panel-divider { height: 1px; background: #F0F1F3; margin: 0 -20px; }
+
+  /* Toggle switch */
+  .toggle-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .toggle-text { flex: 1; }
+  .toggle-title { font-size: 13px; font-weight: 500; color: #0A0A0A; }
+  .toggle-sub { font-size: 12px; color: #9CA3AF; margin-top: 3px; line-height: 1.4; }
+
+  .toggle {
+    width: 36px; height: 20px;
+    border-radius: 10px;
+    background: #E9EAEC;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .2s;
+    margin-top: 2px;
+  }
+
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    transition: transform .2s;
+  }
+
+  .toggle.on { background: #3d64d7; }
+  .toggle.on::after { transform: translateX(16px); }
+
+  /* Agents list */
+  .agents-section { display: flex; flex-direction: column; gap: 8px; }
+  .agents-header { display: flex; align-items: center; justify-content: space-between; }
+  .agents-label { font-size: 12px; font-weight: 500; color: #525866; }
+  .agents-count { font-size: 12px; color: #9CA3AF; }
+
+  .agent-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid #E9EAEC;
+    border-radius: 8px;
+    font-size: 13px; color: #0A0A0A;
+  }
+
+  .agent-av {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    font-size: 9px; font-weight: 600;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Panel footer */
+  .panel-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 14px 20px;
+    border-top: 1px solid #E9EAEC;
+    flex-shrink: 0;
+  }
+
+  .btn-cancel {
+    padding: 7px 16px;
+    background: #fff;
+    border: 1px solid #E9EAEC;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #525866;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .btn-cancel:hover { border-color: #CBD5E0; color: #0A0A0A; }
+
+  .btn-save {
+    padding: 7px 18px;
+    background: #3d64d7;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .btn-save:hover { background: #3358c4; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 16px;
+    background: #0A0A0A;
+    color: #fff;
+    font-size: 13px;
+    border-radius: 9px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.18);
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .25s, transform .25s;
+    pointer-events: none;
+  }
+
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast-icon { color: #1FC16B; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm0 3.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" fill="#fff"/>
+        </svg>
+      </div>
+      <span class="logo-name">Retell AI</span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Platform</div>
+      <div class="nav-item">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M3 4a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 9a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1v-3zm8-9a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1V4zm0 7a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1h-4a1 1 0 01-1-1v-5z" fill="currentColor"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zM4.5 10a5.5 5.5 0 1111 0 5.5 5.5 0 01-11 0zm5.5-2.5a1 1 0 00-1 1v2.5a1 1 0 001 1h2a1 1 0 000-2H11V8.5a1 1 0 00-1-1z" fill="currentColor"/></svg>
+        Agents
+      </div>
+      <div class="nav-item">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm2-.5a.5.5 0 00-.5.5v10a.5.5 0 00.5.5h12a.5.5 0 00.5-.5V5a.5.5 0 00-.5-.5H4zm2 3h8v1.5H6V7.5zm0 3h8v1.5H6v-1.5zm0 3h5v1.5H6v-1.5z" fill="currentColor"/></svg>
+        Call History
+      </div>
+      <div class="nav-item active">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 2.5L12.35 7.26L17.6 8.03L13.8 11.73L14.7 16.96L10 14.49L5.3 16.96L6.2 11.73L2.4 8.03L7.65 7.26L10 2.5Z" fill="currentColor"/></svg>
+        Functions
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Settings</div>
+      <div class="nav-item">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 3a1 1 0 00-.987.836L8.95 4.5H7.5a1 1 0 000 2h.228l-.678 7.5H5a1 1 0 000 2h10a1 1 0 000-2h-2.05l-.678-7.5H12.5a1 1 0 000-2h-1.45l-.063-.664A1 1 0 0010 3z" fill="currentColor"/></svg>
+        Integrations
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <div class="content">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="breadcrumb">
+        <span>Functions</span>
+        <span class="sep">›</span>
+        <span class="current">Post-call Data Extraction</span>
+      </div>
+    </div>
+
+    <!-- Sub-nav -->
+    <div class="subnav">
+      <div class="subnav-item" onclick="alert('Not implemented in this prototype')">
+        <span class="subnav-dot" style="background:#1D4ED8"></span>
+        Pre-conversation
+        <span class="count">2</span>
+      </div>
+      <div class="subnav-item" onclick="alert('Not implemented in this prototype')">
+        <span class="subnav-dot" style="background:#166534"></span>
+        During-conversation
+        <span class="count">3</span>
+      </div>
+      <div class="subnav-item" onclick="alert('Not implemented in this prototype')">
+        <span class="subnav-dot" style="background:#9A3412"></span>
+        Post-conversation
+        <span class="count">3</span>
+      </div>
+      <div class="subnav-item active">
+        <span class="subnav-dot" style="background:#CA8A04"></span>
+        Post-call Data Extraction
+        <span class="count">4</span>
+      </div>
+      <div class="subnav-item" onclick="alert('Not implemented in this prototype')">
+        <span class="subnav-dot" style="background:#3d64d7"></span>
+        Custom Functions
+        <span class="count">1</span>
+      </div>
+    </div>
+
+    <!-- Page -->
+    <main>
+      <div class="page-header">
+        <div class="page-dot"></div>
+        <h1>Post-call Data Extraction</h1>
+        <span class="h-count">4</span>
+      </div>
+      <p class="subtitle">Define the information you need to extract from the call transcript.</p>
+
+      <!-- Action bar -->
+      <div class="actionbar">
+        <button class="pill-btn">All Agents <span style="font-size:10px;margin-left:2px">▾</span></button>
+        <button class="pill-btn">All Types <span style="font-size:10px;margin-left:2px">▾</span></button>
+        <span class="spacer"></span>
+        <div class="btn-primary-wrap">
+          <button class="btn-primary" onclick="toggleDropdown(event)">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="#fff"/></svg>
+            Create New
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="none" style="margin-left:2px"><path d="M5 7l5 5 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="create-dropdown" id="createDropdown">
+            <div class="dd-item" onclick="openPanel(null)">
+              <div class="dd-icon" style="background:#FFFBEB">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="#CA8A04"/></svg>
+              </div>
+              <div>
+                <div class="dd-item-title">New extraction field</div>
+                <div class="dd-item-sub">Create a field from scratch.</div>
+              </div>
+            </div>
+            <div class="dd-divider"></div>
+            <div class="dd-item" onclick="closeDropdown()">
+              <div class="dd-icon" style="background:#F5F7FA">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2.5L12.35 7.26L17.6 8.03L13.8 11.73L14.7 16.96L10 14.49L5.3 16.96L6.2 11.73L2.4 8.03L7.65 7.26L10 2.5Z" fill="#525866"/></svg>
+              </div>
+              <div>
+                <div class="dd-item-title">Browse Templates</div>
+                <div class="dd-item-sub">Start from a ready-made template.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Extractable data</th>
+              <th>Type</th>
+              <th>Agents</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="extractorTbody">
+            <tr onclick="openPanel('qualification_result')">
+              <td>
+                <div class="fn-name">qualification_result</div>
+                <div class="fn-sub">qualification_result</div>
+              </td>
+              <td><div class="fn-desc">The outcome of qualifying the caller's case during intake.</div></td>
+              <td><span class="type-badge">Selector</span></td>
+              <td>
+                <div class="used-by">
+                  <div class="avatars">
+                    <div class="av" style="background:#3d64d7">DR</div>
+                    <div class="av" style="background:#7D52F4">IV</div>
+                    <div class="av" style="background:#1FC16B">SC</div>
+                    <div class="av more">+2</div>
+                  </div>
+                  <span class="used-count">5 agents</span>
+                </div>
+              </td>
+              <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="17" height="17" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+            </tr>
+            <tr onclick="openPanel('disqualification_reason')">
+              <td>
+                <div class="fn-name">disqualification_reason</div>
+                <div class="fn-sub">disqualification_reason</div>
+              </td>
+              <td><div class="fn-desc">If the caller was disqualified, the reason why.</div></td>
+              <td><span class="type-badge">Selector</span></td>
+              <td>
+                <div class="used-by">
+                  <div class="avatars">
+                    <div class="av" style="background:#3d64d7">DR</div>
+                    <div class="av" style="background:#E5484D">LI</div>
+                    <div class="av more">+1</div>
+                  </div>
+                  <span class="used-count">3 agents</span>
+                </div>
+              </td>
+              <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="17" height="17" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+            </tr>
+            <tr onclick="openPanel('intake_submitted')">
+              <td>
+                <div class="fn-name">intake_submitted</div>
+                <div class="fn-sub">intake_submitted</div>
+              </td>
+              <td><div class="fn-desc">Whether intake information was submitted for a qualified caller.</div></td>
+              <td><span class="type-badge">Boolean</span></td>
+              <td>
+                <div class="used-by">
+                  <div class="avatars">
+                    <div class="av" style="background:#3d64d7">DR</div>
+                    <div class="av" style="background:#7D52F4">IV</div>
+                  </div>
+                  <span class="used-count">2 agents</span>
+                </div>
+              </td>
+              <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="17" height="17" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+            </tr>
+            <tr onclick="openPanel('call_disposition')">
+              <td>
+                <div class="fn-name">call_disposition</div>
+                <div class="fn-sub">call_disposition</div>
+              </td>
+              <td><div class="fn-desc">How the call ultimately concluded.</div></td>
+              <td><span class="type-badge">Selector</span></td>
+              <td>
+                <div class="used-by">
+                  <div class="avatars">
+                    <div class="av" style="background:#3d64d7">DR</div>
+                    <div class="av" style="background:#7D52F4">IV</div>
+                    <div class="av" style="background:#1FC16B">SC</div>
+                    <div class="av more">+3</div>
+                  </div>
+                  <span class="used-count">6 agents</span>
+                </div>
+              </td>
+              <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="17" height="17" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <div style="flex:1;font-size:13px;color:#9CA3AF">Page 1 of 1 · 4 fields</div>
+          <div class="page-nav">
+            <button class="page-btn" disabled>‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn" disabled>›</button>
+          </div>
+          <div class="per-page">
+            <select><option>25 / page</option><option>50 / page</option><option>100 / page</option></select>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Panel overlay -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+
+<!-- Side panel -->
+<div class="side-panel" id="sidePanel">
+  <div class="panel-header">
+    <span class="panel-title" id="panelTitle">New extraction field</span>
+    <span class="panel-close" onclick="closePanel()">×</span>
+  </div>
+
+  <div class="panel-body">
+
+    <div class="field-group">
+      <div class="field-label">Name</div>
+      <input class="field-input" type="text" id="fieldName" placeholder="e.g. call_outcome">
+      <div class="field-hint">Used as the field key in the webhook payload.</div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Type</div>
+      <div class="type-tabs">
+        <div class="type-tab" id="tab-text" onclick="setType('text')">Text</div>
+        <div class="type-tab active" id="tab-selector" onclick="setType('selector')">Selector</div>
+        <div class="type-tab" id="tab-boolean" onclick="setType('boolean')">Boolean</div>
+        <div class="type-tab" id="tab-number" onclick="setType('number')">Number</div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Extractable data</div>
+      <textarea class="field-textarea" id="fieldPrompt" rows="3" placeholder="e.g. What was the outcome of the call?"></textarea>
+      <div class="field-hint">The AI reads the transcript after the call and answers this question.</div>
+    </div>
+
+    <div class="field-group" id="choicesSection">
+      <div class="field-label">Choices</div>
+      <div class="choices-list" id="choicesList">
+        <div class="choice-row">
+          <input class="choice-input" type="text" placeholder="e.g. qualified">
+          <span class="choice-del" onclick="removeChoice(this)">×</span>
+        </div>
+        <div class="choice-row">
+          <input class="choice-input" type="text" placeholder="e.g. not_qualified">
+          <span class="choice-del" onclick="removeChoice(this)">×</span>
+        </div>
+      </div>
+      <div class="add-choice" onclick="addChoice()">
+        <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="#3d64d7"/></svg>
+        Add choice
+      </div>
+    </div>
+
+    <div class="panel-divider"></div>
+
+    <div class="field-group">
+      <div class="toggle-row">
+        <div class="toggle-text">
+          <div class="toggle-title">Optional</div>
+          <div class="toggle-sub">Populate this field only when the call matches the conditions you define. Otherwise, it will be left empty.</div>
+        </div>
+        <div class="toggle" id="optionalToggle" onclick="toggleOptional()"></div>
+      </div>
+      <textarea class="field-textarea" id="optionalCondition" rows="2" placeholder="e.g. Populate for answered calls; skip voicemail or no-response calls." style="display:none;margin-top:4px"></textarea>
+    </div>
+
+    <div class="panel-divider"></div>
+
+    <div class="field-group">
+      <div class="toggle-row">
+        <div class="toggle-text">
+          <div class="toggle-title">Save as account-level field</div>
+          <div class="toggle-sub">When on, this field is available across all agents. Turn off to keep it local to one agent only.</div>
+        </div>
+        <div class="toggle on" id="accountToggle" onclick="toggleAccount()"></div>
+      </div>
+    </div>
+
+    <div class="agents-section" id="agentsSection" style="display:none">
+      <div class="agents-header">
+        <span class="agents-label">Used in agents</span>
+        <span class="agents-count" id="agentsCount"></span>
+      </div>
+      <div id="agentsList" style="display:flex;flex-direction:column;gap:6px;margin-top:4px"></div>
+    </div>
+
+  </div>
+
+  <div class="panel-footer">
+    <button class="btn-cancel" onclick="closePanel()">Cancel</button>
+    <button class="btn-save" onclick="savePanel()">Save</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <svg class="toast-icon" width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm3.78 5.78l-4.5 4.5a.75.75 0 01-1.06 0l-2-2 1.06-1.06 1.47 1.47 3.97-3.97 1.06 1.06z" fill="currentColor"/></svg>
+  <span id="toastMsg">Field saved — changes apply to linked agents on their next call.</span>
+</div>
+
+<script>
+  var EXTRACTORS = {
+    qualification_result: {
+      name: 'qualification_result',
+      type: 'selector',
+      prompt: 'The outcome of qualifying the caller\'s case during intake.',
+      choices: ['qualified', 'not_qualified', 'needs_review'],
+      optional: false,
+      account: true,
+      agents: [
+        { initials: 'DR', color: '#3d64d7', name: 'Defendant Intake' },
+        { initials: 'IV', color: '#7D52F4', name: 'Inbound Vetting' },
+        { initials: 'SC', color: '#1FC16B', name: 'Screening Call' },
+        { initials: 'PM', color: '#E5484D', name: 'Personal Injury' },
+        { initials: 'WC', color: '#F59E0B', name: 'Workers Comp' }
+      ]
+    },
+    disqualification_reason: {
+      name: 'disqualification_reason',
+      type: 'selector',
+      prompt: 'If the caller was disqualified, the reason why.',
+      choices: ['no_fault', 'out_of_statute', 'prior_attorney', 'insufficient_injury'],
+      optional: false,
+      account: true,
+      agents: [
+        { initials: 'DR', color: '#3d64d7', name: 'Defendant Intake' },
+        { initials: 'LI', color: '#E5484D', name: 'Liability Check' },
+        { initials: 'IV', color: '#7D52F4', name: 'Inbound Vetting' }
+      ]
+    },
+    intake_submitted: {
+      name: 'intake_submitted',
+      type: 'boolean',
+      prompt: 'Whether intake information was submitted for a qualified caller.',
+      choices: [],
+      optional: false,
+      account: true,
+      agents: [
+        { initials: 'DR', color: '#3d64d7', name: 'Defendant Intake' },
+        { initials: 'IV', color: '#7D52F4', name: 'Inbound Vetting' }
+      ]
+    },
+    call_disposition: {
+      name: 'call_disposition',
+      type: 'selector',
+      prompt: 'How the call ultimately concluded.',
+      choices: ['completed', 'transferred', 'voicemail', 'no_answer', 'callback_scheduled'],
+      optional: false,
+      account: true,
+      agents: [
+        { initials: 'DR', color: '#3d64d7', name: 'Defendant Intake' },
+        { initials: 'IV', color: '#7D52F4', name: 'Inbound Vetting' },
+        { initials: 'SC', color: '#1FC16B', name: 'Screening Call' },
+        { initials: 'PM', color: '#E5484D', name: 'Personal Injury' },
+        { initials: 'WC', color: '#F59E0B', name: 'Workers Comp' },
+        { initials: 'LI', color: '#525866', name: 'Liability Check' }
+      ]
+    }
+  };
+
+  function toggleDropdown(e) {
+    e.stopPropagation();
+    document.getElementById('createDropdown').classList.toggle('open');
+  }
+
+  function closeDropdown() {
+    document.getElementById('createDropdown').classList.remove('open');
+  }
+
+  function openPanel(key) {
+    closeDropdown();
+    var panel = document.getElementById('sidePanel');
+    var overlay = document.getElementById('panelOverlay');
+    var data = key ? EXTRACTORS[key] : null;
+
+    document.getElementById('panelTitle').textContent = data ? data.name : 'New extraction field';
+    document.getElementById('fieldName').value = data ? data.name : '';
+    document.getElementById('fieldPrompt').value = data ? data.prompt : '';
+
+    setType(data ? data.type : 'text');
+
+    var choicesList = document.getElementById('choicesList');
+    choicesList.innerHTML = '';
+    var choices = data ? data.choices : [];
+    if (choices.length === 0 && (!data || data.type === 'selector')) {
+      choices = ['', ''];
+    }
+    choices.forEach(function(c) {
+      addChoiceRow(c);
+    });
+
+    document.getElementById('optionalToggle').className = 'toggle' + (data && data.optional ? ' on' : '');
+    document.getElementById('optionalCondition').style.display = (data && data.optional) ? 'block' : 'none';
+    document.getElementById('accountToggle').className = 'toggle' + (data && data.account ? ' on' : '');
+
+    var agentsSection = document.getElementById('agentsSection');
+    var agentsList = document.getElementById('agentsList');
+    agentsList.innerHTML = '';
+    if (data && data.agents && data.agents.length > 0) {
+      agentsSection.style.display = 'flex';
+      document.getElementById('agentsCount').textContent = data.agents.length + ' agents';
+      data.agents.forEach(function(a) {
+        var chip = document.createElement('div');
+        chip.className = 'agent-chip';
+        chip.innerHTML = '<div class="agent-av" style="background:' + a.color + '">' + a.initials + '</div>' + a.name;
+        agentsList.appendChild(chip);
+      });
+    } else {
+      agentsSection.style.display = 'none';
+    }
+
+    overlay.classList.add('open');
+    panel.classList.add('open');
+  }
+
+  function closePanel() {
+    document.getElementById('sidePanel').classList.remove('open');
+    document.getElementById('panelOverlay').classList.remove('open');
+  }
+
+  function setType(type) {
+    ['text','selector','boolean','number'].forEach(function(t) {
+      document.getElementById('tab-' + t).classList.toggle('active', t === type);
+    });
+    document.getElementById('choicesSection').style.display = type === 'selector' ? 'flex' : 'none';
+  }
+
+  function addChoiceRow(value) {
+    var list = document.getElementById('choicesList');
+    var row = document.createElement('div');
+    row.className = 'choice-row';
+    row.innerHTML = '<input class="choice-input" type="text" placeholder="e.g. outcome" value="' + (value || '') + '"><span class="choice-del" onclick="removeChoice(this)">×</span>';
+    list.appendChild(row);
+  }
+
+  function addChoice() { addChoiceRow(''); }
+
+  function removeChoice(el) {
+    el.parentElement.remove();
+  }
+
+  function toggleOptional() {
+    var tog = document.getElementById('optionalToggle');
+    var cond = document.getElementById('optionalCondition');
+    var on = tog.classList.toggle('on');
+    cond.style.display = on ? 'block' : 'none';
+  }
+
+  function toggleAccount() {
+    document.getElementById('accountToggle').classList.toggle('on');
+  }
+
+  function savePanel() {
+    closePanel();
+    showToast('Field saved — changes apply to linked agents on their next call.');
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 3000);
+  }
+
+  document.addEventListener('click', function(e) {
+    var dd = document.getElementById('createDropdown');
+    if (!document.querySelector('.btn-primary-wrap').contains(e.target)) {
+      dd.classList.remove('open');
+    }
+  });
+</script>
+</body>
+</html>

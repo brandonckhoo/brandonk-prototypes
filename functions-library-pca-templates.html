@@ -144,6 +144,9 @@
   .tb { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; background: #F3F4F6; color: #374151; }
   .tb .d { width: 5px; height: 5px; border-radius: 50%; }
   .popular { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; background: #ecf3ff; color: #3d64d7; }
+  .tmpl-note { display: flex; align-items: flex-start; gap: 9px; background: #F4F7FE; border: 1px solid #DCE6FB; border-radius: 9px; padding: 11px 13px; margin-top: 14px; font-size: 13px; color: #344054; line-height: 1.45; }
+  .tmpl-note svg { flex-shrink: 0; margin-top: 1px; }
+  .tmpl-note b { font-weight: 600; color: #1F2937; }
 </style>
 </head>
 <body>
@@ -516,17 +519,13 @@
     </div>
 
     <div class="modal-body">
+      <div class="tmpl-note">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" fill="#3d64d7"/><path d="M10 6a1 1 0 110 2 1 1 0 010-2zm-.9 3.1h1.8v5.2H9.1V9.1z" fill="#fff"/></svg>
+        <span><b>Language is recorded automatically</b> on every call and shown as a column in Call History, no template needed.</span>
+      </div>
       <!-- Recommended -->
       <div class="tmpl-cat">Recommended</div>
       <div class="tmpl-grid">
-        <div class="tmpl-card featured">
-          <div class="ic" style="background:#EFEAFE"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.25" stroke="#7D52F4" stroke-width="1.5"/><path d="M2.75 10h14.5" stroke="#7D52F4" stroke-width="1.5"/><path d="M10 2.75c2.2 2 2.2 12.5 0 14.5M10 2.75c-2.2 2-2.2 12.5 0 14.5" stroke="#7D52F4" stroke-width="1.5"/></svg></div>
-          <div class="body">
-            <div class="top"><span class="nm">language</span><span class="popular">Popular</span><span class="tb"><span class="d" style="background:#7D52F4"></span>Selector</span></div>
-            <div class="desc">Dominant language detected on the call. Surfaces as a Call History column.</div>
-          </div>
-          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
-        </div>
         <div class="tmpl-card">
           <div class="ic" style="background:#E7F8EF"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#1FC16B"/></svg></div>
           <div class="body">

@@ -1153,6 +1153,7 @@
   }
 
   function openPanel(key) {
+    _currentKey = key;
     closeDropdown();
     var d = key ? DATA[key] : null;
     document.getElementById('panelTitle').textContent = d ? d.name : 'New extraction field';
@@ -1210,10 +1211,16 @@
     document.getElementById('optionalCondition').style.display = on ? 'block' : 'none';
   }
 
+  var _currentKey = null;
+
   function savePanel() {
+    var d = _currentKey ? DATA[_currentKey] : null;
+    var hasAgents = d && d.agents && d.agents.length > 0;
     closePanel();
     var t = document.getElementById('toast');
-    document.getElementById('toastMsg').textContent = 'Field saved — changes apply to linked agents on their next call.';
+    document.getElementById('toastMsg').textContent = hasAgents
+      ? 'Field saved — changes apply to linked agents on their next call.'
+      : 'Field saved.';
     t.classList.add('show');
     setTimeout(function() { t.classList.remove('show'); }, 3000);
   }

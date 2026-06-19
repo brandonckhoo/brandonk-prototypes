@@ -226,7 +226,7 @@
 <aside class="subnav">
   <div class="subnav-group" style="margin-top:0">
     <div class="subnav-group-label">Category</div>
-    <div class="subnav-item" id="cat-extractors" onclick="setCategory('extractors')"><span class="subnav-dot" style="background:#CA8A04"></span> Information Extractors <span class="count">7</span></div>
+    <div class="subnav-item" id="cat-extractors" onclick="setCategory('extractors')"><span class="subnav-dot" style="background:#CA8A04"></span> Post-call Analysis <span class="count">7</span></div>
     <div class="subnav-item active" id="cat-pre" onclick="setCategory('pre')"><span class="subnav-dot" style="background:#1D4ED8"></span> Pre-conversation <span class="count">2</span></div>
     <div class="subnav-item" id="cat-during" onclick="setCategory('during')"><span class="subnav-dot" style="background:#166534"></span> During-conversation <span class="count">3</span></div>
     <div class="subnav-item" id="cat-post" onclick="setCategory('post')"><span class="subnav-dot" style="background:#9A3412"></span> Post-conversation <span class="count">3</span></div>
@@ -534,7 +534,7 @@
 <div id="view-extractors" style="display:none">
   <div class="main-header">
     <div class="dot" style="background:#CA8A04"></div>
-    <h1>Information Extractors</h1>
+    <h1>Post-call Analysis</h1>
     <span class="h-count">7</span>
   </div>
   <p class="subtitle">Define an extraction field once and reuse it across agents. The AI reads the transcript after each call and populates the field automatically.</p>
@@ -544,20 +544,33 @@
       <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M9 3a6 6 0 104.47 10.03l3.25 3.25 1.06-1.06-3.25-3.25A6 6 0 009 3zm0 1.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" fill="currentColor"/></svg>
       <input type="text" placeholder="Search by name or field ID">
     </div>
-    <button class="pill-btn">
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M11.125 2.5C11.125 2.833 10.98 3.133 10.75 3.339V4.75H14.5C15.743 4.75 16.75 5.757 16.75 7V14.5C16.75 15.743 15.743 16.75 14.5 16.75H5.5C4.257 16.75 3.25 15.743 3.25 14.5V7C3.25 5.757 4.257 4.75 5.5 4.75H9.25V3.339C9.02 3.133 8.875 2.833 8.875 2.5C8.875 1.879 9.379 1.375 10 1.375C10.621 1.375 11.125 1.879 11.125 2.5Z" fill="#6B7280"/></svg>
-      All Agents <span class="chev">▾</span>
-    </button>
+    <button class="pill-btn">All Agents <span class="chev">▾</span></button>
     <button class="pill-btn">All Types <span class="chev">▾</span></button>
     <span class="spacer"></span>
-    <button class="btn-ghost">
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 2.5L12.35 7.26L17.6 8.03L13.8 11.73L14.7 16.96L10 14.49L5.3 16.96L6.2 11.73L2.4 8.03L7.65 7.26L10 2.5Z" fill="#6B7280"/></svg>
-      Browse templates
-    </button>
-    <button class="btn-primary">
-      <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="#fff"/></svg>
-      New extractor
-    </button>
+    <div class="btn-primary-wrap">
+      <button class="btn-primary" onclick="togglePcaDropdown(event)">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="#fff"/></svg>
+        Create New
+        <svg width="13" height="13" viewBox="0 0 20 20" fill="none" style="margin-left:2px"><path d="M5 7l5 5 5-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="newfn-dropdown" id="pcaDropdown">
+        <div class="newfn-item">
+          <div class="newfn-item-icon" style="background:#FFFBEB"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="#CA8A04"/></svg></div>
+          <div>
+            <div style="font-size:13px;font-weight:500;color:#0A0A0A">New Post Call Analysis</div>
+            <div style="font-size:12px;color:#9CA3AF;margin-top:1px">Create a new analysis field from scratch.</div>
+          </div>
+        </div>
+        <div class="newfn-divider"></div>
+        <div class="newfn-item">
+          <div class="newfn-item-icon" style="background:#F5F7FA"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2.5L12.35 7.26L17.6 8.03L13.8 11.73L14.7 16.96L10 14.49L5.3 16.96L6.2 11.73L2.4 8.03L7.65 7.26L10 2.5Z" fill="#525866"/></svg></div>
+          <div>
+            <div style="font-size:13px;font-weight:500;color:#0A0A0A">Browse Templates</div>
+            <div style="font-size:12px;color:#9CA3AF;margin-top:1px">Get started from a ready-made template.</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <table>
@@ -680,6 +693,11 @@
     document.getElementById('view-functions').style.display = cat === 'extractors' ? 'none' : 'block';
     document.getElementById('view-extractors').style.display = cat === 'extractors' ? 'block' : 'none';
   }
+  function togglePcaDropdown(e) {
+    e.stopPropagation();
+    const d = document.getElementById('pcaDropdown');
+    d.style.display = d.style.display === 'block' ? 'none' : 'block';
+  }
   function toggleNewFnDropdown(e) {
     e.stopPropagation();
     const d = document.getElementById('newfnDropdown');
@@ -695,6 +713,8 @@
     if (!d.contains(e.target)) d.style.display = 'none';
     const fn = document.getElementById('newfnDropdown');
     if (!fn.contains(e.target)) fn.style.display = 'none';
+    const pca = document.getElementById('pcaDropdown');
+    if (pca && !pca.contains(e.target)) pca.style.display = 'none';
   });
 </script>
 

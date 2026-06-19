@@ -382,6 +382,7 @@
 </aside>
 
 <!-- ===================== MAIN ===================== -->
+<div id="dbg" style="position:fixed;top:4px;right:4px;background:#ff0;color:#000;font-size:11px;font-family:monospace;padding:4px 8px;border-radius:4px;z-index:9999;pointer-events:none">dbg: waiting</div>
 <main class="main">
 
 <!-- VIEW: Functions (default) -->
@@ -1066,6 +1067,9 @@
     var exView = document.getElementById('view-extractors');
     if (fnView) fnView.hidden = (cat === 'extractors');
     if (exView) exView.hidden = (cat !== 'extractors');
+    // debug panel
+    var dbg = document.getElementById('dbg');
+    if (dbg) dbg.textContent = 'cat:' + cat + ' | fn:' + (fnView ? 'found,hidden='+fnView.hidden : 'NULL') + ' | ex:' + (exView ? 'found,hidden='+exView.hidden : 'NULL');
   }
   function togglePcaDropdown(e) {
     e.stopPropagation();

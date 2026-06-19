@@ -1050,6 +1050,10 @@
     el.parentElement.remove();
   }
   function setCategory(cat) {
+    // close any open panels so the nav always works in one click
+    closePcaPanel();
+    closeFnPanel();
+    closeTemplatesModal();
     // update active state
     ['extractors','pre','during','post','custom'].forEach(function(c) {
       var el = document.getElementById('cat-' + c);

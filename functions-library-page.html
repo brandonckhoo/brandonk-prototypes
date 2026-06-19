@@ -225,17 +225,13 @@
 <!-- ===================== SECONDARY NAV (category rail) ===================== -->
 <aside class="subnav">
   <div class="subnav-group" style="margin-top:0">
-    <div class="subnav-group-label">Category <span class="plus" onclick="toggleConnectDrawer(event)">+</span></div>
-    <div class="subnav-item"><span class="subnav-dot" style="background:#3d64d7"></span> Custom API <span class="count">2</span></div>
-    <div class="subnav-item"><span class="subnav-dot" style="background:#CA8A04"></span> Post-call Analysis <span class="count">2</span></div>
-    <div class="subnav-item"><span class="subnav-dot" style="background:#FF9147"></span> Call transfer <span class="count">1</span></div>
-    <div class="cat-section">Connected</div>
-    <div class="subnav-item"><span class="subnav-dot" style="background:#00A1E0"></span> Salesforce <span class="count">3</span></div>
-    <div class="subnav-item"><span class="subnav-dot" style="background:#FF7A59"></span> HubSpot <span class="count">2</span></div>
-    <div class="subnav-item"><span class="subnav-dot" style="background:#03B386"></span> Zendesk <span class="count">1</span></div>
-    <div class="subnav-item"><span class="subnav-dot" style="background:#1FC16B"></span> Cal.com <span class="count">2</span></div>
-    <div class="subnav-item"><span class="subnav-dot" style="background:#006BFF"></span> Calendly <span class="count">1</span></div>
-    <div class="subnav-item"><span class="subnav-dot" style="background:#611F69"></span> Slack <span class="count">1</span></div>
+    <div class="subnav-group-label">Category</div>
+    <div class="subnav-item"><span class="subnav-dot" style="background:#CA8A04"></span> Information Extractors <span class="count">2</span></div>
+    <div class="subnav-item"><span class="subnav-dot" style="background:#1D4ED8"></span> Pre-conversation <span class="count">2</span></div>
+    <div class="subnav-item"><span class="subnav-dot" style="background:#166534"></span> During-conversation <span class="count">3</span></div>
+    <div class="subnav-item"><span class="subnav-dot" style="background:#9A3412"></span> Post-conversation <span class="count">3</span></div>
+    <div class="subnav-item"><span class="subnav-dot" style="background:#3d64d7"></span> Custom Functions <span class="count">1</span></div>
+    <div class="subnav-item" style="opacity:0.45"><span class="subnav-dot" style="background:#6B7280"></span> MCP Connectors <span class="count">0</span></div>
   </div>
 
   <div class="subnav-group">
@@ -314,7 +310,7 @@
       <tr>
         <th>Function name</th>
         <th>Category</th>
-        <th>Timing</th>
+        <th>When</th>
         <th>Used by</th>
         <th>Last edited</th>
         <th></th>
@@ -333,7 +329,7 @@
           </div>
         </td>
         <td><span class="type-badge"><span class="tdot" style="background:#00A1E0"></span>Salesforce</span></td>
-        <td><span class="timing-badge timing-pre">Pre-call</span></td>
+        <td><span class="timing-badge timing-pre">Pre-conversation</span></td>
         <td>
           <div class="used-by">
             <div class="avatars">
@@ -360,7 +356,7 @@
           </div>
         </td>
         <td><span class="type-badge"><span class="tdot" style="background:#1FC16B"></span>Cal.com</span></td>
-        <td><span class="timing-badge timing-mid">Mid-call</span></td>
+        <td><span class="timing-badge timing-mid">During-conversation</span></td>
         <td>
           <div class="used-by">
             <div class="avatars">
@@ -387,7 +383,7 @@
           </div>
         </td>
         <td><span class="type-badge"><span class="tdot" style="background:#FF7A59"></span>HubSpot</span></td>
-        <td><span class="timing-badge timing-post">Post-call</span></td>
+        <td><span class="timing-badge timing-post">Post-conversation</span></td>
         <td>
           <div class="used-by">
             <div class="avatars">
@@ -413,7 +409,7 @@
           </div>
         </td>
         <td><span class="type-badge"><span class="tdot" style="background:#FF9147"></span>Call transfer</span></td>
-        <td><span class="timing-badge timing-mid">Mid-call</span></td>
+        <td><span class="timing-badge timing-mid">During-conversation</span></td>
         <td>
           <div class="used-by">
             <div class="avatars">
@@ -441,7 +437,7 @@
           </div>
         </td>
         <td><span class="type-badge"><span class="tdot" style="background:#3d64d7"></span>Custom API</span></td>
-        <td><span class="timing-badge timing-pre">Pre-call</span></td>
+        <td><span class="timing-badge timing-pre">Pre-conversation</span></td>
         <td>
           <div class="used-by">
             <div class="avatars">
@@ -467,7 +463,7 @@
           </div>
         </td>
         <td><span class="type-badge"><span class="tdot" style="background:#611F69"></span>Slack</span></td>
-        <td><span class="timing-badge timing-post">Post-call</span></td>
+        <td><span class="timing-badge timing-post">Post-conversation</span></td>
         <td>
           <div class="used-by">
             <div class="avatars">
@@ -494,7 +490,7 @@
           </div>
         </td>
         <td><span class="type-badge"><span class="tdot" style="background:#CA8A04"></span>Post-call Analysis</span></td>
-        <td><span class="timing-badge timing-pca">Post-call</span></td>
+        <td><span class="timing-badge timing-pca">Extractor</span></td>
         <td>
           <div class="used-by">
             <div class="avatars">
@@ -521,7 +517,7 @@
           </div>
         </td>
         <td><span class="type-badge"><span class="tdot" style="background:#CA8A04"></span>Post-call Analysis</span></td>
-        <td><span class="timing-badge timing-pca">Post-call</span></td>
+        <td><span class="timing-badge timing-pca">Extractor</span></td>
         <td>
           <div class="used-by">
             <div class="avatars">

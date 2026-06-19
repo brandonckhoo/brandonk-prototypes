@@ -188,6 +188,17 @@
   .panel-cancel:hover { background: #F9FAFB; }
   .panel-save { height: 36px; padding: 0 16px; border: 1px solid #0E121B; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; }
   .panel-save:hover { background: #000; }
+  .panel-agents { border-top: 1px solid #F0F1F3; padding-top: 16px; }
+  .panel-agents-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .panel-agents-title { font-size: 13px; font-weight: 500; color: #374151; }
+  .panel-agents-count { font-size: 12px; color: #6B7280; background: #F3F4F6; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+  .panel-agent-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+  .panel-agent-av { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: #fff; flex-shrink: 0; }
+  .panel-agent-name { font-size: 13px; color: #0A0A0A; flex: 1; }
+  .panel-agent-link { color: #C4C9D4; cursor: pointer; display: flex; align-items: center; }
+  .panel-agent-link:hover { color: #3d64d7; }
+  .extractor-row { cursor: pointer; }
+  .panel-input-readonly { background: #F9FAFB !important; color: #6B7280 !important; cursor: default; }
 </style>
 </head>
 <body>
@@ -593,7 +604,7 @@
         <svg width="13" height="13" viewBox="0 0 20 20" fill="none" style="margin-left:2px"><path d="M5 7l5 5 5-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
       <div class="newfn-dropdown" id="pcaDropdown">
-        <div class="newfn-item" onclick="openPcaPanel()">
+        <div class="newfn-item" onclick="openNewPcaPanel()">
           <div class="newfn-item-icon" style="background:#FFFBEB"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="#CA8A04"/></svg></div>
           <div>
             <div style="font-size:13px;font-weight:500;color:#0A0A0A">New Post-call Data Extraction</div>
@@ -623,33 +634,33 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
+      <tr class="extractor-row" onclick="openPcaEdit('qualification_result')">
         <td><div class="fn-title">qualification_result</div><div class="fn-sub">qualification_result</div></td>
         <td style="color:#525866;font-size:13px;max-width:320px">The outcome of qualifying the caller's case during intake.</td>
         <td><span class="type-badge">Selector</span></td>
         <td><div class="used-by"><div class="avatars"><div class="av" style="background:#3d64d7">DR</div><div class="av" style="background:#7D52F4">IV</div><div class="av" style="background:#1FC16B">SC</div><div class="av more">+2</div></div><span class="used-count">5 agents</span></div></td>
-        <td><span class="row-menu"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
-      <tr>
+      <tr class="extractor-row" onclick="openPcaEdit('disqualification_reason')">
         <td><div class="fn-title">disqualification_reason</div><div class="fn-sub">disqualification_reason</div></td>
         <td style="color:#525866;font-size:13px;max-width:320px">If the caller was disqualified, the reason why.</td>
         <td><span class="type-badge">Selector</span></td>
         <td><div class="used-by"><div class="avatars"><div class="av" style="background:#3d64d7">DR</div><div class="av" style="background:#E5484D">LI</div><div class="av more">+1</div></div><span class="used-count">3 agents</span></div></td>
-        <td><span class="row-menu"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
-      <tr>
+      <tr class="extractor-row" onclick="openPcaEdit('intake_submitted')">
         <td><div class="fn-title">intake_submitted</div><div class="fn-sub">intake_submitted</div></td>
         <td style="color:#525866;font-size:13px;max-width:320px">Whether intake information was submitted for a qualified caller.</td>
         <td><span class="type-badge">Yes / No</span></td>
         <td><div class="used-by"><div class="avatars"><div class="av" style="background:#3d64d7">DR</div><div class="av" style="background:#7D52F4">IV</div></div><span class="used-count">2 agents</span></div></td>
-        <td><span class="row-menu"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
-      <tr>
+      <tr class="extractor-row" onclick="openPcaEdit('call_disposition')">
         <td><div class="fn-title">call_disposition</div><div class="fn-sub">call_disposition</div></td>
         <td style="color:#525866;font-size:13px;max-width:320px">How the call ultimately concluded.</td>
         <td><span class="type-badge">Selector</span></td>
         <td><div class="used-by"><div class="avatars"><div class="av" style="background:#3d64d7">DR</div><div class="av" style="background:#7D52F4">IV</div><div class="av" style="background:#1FC16B">SC</div><div class="av more">+3</div></div><span class="used-count">6 agents</span></div></td>
-        <td><span class="row-menu"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
     </tbody>
   </table>
@@ -709,6 +720,14 @@
       <div class="toggle" id="optToggle" onclick="this.classList.toggle('on')"></div>
     </div>
 
+    <div class="panel-agents" id="pcaAgentsSection" style="display:none">
+      <div class="panel-agents-header">
+        <span class="panel-agents-title">Used in agents</span>
+        <span class="panel-agents-count" id="pcaAgentsCount"></span>
+      </div>
+      <div id="pcaAgentsList"></div>
+    </div>
+
   </div>
   <div class="panel-footer">
     <button class="panel-cancel" onclick="closePcaPanel()">Cancel</button>
@@ -760,6 +779,106 @@
 </div>
 
 <script>
+  var PCA_DATA = {
+    qualification_result: {
+      name: 'qualification_result', type: 'selector', optional: false,
+      prompt: 'The outcome of qualifying the caller\'s case during intake.',
+      choices: ['qualified','not_qualified','existing_client','undetermined'],
+      agentCount: 5,
+      agents: [
+        { initials:'DR', color:'#3d64d7', name:'Dental Receptionist' },
+        { initials:'IV', color:'#7D52F4', name:'Intake Verification' },
+        { initials:'SC', color:'#1FC16B', name:'Scheduling Coordinator' },
+        { initials:'LI', color:'#E5484D', name:'Lead Intake' },
+        { initials:'BK', color:'#F59E0B', name:'Booking Agent' }
+      ]
+    },
+    disqualification_reason: {
+      name: 'disqualification_reason', type: 'selector', optional: true,
+      prompt: 'If the caller was disqualified, the reason why.',
+      choices: ['cosmetic_only','out_of_state','outside_2_year_window','already_represented','non_dental_matter','other'],
+      agentCount: 3,
+      agents: [
+        { initials:'DR', color:'#3d64d7', name:'Dental Receptionist' },
+        { initials:'LI', color:'#E5484D', name:'Lead Intake' },
+        { initials:'IV', color:'#7D52F4', name:'Intake Verification' }
+      ]
+    },
+    intake_submitted: {
+      name: 'intake_submitted', type: 'yesno', optional: false,
+      prompt: 'Whether intake information was submitted for a qualified caller.',
+      choices: [],
+      agentCount: 2,
+      agents: [
+        { initials:'DR', color:'#3d64d7', name:'Dental Receptionist' },
+        { initials:'IV', color:'#7D52F4', name:'Intake Verification' }
+      ]
+    },
+    call_disposition: {
+      name: 'call_disposition', type: 'selector', optional: false,
+      prompt: 'How the call ultimately concluded.',
+      choices: ['transferred_to_attorney','routed_to_client_services','voicemail_callback','disqualified_ended','other'],
+      agentCount: 6,
+      agents: [
+        { initials:'DR', color:'#3d64d7', name:'Dental Receptionist' },
+        { initials:'IV', color:'#7D52F4', name:'Intake Verification' },
+        { initials:'SC', color:'#1FC16B', name:'Scheduling Coordinator' },
+        { initials:'LI', color:'#E5484D', name:'Lead Intake' },
+        { initials:'BK', color:'#F59E0B', name:'Booking Agent' },
+        { initials:'AV', color:'#06B6D4', name:'After-Hours Agent' }
+      ]
+    }
+  };
+
+  function openPcaEdit(fieldId) {
+    var data = PCA_DATA[fieldId];
+    if (!data) return;
+    document.querySelector('.panel-title').textContent = data.name;
+    var nameInput = document.getElementById('pcaName');
+    nameInput.value = data.name;
+    nameInput.readOnly = true;
+    nameInput.classList.add('panel-input-readonly');
+    setPcaType(data.type);
+    document.getElementById('pcaPrompt').value = data.prompt;
+    var list = document.getElementById('choicesList');
+    list.innerHTML = '';
+    data.choices.forEach(function(c) {
+      var row = document.createElement('div');
+      row.className = 'choice-row';
+      row.innerHTML = '<input class="choice-input" type="text" value="' + c + '"><span class="choice-del" onclick="removeChoice(this)">×</span>';
+      list.appendChild(row);
+    });
+    var toggle = document.getElementById('optToggle');
+    toggle.classList.toggle('on', data.optional);
+    document.getElementById('pcaAgentsCount').textContent = data.agentCount + ' agents';
+    var agentsList = document.getElementById('pcaAgentsList');
+    agentsList.innerHTML = '';
+    data.agents.forEach(function(a) {
+      var row = document.createElement('div');
+      row.className = 'panel-agent-row';
+      row.innerHTML = '<div class="panel-agent-av" style="background:' + a.color + '">' + a.initials + '</div><span class="panel-agent-name">' + a.name + '</span><span class="panel-agent-link"><svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M11 3h6v6l-2-2-5 5-1.5-1.5 5-5-2.5-2.5zm-8 2h5v2H5v8h8v-4h2v6H3V5z" fill="currentColor"/></svg></span>';
+      agentsList.appendChild(row);
+    });
+    document.getElementById('pcaAgentsSection').style.display = 'block';
+    document.querySelector('.panel-save').textContent = 'Update';
+    openPcaPanel();
+  }
+
+  function openNewPcaPanel() {
+    document.querySelector('.panel-title').textContent = 'New Post-call Data Extraction';
+    var nameInput = document.getElementById('pcaName');
+    nameInput.value = '';
+    nameInput.readOnly = false;
+    nameInput.classList.remove('panel-input-readonly');
+    setPcaType('selector');
+    document.getElementById('pcaPrompt').value = '';
+    document.getElementById('choicesList').innerHTML = '<div class="choice-row"><input class="choice-input" type="text" placeholder="e.g. qualified"><span class="choice-del" onclick="removeChoice(this)">×</span></div><div class="choice-row"><input class="choice-input" type="text" placeholder="e.g. not_qualified"><span class="choice-del" onclick="removeChoice(this)">×</span></div>';
+    document.getElementById('optToggle').classList.remove('on');
+    document.getElementById('pcaAgentsSection').style.display = 'none';
+    document.querySelector('.panel-save').textContent = 'Save';
+    openPcaPanel();
+  }
+
   function openPcaPanel() {
     document.getElementById('pcaDropdown').style.display = 'none';
     document.getElementById('pcaPanel').classList.add('open');

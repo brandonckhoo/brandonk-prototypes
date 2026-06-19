@@ -90,10 +90,6 @@
 
   /* Action bar */
   .actionbar { display: flex; align-items: center; gap: 10px; padding: 18px 28px 14px; }
-  .search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: 8px; width: 280px; background: #fff; }
-  .search input { border: none; outline: none; font-size: 14px; color: #0A0A0A; width: 100%; background: transparent; }
-  .search input::placeholder { color: #9CA3AF; }
-  .search svg { color: #9CA3AF; flex-shrink: 0; }
   .pill-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; font-size: 14px; color: #374151; cursor: pointer; white-space: nowrap; }
   .pill-btn:hover { background: rgba(0,0,0,0.02); }
   .pill-btn svg { color: #6B7280; flex-shrink: 0; }
@@ -146,7 +142,7 @@
   .row-menu { color: #9CA3AF; cursor: pointer; display: flex; justify-content: flex-end; }
   .row-menu:hover { color: #525866; }
 
-  /* ============ PCA SIDE PANEL ============ */
+  /* ============ extraction field SIDE PANEL ============ */
   .panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.18); z-index: 300; display: none; }
   .panel-overlay.open { display: block; }
   .pca-panel { position: fixed; top: 0; right: -480px; width: 480px; height: 100vh; background: #fff; border-left: 1px solid #E1E4EA; box-shadow: -8px 0 32px rgba(0,0,0,0.12); z-index: 301; display: flex; flex-direction: column; transition: right 0.22s cubic-bezier(0.4,0,0.2,1); }
@@ -199,6 +195,90 @@
   .panel-agent-link:hover { color: #3d64d7; }
   .extractor-row { cursor: pointer; }
   .panel-input-readonly { background: #F9FAFB !important; color: #6B7280 !important; cursor: default; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 500; display: none; }
+  .modal-overlay.open { display: block; }
+  .modal-dialog { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 12px; border: 1px solid #E1E4EA; box-shadow: 0 12px 48px rgba(0,0,0,0.18); z-index: 501; width: 420px; padding: 24px; display: none; flex-direction: column; gap: 12px; }
+  .modal-dialog.open { display: flex; }
+  .modal-icon { width: 40px; height: 40px; background: #FFF0F0; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .modal-title { font-size: 15px; font-weight: 600; color: #0A0A0A; }
+  .modal-body { font-size: 14px; color: #525866; line-height: 1.55; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+  .btn-danger { height: 36px; padding: 0 16px; border: 1px solid #E5484D; border-radius: 8px; background: #E5484D; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; white-space: nowrap; }
+  .btn-danger:hover { background: #D13B41; }
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #0E121B; color: #fff; font-size: 13px; font-weight: 500; padding: 10px 16px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.22); display: flex; align-items: center; gap: 8px; z-index: 600; opacity: 0; transition: opacity 0.18s ease; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+  .toast-check { color: #1FC16B; flex-shrink: 0; }
+  .pagination-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-top: 1px solid #F0F1F3; }
+  .page-info { font-size: 13px; color: #6B7280; }
+  .page-nav { display: flex; align-items: center; gap: 4px; }
+  .page-btn { min-width: 28px; height: 28px; padding: 0 6px; display: flex; align-items: center; justify-content: center; border: 1px solid #E5E7EB; border-radius: 6px; background: #fff; cursor: pointer; color: #374151; font-size: 13px; font-weight: 500; }
+  .page-btn:hover { background: #F9FAFB; }
+  .page-btn[disabled] { color: #D1D5DB; cursor: default; background: #fff; }
+  .page-btn.active { background: #0E121B; color: #fff; border-color: #0E121B; }
+  .per-page { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6B7280; }
+  .per-page select { border: 1px solid #E5E7EB; border-radius: 6px; padding: 4px 8px; font-size: 13px; color: #374151; background: #fff; outline: none; cursor: pointer; }
+
+  /* ============ TEMPLATES MODAL ============ */
+  .tmpl-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 200; }
+  .tmpl-overlay.open { display: flex; }
+  .tmpl-modal { width: 840px; max-width: calc(100vw - 48px); max-height: 88vh; background: #fff; border-radius: 14px; box-shadow: 0 20px 48px rgba(0,0,0,0.22); display: flex; flex-direction: column; overflow: hidden; }
+  .tmpl-modal-head { padding: 22px 24px 16px; border-bottom: 1px solid #F0F1F3; position: relative; }
+  .tmpl-modal-head h2 { font-size: 17px; font-weight: 600; color: #0A0A0A; }
+  .tmpl-modal-head p { font-size: 13px; color: #6B7280; margin-top: 4px; line-height: 1.5; max-width: 640px; }
+  .tmpl-modal-x { position: absolute; top: 20px; right: 20px; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #9CA3AF; cursor: pointer; }
+  .tmpl-modal-x:hover { background: rgba(0,0,0,0.05); }
+  .tmpl-modal-search { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: 8px; margin-top: 14px; max-width: 360px; }
+  .tmpl-modal-search input { border: none; outline: none; font-size: 14px; width: 100%; background: transparent; }
+  .tmpl-modal-search input::placeholder { color: #9CA3AF; }
+  .tmpl-modal-search svg { color: #9CA3AF; flex-shrink: 0; }
+  .tmpl-modal-body { padding: 8px 24px 24px; overflow-y: auto; }
+  .tmpl-cat { font-size: 12px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.03em; margin: 20px 0 10px; }
+  .tmpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tmpl-card { border: 1px solid #E1E4EA; border-radius: 10px; padding: 13px 14px; display: flex; gap: 11px; cursor: pointer; position: relative; transition: border-color .12s, box-shadow .12s; }
+  .tmpl-card:hover { border-color: #C7CCD6; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .tmpl-card .ic { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .tmpl-card .ic svg { width: 17px; height: 17px; }
+  .tmpl-card .cardbody { flex: 1; min-width: 0; }
+  .tmpl-card .cardtop { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .tmpl-card .nm { font-size: 14px; font-weight: 600; color: #0A0A0A; }
+  .tmpl-card .desc { font-size: 12.5px; color: #6B7280; margin-top: 3px; line-height: 1.45; }
+  .tmpl-card .add { position: absolute; top: 12px; right: 12px; color: #C0C4CC; opacity: 0; transition: opacity .12s; }
+  .tmpl-card:hover .add { opacity: 1; color: #3d64d7; }
+  .tb { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; background: #F3F4F6; color: #374151; }
+  .tb .d { width: 5px; height: 5px; border-radius: 50%; }
+
+  /* ============ TEMPLATE FIELD EDITOR ============ */
+  .tmpl-editor { width: 560px; max-width: calc(100vw - 48px); max-height: 90vh; background: #fff; border-radius: 14px; box-shadow: 0 20px 48px rgba(0,0,0,0.22); display: flex; flex-direction: column; overflow: hidden; }
+  .tmpl-editor-head { padding: 18px 22px 16px; border-bottom: 1px solid #F0F1F3; position: relative; }
+  .tmpl-editor-back { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: #6B7280; cursor: pointer; margin-bottom: 8px; }
+  .tmpl-editor-back:hover { color: #0A0A0A; }
+  .tmpl-editor-head h2 { font-size: 16px; font-weight: 600; color: #0A0A0A; }
+  .tmpl-editor-head .from { font-size: 12.5px; color: #3d64d7; margin-top: 3px; }
+  .tmpl-editor-body { padding: 18px 22px; overflow-y: auto; }
+  .fld { margin-bottom: 16px; }
+  .fld label { display: block; font-size: 13px; font-weight: 600; color: #0A0A0A; margin-bottom: 6px; }
+  .fld input, .fld textarea, .fld .fld-select { width: 100%; border: 1px solid #E5E7EB; border-radius: 8px; padding: 9px 11px; font-size: 14px; color: #0A0A0A; font-family: inherit; background: #fff; box-sizing: border-box; }
+  .fld textarea { resize: vertical; min-height: 60px; line-height: 1.45; }
+  .fld .fld-select { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .fld .fld-select svg { color: #9CA3AF; }
+  .fld .hint { font-size: 12px; color: #9CA3AF; margin-top: 5px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid #E5E7EB; border-radius: 7px; font-size: 13px; color: #344054; background: #FAFBFC; }
+  .chip .x { color: #C0C4CC; cursor: pointer; }
+  .chip-add { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border: 1px dashed #D1D5DB; border-radius: 7px; font-size: 13px; color: #6B7280; cursor: pointer; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-top: 1px solid #F0F1F3; }
+  .toggle-row:last-of-type { border-bottom: 1px solid #F0F1F3; }
+  .toggle-row .lab { font-size: 13.5px; font-weight: 600; color: #0A0A0A; }
+  .toggle-row .sub { font-size: 12px; color: #6B7280; margin-top: 2px; max-width: 360px; }
+  .tog { width: 38px; height: 22px; border-radius: 11px; background: #3d64d7; position: relative; flex-shrink: 0; cursor: pointer; }
+  .tog::after { content: ''; position: absolute; top: 2px; left: 18px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left .12s; }
+  .tog.off { background: #D1D5DB; }
+  .tog.off::after { left: 2px; }
+  .tmpl-editor-foot { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 14px 22px; border-top: 1px solid #F0F1F3; }
+  .btn-sec { height: 36px; padding: 0 14px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 500; color: #0A0A0A; cursor: pointer; }
+  .btn-sec:hover { background: rgba(0,0,0,0.02); }
+  .btn-pri { height: 36px; padding: 0 16px; border: 1px solid #0E121B; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; }
+  .btn-pri:hover { background: #000; }
 </style>
 </head>
 <body>
@@ -247,7 +327,7 @@
   <div class="section-group">
   <div class="section-label">System</div>
   <ul class="nav-items">
-    <li class="nav-item new-item"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.75 2.5V5.268C11.636 5.446 12.43 5.88 13.042 6.504L15.238 5.237L15.988 6.537L13.798 7.8C14.068 8.472 14.168 9.212 14.068 9.974L16.75 10.75V12.25L14.068 13.026C13.928 13.55 13.694 14.034 13.388 14.462L14.988 16.762L13.762 17.688L12.164 15.388C11.73 15.594 11.254 15.728 10.75 15.776V18.25H9.25V15.776C8.746 15.728 8.27 15.594 7.836 15.388L6.238 17.688L5.012 16.762L6.612 14.462C6.306 14.034 6.072 13.55 5.932 13.026L3.25 12.25V10.75L5.932 9.974C5.872 9.522 5.882 9.064 5.964 8.616L3.25 7.75V6.25L5.932 6.974C6.072 6.45 6.306 5.966 6.612 5.538L5.012 3.238L6.238 2.312L7.836 4.612C8.27 4.406 8.746 4.272 9.25 4.224V2.5H10.75ZM10 7.5C8.619 7.5 7.5 8.619 7.5 10C7.5 11.381 8.619 12.5 10 12.5C11.381 12.5 12.5 11.381 12.5 10C12.5 8.619 11.381 7.5 10 7.5ZM10 9C10.552 9 11 9.448 11 10C11 10.552 10.552 11 10 11C9.448 11 9 10.552 9 10C9 9.448 9.448 9 10 9Z" fill="#525866"/></svg>Integrations</li>
+    <li class="nav-item"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.75 2.5V5.268C11.636 5.446 12.43 5.88 13.042 6.504L15.238 5.237L15.988 6.537L13.798 7.8C14.068 8.472 14.168 9.212 14.068 9.974L16.75 10.75V12.25L14.068 13.026C13.928 13.55 13.694 14.034 13.388 14.462L14.988 16.762L13.762 17.688L12.164 15.388C11.73 15.594 11.254 15.728 10.75 15.776V18.25H9.25V15.776C8.746 15.728 8.27 15.594 7.836 15.388L6.238 17.688L5.012 16.762L6.612 14.462C6.306 14.034 6.072 13.55 5.932 13.026L3.25 12.25V10.75L5.932 9.974C5.872 9.522 5.882 9.064 5.964 8.616L3.25 7.75V6.25L5.932 6.974C6.072 6.45 6.306 5.966 6.612 5.538L5.012 3.238L6.238 2.312L7.836 4.612C8.27 4.406 8.746 4.272 9.25 4.224V2.5H10.75ZM10 7.5C8.619 7.5 7.5 8.619 7.5 10C7.5 11.381 8.619 12.5 10 12.5C11.381 12.5 12.5 11.381 12.5 10C12.5 8.619 11.381 7.5 10 7.5ZM10 9C10.552 9 11 9.448 11 10C11 10.552 10.552 11 10 11C9.448 11 9 10.552 9 10C9 9.448 9.448 9 10 9Z" fill="#525866"/></svg>Integrations</li>
     <li class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M16 17.5H4C3.801 17.5 3.61 17.421 3.47 17.28C3.329 17.14 3.25 16.949 3.25 16.75V3.25C3.25 3.051 3.329 2.86 3.47 2.72C3.61 2.579 3.801 2.5 4 2.5H16C16.199 2.5 16.39 2.579 16.53 2.72C16.671 2.86 16.75 3.051 16.75 3.25V16.75C16.75 16.949 16.671 17.14 16.53 17.28C16.39 17.421 16.199 17.5 16 17.5ZM15.25 16V4H4.75V16H15.25ZM7 7.75H13V9.25H7V7.75ZM7 10.75H13V12.25H7V10.75Z" fill="#525866"/></svg>Billing</li>
     <li class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1.75L17.125 5.875V14.125L10 18.25L2.875 14.125V5.875L10 1.75ZM10 3.483L4.375 6.74V13.26L10 16.517L15.625 13.26V6.74L10 3.483ZM10 13C9.204 13 8.441 12.684 7.879 12.121C7.316 11.559 7 10.796 7 10C7 9.204 7.316 8.441 7.879 7.879C8.441 7.316 9.204 7 10 7C10.796 7 11.559 7.316 12.121 7.879C12.684 8.441 13 9.204 13 10C13 10.796 12.684 11.559 12.121 12.121C11.559 12.684 10.796 13 10 13ZM10 11.5C10.398 11.5 10.779 11.342 11.061 11.061C11.342 10.779 11.5 10.398 11.5 10C11.5 9.602 11.342 9.221 11.061 8.939C10.779 8.658 10.398 8.5 10 8.5C9.602 8.5 9.221 8.658 8.939 8.939C8.658 9.221 8.5 9.602 8.5 10C8.5 10.398 8.658 10.779 8.939 11.061C9.221 11.342 9.602 11.5 10 11.5Z" fill="#525866"/></svg>Settings</li>
   </ul>
@@ -280,7 +360,7 @@
 <aside class="subnav">
   <div class="subnav-group" style="margin-top:0">
     <div class="subnav-group-label">Category</div>
-    <div class="subnav-item" id="cat-extractors" onclick="setCategory('extractors')"><span class="subnav-dot" style="background:#CA8A04"></span> Post-call Data Extraction <span class="count">4</span></div>
+    <div class="subnav-item" id="cat-extractors" onclick="setCategory('extractors')"><span class="subnav-dot" style="background:#CA8A04"></span> Post-call Data Retrieval <span class="count">4</span></div>
     <div class="subnav-item active" id="cat-pre" onclick="setCategory('pre')"><span class="subnav-dot" style="background:#1D4ED8"></span> Pre-conversation <span class="count">2</span></div>
     <div class="subnav-item" id="cat-during" onclick="setCategory('during')"><span class="subnav-dot" style="background:#166534"></span> During-conversation <span class="count">3</span></div>
     <div class="subnav-item" id="cat-post" onclick="setCategory('post')"><span class="subnav-dot" style="background:#9A3412"></span> Post-conversation <span class="count">3</span></div>
@@ -303,10 +383,6 @@
   <p class="subtitle">Build a function once and reuse it across agents. One edit updates every agent that links to it.</p>
 
   <div class="actionbar">
-    <div class="search">
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M9 3a6 6 0 104.47 10.03l3.25 3.25 1.06-1.06-3.25-3.25A6 6 0 009 3zm0 1.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" fill="currentColor"/></svg>
-      <input type="text" placeholder="Search by name or function ID">
-    </div>
     <button class="pill-btn">
       <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 4a3 3 0 012.83 2H16v1.5h-3.17a3 3 0 01-5.66 0H4V6h3.17A3 3 0 0110 4zm0 1.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM4 12.5h3.17a3 3 0 015.66 0H16V14h-3.17a3 3 0 01-5.66 0H4v-1.5z" fill="currentColor"/></svg>
       Filter by agent <span class="chev">▾</span>
@@ -355,7 +431,7 @@
     <thead>
       <tr>
         <th>Function name</th>
-        <th>Category</th>
+        <th style="min-width:190px">Category</th>
         <th>When</th>
         <th>Used by</th>
         <th>Last edited</th>
@@ -524,7 +600,7 @@
         <td class="edited">06/09/2026 16:57</td>
         <td><span class="row-menu"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
-      <!-- Row 7: Post-call Analysis -->
+      <!-- Row 7: Post-call Data Retrieval -->
       <tr>
         <td>
           <div class="fn-name">
@@ -535,7 +611,7 @@
             </div>
           </div>
         </td>
-        <td><span class="type-badge"><span class="tdot" style="background:#CA8A04"></span>Post-call Data Extraction</span></td>
+        <td><span class="type-badge"><span class="tdot" style="background:#CA8A04"></span>Post-call Data Retrieval</span></td>
         <td><span class="timing-badge timing-pca">Extractor</span></td>
         <td>
           <div class="used-by">
@@ -551,7 +627,7 @@
         <td class="edited">06/09/2026 21:38</td>
         <td><span class="row-menu"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
-      <!-- Row 8: Post-call Analysis -->
+      <!-- Row 8: Post-call Data Retrieval -->
       <tr>
         <td>
           <div class="fn-name">
@@ -562,7 +638,7 @@
             </div>
           </div>
         </td>
-        <td><span class="type-badge"><span class="tdot" style="background:#CA8A04"></span>Post-call Data Extraction</span></td>
+        <td><span class="type-badge"><span class="tdot" style="background:#CA8A04"></span>Post-call Data Retrieval</span></td>
         <td><span class="timing-badge timing-pca">Extractor</span></td>
         <td>
           <div class="used-by">
@@ -578,22 +654,29 @@
       </tr>
     </tbody>
   </table>
+  <div class="pagination-bar">
+    <div class="page-info">Page 1 of 1 · 8 functions</div>
+    <div class="page-nav">
+      <button class="page-btn" disabled>‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn" disabled>›</button>
+    </div>
+    <div class="per-page">
+      <select><option>25 / page</option><option>50 / page</option><option>100 / page</option></select>
+    </div>
+  </div>
 </div><!-- /view-functions -->
 
 <!-- VIEW: Information Extractors -->
 <div id="view-extractors" style="display:none">
   <div class="main-header">
     <div class="dot" style="background:#CA8A04"></div>
-    <h1>Post-call Data Extraction</h1>
+    <h1>Post-call Data Retrieval</h1>
     <span class="h-count">4</span>
   </div>
-  <p class="subtitle">Define a field once and reuse it across agents. The AI reads each call transcript and populates it automatically.</p>
+  <p class="subtitle">Define the information that you need to extract from the call</p>
 
   <div class="actionbar">
-    <div class="search">
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M9 3a6 6 0 104.47 10.03l3.25 3.25 1.06-1.06-3.25-3.25A6 6 0 009 3zm0 1.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" fill="currentColor"/></svg>
-      <input type="text" placeholder="Search by name or field ID">
-    </div>
     <button class="pill-btn">All Agents <span class="chev">▾</span></button>
     <button class="pill-btn">All Types <span class="chev">▾</span></button>
     <span class="spacer"></span>
@@ -607,12 +690,12 @@
         <div class="newfn-item" onclick="openNewPcaPanel()">
           <div class="newfn-item-icon" style="background:#FFFBEB"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="#CA8A04"/></svg></div>
           <div>
-            <div style="font-size:13px;font-weight:500;color:#0A0A0A">New Post-call Data Extraction</div>
+            <div style="font-size:13px;font-weight:500;color:#0A0A0A">New Post-call Data Retrieval</div>
             <div style="font-size:12px;color:#9CA3AF;margin-top:1px">Create a new extraction field from scratch.</div>
           </div>
         </div>
         <div class="newfn-divider"></div>
-        <div class="newfn-item">
+        <div class="newfn-item" onclick="openTemplatesModal()">
           <div class="newfn-item-icon" style="background:#F5F7FA"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2.5L12.35 7.26L17.6 8.03L13.8 11.73L14.7 16.96L10 14.49L5.3 16.96L6.2 11.73L2.4 8.03L7.65 7.26L10 2.5Z" fill="#525866"/></svg></div>
           <div>
             <div style="font-size:13px;font-weight:500;color:#0A0A0A">Browse Templates</div>
@@ -664,17 +747,28 @@
       </tr>
     </tbody>
   </table>
+  <div class="pagination-bar">
+    <div class="page-info">Page 1 of 1 · 4 fields</div>
+    <div class="page-nav">
+      <button class="page-btn" disabled>‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn" disabled>›</button>
+    </div>
+    <div class="per-page">
+      <select><option>25 / page</option><option>50 / page</option><option>100 / page</option></select>
+    </div>
+  </div>
 </div><!-- /view-extractors -->
 
 </main>
 
-<!-- PCA side panel overlay -->
+<!-- extraction field side panel overlay -->
 <div class="panel-overlay" id="pcaOverlay" onclick="closePcaPanel()"></div>
 
-<!-- PCA side panel -->
+<!-- extraction field side panel -->
 <div class="pca-panel" id="pcaPanel">
   <div class="panel-header">
-    <span class="panel-title">New Post-call Data Extraction</span>
+    <span class="panel-title">New Post-call Data Retrieval</span>
     <span class="panel-close" onclick="closePcaPanel()">×</span>
   </div>
   <div class="panel-body">
@@ -726,7 +820,7 @@
           <div class="panel-label">Save as account-level field</div>
           <div class="panel-hint" style="margin-top:4px">When on, this field is available across all agents. Turn off to keep it local to one agent only.</div>
         </div>
-        <div class="toggle on" id="accountToggle" onclick="this.classList.toggle('on')" style="flex-shrink:0;margin-top:2px"></div>
+        <div class="toggle on" id="accountToggle" onclick="handleAcctLevelToggle()" style="flex-shrink:0;margin-top:2px"></div>
       </div>
     </div>
 
@@ -741,7 +835,27 @@
   </div>
   <div class="panel-footer">
     <button class="panel-cancel" onclick="closePcaPanel()">Cancel</button>
-    <button class="panel-save">Save</button>
+    <button class="panel-save" onclick="handlePanelSave()">Save</button>
+  </div>
+</div>
+
+<!-- Success toast -->
+<div class="toast" id="saveToast">
+  <svg class="toast-check" width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm3.78 5.78l-4.5 4.5a.75.75 0 01-1.06 0l-2-2 1.06-1.06 1.47 1.47 3.97-3.97 1.06 1.06z" fill="currentColor"/></svg>
+  <span id="saveToastMsg">Field updated — changes apply to linked agents on their next call</span>
+</div>
+
+<!-- Remove from library confirmation modal -->
+<div class="modal-overlay" id="removeLibraryOverlay" onclick="cancelRemoveLibrary()"></div>
+<div class="modal-dialog" id="removeLibraryModal">
+  <div class="modal-icon">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2.5a7.5 7.5 0 100 15 7.5 7.5 0 000-15zm0 1.5a6 6 0 110 12A6 6 0 0110 4zm-.75 3.25h1.5v5h-1.5v-5zm0 6h1.5v1.5h-1.5v-1.5z" fill="#E5484D"/></svg>
+  </div>
+  <div class="modal-title">Remove from library?</div>
+  <div class="modal-body">This field is linked to <strong id="removeLibraryCount"></strong>. They will each keep a local copy, but changes will no longer sync across agents.</div>
+  <div class="modal-actions">
+    <button class="panel-cancel" onclick="cancelRemoveLibrary()">Keep as account field</button>
+    <button class="btn-danger" onclick="confirmRemoveLibrary()">Remove from library</button>
   </div>
 </div>
 
@@ -789,7 +903,7 @@
 </div>
 
 <script>
-  var PCA_DATA = {
+  var extraction field_DATA = {
     qualification_result: {
       name: 'qualification_result', type: 'selector', optional: false, accountLevel: true,
       prompt: 'The outcome of qualifying the caller\'s case during intake.',
@@ -841,7 +955,7 @@
   };
 
   function openPcaEdit(fieldId) {
-    var data = PCA_DATA[fieldId];
+    var data = extraction field_DATA[fieldId];
     if (!data) return;
     document.querySelector('.panel-title').textContent = data.name;
     var nameInput = document.getElementById('pcaName');
@@ -877,7 +991,7 @@
   }
 
   function openNewPcaPanel() {
-    document.querySelector('.panel-title').textContent = 'New Post-call Data Extraction';
+    document.querySelector('.panel-title').textContent = 'New Post-call Data Retrieval';
     var nameInput = document.getElementById('pcaName');
     nameInput.value = '';
     nameInput.readOnly = false;
@@ -957,7 +1071,277 @@
     const pca = document.getElementById('pcaDropdown');
     if (pca && !pca.contains(e.target)) pca.style.display = 'none';
   });
+
+  var _toastTimer = null;
+  function showToast(msg) {
+    var toast = document.getElementById('saveToast');
+    document.getElementById('saveToastMsg').textContent = msg;
+    toast.classList.add('show');
+    if (_toastTimer) clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(function() { toast.classList.remove('show'); }, 5000);
+  }
+
+  function handlePanelSave() {
+    var isUpdate = document.querySelector('.panel-save').textContent === 'Update';
+    var agentCount = parseInt(document.getElementById('pcaAgentsCount').textContent) || 0;
+    var msg = isUpdate && agentCount > 0
+      ? 'Field updated — changes apply to linked agents on their next call'
+      : 'Field saved to the library';
+    closePcaPanel();
+    showToast(msg);
+  }
+
+  var _pendingToggleOff = false;
+
+  function handleAcctLevelToggle() {
+    var toggle = document.getElementById('accountToggle');
+    var isOn = toggle.classList.contains('on');
+    if (isOn) {
+      var countText = document.getElementById('pcaAgentsCount').textContent || '';
+      var agentCount = parseInt(countText) || 0;
+      if (agentCount > 0) {
+        document.getElementById('removeLibraryCount').textContent = agentCount + ' agent' + (agentCount !== 1 ? 's' : '');
+        document.getElementById('removeLibraryOverlay').classList.add('open');
+        document.getElementById('removeLibraryModal').classList.add('open');
+        _pendingToggleOff = true;
+        return;
+      }
+    }
+    toggle.classList.toggle('on');
+  }
+
+  function cancelRemoveLibrary() {
+    document.getElementById('removeLibraryOverlay').classList.remove('open');
+    document.getElementById('removeLibraryModal').classList.remove('open');
+    _pendingToggleOff = false;
+  }
+
+  function confirmRemoveLibrary() {
+    document.getElementById('removeLibraryOverlay').classList.remove('open');
+    document.getElementById('removeLibraryModal').classList.remove('open');
+    if (_pendingToggleOff) {
+      document.getElementById('accountToggle').classList.remove('on');
+      _pendingToggleOff = false;
+    }
+  }
+
+  // ===== TEMPLATES MODAL =====
+  var TMPL_OPTIONS = {
+    user_sentiment: ['Positive', 'Neutral', 'Negative'],
+    call_outcome: ['Booked appointment', 'Live transfer', 'Not qualified', 'Follow up', 'Not interested'],
+    lead_qualification: ['Yes', 'No', 'Maybe'],
+    interest_level: ['Very interested', 'Interested', 'Neutral', 'Not interested']
+  };
+
+  function openTemplatesModal() {
+    document.getElementById('pcaDropdown').style.display = 'none';
+    document.getElementById('tmplOverlay').classList.add('open');
+    document.getElementById('editorOverlay').classList.remove('open');
+  }
+
+  function closeTemplatesModal() {
+    document.getElementById('tmplOverlay').classList.remove('open');
+    document.getElementById('editorOverlay').classList.remove('open');
+  }
+
+  function openTmplEditor(name, type, desc) {
+    document.getElementById('ed-name').value = name;
+    document.getElementById('ed-type').textContent = type;
+    document.getElementById('ed-desc').value = desc;
+    document.getElementById('ed-from').textContent = 'From template: ' + name;
+    var optRow = document.getElementById('ed-options-row');
+    var chips = document.getElementById('ed-chips');
+    chips.innerHTML = '';
+    if (type === 'Selector' && TMPL_OPTIONS[name]) {
+      TMPL_OPTIONS[name].forEach(function(o) {
+        var c = document.createElement('span');
+        c.className = 'chip';
+        c.innerHTML = o + ' <span class="x">&times;</span>';
+        chips.appendChild(c);
+      });
+      var add = document.createElement('span');
+      add.className = 'chip-add';
+      add.textContent = '+ Add option';
+      chips.appendChild(add);
+      optRow.style.display = '';
+    } else {
+      optRow.style.display = 'none';
+    }
+    document.getElementById('tmplOverlay').classList.remove('open');
+    document.getElementById('editorOverlay').classList.add('open');
+  }
+
+  function tmplBackToTemplates() {
+    document.getElementById('editorOverlay').classList.remove('open');
+    document.getElementById('tmplOverlay').classList.add('open');
+  }
+
+  document.querySelectorAll('.tmpl-card').forEach(function(card) {
+    card.addEventListener('click', function() {
+      var name = card.querySelector('.nm').textContent.trim();
+      var type = card.querySelector('.tb').textContent.trim();
+      var desc = card.querySelector('.desc').textContent.trim();
+      openTmplEditor(name, type, desc);
+    });
+  });
+
+  document.getElementById('ed-back').addEventListener('click', tmplBackToTemplates);
+  document.getElementById('ed-cancel').addEventListener('click', closeTemplatesModal);
+  document.getElementById('ed-tog-acct').addEventListener('click', function() { this.classList.toggle('off'); });
 </script>
+
+<!-- ===================== TEMPLATES MODAL ===================== -->
+<div class="tmpl-overlay" id="tmplOverlay">
+  <div class="tmpl-modal">
+    <div class="tmpl-modal-head">
+      <h2>Browse templates</h2>
+      <p>Start from a preset post-call field instead of building from scratch. Adding a template creates an account field you can edit once and reuse across every agent.</p>
+      <div class="tmpl-modal-x" onclick="closeTemplatesModal()"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5.7 5.7l8.6 8.6M14.3 5.7l-8.6 8.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+      <div class="tmpl-modal-search">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M9 3a6 6 0 104.47 10.03l3.25 3.25 1.06-1.06-3.25-3.25A6 6 0 009 3zm0 1.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" fill="currentColor"/></svg>
+        <input type="text" placeholder="Search templates">
+      </div>
+    </div>
+    <div class="tmpl-modal-body">
+      <div class="tmpl-cat">Recommended</div>
+      <div class="tmpl-grid">
+        <div class="tmpl-card">
+          <div class="ic" style="background:#E7F8EF"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#1FC16B"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">call_summary</span><span class="tb"><span class="d" style="background:#1FC16B"></span>Text</span></div><div class="desc">A short 2 to 3 sentence recap of the conversation.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+        <div class="tmpl-card">
+          <div class="ic" style="background:#EFEAFE"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#7D52F4"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">user_sentiment</span><span class="tb"><span class="d" style="background:#7D52F4"></span>Selector</span></div><div class="desc">Caller mood at the end of the call: positive, neutral, or negative.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+        <div class="tmpl-card">
+          <div class="ic" style="background:#EFEAFE"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#7D52F4"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">call_outcome</span><span class="tb"><span class="d" style="background:#7D52F4"></span>Selector</span></div><div class="desc">Booked, transferred, not qualified, follow up, or not interested.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+      </div>
+
+      <div class="tmpl-cat">Contact details</div>
+      <div class="tmpl-grid">
+        <div class="tmpl-card">
+          <div class="ic" style="background:#E7F8EF"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#1FC16B"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">customer_name</span><span class="tb"><span class="d" style="background:#1FC16B"></span>Text</span></div><div class="desc">The caller's full name.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+        <div class="tmpl-card">
+          <div class="ic" style="background:#E7F8EF"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#1FC16B"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">customer_email</span><span class="tb"><span class="d" style="background:#1FC16B"></span>Text</span></div><div class="desc">The caller's email address.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+        <div class="tmpl-card">
+          <div class="ic" style="background:#E7F8EF"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#1FC16B"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">customer_company</span><span class="tb"><span class="d" style="background:#1FC16B"></span>Text</span></div><div class="desc">The company the caller represents.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+        <div class="tmpl-card">
+          <div class="ic" style="background:#E7F8EF"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#1FC16B"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">reason_for_call</span><span class="tb"><span class="d" style="background:#1FC16B"></span>Text</span></div><div class="desc">Why the caller reached out.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+      </div>
+
+      <div class="tmpl-cat">Sales</div>
+      <div class="tmpl-grid">
+        <div class="tmpl-card">
+          <div class="ic" style="background:#EFEAFE"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#7D52F4"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">lead_qualification</span><span class="tb"><span class="d" style="background:#7D52F4"></span>Selector</span></div><div class="desc">Is the lead qualified: yes, no, or maybe.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+        <div class="tmpl-card">
+          <div class="ic" style="background:#EFEAFE"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#7D52F4"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">interest_level</span><span class="tb"><span class="d" style="background:#7D52F4"></span>Selector</span></div><div class="desc">Very interested, interested, neutral, or not interested.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+        <div class="tmpl-card">
+          <div class="ic" style="background:#E7F8EF"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#1FC16B"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">budget_range</span><span class="tb"><span class="d" style="background:#1FC16B"></span>Text</span></div><div class="desc">The caller's stated budget range.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+        <div class="tmpl-card">
+          <div class="ic" style="background:#E7F8EF"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#1FC16B"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">objection_handled</span><span class="tb"><span class="d" style="background:#1FC16B"></span>Text</span></div><div class="desc">The main objection the caller raised on the call.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+      </div>
+
+      <div class="tmpl-cat">Support &amp; compliance</div>
+      <div class="tmpl-grid">
+        <div class="tmpl-card">
+          <div class="ic" style="background:#E7F8EF"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#1FC16B"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">issue_description</span><span class="tb"><span class="d" style="background:#1FC16B"></span>Text</span></div><div class="desc">A brief description of the issue the caller faced.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+        <div class="tmpl-card">
+          <div class="ic" style="background:#E8EDFC"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#3d64d7"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">callback_requested</span><span class="tb"><span class="d" style="background:#3d64d7"></span>Boolean</span></div><div class="desc">Did the caller ask to be called back.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+        <div class="tmpl-card">
+          <div class="ic" style="background:#E8EDFC"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#3d64d7"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">do_not_contact</span><span class="tb"><span class="d" style="background:#3d64d7"></span>Boolean</span></div><div class="desc">Did the caller ask to not be contacted again.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+        <div class="tmpl-card">
+          <div class="ic" style="background:#FFF1E7"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#FF9147"/></svg></div>
+          <div class="cardbody"><div class="cardtop"><span class="nm">satisfaction_score</span><span class="tb"><span class="d" style="background:#FF9147"></span>Number</span></div><div class="desc">Inferred CSAT score from 1 to 5.</div></div>
+          <span class="add"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z"/></svg></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TEMPLATE FIELD EDITOR ===================== -->
+<div class="tmpl-overlay" id="editorOverlay">
+  <div class="tmpl-editor">
+    <div class="tmpl-editor-head">
+      <div class="tmpl-editor-back" id="ed-back"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to templates</div>
+      <h2>New field</h2>
+      <div class="from" id="ed-from">From template</div>
+    </div>
+    <div class="tmpl-editor-body">
+      <div class="fld">
+        <label>Type</label>
+        <div class="fld-select"><span id="ed-type">Text</span><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="fld">
+        <label>Name</label>
+        <input type="text" id="ed-name" value="">
+      </div>
+      <div class="fld">
+        <label>Description</label>
+        <textarea id="ed-desc"></textarea>
+        <div class="hint">Tells Retell what to extract from the call.</div>
+      </div>
+      <div class="fld" id="ed-options-row" style="display:none">
+        <label>Options</label>
+        <div class="chips" id="ed-chips"></div>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="lab">Set as account field</div>
+          <div class="sub">Shared across agents. Edit it once and every linked agent updates.</div>
+        </div>
+        <div class="tog" id="ed-tog-acct"></div>
+      </div>
+      <div class="fld" style="margin-top:16px;margin-bottom:0">
+        <label>Apply to</label>
+        <div class="fld-select"><span>All agents</span><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="hint">Linked. A later edit applies to every agent at once. Choose Copy on an agent to diverge.</div>
+      </div>
+    </div>
+    <div class="tmpl-editor-foot">
+      <button class="btn-sec" id="ed-cancel">Cancel</button>
+      <button class="btn-pri">Add field</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

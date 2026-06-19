@@ -651,7 +651,7 @@
       <tr class="extractor-row" onclick="openPcaEdit('intake_submitted')">
         <td><div class="fn-title">intake_submitted</div><div class="fn-sub">intake_submitted</div></td>
         <td style="color:#525866;font-size:13px;max-width:320px">Whether intake information was submitted for a qualified caller.</td>
-        <td><span class="type-badge">Yes / No</span></td>
+        <td><span class="type-badge">Boolean</span></td>
         <td><div class="used-by"><div class="avatars"><div class="av" style="background:#3d64d7">DR</div><div class="av" style="background:#7D52F4">IV</div></div><span class="used-count">2 agents</span></div></td>
         <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
@@ -688,9 +688,10 @@
     <div class="panel-field">
       <div class="panel-label">Type</div>
       <div class="type-tabs">
-        <div class="type-tab active" id="tab-selector" onclick="setPcaType('selector')">Selector</div>
-        <div class="type-tab" id="tab-yesno" onclick="setPcaType('yesno')">Yes / No</div>
-        <div class="type-tab" id="tab-text" onclick="setPcaType('text')">Text</div>
+        <div class="type-tab active" id="tab-text" onclick="setPcaType('text')">Text</div>
+        <div class="type-tab" id="tab-selector" onclick="setPcaType('selector')">Selector</div>
+        <div class="type-tab" id="tab-boolean" onclick="setPcaType('boolean')">Boolean</div>
+        <div class="type-tab" id="tab-number" onclick="setPcaType('number')">Number</div>
       </div>
     </div>
 
@@ -712,12 +713,21 @@
       </div>
     </div>
 
-    <div class="optional-row">
-      <div>
-        <div class="optional-label">Optional</div>
-        <div class="panel-hint">If off, the field is always populated after every call.</div>
+    <div class="panel-field" style="border-top:1px solid #F0F1F3;padding-top:16px;gap:8px">
+      <div class="panel-label">Optional</div>
+      <div class="panel-hint">Populate this field only when the call matches the conditions you define. Otherwise, it will be left empty.</div>
+      <div class="toggle" id="optToggle" onclick="toggleOptional()"></div>
+      <textarea class="panel-textarea" rows="3" placeholder="e.g. Populate for answered calls; skip voicemail or no-response calls." id="pcaOptionalCondition" style="display:none;margin-top:4px"></textarea>
+    </div>
+
+    <div class="panel-field" style="border-top:1px solid #F0F1F3;padding-top:16px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+        <div>
+          <div class="panel-label">Save as account-level field</div>
+          <div class="panel-hint" style="margin-top:4px">When on, this field is available across all agents. Turn off to keep it local to one agent only.</div>
+        </div>
+        <div class="toggle on" id="accountToggle" onclick="this.classList.toggle('on')" style="flex-shrink:0;margin-top:2px"></div>
       </div>
-      <div class="toggle" id="optToggle" onclick="this.classList.toggle('on')"></div>
     </div>
 
     <div class="panel-agents" id="pcaAgentsSection" style="display:none">
@@ -781,7 +791,7 @@
 <script>
   var PCA_DATA = {
     qualification_result: {
-      name: 'qualification_result', type: 'selector', optional: false,
+      name: 'qualification_result', type: 'selector', optional: false, accountLevel: true,
       prompt: 'The outcome of qualifying the caller\'s case during intake.',
       choices: ['qualified','not_qualified','existing_client','undetermined'],
       agentCount: 5,
@@ -794,7 +804,7 @@
       ]
     },
     disqualification_reason: {
-      name: 'disqualification_reason', type: 'selector', optional: true,
+      name: 'disqualification_reason', type: 'selector', optional: true, accountLevel: true,
       prompt: 'If the caller was disqualified, the reason why.',
       choices: ['cosmetic_only','out_of_state','outside_2_year_window','already_represented','non_dental_matter','other'],
       agentCount: 3,
@@ -805,7 +815,7 @@
       ]
     },
     intake_submitted: {
-      name: 'intake_submitted', type: 'yesno', optional: false,
+      name: 'intake_submitted', type: 'boolean', optional: false, accountLevel: true,
       prompt: 'Whether intake information was submitted for a qualified caller.',
       choices: [],
       agentCount: 2,
@@ -815,7 +825,7 @@
       ]
     },
     call_disposition: {
-      name: 'call_disposition', type: 'selector', optional: false,
+      name: 'call_disposition', type: 'selector', optional: false, accountLevel: true,
       prompt: 'How the call ultimately concluded.',
       choices: ['transferred_to_attorney','routed_to_client_services','voicemail_callback','disqualified_ended','other'],
       agentCount: 6,
@@ -848,8 +858,10 @@
       row.innerHTML = '<input class="choice-input" type="text" value="' + c + '"><span class="choice-del" onclick="removeChoice(this)">×</span>';
       list.appendChild(row);
     });
-    var toggle = document.getElementById('optToggle');
-    toggle.classList.toggle('on', data.optional);
+    var optToggle = document.getElementById('optToggle');
+    optToggle.classList.toggle('on', data.optional);
+    document.getElementById('pcaOptionalCondition').style.display = data.optional ? 'block' : 'none';
+    document.getElementById('accountToggle').classList.toggle('on', data.accountLevel !== false);
     document.getElementById('pcaAgentsCount').textContent = data.agentCount + ' agents';
     var agentsList = document.getElementById('pcaAgentsList');
     agentsList.innerHTML = '';
@@ -870,10 +882,12 @@
     nameInput.value = '';
     nameInput.readOnly = false;
     nameInput.classList.remove('panel-input-readonly');
-    setPcaType('selector');
+    setPcaType('text');
     document.getElementById('pcaPrompt').value = '';
     document.getElementById('choicesList').innerHTML = '<div class="choice-row"><input class="choice-input" type="text" placeholder="e.g. qualified"><span class="choice-del" onclick="removeChoice(this)">×</span></div><div class="choice-row"><input class="choice-input" type="text" placeholder="e.g. not_qualified"><span class="choice-del" onclick="removeChoice(this)">×</span></div>';
     document.getElementById('optToggle').classList.remove('on');
+    document.getElementById('pcaOptionalCondition').style.display = 'none';
+    document.getElementById('accountToggle').classList.add('on');
     document.getElementById('pcaAgentsSection').style.display = 'none';
     document.querySelector('.panel-save').textContent = 'Save';
     openPcaPanel();
@@ -889,10 +903,15 @@
     document.getElementById('pcaOverlay').classList.remove('open');
   }
   function setPcaType(type) {
-    ['selector','yesno','text'].forEach(function(t) {
+    ['text','selector','boolean','number'].forEach(function(t) {
       document.getElementById('tab-' + t).classList.toggle('active', t === type);
     });
     document.getElementById('choices-section').style.display = type === 'selector' ? 'flex' : 'none';
+  }
+  function toggleOptional() {
+    var toggle = document.getElementById('optToggle');
+    toggle.classList.toggle('on');
+    document.getElementById('pcaOptionalCondition').style.display = toggle.classList.contains('on') ? 'block' : 'none';
   }
   function addChoice() {
     var list = document.getElementById('choicesList');

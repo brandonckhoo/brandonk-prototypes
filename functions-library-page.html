@@ -143,8 +143,19 @@
   .row-menu:hover { color: #525866; }
 
   /* ============ extraction field SIDE PANEL ============ */
-  .panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.18); z-index: 300; display: none; }
-  .panel-overlay.open { display: block; }
+  .panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.18); z-index: 300; display: none; pointer-events: none; }
+  .panel-overlay.open { display: block; pointer-events: auto; }
+  .tmpl-overlay { pointer-events: none; }
+  .tmpl-overlay.open { pointer-events: auto; }
+  /* ============ FUNCTION DETAIL PANEL ============ */
+  .fn-panel { position: fixed; top: 0; right: -480px; width: 480px; height: 100vh; background: #fff; border-left: 1px solid #E1E4EA; box-shadow: -8px 0 32px rgba(0,0,0,0.12); z-index: 301; display: flex; flex-direction: column; transition: right 0.22s cubic-bezier(0.4,0,0.2,1); }
+  .fn-panel.open { right: 0; }
+  .fn-info-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 4px; }
+  .fn-panel-section { padding: 16px 0; border-top: 1px solid #F0F1F3; display: flex; flex-direction: column; gap: 6px; }
+  .fn-endpoint { font-size: 12.5px; color: #525866; font-family: 'SF Mono', 'Fira Code', monospace; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 6px; padding: 8px 10px; word-break: break-all; margin-top: 4px; }
+  .fn-agent-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .fn-agent-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #374151; }
+  .fn-agent-av { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: #fff; flex-shrink: 0; }
   .pca-panel { position: fixed; top: 0; right: -480px; width: 480px; height: 100vh; background: #fff; border-left: 1px solid #E1E4EA; box-shadow: -8px 0 32px rgba(0,0,0,0.12); z-index: 301; display: flex; flex-direction: column; transition: right 0.22s cubic-bezier(0.4,0,0.2,1); }
   .pca-panel.open { right: 0; }
   .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 18px; border-bottom: 1px solid #F0F1F3; flex-shrink: 0; }
@@ -440,7 +451,7 @@
     </thead>
     <tbody>
       <!-- Row 1: Salesforce, Pre-call -->
-      <tr>
+      <tr onclick="openFnPanel('get_salesforce_opportunity')" style="cursor:pointer">
         <td>
           <div class="fn-name">
             <div class="fn-icon" style="background:#E3F4FC"><svg viewBox="0 0 20 20" fill="none"><path d="M10 3c1.4 0 2.6.8 3.2 2 .5-.2 1.1-.3 1.7-.3 2.3 0 4.1 1.8 4.1 4.1 0 .4-.1.8-.2 1.2.5.7.7 1.5.7 2.3 0 2.2-1.8 4-4 4H5C3.3 16.3 2 14.9 2 13.2c0-1 .5-1.9 1.3-2.5C3.1 10.3 3 9.9 3 9.5 3 7.7 4.8 6 7 6c.3-1.7 1.5-3 3-3z" fill="#00A1E0"/></svg></div>
@@ -464,10 +475,10 @@
           </div>
         </td>
         <td class="edited">06/15/2026 14:22</td>
-        <td><span class="row-menu"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- Row 2: Cal.com, Mid-call -->
-      <tr>
+      <tr onclick="openFnPanel('book_appointment')" style="cursor:pointer">
         <td>
           <div class="fn-name">
             <div class="fn-icon" style="background:#E8F8F0"><svg viewBox="0 0 20 20" fill="none"><path d="M5 3h10a1 1 0 011 1v3H4V4a1 1 0 011-1zm-1 5h12v8a1 1 0 01-1 1H5a1 1 0 01-1-1V8zm3 2v1.5h6V10H7z" fill="#1FC16B"/></svg></div>
@@ -491,10 +502,10 @@
           </div>
         </td>
         <td class="edited">06/15/2026 09:11</td>
-        <td><span class="row-menu"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- Row 3: HubSpot, Post-call -->
-      <tr>
+      <tr onclick="openFnPanel('update_hubspot_deal')" style="cursor:pointer">
         <td>
           <div class="fn-name">
             <div class="fn-icon" style="background:#FFF3EF"><svg viewBox="0 0 20 20" fill="none"><path d="M13.5 7.25a2.25 2.25 0 10-3.4 1.94V11.5l-2.5 1.5v1.5l2.5-1.5V14l-2 1v1.5l2-1V17h1.5v-2l2 1V14.5l-2-1v-.5l2.5 1.5V13l-2.5-1.5V9.19a2.25 2.25 0 001.9-1.94z" fill="#FF7A59"/></svg></div>
@@ -517,10 +528,10 @@
           </div>
         </td>
         <td class="edited">06/14/2026 11:05</td>
-        <td><span class="row-menu"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- Row 4: Call transfer, Mid-call -->
-      <tr>
+      <tr onclick="openFnPanel('transfer_to_human')" style="cursor:pointer">
         <td>
           <div class="fn-name">
             <div class="fn-icon" style="background:#FFF1E7"><svg viewBox="0 0 20 20" fill="none"><path d="M3 6a2 2 0 012-2h6a2 2 0 012 2v2.5l3-2v7l-3-2V14a2 2 0 01-2 2H5a2 2 0 01-2-2V6z" fill="#FF9147"/></svg></div>
@@ -545,10 +556,10 @@
           </div>
         </td>
         <td class="edited">06/12/2026 09:43</td>
-        <td><span class="row-menu"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- Row 5: Custom API, Pre-call -->
-      <tr>
+      <tr onclick="openFnPanel('verify_customer_identity')" style="cursor:pointer">
         <td>
           <div class="fn-name">
             <div class="fn-icon" style="background:#EFEAFE"><svg viewBox="0 0 20 20" fill="none"><path d="M10 2l6 2.5v4c0 3.7-2.5 6.9-6 7.5-3.5-.6-6-3.8-6-7.5v-4L10 2zm-1 9.5l4-4-1-1-3 3-1.5-1.5-1 1L9 11.5z" fill="#7D52F4"/></svg></div>
@@ -571,10 +582,10 @@
           </div>
         </td>
         <td class="edited">06/10/2026 11:13</td>
-        <td><span class="row-menu"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- Row 6: Slack, Post-call -->
-      <tr>
+      <tr onclick="openFnPanel('send_slack_notification')" style="cursor:pointer">
         <td>
           <div class="fn-name">
             <div class="fn-icon" style="background:#F4F0FA"><svg viewBox="0 0 20 20" fill="none"><path d="M7.5 3a1.5 1.5 0 00-1.5 1.5V6H4.5a1.5 1.5 0 000 3H6v1H4.5a1.5 1.5 0 000 3H6v.5a1.5 1.5 0 003 0V13h1v.5a1.5 1.5 0 003 0V13h.5a1.5 1.5 0 000-3H13V9h.5a1.5 1.5 0 000-3H13V5.5a1.5 1.5 0 00-3 0V6H9V4.5A1.5 1.5 0 007.5 3zM9 9V7h1v2H9zm0 4v-2h1v2H9z" fill="#611F69"/></svg></div>
@@ -598,10 +609,10 @@
           </div>
         </td>
         <td class="edited">06/09/2026 16:57</td>
-        <td><span class="row-menu"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- Row 7: Post-call Data Retrieval -->
-      <tr>
+      <tr onclick="openFnPanel('qualification_result')" style="cursor:pointer">
         <td>
           <div class="fn-name">
             <div class="fn-icon" style="background:#FFFBEB"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#CA8A04"/></svg></div>
@@ -625,10 +636,10 @@
           </div>
         </td>
         <td class="edited">06/09/2026 21:38</td>
-        <td><span class="row-menu"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- Row 8: Post-call Data Retrieval -->
-      <tr>
+      <tr onclick="openFnPanel('call_disposition')" style="cursor:pointer">
         <td>
           <div class="fn-name">
             <div class="fn-icon" style="background:#FFFBEB"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H13l3 3v9.5c0 .83-.67 1.5-1.5 1.5h-9C4.67 17 4 16.33 4 15.5v-11zM7 9h6v1.5H7V9zm0 3h4v1.5H7V12z" fill="#CA8A04"/></svg></div>
@@ -650,7 +661,7 @@
           </div>
         </td>
         <td class="edited">06/03/2026 11:14</td>
-        <td><span class="row-menu"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
     </tbody>
   </table>
@@ -1180,7 +1191,85 @@
       openTmplPanel(name, type, desc);
     });
   });
+
+  // ===== FUNCTION DETAIL PANEL =====
+  var FN_DATA = {
+    get_salesforce_opportunity: { name: 'get_salesforce_opportunity', sub: 'Reads deal stage and contact details before call starts', category: 'Salesforce', categoryColor: '#00A1E0', timing: 'Pre-conversation', timingClass: 'timing-pre', agents: ['DR','IV','SC','KP','AM'], agentColors: ['#3d64d7','#7D52F4','#1FC16B','#E5484D','#FF9147'], lastEdited: '06/15/2026 14:22', description: 'Fetches the Salesforce opportunity linked to the caller\'s phone number and populates deal stage, account name, and last activity date into the agent\'s context before the call begins.', endpoint: 'GET /services/data/v58.0/query' },
+    book_appointment: { name: 'book_appointment', sub: 'Creates an event on the customer\'s chosen slot', category: 'Cal.com', categoryColor: '#1FC16B', timing: 'During-conversation', timingClass: 'timing-mid', agents: ['DR','IV','SC','BK','MO'], agentColors: ['#3d64d7','#7D52F4','#1FC16B','#E5484D','#FF9147'], lastEdited: '06/15/2026 09:11', description: 'Books a Cal.com appointment for the customer\'s chosen time slot during the call. Confirms the booking and sends a calendar invite to the caller\'s email.', endpoint: 'POST /v1/bookings' },
+    update_hubspot_deal: { name: 'update_hubspot_deal', sub: 'Updates deal stage and notes in HubSpot after call ends', category: 'HubSpot', categoryColor: '#FF7A59', timing: 'Post-conversation', timingClass: 'timing-post', agents: ['DR','LI','MO'], agentColors: ['#3d64d7','#E5484D','#FF9147'], lastEdited: '06/14/2026 11:05', description: 'Updates the HubSpot deal with the call outcome, next steps, and any notes captured during the conversation. Moves the deal to the appropriate pipeline stage.', endpoint: 'PATCH /crm/v3/objects/deals/{dealId}' },
+    transfer_to_human: { name: 'transfer_to_human', sub: 'Warm transfer to a live support queue', category: 'Call transfer', categoryColor: '#FF9147', timing: 'During-conversation', timingClass: 'timing-mid', agents: ['DR','LI','IV','SC'], agentColors: ['#3d64d7','#E5484D','#7D52F4','#1FC16B'], lastEdited: '06/12/2026 09:43', description: 'Performs a warm transfer to the next available agent in the support queue. Passes a summary of the call context to the receiving agent before the handoff completes.', endpoint: 'POST /v1/calls/transfer' },
+    verify_customer_identity: { name: 'verify_customer_identity', sub: 'Checks name and DOB against the CRM record', category: 'Custom API', categoryColor: '#3d64d7', timing: 'Pre-conversation', timingClass: 'timing-pre', agents: ['IV','LI','BK'], agentColors: ['#7D52F4','#E5484D','#FF9147'], lastEdited: '06/10/2026 11:13', description: 'Verifies the caller\'s identity by matching their stated name and date of birth against the CRM record linked to their phone number. Returns a verified or failed status.', endpoint: 'POST https://api.yourcrm.com/v2/identity/verify' },
+    send_slack_notification: { name: 'send_slack_notification', sub: 'Posts call summary to the team Slack channel', category: 'Slack', categoryColor: '#611F69', timing: 'Post-conversation', timingClass: 'timing-post', agents: ['DR','IV','SC','BK'], agentColors: ['#3d64d7','#7D52F4','#1FC16B','#E5484D'], lastEdited: '06/09/2026 16:57', description: 'Sends a formatted call summary to the designated Slack channel after each call ends. Includes the caller\'s name, outcome, and any flagged action items.', endpoint: 'POST https://slack.com/api/chat.postMessage' },
+    qualification_result: { name: 'qualification_result', sub: 'The outcome of qualifying the caller\'s case during intake', category: 'Post-call Data Retrieval', categoryColor: '#CA8A04', timing: 'Extractor', timingClass: 'timing-pca', agents: ['DR','IV','SC','LI','BK','MO'], agentColors: ['#3d64d7','#7D52F4','#1FC16B','#E5484D','#FF9147','#525866'], lastEdited: '06/09/2026 21:38', description: 'After the call ends, the AI reads the transcript and determines whether the caller\'s case was qualified, not qualified, or escalated.', endpoint: null },
+    call_disposition: { name: 'call_disposition', sub: 'How the call ultimately concluded', category: 'Post-call Data Retrieval', categoryColor: '#CA8A04', timing: 'Extractor', timingClass: 'timing-pca', agents: ['LI','IV'], agentColors: ['#E5484D','#7D52F4'], lastEdited: '06/03/2026 11:14', description: 'After the call ends, the AI reads the transcript and classifies the call outcome: resolved, transferred, voicemail, or abandoned.', endpoint: null }
+  };
+  var AGENT_NAMES = {DR:'Dr. Rivera Agent', IV:'Ivan V. Agent', SC:'Sara Chen Agent', LI:'Linda Im Agent', BK:'Brandon K. Agent', MO:'Mike O. Agent', KP:'Karen P. Agent', AM:'Alex M. Agent'};
+
+  function openFnPanel(key) {
+    var d = FN_DATA[key];
+    if (!d) return;
+    document.getElementById('fn-panel-title').textContent = d.name;
+    document.getElementById('fn-panel-badge').innerHTML = '<span class="tdot" style="background:' + d.categoryColor + '"></span>' + d.category;
+    var timingEl = document.getElementById('fn-panel-timing');
+    timingEl.textContent = d.timing;
+    timingEl.className = 'timing-badge ' + d.timingClass;
+    document.getElementById('fn-panel-desc').textContent = d.description;
+    var epSection = document.getElementById('fn-panel-endpoint-section');
+    if (d.endpoint) {
+      document.getElementById('fn-panel-endpoint').textContent = d.endpoint;
+      epSection.style.display = '';
+    } else {
+      epSection.style.display = 'none';
+    }
+    document.getElementById('fn-panel-agent-count').textContent = d.agents.length + ' agent' + (d.agents.length !== 1 ? 's' : '');
+    var list = document.getElementById('fn-panel-agent-list');
+    list.innerHTML = '';
+    d.agents.forEach(function(initials, i) {
+      var row = document.createElement('div');
+      row.className = 'fn-agent-row';
+      row.innerHTML = '<div class="fn-agent-av" style="background:' + d.agentColors[i] + '">' + initials + '</div><span>' + (AGENT_NAMES[initials] || initials) + '</span>';
+      list.appendChild(row);
+    });
+    document.getElementById('fnOverlay').classList.add('open');
+    document.getElementById('fnPanel').classList.add('open');
+  }
+
+  function closeFnPanel() {
+    document.getElementById('fnPanel').classList.remove('open');
+    document.getElementById('fnOverlay').classList.remove('open');
+  }
 </script>
+
+<!-- ===================== FUNCTION DETAIL PANEL ===================== -->
+<div class="panel-overlay" id="fnOverlay" onclick="closeFnPanel()"></div>
+<div class="fn-panel" id="fnPanel">
+  <div class="panel-header">
+    <span class="panel-title" id="fn-panel-title"></span>
+    <span class="panel-close" onclick="closeFnPanel()">×</span>
+  </div>
+  <div class="panel-body">
+    <div class="fn-info-row">
+      <span class="type-badge" id="fn-panel-badge"></span>
+      <span class="timing-badge" id="fn-panel-timing"></span>
+    </div>
+    <div class="fn-panel-section">
+      <div class="panel-label">Description</div>
+      <div id="fn-panel-desc" style="font-size:14px;color:#525866;line-height:1.55;margin-top:2px"></div>
+    </div>
+    <div class="fn-panel-section" id="fn-panel-endpoint-section">
+      <div class="panel-label">Endpoint</div>
+      <div class="fn-endpoint" id="fn-panel-endpoint"></div>
+    </div>
+    <div class="fn-panel-section">
+      <div class="panel-label">Used by <span id="fn-panel-agent-count" style="color:#6B7280;font-weight:400"></span></div>
+      <div class="fn-agent-list" id="fn-panel-agent-list"></div>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <button class="panel-cancel" onclick="closeFnPanel()">Close</button>
+    <button class="panel-save" onclick="closeFnPanel(); showToast('Function updated')">Update</button>
+  </div>
+</div>
 
 <!-- ===================== TEMPLATES MODAL ===================== -->
 <div class="tmpl-overlay" id="tmplOverlay">

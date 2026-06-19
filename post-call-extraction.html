@@ -475,7 +475,19 @@
     display: flex; align-items: center; gap: 8px;
     padding: 8px 10px; border: 1px solid #E9EAEC;
     border-radius: 8px; font-size: 13px; color: #0A0A0A;
+    cursor: pointer; transition: background .1s, border-color .1s;
   }
+
+  .agent-chip:hover { background: #F5F7FA; border-color: #CBD5E0; }
+
+  .agent-chip-name { flex: 1; }
+
+  .agent-chip-link {
+    color: #C0C5CD; flex-shrink: 0;
+    display: flex; align-items: center;
+  }
+
+  .agent-chip:hover .agent-chip-link { color: #3d64d7; }
 
   .agent-av {
     width: 22px; height: 22px; border-radius: 50%;
@@ -1308,7 +1320,8 @@
       d.agents.forEach(function(a) {
         var el = document.createElement('div');
         el.className = 'agent-chip';
-        el.innerHTML = '<div class="agent-av" style="background:' + a.c + '">' + a.i + '</div>' + a.n;
+        el.innerHTML = '<div class="agent-av" style="background:' + a.c + '">' + a.i + '</div><span class="agent-chip-name">' + a.n + '</span><span class="agent-chip-link"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M11 3h6v6M17 3l-9 9M8 5H4a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1v-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+        el.onclick = function() { showAgentToast(a.n); };
         agList.appendChild(el);
       });
     } else { sec.style.display = 'none'; }
@@ -1358,7 +1371,7 @@
       agents.forEach(function(a) {
         var row = document.createElement('div');
         row.className = 'confirm-agent-row';
-        row.innerHTML = '<div class="agent-av" style="background:' + a.c + ';width:22px;height:22px;border-radius:50%;font-size:9px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + a.i + '</div>' + a.n;
+        row.innerHTML = '<div class="agent-av" style="background:' + a.c + ';width:22px;height:22px;border-radius:50%;font-size:9px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + a.i + '</div><span style="flex:1">' + a.n + '</span><span style="color:#C0C5CD;display:flex;align-items:center"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M11 3h6v6M17 3l-9 9M8 5H4a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1v-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
         list.appendChild(row);
       });
       document.getElementById('confirmOverlay').classList.add('open');
@@ -1385,7 +1398,7 @@
       agents.forEach(function(a) {
         var row = document.createElement('div');
         row.className = 'confirm-agent-row';
-        row.innerHTML = '<div class="agent-av" style="background:' + a.c + ';width:22px;height:22px;border-radius:50%;font-size:9px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + a.i + '</div>' + a.n;
+        row.innerHTML = '<div class="agent-av" style="background:' + a.c + ';width:22px;height:22px;border-radius:50%;font-size:9px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + a.i + '</div><span style="flex:1">' + a.n + '</span><span style="color:#C0C5CD;display:flex;align-items:center"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M11 3h6v6M17 3l-9 9M8 5H4a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1v-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
         list.appendChild(row);
       });
       document.getElementById('dangerOverlay').classList.add('open');
@@ -1414,6 +1427,13 @@
   function confirmSave() {
     closeConfirm();
     doSave(true);
+  }
+
+  function showAgentToast(name) {
+    var t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = 'Opening ' + name + '…';
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 2000);
   }
 
   function doSave(hasAgents) {

@@ -1136,44 +1136,40 @@
   function openTemplatesModal() {
     document.getElementById('pcaDropdown').style.display = 'none';
     document.getElementById('tmplOverlay').classList.add('open');
-    document.getElementById('editorOverlay').classList.remove('open');
   }
 
   function closeTemplatesModal() {
     document.getElementById('tmplOverlay').classList.remove('open');
-    document.getElementById('editorOverlay').classList.remove('open');
   }
 
-  function openTmplEditor(name, type, desc) {
-    document.getElementById('ed-name').value = name;
-    document.getElementById('ed-type').textContent = type;
-    document.getElementById('ed-desc').value = desc;
-    document.getElementById('ed-from').textContent = 'From template: ' + name;
-    var optRow = document.getElementById('ed-options-row');
-    var chips = document.getElementById('ed-chips');
-    chips.innerHTML = '';
-    if (type === 'Selector' && TMPL_OPTIONS[name]) {
-      TMPL_OPTIONS[name].forEach(function(o) {
-        var c = document.createElement('span');
-        c.className = 'chip';
-        c.innerHTML = o + ' <span class="x">&times;</span>';
-        chips.appendChild(c);
-      });
-      var add = document.createElement('span');
-      add.className = 'chip-add';
-      add.textContent = '+ Add option';
-      chips.appendChild(add);
-      optRow.style.display = '';
-    } else {
-      optRow.style.display = 'none';
-    }
+  function openTmplPanel(name, type, desc) {
     document.getElementById('tmplOverlay').classList.remove('open');
-    document.getElementById('editorOverlay').classList.add('open');
-  }
-
-  function tmplBackToTemplates() {
-    document.getElementById('editorOverlay').classList.remove('open');
-    document.getElementById('tmplOverlay').classList.add('open');
+    document.querySelector('.panel-title').textContent = 'New Post-call Data Retrieval';
+    var nameInput = document.getElementById('pcaName');
+    nameInput.value = name;
+    nameInput.readOnly = false;
+    nameInput.classList.remove('panel-input-readonly');
+    var typeMap = {'Text': 'text', 'Selector': 'selector', 'Boolean': 'boolean', 'Number': 'number'};
+    setPcaType(typeMap[type] || 'text');
+    document.getElementById('pcaPrompt').value = desc;
+    if (type === 'Selector' && TMPL_OPTIONS[name]) {
+      var choicesList = document.getElementById('choicesList');
+      choicesList.innerHTML = '';
+      TMPL_OPTIONS[name].forEach(function(opt) {
+        var row = document.createElement('div');
+        row.className = 'choice-row';
+        row.innerHTML = '<input class="choice-input" type="text" value="' + opt + '"><span class="choice-del" onclick="removeChoice(this)">×</span>';
+        choicesList.appendChild(row);
+      });
+    } else {
+      document.getElementById('choicesList').innerHTML = '<div class="choice-row"><input class="choice-input" type="text" placeholder="e.g. qualified"><span class="choice-del" onclick="removeChoice(this)">×</span></div><div class="choice-row"><input class="choice-input" type="text" placeholder="e.g. not_qualified"><span class="choice-del" onclick="removeChoice(this)">×</span></div>';
+    }
+    document.getElementById('optToggle').classList.remove('on');
+    document.getElementById('pcaOptionalCondition').style.display = 'none';
+    document.getElementById('accountToggle').classList.add('on');
+    document.getElementById('pcaAgentsSection').style.display = 'none';
+    document.querySelector('.panel-save').textContent = 'Save';
+    openPcaPanel();
   }
 
   document.querySelectorAll('.tmpl-card').forEach(function(card) {
@@ -1181,13 +1177,9 @@
       var name = card.querySelector('.nm').textContent.trim();
       var type = card.querySelector('.tb').textContent.trim();
       var desc = card.querySelector('.desc').textContent.trim();
-      openTmplEditor(name, type, desc);
+      openTmplPanel(name, type, desc);
     });
   });
-
-  document.getElementById('ed-back').addEventListener('click', tmplBackToTemplates);
-  document.getElementById('ed-cancel').addEventListener('click', closeTemplatesModal);
-  document.getElementById('ed-tog-acct').addEventListener('click', function() { this.classList.toggle('off'); });
 </script>
 
 <!-- ===================== TEMPLATES MODAL ===================== -->
@@ -1297,51 +1289,6 @@
   </div>
 </div>
 
-<!-- ===================== TEMPLATE FIELD EDITOR ===================== -->
-<div class="tmpl-overlay" id="editorOverlay">
-  <div class="tmpl-editor">
-    <div class="tmpl-editor-head">
-      <div class="tmpl-editor-back" id="ed-back"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to templates</div>
-      <h2>New field</h2>
-      <div class="from" id="ed-from">From template</div>
-    </div>
-    <div class="tmpl-editor-body">
-      <div class="fld">
-        <label>Type</label>
-        <div class="fld-select"><span id="ed-type">Text</span><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      </div>
-      <div class="fld">
-        <label>Name</label>
-        <input type="text" id="ed-name" value="">
-      </div>
-      <div class="fld">
-        <label>Description</label>
-        <textarea id="ed-desc"></textarea>
-        <div class="hint">Tells Retell what to extract from the call.</div>
-      </div>
-      <div class="fld" id="ed-options-row" style="display:none">
-        <label>Options</label>
-        <div class="chips" id="ed-chips"></div>
-      </div>
-      <div class="toggle-row">
-        <div>
-          <div class="lab">Set as account field</div>
-          <div class="sub">Shared across agents. Edit it once and every linked agent updates.</div>
-        </div>
-        <div class="tog" id="ed-tog-acct"></div>
-      </div>
-      <div class="fld" style="margin-top:16px;margin-bottom:0">
-        <label>Apply to</label>
-        <div class="fld-select"><span>All agents</span><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="hint">Linked. A later edit applies to every agent at once. Choose Copy on an agent to diverge.</div>
-      </div>
-    </div>
-    <div class="tmpl-editor-foot">
-      <button class="btn-sec" id="ed-cancel">Cancel</button>
-      <button class="btn-pri">Add field</button>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>

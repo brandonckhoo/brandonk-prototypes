@@ -147,6 +147,39 @@
   .tmpl-note { display: flex; align-items: flex-start; gap: 9px; background: #F4F7FE; border: 1px solid #DCE6FB; border-radius: 9px; padding: 11px 13px; margin-top: 14px; font-size: 13px; color: #344054; line-height: 1.45; }
   .tmpl-note svg { flex-shrink: 0; margin-top: 1px; }
   .tmpl-note b { font-weight: 600; color: #1F2937; }
+
+  /* ============ FIELD EDITOR MODAL ============ */
+  .editor { width: 560px; max-width: calc(100vw - 48px); max-height: 90vh; background: #fff; border-radius: 14px; box-shadow: 0 20px 48px rgba(0,0,0,0.22); display: flex; flex-direction: column; overflow: hidden; }
+  .editor-head { padding: 18px 22px 16px; border-bottom: 1px solid #F0F1F3; position: relative; }
+  .editor-back { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: #6B7280; cursor: pointer; margin-bottom: 8px; }
+  .editor-back:hover { color: #0A0A0A; }
+  .editor-head h2 { font-size: 16px; font-weight: 600; color: #0A0A0A; }
+  .editor-head .from { font-size: 12.5px; color: #3d64d7; margin-top: 3px; }
+  .editor-body { padding: 18px 22px; overflow-y: auto; }
+  .fld { margin-bottom: 16px; }
+  .fld label { display: block; font-size: 13px; font-weight: 600; color: #0A0A0A; margin-bottom: 6px; }
+  .fld input, .fld textarea, .fld .select { width: 100%; border: 1px solid #E5E7EB; border-radius: 8px; padding: 9px 11px; font-size: 14px; color: #0A0A0A; font-family: inherit; background: #fff; }
+  .fld textarea { resize: vertical; min-height: 60px; line-height: 1.45; }
+  .fld .select { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .fld .select svg { color: #9CA3AF; }
+  .fld .hint { font-size: 12px; color: #9CA3AF; margin-top: 5px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid #E5E7EB; border-radius: 7px; font-size: 13px; color: #344054; background: #FAFBFC; }
+  .chip .x { color: #C0C4CC; cursor: pointer; }
+  .chip-add { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border: 1px dashed #D1D5DB; border-radius: 7px; font-size: 13px; color: #6B7280; cursor: pointer; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-top: 1px solid #F0F1F3; }
+  .toggle-row:last-of-type { border-bottom: 1px solid #F0F1F3; }
+  .toggle-row .lab { font-size: 13.5px; font-weight: 600; color: #0A0A0A; }
+  .toggle-row .sub { font-size: 12px; color: #6B7280; margin-top: 2px; max-width: 360px; }
+  .tog { width: 38px; height: 22px; border-radius: 11px; background: #3d64d7; position: relative; flex-shrink: 0; cursor: pointer; }
+  .tog::after { content: ''; position: absolute; top: 2px; left: 18px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left .12s; }
+  .tog.off { background: #D1D5DB; }
+  .tog.off::after { left: 2px; }
+  .editor-foot { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 14px 22px; border-top: 1px solid #F0F1F3; }
+  .btn-sec { height: 36px; padding: 0 14px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 500; color: #0A0A0A; cursor: pointer; }
+  .btn-sec:hover { background: rgba(0,0,0,0.02); }
+  .btn-pri { height: 36px; padding: 0 16px; border: 1px solid #0E121B; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; }
+  .btn-pri:hover { background: #000; }
 </style>
 </head>
 <body>
@@ -506,7 +539,7 @@
 </main>
 
 <!-- ===================== BROWSE TEMPLATES MODAL ===================== -->
-<div class="overlay">
+<div class="overlay" id="tmpl-overlay">
   <div class="modal">
     <div class="modal-head">
       <h2>Browse templates</h2>
@@ -661,6 +694,115 @@
     </div>
   </div>
 </div>
+
+<!-- ===================== PREFILLED FIELD EDITOR MODAL ===================== -->
+<div class="overlay" id="editor-overlay" style="display:none">
+  <div class="editor">
+    <div class="editor-head">
+      <div class="editor-back" id="ed-back"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to templates</div>
+      <h2>New field</h2>
+      <div class="from" id="ed-from">From template</div>
+    </div>
+    <div class="editor-body">
+      <div class="fld">
+        <label>Type</label>
+        <div class="select"><span id="ed-type">Text</span><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="fld">
+        <label>Name</label>
+        <input type="text" id="ed-name" value="">
+      </div>
+      <div class="fld">
+        <label>Description</label>
+        <textarea id="ed-desc"></textarea>
+        <div class="hint">Tells Retell what to extract from the call.</div>
+      </div>
+      <div class="fld" id="ed-options-row" style="display:none">
+        <label>Options</label>
+        <div class="chips" id="ed-chips"></div>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="lab">Set as account field</div>
+          <div class="sub">Shared across agents. Edit it once and every linked agent updates.</div>
+        </div>
+        <div class="tog" id="ed-tog-acct"></div>
+      </div>
+      <div class="fld" style="margin-top:16px;margin-bottom:0">
+        <label>Apply to</label>
+        <div class="select"><span>All agents</span><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="hint">Linked. A later edit applies to every agent at once. Choose Copy on an agent to diverge.</div>
+      </div>
+    </div>
+    <div class="editor-foot">
+      <button class="btn-sec" id="ed-cancel">Cancel</button>
+      <button class="btn-pri">Add field</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Selector options per template (the only types that carry predefined choices)
+  var OPTIONS = {
+    user_sentiment: ['Positive', 'Neutral', 'Negative'],
+    call_outcome: ['Booked appointment', 'Live transfer', 'Not qualified', 'Follow up', 'Not interested'],
+    lead_qualification: ['Yes', 'No', 'Maybe'],
+    interest_level: ['Very interested', 'Interested', 'Neutral', 'Not interested']
+  };
+
+  var tmplOverlay = document.getElementById('tmpl-overlay');
+  var editorOverlay = document.getElementById('editor-overlay');
+
+  function openEditor(name, type, desc) {
+    document.getElementById('ed-name').value = name;
+    document.getElementById('ed-type').textContent = type;
+    document.getElementById('ed-desc').value = desc;
+    document.getElementById('ed-from').textContent = 'From template: ' + name;
+
+    var optRow = document.getElementById('ed-options-row');
+    var chips = document.getElementById('ed-chips');
+    chips.innerHTML = '';
+    if (type === 'Selector' && OPTIONS[name]) {
+      OPTIONS[name].forEach(function (o) {
+        var c = document.createElement('span');
+        c.className = 'chip';
+        c.innerHTML = o + ' <span class="x">&times;</span>';
+        chips.appendChild(c);
+      });
+      var add = document.createElement('span');
+      add.className = 'chip-add';
+      add.textContent = '+ Add option';
+      chips.appendChild(add);
+      optRow.style.display = '';
+    } else {
+      optRow.style.display = 'none';
+    }
+
+    tmplOverlay.style.display = 'none';
+    editorOverlay.style.display = 'flex';
+  }
+
+  document.querySelectorAll('.tmpl-card').forEach(function (card) {
+    card.addEventListener('click', function () {
+      var name = card.querySelector('.nm').textContent.trim();
+      var type = card.querySelector('.tb').textContent.trim();
+      var desc = card.querySelector('.desc').textContent.trim();
+      openEditor(name, type, desc);
+    });
+  });
+
+  function backToTemplates() {
+    editorOverlay.style.display = 'none';
+    tmplOverlay.style.display = 'flex';
+  }
+  document.getElementById('ed-back').addEventListener('click', backToTemplates);
+  document.getElementById('ed-cancel').addEventListener('click', backToTemplates);
+
+  // account toggle demo
+  document.getElementById('ed-tog-acct').addEventListener('click', function () {
+    this.classList.toggle('off');
+  });
+</script>
 
 </body>
 </html>

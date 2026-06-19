@@ -145,6 +145,49 @@
   td.edited { color: #6B7280; font-size: 13px; white-space: nowrap; }
   .row-menu { color: #9CA3AF; cursor: pointer; display: flex; justify-content: flex-end; }
   .row-menu:hover { color: #525866; }
+
+  /* ============ PCA SIDE PANEL ============ */
+  .panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.18); z-index: 300; display: none; }
+  .panel-overlay.open { display: block; }
+  .pca-panel { position: fixed; top: 0; right: -480px; width: 480px; height: 100vh; background: #fff; border-left: 1px solid #E1E4EA; box-shadow: -8px 0 32px rgba(0,0,0,0.12); z-index: 301; display: flex; flex-direction: column; transition: right 0.22s cubic-bezier(0.4,0,0.2,1); }
+  .pca-panel.open { right: 0; }
+  .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 18px; border-bottom: 1px solid #F0F1F3; flex-shrink: 0; }
+  .panel-title { font-size: 15px; font-weight: 600; color: #0A0A0A; }
+  .panel-close { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; color: #9CA3AF; font-size: 20px; line-height: 1; }
+  .panel-close:hover { background: #F3F4F6; color: #525866; }
+  .panel-body { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+  .panel-field { display: flex; flex-direction: column; gap: 6px; }
+  .panel-label { font-size: 13px; font-weight: 500; color: #374151; }
+  .panel-hint { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
+  .panel-input { height: 36px; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0 12px; font-size: 14px; color: #0A0A0A; outline: none; width: 100%; background: #fff; }
+  .panel-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.1); }
+  .panel-textarea { border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px 12px; font-size: 14px; color: #0A0A0A; outline: none; width: 100%; background: #fff; resize: none; font-family: inherit; line-height: 1.5; }
+  .panel-textarea:focus { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.1); }
+  .type-tabs { display: flex; gap: 0; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden; }
+  .type-tab { flex: 1; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #525866; cursor: pointer; background: #fff; border-right: 1px solid #E5E7EB; }
+  .type-tab:last-child { border-right: none; }
+  .type-tab:hover { background: #F9FAFB; }
+  .type-tab.active { background: #0E121B; color: #fff; }
+  .choices-list { display: flex; flex-direction: column; gap: 6px; }
+  .choice-row { display: flex; align-items: center; gap: 8px; }
+  .choice-input { flex: 1; height: 34px; border: 1px solid #E5E7EB; border-radius: 7px; padding: 0 10px; font-size: 13px; color: #0A0A0A; outline: none; background: #fff; }
+  .choice-input:focus { border-color: #3d64d7; }
+  .choice-del { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #D1D5DB; cursor: pointer; border-radius: 4px; flex-shrink: 0; font-size: 16px; line-height: 1; }
+  .choice-del:hover { color: #9CA3AF; background: #F3F4F6; }
+  .add-choice { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: #3d64d7; cursor: pointer; font-weight: 500; margin-top: 2px; }
+  .add-choice:hover { opacity: 0.8; }
+  .optional-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0 0; border-top: 1px solid #F0F1F3; }
+  .optional-label { font-size: 14px; color: #374151; }
+  .optional-hint { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
+  .toggle { width: 36px; height: 20px; border-radius: 10px; background: #E5E7EB; position: relative; cursor: pointer; transition: background 0.18s; flex-shrink: 0; }
+  .toggle.on { background: #0E121B; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left 0.18s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .toggle.on::after { left: 18px; }
+  .panel-footer { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid #F0F1F3; flex-shrink: 0; }
+  .panel-cancel { height: 36px; padding: 0 16px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 500; color: #374151; cursor: pointer; }
+  .panel-cancel:hover { background: #F9FAFB; }
+  .panel-save { height: 36px; padding: 0 16px; border: 1px solid #0E121B; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; }
+  .panel-save:hover { background: #000; }
 </style>
 </head>
 <body>
@@ -550,7 +593,7 @@
         <svg width="13" height="13" viewBox="0 0 20 20" fill="none" style="margin-left:2px"><path d="M5 7l5 5 5-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
       <div class="newfn-dropdown" id="pcaDropdown">
-        <div class="newfn-item">
+        <div class="newfn-item" onclick="openPcaPanel()">
           <div class="newfn-item-icon" style="background:#FFFBEB"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="#CA8A04"/></svg></div>
           <div>
             <div style="font-size:13px;font-weight:500;color:#0A0A0A">New Post Call Analysis</div>
@@ -635,6 +678,65 @@
 
 </main>
 
+<!-- PCA side panel overlay -->
+<div class="panel-overlay" id="pcaOverlay" onclick="closePcaPanel()"></div>
+
+<!-- PCA side panel -->
+<div class="pca-panel" id="pcaPanel">
+  <div class="panel-header">
+    <span class="panel-title">New Post Call Analysis</span>
+    <span class="panel-close" onclick="closePcaPanel()">×</span>
+  </div>
+  <div class="panel-body">
+
+    <div class="panel-field">
+      <div class="panel-label">Name</div>
+      <input class="panel-input" type="text" placeholder="e.g. call_outcome" id="pcaName">
+      <div class="panel-hint">Used as the field key in the webhook payload.</div>
+    </div>
+
+    <div class="panel-field">
+      <div class="panel-label">Type</div>
+      <div class="type-tabs">
+        <div class="type-tab active" id="tab-selector" onclick="setPcaType('selector')">Selector</div>
+        <div class="type-tab" id="tab-yesno" onclick="setPcaType('yesno')">Yes / No</div>
+        <div class="type-tab" id="tab-text" onclick="setPcaType('text')">Text</div>
+      </div>
+    </div>
+
+    <div class="panel-field">
+      <div class="panel-label">Extractable data</div>
+      <textarea class="panel-textarea" rows="3" placeholder="e.g. What was the outcome of the call?" id="pcaPrompt"></textarea>
+      <div class="panel-hint">The AI reads the transcript after the call and answers this question.</div>
+    </div>
+
+    <div class="panel-field" id="choices-section">
+      <div class="panel-label">Choices</div>
+      <div class="choices-list" id="choicesList">
+        <div class="choice-row"><input class="choice-input" type="text" placeholder="e.g. qualified"><span class="choice-del" onclick="removeChoice(this)">×</span></div>
+        <div class="choice-row"><input class="choice-input" type="text" placeholder="e.g. not_qualified"><span class="choice-del" onclick="removeChoice(this)">×</span></div>
+      </div>
+      <div class="add-choice" onclick="addChoice()">
+        <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="#3d64d7"/></svg>
+        Add choice
+      </div>
+    </div>
+
+    <div class="optional-row">
+      <div>
+        <div class="optional-label">Optional</div>
+        <div class="panel-hint">If off, the field is always populated after every call.</div>
+      </div>
+      <div class="toggle" id="optToggle" onclick="this.classList.toggle('on')"></div>
+    </div>
+
+  </div>
+  <div class="panel-footer">
+    <button class="panel-cancel" onclick="closePcaPanel()">Cancel</button>
+    <button class="panel-save">Save</button>
+  </div>
+</div>
+
 <!-- Connect integration drawer -->
 <div class="connect-drawer" id="connectDrawer">
   <div class="connect-drawer-header">
@@ -679,6 +781,32 @@
 </div>
 
 <script>
+  function openPcaPanel() {
+    document.getElementById('pcaDropdown').style.display = 'none';
+    document.getElementById('pcaPanel').classList.add('open');
+    document.getElementById('pcaOverlay').classList.add('open');
+  }
+  function closePcaPanel() {
+    document.getElementById('pcaPanel').classList.remove('open');
+    document.getElementById('pcaOverlay').classList.remove('open');
+  }
+  function setPcaType(type) {
+    ['selector','yesno','text'].forEach(function(t) {
+      document.getElementById('tab-' + t).classList.toggle('active', t === type);
+    });
+    document.getElementById('choices-section').style.display = type === 'selector' ? 'flex' : 'none';
+  }
+  function addChoice() {
+    var list = document.getElementById('choicesList');
+    var row = document.createElement('div');
+    row.className = 'choice-row';
+    row.innerHTML = '<input class="choice-input" type="text" placeholder="Add a choice"><span class="choice-del" onclick="removeChoice(this)">×</span>';
+    list.appendChild(row);
+    row.querySelector('input').focus();
+  }
+  function removeChoice(el) {
+    el.parentElement.remove();
+  }
   function setCategory(cat) {
     // update active state
     ['extractors','pre','during','post','custom'].forEach(function(c) {

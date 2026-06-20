@@ -223,6 +223,74 @@
   }
 
   .filter-btn:hover { border-color: #CBD5E0; color: #0A0A0A; }
+  .filter-btn.active { border-color: #3d64d7; color: #3d64d7; background: #EEF2FF; }
+  .filter-count-badge { background: #3d64d7; color: #fff; border-radius: 99px; font-size: 11px; padding: 1px 6px; font-weight: 600; margin-left: 2px; }
+
+  /* ── Search bar ── */
+  .search-bar {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 10px; background: #fff;
+    border: 1px solid #E9EAEC; border-radius: 8px;
+    font-size: 13px; color: #9CA3AF; width: 210px;
+  }
+  .search-bar input { border: none; outline: none; font-size: 13px; color: #0A0A0A; width: 100%; font-family: inherit; background: transparent; }
+  .search-bar input::placeholder { color: #9CA3AF; }
+
+  /* ── Filter panel ── */
+  .filter-panel {
+    position: absolute; z-index: 250; top: calc(100% + 6px); left: 0;
+    background: #fff; border: 1px solid #E9EAEC; border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.10);
+    width: 240px; display: none;
+  }
+  .filter-panel.open { display: block; }
+  .filter-section { padding: 10px 14px 6px; }
+  .filter-section-label {
+    font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .06em; color: #9CA3AF; margin-bottom: 8px;
+  }
+  .filter-search-input {
+    width: 100%; padding: 6px 10px; border: 1px solid #E9EAEC;
+    border-radius: 7px; font-size: 12.5px; outline: none; font-family: inherit;
+    color: #0A0A0A; box-sizing: border-box;
+  }
+  .filter-search-input:focus { border-color: #3d64d7; }
+  .filter-agent-list { margin-top: 6px; max-height: 140px; overflow-y: auto; }
+  .filter-check-row {
+    display: flex; align-items: center; gap: 7px;
+    padding: 4px 2px; cursor: pointer; font-size: 12.5px; color: #0A0A0A;
+  }
+  .filter-check-row input[type=checkbox] { cursor: pointer; accent-color: #3d64d7; flex-shrink: 0; }
+  .filter-agent-draft { font-size: 10.5px; color: #9CA3AF; background: #F5F7FA; border-radius: 4px; padding: 1px 5px; margin-left: 2px; }
+  .filter-radio-row {
+    display: flex; align-items: center; gap: 7px;
+    padding: 4px 2px; cursor: pointer; font-size: 12.5px; color: #0A0A0A;
+  }
+  .filter-radio-row input[type=radio] { cursor: pointer; accent-color: #3d64d7; flex-shrink: 0; }
+  .filter-divider { height: 1px; background: #F0F1F3; }
+  .filter-actions {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+  }
+  .filter-clear-btn { font-size: 12.5px; color: #9CA3AF; cursor: pointer; background: none; border: none; font-family: inherit; }
+  .filter-clear-btn:hover { color: #525866; }
+  .filter-apply-btn {
+    padding: 5px 14px; background: #3d64d7; color: #fff;
+    border: none; border-radius: 7px; font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: inherit;
+  }
+  .filter-apply-btn:hover { background: #3358c4; }
+
+  /* ── Filter chips ── */
+  .filter-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .filter-chip {
+    display: flex; align-items: center; gap: 5px;
+    padding: 3px 6px 3px 10px; background: #EEF2FF;
+    border: 1px solid #C7D2FE; border-radius: 99px;
+    font-size: 12px; color: #3d64d7;
+  }
+  .filter-chip-x { cursor: pointer; display: flex; align-items: center; color: #93A3FF; }
+  .filter-chip-x:hover { color: #3d64d7; }
 
   .spacer { flex: 1; }
 
@@ -935,11 +1003,43 @@
 
       <!-- Toolbar -->
       <div class="toolbar">
-        <button class="filter-btn">
-          <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M6 10h8M9 15h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          Filter by agent
-          <svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
+        <!-- Filter button + panel -->
+        <div style="position:relative">
+          <button class="filter-btn" id="filterBtn" onclick="toggleFilterPanel(event)">
+            <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M6 10h8M9 15h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Filter
+            <span class="filter-count-badge" id="filterCountBadge" style="display:none"></span>
+            <svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="filter-panel" id="filterPanel" onclick="event.stopPropagation()">
+            <!-- Agent section -->
+            <div class="filter-section">
+              <div class="filter-section-label">Agent</div>
+              <input class="filter-search-input" type="text" placeholder="Search agents…" id="agentSearchInput" oninput="buildAgentList(this.value)">
+              <div class="filter-agent-list" id="agentCheckList"></div>
+            </div>
+            <div class="filter-divider"></div>
+            <!-- Analysis Categories section -->
+            <div class="filter-section">
+              <div class="filter-section-label">Analysis Categories</div>
+              <label class="filter-radio-row"><input type="radio" name="typeFilter" value="" checked onchange=""> All types</label>
+              <label class="filter-radio-row"><input type="radio" name="typeFilter" value="boolean"> Boolean</label>
+              <label class="filter-radio-row"><input type="radio" name="typeFilter" value="text"> Text</label>
+              <label class="filter-radio-row"><input type="radio" name="typeFilter" value="number"> Number</label>
+              <label class="filter-radio-row"><input type="radio" name="typeFilter" value="selector"> Selector</label>
+            </div>
+            <div class="filter-divider"></div>
+            <div class="filter-actions">
+              <button class="filter-clear-btn" onclick="clearFilters()">Clear all</button>
+              <button class="filter-apply-btn" onclick="applyFilters()">Apply</button>
+            </div>
+          </div>
+        </div>
+        <!-- Keyword search -->
+        <div class="search-bar">
+          <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="#9CA3AF" stroke-width="1.5"/><path d="M13.5 13.5L17 17" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="text" placeholder="Search fields…" id="searchInput" oninput="searchTable(this.value)">
+        </div>
         <span class="spacer"></span>
         <div style="position:relative">
           <button class="btn-create" onclick="toggleDropdown(event)">
@@ -969,6 +1069,9 @@
           </div>
         </div>
       </div>
+
+      <!-- Filter chips -->
+      <div class="filter-chips" id="filterChips" style="display:none"></div>
 
       <!-- Table -->
       <div class="table-card">
@@ -1642,7 +1745,145 @@
     _deleteKey = null;
   }
 
-  document.addEventListener('click', function() { closeRowMenu(); });
+
+  /* ── Filter panel ── */
+  var _filterAgents = [];
+  var _filterType   = '';
+  var _searchQuery  = '';
+
+  var ALL_AGENTS = [
+    { n: 'Defendant Intake',      c: '#3d64d7', i: 'DR', draft: false },
+    { n: 'Inbound Vetting',       c: '#7D52F4', i: 'IV', draft: false },
+    { n: 'Screening Call',        c: '#1FC16B', i: 'SC', draft: false },
+    { n: 'Personal Injury',       c: '#E5484D', i: 'PM', draft: false },
+    { n: 'Workers Comp',          c: '#F59E0B', i: 'WC', draft: false },
+    { n: 'Liability Check',       c: '#525866', i: 'LI', draft: false },
+    { n: 'Callback Handler',      c: '#0EA5E9', i: 'CB', draft: true  },
+  ];
+
+  function toggleFilterPanel(e) {
+    e.stopPropagation();
+    var panel = document.getElementById('filterPanel');
+    if (!panel.classList.contains('open')) {
+      buildAgentList('');
+      panel.classList.add('open');
+    } else {
+      panel.classList.remove('open');
+    }
+  }
+
+  function buildAgentList(query) {
+    var list = document.getElementById('agentCheckList');
+    list.innerHTML = '';
+    var q = (query || '').toLowerCase();
+    ALL_AGENTS.filter(function(a) {
+      return !q || a.n.toLowerCase().includes(q);
+    }).forEach(function(a) {
+      var label = document.createElement('label');
+      label.className = 'filter-check-row';
+      var checked = _filterAgents.includes(a.n);
+      label.innerHTML = '<input type="checkbox" value="' + a.n + '"' + (checked ? ' checked' : '') + '>'
+        + '<span style="display:flex;align-items:center;gap:4px">'
+        + '<span style="width:14px;height:14px;border-radius:50%;background:' + a.c + ';display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#fff;flex-shrink:0">' + a.i + '</span>'
+        + a.n
+        + (a.draft ? '<span class="filter-agent-draft">Draft</span>' : '')
+        + '</span>';
+      list.appendChild(label);
+    });
+  }
+
+  function applyFilters() {
+    var checks = document.querySelectorAll('#agentCheckList input[type=checkbox]:checked');
+    _filterAgents = Array.from(checks).map(function(c) { return c.value; });
+    var radios = document.querySelectorAll('input[name=typeFilter]');
+    radios.forEach(function(r) { if (r.checked) _filterType = r.value; });
+    document.getElementById('filterPanel').classList.remove('open');
+    updateFilterChips();
+    runFilters();
+  }
+
+  function clearFilters() {
+    _filterAgents = [];
+    _filterType = '';
+    document.getElementById('agentSearchInput').value = '';
+    buildAgentList('');
+    var radios = document.querySelectorAll('input[name=typeFilter]');
+    if (radios.length) radios[0].checked = true;
+    document.getElementById('filterPanel').classList.remove('open');
+    updateFilterChips();
+    runFilters();
+  }
+
+  function removeAgentFilter(name) {
+    _filterAgents = _filterAgents.filter(function(n) { return n !== name; });
+    updateFilterChips();
+    runFilters();
+  }
+
+  function removeTypeFilter() {
+    _filterType = '';
+    var radios = document.querySelectorAll('input[name=typeFilter]');
+    if (radios.length) radios[0].checked = true;
+    updateFilterChips();
+    runFilters();
+  }
+
+  function updateFilterChips() {
+    var chips = document.getElementById('filterChips');
+    chips.innerHTML = '';
+    var x = '<svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+    _filterAgents.forEach(function(name) {
+      var chip = document.createElement('div');
+      chip.className = 'filter-chip';
+      chip.innerHTML = name + '<span class="filter-chip-x" onclick="removeAgentFilter('' + name.replace(/'/g,"\'") + '')">' + x + '</span>';
+      chips.appendChild(chip);
+    });
+    if (_filterType) {
+      var labels = { boolean:'Boolean', text:'Text', number:'Number', selector:'Selector' };
+      var chip = document.createElement('div');
+      chip.className = 'filter-chip';
+      chip.innerHTML = 'Type: ' + labels[_filterType] + '<span class="filter-chip-x" onclick="removeTypeFilter()">' + x + '</span>';
+      chips.appendChild(chip);
+    }
+    var total = _filterAgents.length + (_filterType ? 1 : 0);
+    chips.style.display = total ? 'flex' : 'none';
+    var btn = document.getElementById('filterBtn');
+    var badge = document.getElementById('filterCountBadge');
+    if (total > 0) { btn.classList.add('active'); badge.textContent = total; badge.style.display = ''; }
+    else           { btn.classList.remove('active'); badge.style.display = 'none'; }
+  }
+
+  function searchTable(q) {
+    _searchQuery = q.toLowerCase();
+    runFilters();
+  }
+
+  function runFilters() {
+    var rows = document.querySelectorAll('tbody tr');
+    rows.forEach(function(row) {
+      var onclick = row.getAttribute('onclick') || '';
+      var m = onclick.match(/openPanel\('([^']+)'\)/);
+      var key = m ? m[1] : null;
+      var d = key ? DATA[key] : null;
+      if (!d) { row.style.display = ''; return; }
+      var show = true;
+      if (_searchQuery) {
+        var hit = d.name.toLowerCase().includes(_searchQuery) || d.prompt.toLowerCase().includes(_searchQuery);
+        if (!hit) show = false;
+      }
+      if (show && _filterAgents.length > 0) {
+        var agentNames = (d.agents || []).map(function(a) { return a.n; });
+        var hit2 = _filterAgents.some(function(n) { return agentNames.includes(n); });
+        if (!hit2) show = false;
+      }
+      if (show && _filterType) {
+        if (d.type !== _filterType) show = false;
+      }
+      row.style.display = show ? '' : 'none';
+    });
+  }
+
+  document.addEventListener('click', function() { closeRowMenu(); var fp = document.getElementById('filterPanel'); if(fp) fp.classList.remove('open'); });
 
   function showAgentToast(name) {
     var t = document.getElementById('toast');

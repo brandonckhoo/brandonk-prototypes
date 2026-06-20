@@ -343,8 +343,9 @@
   .row-dropdown-item {
     display: flex; align-items: center; gap: 8px;
     padding: 7px 10px; border-radius: 6px;
-    font-size: 13px; cursor: pointer;
+    font-size: 13px; cursor: pointer; color: #0A0A0A;
   }
+  .row-dropdown-item:hover { background: #F5F7FA; }
   .row-dropdown-item.danger { color: #E5484D; }
   .row-dropdown-item.danger:hover { background: #FEF2F2; }
 
@@ -1119,6 +1120,11 @@
 
 <!-- Row 3-dot dropdown -->
 <div class="row-dropdown" id="rowDropdown" onclick="event.stopPropagation()">
+  <div class="row-dropdown-item" onclick="copyFieldId()">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="7" y="7" width="9" height="11" rx="1.5" stroke="#525866" stroke-width="1.6"/><path d="M13 7V5a1.5 1.5 0 00-1.5-1.5h-7A1.5 1.5 0 003 5v9A1.5 1.5 0 004.5 15.5H7" stroke="#525866" stroke-width="1.6" stroke-linecap="round"/></svg>
+    Copy ID
+  </div>
+  <div style="height:1px;background:#F0F1F3;margin:3px 0"></div>
   <div class="row-dropdown-item danger" onclick="deleteField()">
     <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M8 5V3h4v2M6 5l1 12h6l1-12" stroke="#E5484D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     Delete
@@ -1488,6 +1494,15 @@
 
   function closeRowMenu() {
     document.getElementById('rowDropdown').classList.remove('open');
+  }
+
+  function copyFieldId() {
+    closeRowMenu();
+    navigator.clipboard.writeText(_deleteKey).catch(function() {});
+    var t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = 'Field ID copied to clipboard.';
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 2500);
   }
 
   function deleteField() {

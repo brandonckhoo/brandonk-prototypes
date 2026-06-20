@@ -730,6 +730,219 @@
 
   .tmpl-card-desc { font-size: 12px; color: #9CA3AF; line-height: 1.4; }
 
+  /* ── Single Prompt Agent Overlay ── */
+  .sp-overlay {
+    position: fixed; inset: 0; background: #F5F7FA;
+    z-index: 500; display: none; flex-direction: column;
+  }
+  .sp-overlay.open { display: flex; }
+
+  .sp-topbar {
+    background: #fff; border-bottom: 1px solid #E9EAEC;
+    height: 48px; display: flex; align-items: center;
+    padding: 0 20px; gap: 10px; flex-shrink: 0;
+  }
+  .sp-breadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: #9CA3AF;
+  }
+  .sp-breadcrumb-cur { color: #0A0A0A; font-weight: 500; }
+  .sp-breadcrumb-sep { color: #D1D5DB; }
+  .sp-preview-badge {
+    font-size: 11px; padding: 2px 8px; border-radius: 5px;
+    background: #FFF7ED; color: #D97706; border: 1px solid #FDE68A; font-weight: 500;
+  }
+  .sp-close-preview {
+    margin-left: auto; padding: 5px 12px;
+    background: #F5F7FA; border: 1px solid #E9EAEC; border-radius: 7px;
+    font-size: 12.5px; color: #525866; cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .sp-close-preview:hover { background: #ECEEF1; }
+
+  .sp-content { flex: 1; display: flex; min-height: 0; }
+
+  .sp-agent-sidebar {
+    width: 224px; flex-shrink: 0; background: #F5F7FA;
+    border-right: 1px solid #E9EAEC; display: flex; flex-direction: column;
+  }
+  .sp-agent-hdr {
+    padding: 14px 14px 10px; border-bottom: 1px solid #E9EAEC;
+  }
+  .sp-agent-name-row { display: flex; align-items: center; gap: 9px; }
+  .sp-agent-av {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: #3d64d7; color: #fff; font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .sp-agent-title { font-size: 13.5px; font-weight: 600; color: #0A0A0A; }
+  .sp-agent-meta { font-size: 11.5px; color: #9CA3AF; margin-top: 2px; }
+  .sp-nav-dim {
+    padding: 8px; opacity: .5; pointer-events: none; flex: 1;
+  }
+  .sp-nav-dim .nav-item { pointer-events: none; }
+
+  .sp-main-area { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+  .sp-editor-tabs-row {
+    display: flex; background: #fff; border-bottom: 1px solid #E9EAEC;
+    padding: 0 20px; flex-shrink: 0;
+  }
+  .sp-editor-tab {
+    padding: 11px 14px; font-size: 13px; color: #9CA3AF;
+    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .sp-editor-tab.active { color: #0A0A0A; border-bottom-color: #3d64d7; font-weight: 500; }
+  .sp-editor-tab:hover:not(.active) { color: #525866; }
+
+  .sp-split { flex: 1; display: flex; min-height: 0; }
+
+  .sp-prompt-area {
+    flex: 1; padding: 20px; background: #fff; border-right: 1px solid #E9EAEC;
+    display: flex; flex-direction: column;
+  }
+  .sp-prompt-label {
+    font-size: 11px; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; color: #C0C5CD; margin-bottom: 10px;
+  }
+  .sp-prompt-mock {
+    font-size: 12px; color: #E2E4E8; line-height: 1.7;
+    font-family: 'SF Mono', 'Menlo', monospace;
+    border: 1px solid #F0F1F3; border-radius: 8px; padding: 14px; background: #FAFAFA;
+    flex: 1;
+  }
+
+  .sp-config-panel {
+    width: 290px; flex-shrink: 0; background: #F5F7FA;
+    display: flex; flex-direction: column;
+  }
+  .sp-config-tabs {
+    display: flex; background: #fff; border-bottom: 1px solid #E9EAEC;
+    padding: 0 12px; flex-shrink: 0;
+  }
+  .sp-config-tab {
+    padding: 10px 10px; font-size: 13px; color: #9CA3AF;
+    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap;
+  }
+  .sp-config-tab.active { color: #0A0A0A; border-bottom-color: #3d64d7; font-weight: 500; }
+
+  .sp-config-body {
+    flex: 1; overflow-y: auto; padding: 10px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+
+  .sp-accordion {
+    border: 1px solid #E9EAEC; border-radius: 9px;
+    overflow: hidden; background: #fff;
+  }
+  .sp-accordion-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; font-size: 13px; font-weight: 500; color: #0A0A0A;
+    cursor: pointer; user-select: none;
+  }
+  .sp-accordion-hdr:hover { background: #F8F9FB; }
+  .sp-accordion-chev { color: #9CA3AF; flex-shrink: 0; transition: transform .2s; }
+  .sp-accordion.open .sp-accordion-chev { transform: rotate(180deg); }
+  .sp-accordion-body {
+    border-top: 1px solid #F0F1F3; background: #F8F9FB;
+    padding: 8px; display: none; flex-direction: column; gap: 4px;
+  }
+  .sp-accordion.open .sp-accordion-body { display: flex; }
+
+  .sp-pcde-row {
+    display: flex; align-items: center; gap: 7px;
+    padding: 6px 9px; background: #fff; border-radius: 7px;
+    border: 1px solid #E9EAEC; font-size: 12.5px; color: #0A0A0A;
+  }
+  .sp-pcde-type-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .sp-pcde-scope {
+    margin-left: auto; font-size: 11px; font-weight: 500;
+    padding: 2px 7px; border-radius: 5px; flex-shrink: 0;
+  }
+  .sp-scope-acct { background: #EEF2FF; color: #3d64d7; }
+  .sp-scope-local { background: #F5F7FA; color: #525866; }
+
+  .sp-add-pcde-btn {
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    width: 100%; padding: 7px; background: #fff;
+    border: 1px dashed #C7D2FE; border-radius: 7px;
+    font-size: 13px; color: #3d64d7; font-weight: 500;
+    cursor: pointer; font-family: inherit; margin-top: 2px;
+  }
+  .sp-add-pcde-btn:hover { background: #EEF2FF; border-style: solid; }
+
+  /* SP Add picker */
+  .sp-picker {
+    position: fixed; z-index: 700;
+    background: #fff; border: 1px solid #E9EAEC; border-radius: 10px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.12);
+    width: 252px; display: none; overflow: hidden;
+  }
+  .sp-picker.open { display: block; }
+  .sp-picker-section { padding: 8px 10px 6px; }
+  .sp-picker-section:first-child { padding-top: 10px; }
+  .sp-picker-lbl {
+    font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .06em; color: #9CA3AF; display: block; padding: 0 2px 5px;
+  }
+  .sp-picker-field-row, .sp-picker-type-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 8px; border-radius: 7px; font-size: 13px; color: #0A0A0A; cursor: pointer;
+  }
+  .sp-picker-field-row:hover, .sp-picker-type-row:hover { background: #F5F7FA; }
+  .sp-picker-field-linked { opacity: .4; cursor: default; }
+  .sp-picker-field-linked:hover { background: transparent; }
+  .sp-picker-acct-tag {
+    margin-left: auto; font-size: 11px; font-weight: 500;
+    padding: 2px 7px; border-radius: 5px;
+    background: #EEF2FF; color: #3d64d7; flex-shrink: 0;
+  }
+  .sp-picker-linked-tag {
+    margin-left: auto; font-size: 11px; color: #9CA3AF;
+    padding: 2px 7px; border-radius: 5px;
+    background: #F5F7FA; flex-shrink: 0;
+  }
+  .sp-picker-divider { height: 1px; background: #F0F1F3; margin: 4px 0; }
+  .sp-type-icon {
+    width: 24px; height: 24px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; flex-shrink: 0;
+  }
+
+  /* SP Field Editor overlay */
+  .sp-fe-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.32);
+    z-index: 800; display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(2px);
+  }
+  .sp-fe-overlay.open { display: flex; }
+  .sp-fe-modal {
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 16px 48px rgba(0,0,0,.14);
+    width: 440px; max-width: calc(100vw - 48px);
+    max-height: calc(100vh - 80px);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .sp-fe-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid #E9EAEC; flex-shrink: 0;
+  }
+  .sp-fe-title { font-size: 14px; font-weight: 600; color: #0A0A0A; }
+  .sp-fe-close {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: #9CA3AF; cursor: pointer; line-height: 1;
+  }
+  .sp-fe-close:hover { background: #F5F7FA; color: #525866; }
+  .sp-fe-body {
+    flex: 1; overflow-y: auto; padding: 20px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .sp-fe-footer {
+    display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+    padding: 13px 20px; border-top: 1px solid #E9EAEC; flex-shrink: 0;
+  }
+
   /* ── Remove from library modal ── */
   .danger-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,.32);
@@ -1059,6 +1272,16 @@
               <div>
                 <div class="dd-title">Browse Templates</div>
                 <div class="dd-sub">Start from a ready-made template.</div>
+              </div>
+            </div>
+            <div class="dd-divider"></div>
+            <div class="dd-item" onclick="openSPOverlay()">
+              <div class="dd-icon" style="background:#F0FDF4">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="7" width="14" height="10" rx="2" stroke="#166534" stroke-width="1.5"/><path d="M7 7V5a3 3 0 016 0v2" stroke="#166534" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="12" r="1.5" fill="#166534"/></svg>
+              </div>
+              <div>
+                <div class="dd-title">From a Single Prompt agent</div>
+                <div class="dd-sub">Open an agent and add or link a field.</div>
               </div>
             </div>
           </div>
@@ -1452,6 +1675,230 @@
         </div>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- Single Prompt Agent Overlay -->
+<div class="sp-overlay" id="spOverlay">
+
+  <!-- Top bar -->
+  <div class="sp-topbar">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <circle cx="5" cy="5" r="2" fill="#0A0A0A"/><circle cx="12" cy="5" r="2" fill="#0A0A0A"/><circle cx="19" cy="5" r="2" fill="#0A0A0A"/>
+      <circle cx="5" cy="12" r="2" fill="#0A0A0A"/><circle cx="12" cy="12" r="2" fill="#0A0A0A"/><circle cx="19" cy="12" r="2" fill="#0A0A0A"/>
+      <circle cx="5" cy="19" r="2" fill="#0A0A0A"/><circle cx="12" cy="19" r="2" fill="#0A0A0A"/><circle cx="19" cy="19" r="2" fill="#0A0A0A"/>
+    </svg>
+    <div class="sp-breadcrumb">
+      <span>Agents</span>
+      <span class="sp-breadcrumb-sep">›</span>
+      <span class="sp-breadcrumb-cur">Defendant Intake</span>
+    </div>
+    <span class="sp-preview-badge">Step 1–4 preview</span>
+    <button class="sp-close-preview" onclick="closeSPOverlay()">
+      <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M12 5l-5 5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to library
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="sp-content">
+
+    <!-- Agent sidebar -->
+    <div class="sp-agent-sidebar">
+      <div class="sp-agent-hdr">
+        <div class="sp-agent-name-row">
+          <div class="sp-agent-av">DR</div>
+          <div>
+            <div class="sp-agent-title">Defendant Intake</div>
+            <div class="sp-agent-meta">Single Prompt · Active</div>
+          </div>
+        </div>
+      </div>
+      <div class="sp-nav-dim">
+        <div class="nav-item" style="font-size:13px;color:#C0C5CD;gap:8px;padding:6px 10px;border-radius:7px;display:flex;align-items:center;margin-bottom:1px">
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M3 6h14M3 10h14M3 14h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Prompt
+        </div>
+        <div class="nav-item" style="font-size:13px;color:#C0C5CD;gap:8px;padding:6px 10px;border-radius:7px;display:flex;align-items:center;margin-bottom:1px">
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C7.5 2.5 5.5 4.5 5.5 7c0 3.5-2 5-2 5h13s-2-1.5-2-5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.5 16.5a1.5 1.5 0 003 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Voice
+        </div>
+        <div class="nav-item" style="font-size:13px;color:#C0C5CD;gap:8px;padding:6px 10px;border-radius:7px;display:flex;align-items:center;margin-bottom:1px">
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M6 7h8M6 10h8M6 13h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Knowledge Base
+        </div>
+        <div class="nav-item" style="font-size:13px;color:#C0C5CD;gap:8px;padding:6px 10px;border-radius:7px;display:flex;align-items:center;margin-bottom:1px">
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 4h12v2H4zm2 4h8v2H6zm3 4h2v4h-2z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Settings
+        </div>
+      </div>
+    </div>
+
+    <!-- Main editor area -->
+    <div class="sp-main-area">
+
+      <!-- Editor tabs -->
+      <div class="sp-editor-tabs-row">
+        <div class="sp-editor-tab" onclick="">Prompt</div>
+        <div class="sp-editor-tab active">Functions</div>
+        <div class="sp-editor-tab" onclick="">Settings</div>
+      </div>
+
+      <!-- Split: prompt + config panel -->
+      <div class="sp-split">
+
+        <!-- Prompt placeholder -->
+        <div class="sp-prompt-area">
+          <div class="sp-prompt-label">System Prompt</div>
+          <div class="sp-prompt-mock">
+            You are a helpful intake specialist for Defendant Law Group, a personal injury law firm.
+            Your role is to screen incoming callers to determine whether their case qualifies for
+            representation. Greet the caller warmly and explain the intake process...
+            <br><br>
+            [Qualification criteria]<br>
+            — The incident occurred within the statute of limitations<br>
+            — The caller was not at fault<br>
+            — There is a documented injury<br>
+            — No prior attorney representation<br>
+            <br>
+            If the caller qualifies, confirm their contact details and let them know the
+            next steps. If they do not qualify, deliver the news with empathy and...
+          </div>
+        </div>
+
+        <!-- Config panel: Post-Call Data Extraction (active) -->
+        <div class="sp-config-panel">
+          <div class="sp-config-tabs">
+            <div class="sp-config-tab">Voice</div>
+            <div class="sp-config-tab active">Functions</div>
+            <div class="sp-config-tab">Settings</div>
+          </div>
+          <div class="sp-config-body">
+
+            <!-- Step 2 callout -->
+            <div style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:8px;padding:9px 11px;font-size:12px;color:#3d64d7;line-height:1.5;margin-bottom:2px">
+              <strong>Step 2</strong> — Expand Post-Call Data Extraction and click <strong>+ Add</strong>.
+            </div>
+
+            <!-- Post-Call Data Extraction accordion (open) -->
+            <div class="sp-accordion open" id="spPcdeAccordion">
+              <div class="sp-accordion-hdr" onclick="spToggleAccordion('pcde')">
+                <span>Post-Call Data Extraction</span>
+                <svg class="sp-accordion-chev" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="sp-accordion-body">
+                <div id="spPcdeList"></div>
+                <button class="sp-add-pcde-btn" id="spAddBtn" onclick="openSPPicker(event)">
+                  <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="#3d64d7"/></svg>
+                  Add
+                </button>
+              </div>
+            </div>
+
+            <!-- Functions accordion (collapsed) -->
+            <div class="sp-accordion" id="spFuncAccordion">
+              <div class="sp-accordion-hdr" onclick="spToggleAccordion('func')">
+                <span>Functions</span>
+                <svg class="sp-accordion-chev" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="sp-accordion-body">
+                <div style="font-size:12px;color:#9CA3AF;padding:4px 2px">No functions linked yet.</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SP Add picker -->
+<div class="sp-picker" id="spPicker" onclick="event.stopPropagation()">
+  <div class="sp-picker-section">
+    <span class="sp-picker-lbl">From library</span>
+    <div id="spPickerLibraryList"></div>
+  </div>
+  <div class="sp-picker-divider"></div>
+  <div class="sp-picker-section" style="padding-bottom:10px">
+    <span class="sp-picker-lbl">Create new</span>
+    <div class="sp-picker-type-row" onclick="openSPFieldEditor('boolean')">
+      <div class="sp-type-icon" style="background:#F0FDF4;color:#166534">Y/N</div>
+      Yes / No
+    </div>
+    <div class="sp-picker-type-row" onclick="openSPFieldEditor('text')">
+      <div class="sp-type-icon" style="background:#F5F7FA;color:#525866">T</div>
+      Text
+    </div>
+    <div class="sp-picker-type-row" onclick="openSPFieldEditor('number')">
+      <div class="sp-type-icon" style="background:#FFFBEB;color:#92400E">#</div>
+      Number
+    </div>
+    <div class="sp-picker-type-row" onclick="openSPFieldEditor('selector')">
+      <div class="sp-type-icon" style="background:#EEF2FF;color:#3d64d7">≡</div>
+      Selector
+    </div>
+  </div>
+</div>
+
+<!-- SP Field Editor -->
+<div class="sp-fe-overlay" id="spFeOverlay">
+  <div class="sp-fe-modal">
+    <div class="sp-fe-header">
+      <span class="sp-fe-title" id="spFeTitle">New field</span>
+      <span class="sp-fe-close" onclick="closeSPFe()">×</span>
+    </div>
+    <div class="sp-fe-body">
+
+      <div class="field-group">
+        <div class="field-label">Name</div>
+        <input class="field-input" type="text" id="spFeName" placeholder="e.g. call_outcome">
+        <div class="field-hint">Used as the field key in the webhook payload.</div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Type</div>
+        <div class="type-tabs">
+          <div class="type-tab" id="spFe-tab-boolean" onclick="spFeSetType('boolean')">Yes/No</div>
+          <div class="type-tab active" id="spFe-tab-text" onclick="spFeSetType('text')">Text</div>
+          <div class="type-tab" id="spFe-tab-number" onclick="spFeSetType('number')">Number</div>
+          <div class="type-tab" id="spFe-tab-selector" onclick="spFeSetType('selector')">Selector</div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Extractable data</div>
+        <textarea class="field-textarea" id="spFeData" rows="3" placeholder="e.g. What was the outcome of the call?"></textarea>
+        <div class="field-hint">The AI reads the transcript after the call and answers this question.</div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Format example <span style="color:#C0C5CD;font-weight:400">(optional)</span></div>
+        <input class="field-input" type="text" id="spFeExample" placeholder="e.g. qualified">
+      </div>
+
+      <div class="panel-divider"></div>
+
+      <!-- Step 4 callout -->
+      <div style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:8px;padding:9px 11px;font-size:12px;color:#3d64d7;line-height:1.5">
+        <strong>Step 4</strong> — Toggle <strong>Save as account extraction field</strong> ON to publish to the library, or leave off to keep this field local to this agent only.
+      </div>
+
+      <div class="field-group">
+        <div class="toggle-row">
+          <div class="toggle-text">
+            <div class="toggle-title">Save as account extraction field</div>
+            <div class="toggle-sub">When on, this field is published to the library and available across all agents.</div>
+          </div>
+          <div class="toggle on" id="spFeAccountToggle" onclick="spFeToggleAccount()"></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="sp-fe-footer">
+      <button class="btn-cancel" onclick="closeSPFe()">Cancel</button>
+      <button class="btn-save" onclick="saveSPField()">Save</button>
     </div>
   </div>
 </div>
@@ -1943,7 +2390,164 @@
 
   document.addEventListener('click', function() {
     document.getElementById('createDropdown').classList.remove('open');
+    document.getElementById('spPicker').classList.remove('open');
   });
+
+  /* ── Extra account fields for the library picker ── */
+  DATA['satisfaction_score'] = {
+    name: 'satisfaction_score', type: 'number',
+    prompt: 'Inferred CSAT score from 1 to 5 based on the caller\'s tone.',
+    choices: [], optional: false, account: true, agents: []
+  };
+  DATA['caller_name'] = {
+    name: 'caller_name', type: 'text',
+    prompt: 'The full name of the caller as stated during the call.',
+    choices: [], optional: false, account: true, agents: []
+  };
+
+  /* ── Single Prompt Agent overlay ── */
+  var _spLinked = ['qualification_result', 'disqualification_reason', 'intake_submitted', 'call_disposition'];
+
+  var SP_LIBRARY_FIELDS = [
+    { key: 'call_summary',       type: 'text',   label: 'call_summary' },
+    { key: 'satisfaction_score', type: 'number', label: 'satisfaction_score' },
+    { key: 'caller_name',        type: 'text',   label: 'caller_name' },
+    { key: 'callback_requested', type: 'boolean',label: 'callback_requested' },
+  ];
+
+  var TYPE_COLORS = { text: '#525866', selector: '#3d64d7', boolean: '#166534', number: '#92400E' };
+  var TYPE_BGS    = { text: '#F5F7FA', selector: '#EEF2FF', boolean: '#F0FDF4', number: '#FFFBEB' };
+
+  function openSPOverlay() {
+    closeDropdown();
+    _spLinked = ['qualification_result', 'disqualification_reason', 'intake_submitted', 'call_disposition'];
+    renderSPPcdeList();
+    document.getElementById('spOverlay').classList.add('open');
+  }
+
+  function closeSPOverlay() {
+    document.getElementById('spOverlay').classList.remove('open');
+    closeSPPicker();
+  }
+
+  function renderSPPcdeList() {
+    var list = document.getElementById('spPcdeList');
+    list.innerHTML = '';
+    _spLinked.forEach(function(key) {
+      var d = DATA[key];
+      if (!d) return;
+      var row = document.createElement('div');
+      row.className = 'sp-pcde-row';
+      var tc = TYPE_COLORS[d.type] || '#525866';
+      row.innerHTML = '<div class="sp-pcde-type-dot" style="background:' + tc + '"></div>'
+        + '<span style="flex:1;font-size:12.5px;color:#0A0A0A">' + key + '</span>'
+        + '<span class="sp-pcde-scope ' + (d.account ? 'sp-scope-acct' : 'sp-scope-local') + '">'
+        + (d.account ? 'Account' : 'Local') + '</span>';
+      list.appendChild(row);
+    });
+  }
+
+  function spToggleAccordion(id) {
+    var el = document.getElementById(id === 'pcde' ? 'spPcdeAccordion' : 'spFuncAccordion');
+    el.classList.toggle('open');
+  }
+
+  function openSPPicker(e) {
+    e.stopPropagation();
+    var picker = document.getElementById('spPicker');
+    var rect = e.currentTarget.getBoundingClientRect();
+    picker.style.top = (rect.bottom + 6) + 'px';
+    picker.style.left = (rect.left) + 'px';
+    buildSPPickerLibrary();
+    picker.classList.add('open');
+  }
+
+  function buildSPPickerLibrary() {
+    var lib = document.getElementById('spPickerLibraryList');
+    lib.innerHTML = '';
+    SP_LIBRARY_FIELDS.forEach(function(f) {
+      var isLinked = _spLinked.includes(f.key);
+      var row = document.createElement('div');
+      row.className = 'sp-picker-field-row' + (isLinked ? ' sp-picker-field-linked' : '');
+      var tc = TYPE_COLORS[f.type]; var tb = TYPE_BGS[f.type];
+      var tl = f.type === 'boolean' ? 'Y/N' : f.type === 'number' ? '#' : f.type === 'selector' ? '≡' : 'T';
+      row.innerHTML = '<div class="sp-type-icon" style="background:' + tb + ';color:' + tc + '">' + tl + '</div>'
+        + '<span style="flex:1">' + f.label + '</span>'
+        + (isLinked
+            ? '<span class="sp-picker-linked-tag">Linked</span>'
+            : '<span class="sp-picker-acct-tag">Account</span>');
+      if (!isLinked) {
+        row.onclick = (function(key) { return function() { spLinkField(key); }; })(f.key);
+      }
+      lib.appendChild(row);
+    });
+  }
+
+  function closeSPPicker() {
+    document.getElementById('spPicker').classList.remove('open');
+  }
+
+  function spLinkField(key) {
+    closeSPPicker();
+    if (!_spLinked.includes(key)) {
+      _spLinked.push(key);
+      renderSPPcdeList();
+    }
+    var t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = key + ' linked to this agent.';
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 3000);
+  }
+
+  /* SP Field Editor */
+  var _spFeType = 'text';
+
+  function openSPFieldEditor(type) {
+    closeSPPicker();
+    _spFeType = type;
+    var labels = { text: 'Text', selector: 'Selector', boolean: 'Yes/No', number: 'Number' };
+    document.getElementById('spFeTitle').textContent = 'New ' + (labels[type] || type) + ' field';
+    document.getElementById('spFeName').value = '';
+    document.getElementById('spFeData').value = '';
+    document.getElementById('spFeExample').value = '';
+    ['boolean','text','number','selector'].forEach(function(t) {
+      document.getElementById('spFe-tab-' + t).classList.toggle('active', t === type);
+    });
+    document.getElementById('spFeAccountToggle').className = 'toggle on';
+    document.getElementById('spFeOverlay').classList.add('open');
+  }
+
+  function closeSPFe() {
+    document.getElementById('spFeOverlay').classList.remove('open');
+  }
+
+  function spFeSetType(type) {
+    _spFeType = type;
+    ['boolean','text','number','selector'].forEach(function(t) {
+      document.getElementById('spFe-tab-' + t).classList.toggle('active', t === type);
+    });
+  }
+
+  function spFeToggleAccount() {
+    document.getElementById('spFeAccountToggle').classList.toggle('on');
+  }
+
+  function saveSPField() {
+    var name = (document.getElementById('spFeName').value.trim() || 'new_field').replace(/\s+/g,'_');
+    var isAccount = document.getElementById('spFeAccountToggle').classList.contains('on');
+    closeSPFe();
+    if (!_spLinked.includes(name)) {
+      DATA[name] = { name: name, type: _spFeType, prompt: '', choices: [], optional: false, account: isAccount, agents: [] };
+      _spLinked.push(name);
+      renderSPPcdeList();
+    }
+    var t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = isAccount
+      ? name + ' saved and added to the account library.'
+      : name + ' saved as a local field on this agent.';
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 3500);
+  }
 </script>
 
 </body>

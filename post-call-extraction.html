@@ -1521,7 +1521,10 @@
       agents.forEach(function(a) {
         var row = document.createElement('div');
         row.className = 'confirm-agent-row';
-        row.innerHTML = '<div style="background:' + a.c + ';width:22px;height:22px;border-radius:50%;font-size:9px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + a.i + '</div><span style="flex:1">' + a.n + '</span>';
+        row.className = 'confirm-agent-row agent-chip';
+        row.style.cursor = 'pointer';
+        row.innerHTML = '<div style="background:' + a.c + ';width:22px;height:22px;border-radius:50%;font-size:9px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + a.i + '</div><span style="flex:1">' + a.n + '</span><span class="agent-chip-link"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M11 3h6v6M17 3l-9 9M8 5H4a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1v-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+        row.onclick = (function(name) { return function() { showAgentToast(name); }; })(a.n);
         list.appendChild(row);
       });
     } else {

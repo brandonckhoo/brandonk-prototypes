@@ -1526,6 +1526,8 @@
 
   function toggleDropdown(e) {
     e.stopPropagation();
+    var fp = document.getElementById('filterPanel');
+    if (fp) fp.classList.remove('open');
     document.getElementById('createDropdown').classList.toggle('open');
   }
 
@@ -1758,6 +1760,7 @@
 
   function toggleFilterPanel(e) {
     e.stopPropagation();
+    closeDropdown();
     var panel = document.getElementById('filterPanel');
     if (!panel.classList.contains('open')) {
       buildAgentList('');

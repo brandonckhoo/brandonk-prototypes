@@ -403,44 +403,119 @@ tbody tr:hover { background: rgba(0,0,0,0.018); }
           <input type="text" placeholder="Search functions...">
         </div>
       </div>
-      <div class="section-head">Pre-conversation functions</div>
-      <div class="fn-list-row" onclick="goToStep4('Get Contact', 'Fetch contact record by phone number before the call begins')">
+
+      <!-- Pre-conversation group -->
+      <div class="section-head" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Pre-conversation</span>
+        <span style="color:#B0B8C1;font-weight:400;text-transform:none;font-size:12px;letter-spacing:0">6 functions</span>
+      </div>
+      <div class="fn-list-row" onclick="goToStep4('get_salesforce_contact', 'pre')">
         <div class="fn-list-icon" style="background:#E3F4FC"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 10a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0H3z" fill="#00A1E0"/></svg></div>
         <div class="fn-list-info">
-          <div class="fn-list-name">Get Contact</div>
-          <div class="fn-list-desc">Fetch contact record by phone number before the call begins</div>
+          <div class="fn-list-name">get_salesforce_contact</div>
+          <div class="fn-list-desc">Fetch a contact record before the call</div>
         </div>
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
       </div>
-      <div class="fn-list-row" onclick="goToStep4('Get Lead', 'Pull open lead record associated with the caller')">
+      <div class="fn-list-row" onclick="goToStep4('get_salesforce_lead', 'pre')">
         <div class="fn-list-icon" style="background:#EEF8EE"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2L3 7v11h5v-6h4v6h5V7L10 2z" fill="#1FC16B"/></svg></div>
         <div class="fn-list-info">
-          <div class="fn-list-name">Get Lead</div>
-          <div class="fn-list-desc">Pull open lead record associated with the caller</div>
+          <div class="fn-list-name">get_salesforce_lead</div>
+          <div class="fn-list-desc">Fetch a lead record associated with the caller</div>
         </div>
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
       </div>
-      <div class="fn-list-row" onclick="goToStep4('Get Opportunity', 'Fetch the most recent open opportunity for this contact')">
+      <div class="fn-list-row" onclick="goToStep4('get_salesforce_custom_object', 'pre')">
+        <div class="fn-list-icon" style="background:#F5F3FF"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 4h12v12H4V4zm2 2v8h8V6H6z" fill="#7C3AED"/></svg></div>
+        <div class="fn-list-info">
+          <div class="fn-list-name">get_salesforce_custom_object</div>
+          <div class="fn-list-desc">Fetch a custom object record before the call</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="fn-list-row" onclick="goToStep4('get_salesforce_account', 'pre')">
         <div class="fn-list-icon" style="background:#FFF7ED"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm1 11H9V9h2v4zm0-6H9V5h2v2z" fill="#F59E0B"/></svg></div>
         <div class="fn-list-info">
-          <div class="fn-list-name">Get Opportunity</div>
-          <div class="fn-list-desc">Fetch the most recent open opportunity for this contact</div>
+          <div class="fn-list-name">get_salesforce_account</div>
+          <div class="fn-list-desc">Fetch an account record linked to the caller</div>
         </div>
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
       </div>
-      <div class="fn-list-row" onclick="goToStep4('Get Case', 'Retrieve open support case linked to the caller')">
+      <div class="fn-list-row" onclick="goToStep4('get_salesforce_opportunity', 'pre')">
+        <div class="fn-list-icon" style="background:#E3F4FC"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 3l1.5 4.5H16l-3.7 2.7 1.4 4.3L10 12l-3.7 2.5 1.4-4.3L4 7.5h4.5L10 3z" fill="#00A1E0"/></svg></div>
+        <div class="fn-list-info">
+          <div class="fn-list-name">get_salesforce_opportunity</div>
+          <div class="fn-list-desc">Fetch the most recent open opportunity for the caller</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="fn-list-row" onclick="goToStep4('get_salesforce_case', 'pre')">
         <div class="fn-list-icon" style="background:#FFF0F0"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 3h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zm2 4v6h6V7H7z" fill="#EF4444"/></svg></div>
         <div class="fn-list-info">
-          <div class="fn-list-name">Get Case</div>
-          <div class="fn-list-desc">Retrieve open support case linked to the caller</div>
+          <div class="fn-list-name">get_salesforce_case</div>
+          <div class="fn-list-desc">Fetch an open support case linked to the caller</div>
         </div>
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
       </div>
-      <div class="fn-list-row" onclick="goToStep4('Get Account', 'Load the company account record before the call')">
-        <div class="fn-list-icon" style="background:#F3F0FF"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 4h12v12H4V4zm2 2v8h8V6H6z" fill="#7C3AED"/></svg></div>
+
+      <!-- Post-conversation group -->
+      <div class="section-head" style="margin-top:6px;display:flex;align-items:center;justify-content:space-between">
+        <span>Post-conversation</span>
+        <span style="color:#B0B8C1;font-weight:400;text-transform:none;font-size:12px;letter-spacing:0">7 functions</span>
+      </div>
+      <div class="fn-list-row" onclick="goToStep4('create_salesforce_lead', 'post')">
+        <div class="fn-list-icon" style="background:#EEF8EE"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2L3 7v11h5v-6h4v6h5V7L10 2z" fill="#1FC16B"/></svg></div>
         <div class="fn-list-info">
-          <div class="fn-list-name">Get Account</div>
-          <div class="fn-list-desc">Load the company account record before the call</div>
+          <div class="fn-list-name">create_salesforce_lead</div>
+          <div class="fn-list-desc">Create a new lead record after the call ends</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="fn-list-row" onclick="goToStep4('update_salesforce_lead', 'post')">
+        <div class="fn-list-icon" style="background:#EEF8EE"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-.5.3l-3 .7.7-3a1 1 0 01.3-.5l8-8a1 1 0 011.5 0z" fill="#1FC16B"/></svg></div>
+        <div class="fn-list-info">
+          <div class="fn-list-name">update_salesforce_lead</div>
+          <div class="fn-list-desc">Update an existing lead record after the call</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="fn-list-row" onclick="goToStep4('update_salesforce_contact', 'post')">
+        <div class="fn-list-icon" style="background:#E3F4FC"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-.5.3l-3 .7.7-3a1 1 0 01.3-.5l8-8a1 1 0 011.5 0z" fill="#00A1E0"/></svg></div>
+        <div class="fn-list-info">
+          <div class="fn-list-name">update_salesforce_contact</div>
+          <div class="fn-list-desc">Update an existing contact record after the call</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="fn-list-row" onclick="goToStep4('update_salesforce_account', 'post')">
+        <div class="fn-list-icon" style="background:#FFF7ED"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-.5.3l-3 .7.7-3a1 1 0 01.3-.5l8-8a1 1 0 011.5 0z" fill="#F59E0B"/></svg></div>
+        <div class="fn-list-info">
+          <div class="fn-list-name">update_salesforce_account</div>
+          <div class="fn-list-desc">Update an account record after the call</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="fn-list-row" onclick="goToStep4('update_salesforce_custom_object', 'post')">
+        <div class="fn-list-icon" style="background:#F5F3FF"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-.5.3l-3 .7.7-3a1 1 0 01.3-.5l8-8a1 1 0 011.5 0z" fill="#7C3AED"/></svg></div>
+        <div class="fn-list-info">
+          <div class="fn-list-name">update_salesforce_custom_object</div>
+          <div class="fn-list-desc">Update a custom object record after the call</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="fn-list-row" onclick="goToStep4('create_salesforce_task', 'post')">
+        <div class="fn-list-icon" style="background:#FFF0F0"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 3h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zm5 4v2H8v2h2v2h2v-2h2v-2h-2V7h-2z" fill="#EF4444"/></svg></div>
+        <div class="fn-list-info">
+          <div class="fn-list-name">create_salesforce_task</div>
+          <div class="fn-list-desc">Log a follow-up task after the call ends</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="fn-list-row" onclick="goToStep4('create_salesforce_note', 'post')" style="border-bottom:none">
+        <div class="fn-list-icon" style="background:#F0FDF4"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 3h10a2 2 0 012 2v10l-4 4H5a2 2 0 01-2-2V5a2 2 0 012-2z" fill="#166534"/></svg></div>
+        <div class="fn-list-info">
+          <div class="fn-list-name">create_salesforce_note</div>
+          <div class="fn-list-desc">Add a call note to a Salesforce record</div>
         </div>
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
       </div>
@@ -454,7 +529,7 @@ tbody tr:hover { background: rgba(0,0,0,0.018); }
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12 5l-6 5 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </div>
       <div class="panel-title-wrap">
-        <div class="panel-title" id="step4-title">Get Contact</div>
+        <div class="panel-title" id="step4-title">get_salesforce_contact</div>
         <div class="panel-subtitle" id="step4-sub">Salesforce · Pre-conversation</div>
       </div>
       <div class="panel-close" onclick="closePanel()">&#x2715;</div>
@@ -475,7 +550,7 @@ tbody tr:hover { background: rgba(0,0,0,0.018); }
             <select class="form-select">
               <option selected>Phone Number</option>
               <option>Email</option>
-              <option>Contact ID</option>
+              <option>Record ID</option>
             </select>
             <span class="match-arrow">→</span>
             <select class="form-select">
@@ -484,7 +559,7 @@ tbody tr:hover { background: rgba(0,0,0,0.018); }
               <option>&#123;&#123;call_id&#125;&#125;</option>
             </select>
           </div>
-          <div class="form-hint">Map the CRM field that identifies the contact to the Retell variable that carries that value.</div>
+          <div class="form-hint">Map the CRM field that identifies the record to the Retell variable that carries that value.</div>
         </div>
         <div class="form-field">
           <span class="form-label">Multiple matches rule</span>
@@ -499,7 +574,8 @@ tbody tr:hover { background: rgba(0,0,0,0.018); }
 
       <div class="config-divider"></div>
 
-      <div class="config-section" style="padding-top:18px">
+      <!-- Pre-conversation: fields to pull -->
+      <div class="config-section" style="padding-top:18px" id="fields-pre">
         <div class="config-section-title">Fields to pull</div>
         <div class="form-hint" style="margin-bottom:12px;color:#9CA3AF;font-size:12px">Select which CRM fields to load into the conversation as Retell variables.</div>
         <div class="field-pull-row">
@@ -529,13 +605,44 @@ tbody tr:hover { background: rgba(0,0,0,0.018); }
         </div>
       </div>
 
+      <!-- Post-conversation: fields to write -->
+      <div class="config-section" style="padding-top:18px;display:none" id="fields-post">
+        <div class="config-section-title">Fields to write</div>
+        <div class="form-hint" style="margin-bottom:12px;color:#9CA3AF;font-size:12px">Map post-call Retell variables to the CRM fields you want to update.</div>
+        <div class="field-pull-row">
+          <div class="field-pull-check checked"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <span class="field-pull-label">Lead Status</span>
+          <select class="field-pull-select"><option>&#123;&#123;call_outcome&#125;&#125;</option></select>
+        </div>
+        <div class="field-pull-row">
+          <div class="field-pull-check checked"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <span class="field-pull-label">Description</span>
+          <select class="field-pull-select"><option>&#123;&#123;call_summary&#125;&#125;</option></select>
+        </div>
+        <div class="field-pull-row">
+          <div class="field-pull-check checked"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <span class="field-pull-label">Last Activity Date</span>
+          <select class="field-pull-select"><option>&#123;&#123;call_date&#125;&#125;</option></select>
+        </div>
+        <div class="field-pull-row">
+          <div class="field-pull-check"></div>
+          <span class="field-pull-label" style="color:#9CA3AF">Rating</span>
+          <select class="field-pull-select" style="opacity:0.4;pointer-events:none"><option>-- not mapped --</option></select>
+        </div>
+        <div class="field-pull-row">
+          <div class="field-pull-check"></div>
+          <span class="field-pull-label" style="color:#9CA3AF">Lead Source</span>
+          <select class="field-pull-select" style="opacity:0.4;pointer-events:none"><option>-- not mapped --</option></select>
+        </div>
+      </div>
+
       <div class="config-divider"></div>
 
       <div class="config-section" style="padding-top:18px;padding-bottom:8px">
         <div class="config-section-title">Name and scope</div>
         <div class="form-field">
           <span class="form-label">Function name</span>
-          <input class="form-input" type="text" value="fetch_contact_salesforce" placeholder="e.g. fetch_contact_salesforce">
+          <input class="form-input" id="fn-name-input" type="text" value="get_salesforce_contact" placeholder="e.g. get_salesforce_contact">
         </div>
         <div class="form-field">
           <span class="form-label">Scope</span>
@@ -597,10 +704,14 @@ function goToStep2() {
   showStep(2);
 }
 
-function goToStep4(fnName, fnDesc) {
-  document.getElementById('step4-title').textContent = fnName;
+function goToStep4(fnName, category) {
   const intgName = currentIntegration === 'salesforce' ? 'Salesforce' : 'HubSpot';
-  document.getElementById('step4-sub').textContent = intgName + ' · Pre-conversation';
+  const catLabel = category === 'post' ? 'Post-conversation' : 'Pre-conversation';
+  document.getElementById('step4-title').textContent = fnName;
+  document.getElementById('step4-sub').textContent = intgName + ' · ' + catLabel;
+  document.getElementById('fn-name-input').value = fnName;
+  document.getElementById('fields-pre').style.display = category === 'pre' ? 'block' : 'none';
+  document.getElementById('fields-post').style.display = category === 'post' ? 'block' : 'none';
   showStep(4);
 }
 

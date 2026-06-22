@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — New Function Panel</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; }
+
+/* ===== SIDEBAR ===== */
+.sidebar { width: 220px; min-width: 220px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; }
+.sidebar-logo { padding: 20px 10px 12px 20px; }
+.workspace { display: flex; align-items: center; gap: 8px; padding: 10px 10px 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; flex-shrink: 0; }
+.workspace-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-scroll { padding: 4px 0 16px; flex: 1; overflow-y: auto; }
+.section-group { margin-top: 8px; }
+.section-group:first-child { margin-top: 0; }
+.section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; height: 24px; }
+.nav-items { list-style: none; padding: 0 14px; }
+.nav-items .nav-item + .nav-item { margin-top: 4px; }
+.nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; white-space: nowrap; border-radius: 6px; }
+.nav-item:hover { background: rgba(0,0,0,0.03); }
+.nav-item.current { color: #0A0A0A; font-weight: 500; background: #fff; }
+.footer { padding: 16px 14px; }
+.footer-card { display: flex; align-items: center; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; box-shadow: rgba(0,0,0,0.1) 0px 1px 3px, rgba(0,0,0,0.1) 0px 1px 2px -1px; width: 100%; }
+.footer-card.pay { padding: 16px; height: 58px; margin-bottom: 8px; }
+.footer-card.user { padding: 10px 10px 10px 12px; height: 40px; margin-bottom: 12px; gap: 8px; }
+.footer-badge-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px 4px 4px; background: #ecf3ff; border-radius: 6px; font-size: 12px; font-weight: 500; color: #3d64d7; }
+.spacer-flex { flex: 1; }
+.footer-user .av-img { width: 20px; height: 20px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+.footer-user .av-img img { width: 100%; height: 100%; object-fit: cover; }
+.footer-user .name { font-size: 14px; color: #525866; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.footer-links { display: flex; align-items: center; gap: 4px; }
+.footer-link { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; font-size: 14px; color: #525866; cursor: pointer; height: 36px; }
+.footer-divider { width: 1px; height: 12px; background: #D1D5DB; }
+
+/* ===== SUBNAV ===== */
+.subnav { width: 240px; min-width: 240px; background: #fff; border-right: 1px solid #E1E4EA; height: 100vh; overflow-y: auto; padding: 20px 12px; }
+.subnav-group-label { padding: 4px 10px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.02em; margin-bottom: 4px; }
+.subnav-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; min-height: 32px; border-radius: 6px; font-size: 13px; color: #0A0A0A; cursor: pointer; }
+.subnav-item:hover { background: rgba(0,0,0,0.03); }
+.subnav-item.active { background: #F5F7FA; font-weight: 500; }
+.subnav-item .count { margin-left: auto; font-size: 13px; color: #99A0AE; }
+.subnav-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+/* ===== MAIN ===== */
+.main { flex: 1; overflow: auto; background: #fff; min-width: 0; position: relative; }
+.main-header { display: flex; align-items: center; gap: 10px; padding: 22px 28px 0; }
+.main-header .dot { width: 9px; height: 9px; background: #3d64d7; border-radius: 50%; }
+.main-header h1 { font-size: 16px; font-weight: 600; color: #0A0A0A; }
+.main-header .h-count { font-size: 14px; color: #99A0AE; }
+.subtitle { padding: 6px 28px 0; font-size: 13px; color: #6B7280; line-height: 1.5; }
+.actionbar { display: flex; align-items: center; gap: 10px; padding: 18px 28px 14px; }
+.pill-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; font-size: 14px; color: #374151; cursor: pointer; }
+.btn-primary { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border: 1px solid #0E121B; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; }
+.btn-primary:hover { background: #000; }
+table { width: 100%; border-collapse: collapse; }
+thead th { text-align: left; font-size: 12px; font-weight: 500; color: #6B7280; text-transform: uppercase; letter-spacing: 0.02em; padding: 10px 16px; border-bottom: 1px solid #E1E4EA; white-space: nowrap; }
+thead th:first-child { padding-left: 28px; }
+thead th:last-child { padding-right: 28px; }
+tbody td { font-size: 14px; color: #0A0A0A; padding: 14px 16px; border-bottom: 1px solid #F0F1F3; vertical-align: middle; }
+tbody td:first-child { padding-left: 28px; }
+tbody td:last-child { padding-right: 28px; }
+tbody tr:hover { background: rgba(0,0,0,0.018); }
+.fn-name-cell { display: flex; align-items: center; gap: 10px; }
+.fn-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.fn-title { font-weight: 500; font-size: 14px; }
+.fn-sub { font-size: 12px; color: #9CA3AF; margin-top: 1px; }
+.intg-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; background: #F3F4F6; color: #374151; }
+.scope-pill { display: inline-flex; padding: 2px 8px; border-radius: 5px; font-size: 12px; font-weight: 500; background: #EFF6FF; color: #2563EB; }
+.used-by { display: flex; align-items: center; gap: 8px; }
+.avatars { display: flex; }
+.av { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; margin-left: -7px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: #fff; flex-shrink: 0; }
+.av:first-child { margin-left: 0; }
+.used-count { font-size: 13px; color: #525866; }
+.status-cell { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.row-menu { color: #9CA3AF; cursor: pointer; }
+
+/* ===== SLIDE-OUT PANEL ===== */
+.panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.18); z-index: 300; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.panel-overlay.open { opacity: 1; pointer-events: auto; }
+.panel { position: fixed; top: 0; right: -500px; width: 480px; height: 100vh; background: #fff; border-left: 1px solid #E1E4EA; box-shadow: -8px 0 32px rgba(0,0,0,0.12); z-index: 301; display: flex; flex-direction: column; transition: right 0.24s cubic-bezier(0.4,0,0.2,1); }
+.panel.open { right: 0; }
+
+/* Panel header */
+.panel-header { display: flex; align-items: center; gap: 10px; padding: 18px 20px 16px; border-bottom: 1px solid #F0F1F3; flex-shrink: 0; }
+.panel-back { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #9CA3AF; cursor: pointer; flex-shrink: 0; }
+.panel-back:hover { background: #F3F4F6; color: #525866; }
+.panel-title-wrap { flex: 1; min-width: 0; }
+.panel-title { font-size: 15px; font-weight: 600; color: #0A0A0A; }
+.panel-subtitle { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
+.panel-close { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #9CA3AF; cursor: pointer; font-size: 18px; flex-shrink: 0; }
+.panel-close:hover { background: #F3F4F6; }
+
+/* Step breadcrumb */
+.step-crumb { display: flex; align-items: center; gap: 6px; padding: 10px 20px; border-bottom: 1px solid #F0F1F3; flex-shrink: 0; }
+.step-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #9CA3AF; }
+.step-chip.active { color: #0A0A0A; font-weight: 500; }
+.step-chip.done { color: #1FC16B; }
+.step-sep { color: #D1D5DB; font-size: 12px; }
+
+/* Panel body */
+.panel-body { flex: 1; overflow-y: auto; }
+
+/* ===== STEP 2: Integration list ===== */
+.panel-search { padding: 14px 20px 10px; }
+.search-wrap { display: flex; align-items: center; gap: 8px; height: 36px; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0 12px; background: #FAFAFA; }
+.search-wrap svg { color: #9CA3AF; flex-shrink: 0; }
+.search-wrap input { border: none; outline: none; font-size: 14px; background: transparent; width: 100%; font-family: inherit; }
+.search-wrap input::placeholder { color: #B0B8C1; }
+.section-head { padding: 12px 20px 6px; font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; }
+.intg-row { display: flex; align-items: center; gap: 12px; padding: 11px 20px; cursor: pointer; border-bottom: 1px solid #F9FAFB; }
+.intg-row:hover { background: #FAFBFC; }
+.intg-logo-box { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #F0F1F3; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.intg-info { flex: 1; min-width: 0; }
+.intg-name { font-size: 14px; font-weight: 500; color: #0A0A0A; }
+.intg-desc { font-size: 12px; color: #9CA3AF; margin-top: 1px; }
+.badge-conn { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 6px; font-size: 12px; font-weight: 500; background: #F0FDF4; color: #166534; white-space: nowrap; flex-shrink: 0; }
+.badge-conn::before { content:''; display:block; width:6px; height:6px; border-radius:50%; background:#1FC16B; }
+.btn-connect { height: 30px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: 7px; background: #fff; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.btn-connect:hover { background: #F9FAFB; }
+.intg-chevron { color: #D1D5DB; flex-shrink: 0; }
+
+/* ===== STEP 3: Function list ===== */
+.fn-list-row { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #F9FAFB; }
+.fn-list-row:hover { background: #FAFBFC; }
+.fn-list-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.fn-list-info { flex: 1; min-width: 0; }
+.fn-list-name { font-size: 14px; font-weight: 500; color: #0A0A0A; }
+.fn-list-desc { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
+
+/* ===== STEP 4/5: Config form ===== */
+.config-section { padding: 18px 20px 0; }
+.config-section-title { font-size: 13px; font-weight: 600; color: #0A0A0A; margin-bottom: 12px; }
+.config-divider { height: 1px; background: #F0F1F3; margin: 18px 20px 0; }
+.form-field { margin-bottom: 14px; }
+.form-label { font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 5px; display: block; }
+.form-hint { font-size: 12px; color: #9CA3AF; margin-top: 4px; }
+.form-select { width: 100%; height: 36px; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0 10px; font-size: 14px; color: #0A0A0A; background: #fff; font-family: inherit; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7l5 5 5-5' stroke='%239CA3AF' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; }
+.form-select:focus { outline: none; border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.1); }
+.form-input { width: 100%; height: 36px; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0 12px; font-size: 14px; color: #0A0A0A; background: #fff; font-family: inherit; }
+.form-input:focus { outline: none; border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.1); }
+.match-row { display: flex; gap: 8px; align-items: center; }
+.match-row .form-select { flex: 1; }
+.match-arrow { color: #D1D5DB; flex-shrink: 0; font-size: 14px; }
+
+/* Fields to pull */
+.field-pull-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #F9FAFB; }
+.field-pull-row:last-child { border-bottom: none; }
+.field-pull-check { width: 16px; height: 16px; border: 1.5px solid #D1D5DB; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.field-pull-check.checked { background: #0E121B; border-color: #0E121B; }
+.field-pull-check.checked svg { display: block; }
+.field-pull-check svg { display: none; }
+.field-pull-label { font-size: 13px; color: #374151; flex: 1; }
+.field-pull-select { width: 140px; height: 30px; border: 1px solid #E5E7EB; border-radius: 6px; padding: 0 8px; font-size: 12px; color: #374151; background: #fff; font-family: inherit; flex-shrink: 0; }
+
+/* Scope radio */
+.scope-options { display: flex; flex-direction: column; gap: 8px; }
+.scope-option { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: 8px; cursor: pointer; }
+.scope-option.selected { border-color: #3d64d7; background: #F8FAFF; }
+.scope-radio { width: 16px; height: 16px; border: 1.5px solid #D1D5DB; border-radius: 50%; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+.scope-option.selected .scope-radio { border-color: #3d64d7; background: #3d64d7; }
+.scope-option.selected .scope-radio::after { content: ''; display: block; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+.scope-label { font-size: 13px; font-weight: 500; color: #0A0A0A; }
+.scope-hint { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
+
+/* Panel footer */
+.panel-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid #F0F1F3; flex-shrink: 0; }
+.btn-cancel { height: 36px; padding: 0 16px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 500; color: #374151; cursor: pointer; }
+.btn-cancel:hover { background: #F9FAFB; }
+.btn-save { height: 36px; padding: 0 16px; border: 1px solid #0E121B; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; }
+.btn-save:hover { background: #000; }
+.btn-next { height: 36px; padding: 0 16px; border: 1px solid #0E121B; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#0A0A0A"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73ZM205.22 49.69C202.9 52 199.43 52.58 195.38 52.58H176.28V26.54H193.64C198.85 26.54 201.74 27.12 204.64 28.86C208.11 30.59 209.85 34.64 209.85 39.27C209.85 43.9 208.11 47.38 205.22 49.69Z" fill="#0A0A0A"/><path d="M255.56 34.65C238.2 34.65 226.63 47.95 226.63 66.47C226.63 84.99 242.25 98.3 256.14 98.3C270.03 98.3 279.86 90.19 283.33 78.62H269.45C267.71 82.67 264.82 87.3 256.14 87.3C247.46 87.3 239.94 81.52 239.94 69.94H283.91C283.91 49.69 272.92 34.65 255.56 34.65ZM240.51 60.11C241.09 51.43 246.88 45.06 255.56 45.06C264.24 45.06 270.02 51.43 270.02 60.11H240.51Z" fill="#0A0A0A"/><path d="M344.09 34.65C326.73 34.65 315.16 47.95 315.16 66.47C315.16 85.15 330.78 98.3 344.67 98.3C358.56 98.3 368.39 90.19 371.87 78.62H357.98C356.24 82.67 353.35 87.3 344.67 87.3C335.99 87.3 328.47 81.52 328.47 69.94H372.44C372.44 49.69 361.45 34.65 344.09 34.65ZM329.05 60.11C329.62 51.43 335.41 45.06 344.09 45.06C352.77 45.06 358.56 51.43 358.56 60.11H329.05Z" fill="#0A0A0A"/><path d="M390.96 14.97H377.65V95.92H390.96V14.97Z" fill="#0A0A0A"/><path d="M413.53 14.97H400.22V95.92H413.53V14.97Z" fill="#0A0A0A"/><path d="M304.17 17.28L290.84 17.28L290.85 34.65H282.76V45H290.85V82.82C290.85 87.58 291.8 90.43 294.66 93.29C297.51 96.14 300.37 97.09 305.13 97.09H315.14V85.67H309.88C308.16 85.67 306.96 85.37 306.13 85.11C305.27 84.84 304.61 84.16 304.4 83.29C304.17 82.33 304.17 81.09 304.17 79.9V45H315.14V34.65H304.17V17.28Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="workspace">
+    <div class="workspace-avatar">B</div>
+    <span class="workspace-name">Brandon K... Workspace</span>
+    <span style="color:#99A0AE;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14.31 7.95L10 3.64L5.69 7.95L6.67 8.93L10 5.6L13.33 8.93L14.31 7.95ZM5.69 12.05L10 16.36L14.31 12.05L13.33 11.07L10 14.4L6.67 11.07L5.69 12.05Z" fill="#99A0AE"/></svg></span>
+  </div>
+  <div class="nav-scroll">
+    <div class="section-group">
+      <div class="section-label">Build</div>
+      <ul class="nav-items">
+        <li class="nav-item"><svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M11.125 2.5C11.125 2.833 10.98 3.133 10.75 3.339V4.75H14.5C15.743 4.75 16.75 5.757 16.75 7V14.5C16.75 15.743 15.743 16.75 14.5 16.75H5.5C4.257 16.75 3.25 15.743 3.25 14.5V7C3.25 5.757 4.257 4.75 5.5 4.75H9.25V3.339C9.02 3.133 8.875 2.833 8.875 2.5C8.875 1.879 9.379 1.375 10 1.375C10.621 1.375 11.125 1.879 11.125 2.5ZM5.5 6.25C5.086 6.25 4.75 6.586 4.75 7V14.5C4.75 14.914 5.086 15.25 5.5 15.25H14.5C14.914 15.25 15.25 14.914 15.25 14.5V7C15.25 6.586 14.914 6.25 14.5 6.25H5.5Z" fill="#525866"/></svg>Agents</li>
+        <li class="nav-item"><svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M3.25 14.875V4.75C3.25 4.153 3.487 3.581 3.909 3.159C4.331 2.737 4.903 2.5 5.5 2.5H16C16.199 2.5 16.39 2.579 16.53 2.72C16.671 2.86 16.75 3.051 16.75 3.25V16.75C16.75 16.949 16.671 17.14 16.53 17.28C16.39 17.421 16.199 17.5 16 17.5H5.875C5.179 17.5 4.511 17.223 4.019 16.731C3.527 16.239 3.25 15.571 3.25 14.875Z" fill="#525866"/></svg>Knowledge Base</li>
+        <li class="nav-item current"><svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M7.4 3.5C6.2 3.5 5.5 4.3 5.5 5.6V8.1C5.5 8.9 5.1 9.4 4.2 9.4H3.5V10.9H4.2C5.1 10.9 5.5 11.4 5.5 12.2V14.7C5.5 16 6.2 16.8 7.4 16.8H8.2V15.3H7.6C7.1 15.3 6.9 15.1 6.9 14.5V12C6.9 11 6.5 10.4 5.8 10.15C6.5 9.9 6.9 9.3 6.9 8.3V5.8C6.9 5.2 7.1 5 7.6 5H8.2V3.5H7.4ZM12.6 3.5C13.8 3.5 14.5 4.3 14.5 5.6V8.1C14.5 8.9 14.9 9.4 15.8 9.4H16.5V10.9H15.8C14.9 10.9 14.5 11.4 14.5 12.2V14.7C14.5 16 13.8 16.8 12.6 16.8H11.8V15.3H12.4C12.9 15.3 13.1 15.1 13.1 14.5V12C13.1 11 13.5 10.4 14.2 10.15C13.5 9.9 13.1 9.3 13.1 8.3V5.8C13.1 5.2 12.9 5 12.4 5H11.8V3.5H12.6Z" fill="#3d64d7"/></svg>Functions</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Deploy</div>
+      <ul class="nav-items">
+        <li class="nav-item"><svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M6.25 2.5H14.5C14.699 2.5 14.89 2.579 15.03 2.72C15.171 2.86 15.25 3.051 15.25 3.25V16.75H4.75V1H6.25V2.5Z" fill="#525866"/></svg>Phone Numbers</li>
+        <li class="nav-item"><svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M8.02 9.01C8.73 10.25 9.75 11.27 10.99 11.98L11.65 11.05C11.76 10.9 11.92 10.79 12.09 10.75C12.27 10.71 12.46 10.74 12.62 10.83C13.68 11.4 14.85 11.75 16.06 11.85C16.25 11.86 16.42 11.95 16.55 12.09C16.68 12.23 16.75 12.41 16.75 12.6V15.94C16.75 16.13 16.68 16.31 16.56 16.44C16.43 16.58 16.26 16.67 16.08 16.69C15.68 16.73 15.28 16.75 14.88 16.75C8.46 16.75 3.25 11.55 3.25 5.13Z" fill="#525866"/></svg>Batch Call</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Monitor</div>
+      <ul class="nav-items">
+        <li class="nav-item"><svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M10 2.5C14.14 2.5 17.5 5.86 17.5 10C17.5 14.14 14.14 17.5 10 17.5C5.86 17.5 2.5 14.14 2.5 10H4C4 13.31 6.69 16 10 16C13.31 16 16 13.31 16 10Z" fill="#525866"/></svg>Call History</li>
+        <li class="nav-item"><svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M10 2.5C14.14 2.5 17.5 5.86 17.5 10C17.5 14.14 14.14 17.5 10 17.5L2.5 17.5L3.38 13.53C2.82 12.48 2.5 11.28 2.5 10C2.5 5.86 5.86 2.5 10 2.5Z" fill="#525866"/></svg>Chat History</li>
+        <li class="nav-item"><svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M10 17.5C5.86 17.5 2.5 14.14 2.5 10C2.5 6.64 4.71 3.8 7.75 2.84V4.44C5.08 5.5 3.25 8.05 3.25 10Z" fill="#525866"/></svg>Analytics</li>
+        <li class="nav-item"><svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M9.25 2.5C5.52 2.5 2.5 5.52 2.5 9.25C2.5 12.98 5.52 16 9.25 16C12.98 16 16 12.98 16 9.25Z" fill="#525866"/></svg>AI Quality Assurance</li>
+        <li class="nav-item"><svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M4 16V11.5C4 9.91 4.63 8.38 5.76 7.26C6.88 6.13 8.41 5.5 10 5.5Z" fill="#525866"/></svg>Alerting</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">System</div>
+      <ul class="nav-items">
+        <li class="nav-item"><svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M10.75 2.5V5.27C11.64 5.45 12.43 5.88 13.04 6.5L15.24 5.24L15.99 6.54L13.8 7.8C14.07 8.47 14.17 9.21 14.07 9.97L16.75 10.75V12.25L14.07 13.03C13.93 13.55 13.69 14.03 13.39 14.46L14.99 16.76L13.76 17.69L12.16 15.39C11.73 15.59 11.25 15.73 10.75 15.78V18.25H9.25V15.78C8.75 15.73 8.27 15.59 7.84 15.39L6.24 17.69L5.01 16.76L6.61 14.46Z" fill="#525866"/></svg>Integrations</li>
+        <li class="nav-item"><svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M16 17.5H4C3.801 17.5 3.61 17.421 3.47 17.28C3.329 17.14 3.25 16.949 3.25 16.75V3.25H16.75V16.75C16.75 16.949 16.671 17.14 16.53 17.28Z" fill="#525866"/></svg>Billing</li>
+        <li class="nav-item"><svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M10 1.75L17.125 5.875V14.125L10 18.25L2.875 14.125V5.875L10 1.75ZM10 13C11.381 13 12.5 11.881 12.5 10.5C12.5 9.119 11.381 8 10 8Z" fill="#525866"/></svg>Settings</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="footer-card pay">
+      <div class="footer-badge-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 14C4.686 14 2 11.314 2 8C2 4.686 4.686 2 8 2C11.314 2 14 4.686 14 8C14 11.314 11.314 14 8 14ZM7.402 10.4L11.644 6.157L10.795 5.309L7.402 8.703L5.704 7.006L4.856 7.854L7.402 10.4Z" fill="#3d64d7"/></svg>Pay As You Go</div>
+      <span class="spacer-flex"></span>
+      <span style="color:#9CA3AF"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.31 7.95L10 3.64L5.69 7.95L6.67 8.93L10 5.6L13.33 8.93L14.31 7.95ZM5.69 12.05L10 16.36L14.31 12.05L13.33 11.07L10 14.4L6.67 11.07L5.69 12.05Z" fill="#9CA3AF"/></svg></span>
+    </div>
+    <div class="footer-card user footer-user">
+      <div class="av-img"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c" alt=""></div>
+      <span class="name">brandon@retellai.com</span>
+      <span style="color:#9CA3AF"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.31 7.95L10 3.64L5.69 7.95L6.67 8.93L10 5.6L13.33 8.93L14.31 7.95ZM5.69 12.05L10 16.36L14.31 12.05L13.33 11.07L10 14.4L6.67 11.07L5.69 12.05Z" fill="#9CA3AF"/></svg></span>
+    </div>
+    <div class="footer-links">
+      <a class="footer-link">Help</a>
+      <div class="footer-divider"></div>
+      <a class="footer-link">Updates</a>
+    </div>
+  </div>
+</aside>
+
+<!-- SUBNAV -->
+<aside class="subnav">
+  <div>
+    <div class="subnav-group-label">Category</div>
+    <div class="subnav-item"><span class="subnav-dot" style="background:#CA8A04"></span>Post-call Data Extraction<span class="count">6</span></div>
+    <div class="subnav-item active"><span class="subnav-dot" style="background:#1D4ED8"></span>Pre-conversation<span class="count">2</span></div>
+    <div class="subnav-item"><span class="subnav-dot" style="background:#166534"></span>During-conversation<span class="count">3</span></div>
+    <div class="subnav-item"><span class="subnav-dot" style="background:#9A3412"></span>Post-conversation<span class="count">3</span></div>
+    <div class="subnav-item"><span class="subnav-dot" style="background:#3d64d7"></span>Custom Functions<span class="count">4</span></div>
+    <div class="subnav-item" style="opacity:0.45"><span class="subnav-dot" style="background:#6B7280"></span>MCP Connectors<span class="count">0</span></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="main-header">
+    <div class="dot"></div>
+    <h1>Pre-conversation</h1>
+    <span class="h-count">2</span>
+  </div>
+  <p class="subtitle">Fetch CRM records and load data into the agent before the call connects.</p>
+  <div class="actionbar">
+    <button class="pill-btn">All Agents <span style="color:#9CA3AF;margin-left:2px">▾</span></button>
+    <span class="spacer-flex"></span>
+    <button class="btn-primary" onclick="openPanel()">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="#fff"/></svg>
+      New Function
+    </button>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Function name</th>
+        <th>Integration</th>
+        <th>Action</th>
+        <th>Used by</th>
+        <th>Status</th>
+        <th>Scope</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="fn-name-cell">
+            <div class="fn-icon" style="background:#E3F4FC"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 3c1.4 0 2.6.8 3.2 2 .5-.2 1.1-.3 1.7-.3 2.3 0 4.1 1.8 4.1 4.1 0 .4-.1.8-.2 1.2.5.7.7 1.5.7 2.3 0 2.2-1.8 4-4 4H5C3.3 16.3 2 14.9 2 13.2c0-1 .5-1.9 1.3-2.5C3.1 10.3 3 9.9 3 9.5 3 7.7 4.8 6 7 6c.3-1.7 1.5-3 3-3z" fill="#00A1E0"/></svg></div>
+            <div><div class="fn-title">fetch_lead_record</div><div class="fn-sub">Pulls open leads before the call begins</div></div>
+          </div>
+        </td>
+        <td><span class="intg-pill">Salesforce</span></td>
+        <td style="color:#525866;font-size:13px">Get Lead</td>
+        <td><div class="used-by"><div class="avatars"><div class="av" style="background:#3d64d7">D</div><div class="av" style="background:#059669">R</div></div><span class="used-count">2 agents</span></div></td>
+        <td><span class="status-cell"><span class="status-dot" style="background:#1FC16B"></span>Active</span></td>
+        <td><span class="scope-pill">Account</span></td>
+        <td class="row-menu">•••</td>
+      </tr>
+      <tr>
+        <td>
+          <div class="fn-name-cell">
+            <div class="fn-icon" style="background:#FFF3EF"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M13.5 7.25a2.25 2.25 0 10-3.4 1.94V11.5l-2.5 1.5v1.5l2.5-1.5V14l-2 1V16.5l2-1V17h1.5v-2l2 1V14.5l-2-1v-.5l2.5 1.5V13l-2.5-1.5V9.19a2.25 2.25 0 001.9-1.94z" fill="#FF7A59"/></svg></div>
+            <div><div class="fn-title">lookup_contact_hubspot</div><div class="fn-sub">Fetches contact details before the call</div></div>
+          </div>
+        </td>
+        <td><span class="intg-pill">HubSpot</span></td>
+        <td style="color:#525866;font-size:13px">Get Contact</td>
+        <td><div class="used-by"><div class="avatars"><div class="av" style="background:#D97706">C</div></div><span class="used-count">1 agent</span></div></td>
+        <td><span class="status-cell"><span class="status-dot" style="background:#1FC16B"></span>Active</span></td>
+        <td><span class="scope-pill">Account</span></td>
+        <td class="row-menu">•••</td>
+      </tr>
+    </tbody>
+  </table>
+</main>
+
+<!-- OVERLAY -->
+<div class="panel-overlay" id="overlay" onclick="closePanel()"></div>
+
+<!-- SLIDE-OUT PANEL -->
+<div class="panel" id="panel">
+
+  <!-- ===== STEP 2: Choose integration ===== -->
+  <div id="step2">
+    <div class="panel-header">
+      <div class="panel-title-wrap">
+        <div class="panel-title">New Function</div>
+        <div class="panel-subtitle">Pre-conversation</div>
+      </div>
+      <div class="panel-close" onclick="closePanel()">&#x2715;</div>
+    </div>
+    <div class="step-crumb">
+      <span class="step-chip active">1 Integration</span>
+      <span class="step-sep">›</span>
+      <span class="step-chip">2 Function</span>
+      <span class="step-sep">›</span>
+      <span class="step-chip">3 Configure</span>
+    </div>
+    <div class="panel-body">
+      <div class="panel-search">
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.52 13.46L17.74 16.67L16.67 17.74L13.46 14.52C12.27 15.48 10.78 16 9.25 16C5.52 16 2.5 12.98 2.5 9.25C2.5 5.52 5.52 2.5 9.25 2.5C12.98 2.5 16 5.52 16 9.25C16 10.78 15.48 12.27 14.52 13.46ZM13.02 12.91C13.97 11.93 14.5 10.62 14.5 9.25C14.5 6.35 12.15 4 9.25 4C6.35 4 4 6.35 4 9.25C4 12.15 6.35 14.5 9.25 14.5C10.62 14.5 11.93 13.97 12.91 13.02Z" fill="currentColor"/></svg>
+          <input type="text" placeholder="Search integrations...">
+        </div>
+      </div>
+      <div class="section-head">Connected</div>
+      <div class="intg-row" onclick="goToStep3('salesforce')">
+        <div class="intg-logo-box"><svg width="20" height="20" viewBox="0 0 48 48" fill="none"><ellipse cx="18.8" cy="22" rx="9.8" ry="10.2" fill="#00A1E0"/><ellipse cx="32" cy="19.5" rx="7.8" ry="8.2" fill="#00A1E0"/><ellipse cx="38.5" cy="27" rx="5.5" ry="5.8" fill="#00A1E0"/><ellipse cx="11.5" cy="30" rx="7.5" ry="7.8" fill="#00A1E0"/><ellipse cx="24" cy="33" rx="8" ry="8.3" fill="#00A1E0"/></svg></div>
+        <div class="intg-info"><div class="intg-name">Salesforce</div><div class="intg-desc">Enterprise sales and CRM platform</div></div>
+        <div class="badge-conn">Connected</div>
+        <span class="intg-chevron"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+      <div class="intg-row" onclick="goToStep3('hubspot')">
+        <div class="intg-logo-box"><svg width="20" height="20" viewBox="0 0 48 48" fill="none"><circle cx="32" cy="14" r="5" fill="#FF7A59"/><circle cx="32" cy="14" r="2.5" fill="#fff"/><path d="M27 14h-7a8 8 0 100 16h7V14z" fill="#FF7A59"/><circle cx="20" cy="22" r="4" fill="#fff"/></svg></div>
+        <div class="intg-info"><div class="intg-name">HubSpot</div><div class="intg-desc">Marketing, sales, and service platform</div></div>
+        <div class="badge-conn">Connected</div>
+        <span class="intg-chevron"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      </div>
+      <div class="section-head" style="margin-top:4px">Available</div>
+      <div class="intg-row">
+        <div class="intg-logo-box"><svg width="20" height="20" viewBox="0 0 48 48" fill="none"><path d="M24 8C15.16 8 8 15.16 8 24s7.16 16 16 16 16-7.16 16-16S32.84 8 24 8z" fill="#03363D"/><path d="M20 18h8v14l-8-7v-7z" fill="#fff"/></svg></div>
+        <div class="intg-info"><div class="intg-name">Zendesk</div><div class="intg-desc">Customer support and ticketing</div></div>
+        <button class="btn-connect" onclick="event.stopPropagation()">Connect</button>
+      </div>
+      <div class="intg-row">
+        <div class="intg-logo-box"><svg width="20" height="20" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="28" rx="4" fill="#111827"/><rect x="16" y="8" width="4" height="8" rx="2" fill="#111827"/><rect x="28" y="8" width="4" height="8" rx="2" fill="#111827"/><rect x="8" y="20" width="32" height="2" fill="#374151"/><rect x="14" y="26" width="6" height="6" rx="1" fill="#fff"/></svg></div>
+        <div class="intg-info"><div class="intg-name">Cal.com</div><div class="intg-desc">Appointment scheduling</div></div>
+        <button class="btn-connect" onclick="event.stopPropagation()">Connect</button>
+      </div>
+      <div class="intg-row">
+        <div class="intg-logo-box"><svg width="20" height="20" viewBox="0 0 48 48" fill="none"><rect x="10" y="26" width="6" height="12" rx="3" fill="#E01E5A"/><rect x="10" y="20" width="12" height="6" rx="3" fill="#E01E5A"/><rect x="26" y="10" width="6" height="12" rx="3" fill="#36C5F0"/><rect x="20" y="16" width="12" height="6" rx="3" fill="#36C5F0"/><rect x="32" y="26" width="6" height="12" rx="3" fill="#2EB67D"/><rect x="26" y="26" width="12" height="6" rx="3" fill="#2EB67D"/><rect x="16" y="32" width="6" height="6" rx="3" fill="#ECB22E"/><rect x="10" y="32" width="12" height="6" rx="3" fill="#ECB22E"/></svg></div>
+        <div class="intg-info"><div class="intg-name">Slack</div><div class="intg-desc">Team messaging and alerts</div></div>
+        <button class="btn-connect" onclick="event.stopPropagation()">Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 3: Select function ===== -->
+  <div id="step3" style="display:none;height:100%;display:none;flex-direction:column">
+    <div class="panel-header">
+      <div class="panel-back" onclick="goToStep2()">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12 5l-6 5 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="panel-title-wrap">
+        <div class="panel-title" id="step3-title">Salesforce</div>
+        <div class="panel-subtitle">Select a function</div>
+      </div>
+      <div class="panel-close" onclick="closePanel()">&#x2715;</div>
+    </div>
+    <div class="step-crumb">
+      <span class="step-chip done">✓ Integration</span>
+      <span class="step-sep">›</span>
+      <span class="step-chip active">2 Function</span>
+      <span class="step-sep">›</span>
+      <span class="step-chip">3 Configure</span>
+    </div>
+    <div class="panel-body">
+      <div style="padding:12px 20px 6px">
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.52 13.46L17.74 16.67L16.67 17.74L13.46 14.52C12.27 15.48 10.78 16 9.25 16C5.52 16 2.5 12.98 2.5 9.25C2.5 5.52 5.52 2.5 9.25 2.5C12.98 2.5 16 5.52 16 9.25C16 10.78 15.48 12.27 14.52 13.46Z" fill="currentColor"/></svg>
+          <input type="text" placeholder="Search functions...">
+        </div>
+      </div>
+      <div class="section-head">Pre-conversation functions</div>
+      <div class="fn-list-row" onclick="goToStep4('Get Contact', 'Fetch contact record by phone number before the call begins')">
+        <div class="fn-list-icon" style="background:#E3F4FC"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 10a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0H3z" fill="#00A1E0"/></svg></div>
+        <div class="fn-list-info">
+          <div class="fn-list-name">Get Contact</div>
+          <div class="fn-list-desc">Fetch contact record by phone number before the call begins</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="fn-list-row" onclick="goToStep4('Get Lead', 'Pull open lead record associated with the caller')">
+        <div class="fn-list-icon" style="background:#EEF8EE"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2L3 7v11h5v-6h4v6h5V7L10 2z" fill="#1FC16B"/></svg></div>
+        <div class="fn-list-info">
+          <div class="fn-list-name">Get Lead</div>
+          <div class="fn-list-desc">Pull open lead record associated with the caller</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="fn-list-row" onclick="goToStep4('Get Opportunity', 'Fetch the most recent open opportunity for this contact')">
+        <div class="fn-list-icon" style="background:#FFF7ED"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm1 11H9V9h2v4zm0-6H9V5h2v2z" fill="#F59E0B"/></svg></div>
+        <div class="fn-list-info">
+          <div class="fn-list-name">Get Opportunity</div>
+          <div class="fn-list-desc">Fetch the most recent open opportunity for this contact</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="fn-list-row" onclick="goToStep4('Get Case', 'Retrieve open support case linked to the caller')">
+        <div class="fn-list-icon" style="background:#FFF0F0"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 3h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zm2 4v6h6V7H7z" fill="#EF4444"/></svg></div>
+        <div class="fn-list-info">
+          <div class="fn-list-name">Get Case</div>
+          <div class="fn-list-desc">Retrieve open support case linked to the caller</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="fn-list-row" onclick="goToStep4('Get Account', 'Load the company account record before the call')">
+        <div class="fn-list-icon" style="background:#F3F0FF"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 4h12v12H4V4zm2 2v8h8V6H6z" fill="#7C3AED"/></svg></div>
+        <div class="fn-list-info">
+          <div class="fn-list-name">Get Account</div>
+          <div class="fn-list-desc">Load the company account record before the call</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 5l6 5-6 5" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 4/5: Configure ===== -->
+  <div id="step4" style="display:none;flex-direction:column;height:100%">
+    <div class="panel-header">
+      <div class="panel-back" onclick="goToStep3Back()">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12 5l-6 5 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="panel-title-wrap">
+        <div class="panel-title" id="step4-title">Get Contact</div>
+        <div class="panel-subtitle" id="step4-sub">Salesforce · Pre-conversation</div>
+      </div>
+      <div class="panel-close" onclick="closePanel()">&#x2715;</div>
+    </div>
+    <div class="step-crumb">
+      <span class="step-chip done">✓ Integration</span>
+      <span class="step-sep">›</span>
+      <span class="step-chip done">✓ Function</span>
+      <span class="step-sep">›</span>
+      <span class="step-chip active">3 Configure</span>
+    </div>
+    <div class="panel-body">
+      <div class="config-section">
+        <div class="config-section-title">Match by</div>
+        <div class="form-field">
+          <span class="form-label">CRM field</span>
+          <div class="match-row">
+            <select class="form-select">
+              <option selected>Phone Number</option>
+              <option>Email</option>
+              <option>Contact ID</option>
+            </select>
+            <span class="match-arrow">→</span>
+            <select class="form-select">
+              <option selected>&#123;&#123;from_number&#125;&#125;</option>
+              <option>&#123;&#123;to_number&#125;&#125;</option>
+              <option>&#123;&#123;call_id&#125;&#125;</option>
+            </select>
+          </div>
+          <div class="form-hint">Map the CRM field that identifies the contact to the Retell variable that carries that value.</div>
+        </div>
+        <div class="form-field">
+          <span class="form-label">Multiple matches rule</span>
+          <select class="form-select">
+            <option selected>Use most recent record</option>
+            <option>Use oldest record</option>
+            <option>Use highest value record</option>
+          </select>
+          <div class="form-hint">Applies to Opportunity and Case objects only.</div>
+        </div>
+      </div>
+
+      <div class="config-divider"></div>
+
+      <div class="config-section" style="padding-top:18px">
+        <div class="config-section-title">Fields to pull</div>
+        <div class="form-hint" style="margin-bottom:12px;color:#9CA3AF;font-size:12px">Select which CRM fields to load into the conversation as Retell variables.</div>
+        <div class="field-pull-row">
+          <div class="field-pull-check checked"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <span class="field-pull-label">First Name</span>
+          <select class="field-pull-select"><option>&#123;&#123;first_name&#125;&#125;</option></select>
+        </div>
+        <div class="field-pull-row">
+          <div class="field-pull-check checked"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <span class="field-pull-label">Last Name</span>
+          <select class="field-pull-select"><option>&#123;&#123;last_name&#125;&#125;</option></select>
+        </div>
+        <div class="field-pull-row">
+          <div class="field-pull-check checked"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <span class="field-pull-label">Account Name</span>
+          <select class="field-pull-select"><option>&#123;&#123;account_name&#125;&#125;</option></select>
+        </div>
+        <div class="field-pull-row">
+          <div class="field-pull-check"></div>
+          <span class="field-pull-label" style="color:#9CA3AF">Email</span>
+          <select class="field-pull-select" style="opacity:0.4;pointer-events:none"><option>-- not mapped --</option></select>
+        </div>
+        <div class="field-pull-row">
+          <div class="field-pull-check"></div>
+          <span class="field-pull-label" style="color:#9CA3AF">Lead Source</span>
+          <select class="field-pull-select" style="opacity:0.4;pointer-events:none"><option>-- not mapped --</option></select>
+        </div>
+      </div>
+
+      <div class="config-divider"></div>
+
+      <div class="config-section" style="padding-top:18px;padding-bottom:8px">
+        <div class="config-section-title">Name and scope</div>
+        <div class="form-field">
+          <span class="form-label">Function name</span>
+          <input class="form-input" type="text" value="fetch_contact_salesforce" placeholder="e.g. fetch_contact_salesforce">
+        </div>
+        <div class="form-field">
+          <span class="form-label">Scope</span>
+          <div class="scope-options">
+            <div class="scope-option selected" onclick="selectScope(this)">
+              <div class="scope-radio"></div>
+              <div>
+                <div class="scope-label">Account</div>
+                <div class="scope-hint">All agents in this workspace can link to this function.</div>
+              </div>
+            </div>
+            <div class="scope-option" onclick="selectScope(this)">
+              <div class="scope-radio"></div>
+              <div>
+                <div class="scope-label">Local</div>
+                <div class="scope-hint">Only available to the agent it was created for. Can be promoted to account level at any time.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn-cancel" onclick="closePanel()">Cancel</button>
+      <button class="btn-save">Save function</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentIntegration = 'salesforce';
+
+function openPanel() {
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('panel').classList.add('open');
+  showStep(2);
+}
+
+function closePanel() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('panel').classList.remove('open');
+}
+
+function showStep(n) {
+  document.getElementById('step2').style.display = n === 2 ? 'block' : 'none';
+  document.getElementById('step3').style.display = n === 3 ? 'flex' : 'none';
+  document.getElementById('step4').style.display = n === 4 ? 'flex' : 'none';
+}
+
+function goToStep3(integration) {
+  currentIntegration = integration;
+  const names = { salesforce: 'Salesforce', hubspot: 'HubSpot' };
+  document.getElementById('step3-title').textContent = names[integration] || integration;
+  showStep(3);
+}
+
+function goToStep2() {
+  showStep(2);
+}
+
+function goToStep4(fnName, fnDesc) {
+  document.getElementById('step4-title').textContent = fnName;
+  const intgName = currentIntegration === 'salesforce' ? 'Salesforce' : 'HubSpot';
+  document.getElementById('step4-sub').textContent = intgName + ' · Pre-conversation';
+  showStep(4);
+}
+
+function goToStep3Back() {
+  showStep(3);
+}
+
+function selectScope(el) {
+  document.querySelectorAll('.scope-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// Open panel on load so the user sees it immediately
+window.onload = () => openPanel();
+</script>
+</body>
+</html>

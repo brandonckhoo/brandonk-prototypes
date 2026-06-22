@@ -107,7 +107,7 @@ body {
 .fn-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 9px 14px;
   cursor: default;
 }
@@ -126,15 +126,16 @@ body {
   flex-shrink: 0;
 }
 
-.fn-meta { flex: 1; min-width: 0; }
-.fn-name-row { display: flex; align-items: center; gap: 6px; }
+.fn-meta { flex: 1; min-width: 0; overflow: hidden; }
+.fn-name-row { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; overflow: hidden; }
 .fn-name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #0A0A0A;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 .fn-row.added-row .fn-name { color: #525866; }
 .fn-badge {
@@ -187,6 +188,8 @@ body {
   flex-shrink: 0;
   border-radius: 5px;
   cursor: pointer;
+  text-decoration: none;
+  margin-left: auto;
 }
 .link-icon:hover { color: #6B7280; background: #F3F4F6; }
 

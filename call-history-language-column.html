@@ -18,7 +18,7 @@ body {
 
 /* ─── SIDEBAR ─────────────────────────────────────────────────── */
 aside {
-  width: 280px;
+  width: 220px;
   flex-shrink: 0;
   background: #F5F7FA;
   display: flex;
@@ -27,269 +27,212 @@ aside {
   overflow: hidden;
   border-right: 1px solid #E1E4EA;
 }
-.logo-area {
-  padding: 20px 10px 12px 20px;
-  flex-shrink: 0;
-}
+.logo-area { padding: 18px 10px 10px 16px; flex-shrink: 0; }
 .workspace-sel {
-  margin: 0 14px;
-  padding: 10px 10px 10px 12px;
-  height: 40px;
+  margin: 0 10px;
+  padding: 8px 10px;
+  height: 36px;
   background: #F5F7FA;
   border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  flex-shrink: 0;
+  border-radius: 7px;
+  display: flex; align-items: center; gap: 7px;
+  cursor: pointer; flex-shrink: 0;
 }
-.ws-avatar {
-  width: 20px; height: 20px;
-  background: #3d64d7;
-  border-radius: 4px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 700; color: #fff;
-  flex-shrink: 0;
-}
-.ws-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; }
-.ws-chev { color: #99A0AE; }
-.nav-scroll {
-  flex: 1;
-  overflow-y: auto;
-  padding: 4px 0 16px;
-  margin-top: 8px;
-}
-.nav-section { margin-top: 8px; }
-.nav-section:first-child { margin-top: 0; }
-.nav-label {
-  font-size: 12px; font-weight: 500; color: #99A0AE;
-  text-transform: uppercase; letter-spacing: 0.04em;
-  padding: 4px; margin: 0 14px; height: 24px;
-  display: flex; align-items: center;
-}
-.nav-items { padding: 0 14px; }
-.nav-item {
-  height: 36px; padding: 8px; gap: 8px;
-  border-radius: 6px;
-  display: flex; align-items: center;
-  font-size: 14px; color: #525866;
-  cursor: pointer;
-  position: relative;
-  margin-top: 4px;
-  text-decoration: none;
-}
-.nav-item:first-child { margin-top: 0; }
+.ws-avatar { width: 18px; height: 18px; background: #3d64d7; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.ws-name { font-size: 12px; font-weight: 500; color: #0A0A0A; flex: 1; }
+.nav-scroll { flex: 1; overflow-y: auto; padding: 4px 0 12px; margin-top: 6px; }
+.nav-section { margin-top: 6px; }
+.nav-label { font-size: 11px; font-weight: 500; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; padding: 3px; margin: 0 10px; display: flex; align-items: center; }
+.nav-items { padding: 0 10px; }
+.nav-item { height: 32px; padding: 0 8px; gap: 7px; border-radius: 6px; display: flex; align-items: center; font-size: 13px; color: #525866; cursor: pointer; margin-top: 2px; }
 .nav-item:hover { background: rgba(0,0,0,0.03); }
-.nav-item.active {
-  background: #FFFFFF;
-  color: #0A0A0A;
-  font-weight: 500;
-}
-.nav-item.active .nav-icon { color: #3d64d7; }
-.nav-icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #525866; }
+.nav-item.active { background: #fff; color: #0A0A0A; font-weight: 500; }
+.nav-icon { width: 16px; height: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.nav-icon svg { width: 14px; height: 14px; fill: #525866; }
 .nav-item.active .nav-icon svg { fill: #3d64d7; }
-.nav-icon svg { fill: #525866; width: 16px; height: 16px; }
+.sidebar-footer { padding: 10px; flex-shrink: 0; }
+.user-card { background: #fff; border: 1px solid #E1E4EA; border-radius: 7px; height: 36px; padding: 8px 10px; display: flex; align-items: center; gap: 7px; cursor: pointer; margin-bottom: 8px; }
+.user-avatar { width: 18px; height: 18px; border-radius: 50%; background: #3d64d7; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.user-email { font-size: 12px; color: #525866; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.billing-pill { background: #ecf3ff; color: #3d64d7; font-size: 11px; font-weight: 500; border-radius: 5px; padding: 3px 8px; display: inline-flex; align-items: center; gap: 4px; }
+.billing-dot { width: 5px; height: 5px; background: #3d64d7; border-radius: 50%; }
 
-/* Sidebar footer */
-.sidebar-footer { padding: 16px 14px; flex-shrink: 0; }
-.billing-card {
-  background: #fff;
-  border: 1px solid #E1E4EA;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1);
-  height: 58px;
-  padding: 16px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-.billing-badge {
-  background: #ecf3ff;
-  color: #3d64d7;
-  font-size: 12px; font-weight: 500;
-  border-radius: 6px;
-  padding: 4px 8px 4px 4px;
-  display: flex; align-items: center; gap: 4px;
-}
-.billing-badge-dot { width: 6px; height: 6px; background: #3d64d7; border-radius: 50%; }
-.billing-chevron { margin-left: auto; color: #9CA3AF; }
-.user-card {
-  background: #fff;
-  border: 1px solid #E1E4EA;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1);
-  height: 40px;
-  padding: 10px 10px 10px 12px;
-  margin-bottom: 12px;
-  display: flex; align-items: center; gap: 8px;
-  cursor: pointer;
-}
-.user-avatar {
-  width: 20px; height: 20px; border-radius: 50%;
-  background: #3d64d7;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 9px; font-weight: 700; color: #fff;
-  flex-shrink: 0;
-}
-.user-email { font-size: 14px; color: #525866; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.footer-links { display: flex; align-items: center; gap: 4px; }
-.footer-link {
-  padding: 8px 12px; font-size: 14px; color: #525866;
-  height: 36px; display: flex; align-items: center; gap: 5px;
-  border-radius: 6px; cursor: pointer;
-}
-.footer-link:hover { background: rgba(0,0,0,0.03); }
-.footer-divider { width: 1px; height: 12px; background: #D1D5DB; }
-
-/* ─── MAIN ────────────────────────────────────────────────────── */
-main {
+/* ─── CONTENT AREA ────────────────────────────────────────────── */
+.content-area {
   flex: 1;
   display: flex;
+  overflow: hidden;
+}
+
+/* ─── TABLE PANEL ─────────────────────────────────────────────── */
+.table-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.2s ease;
+  width: 100%;
+}
+.table-panel.collapsed {
+  width: 340px;
+  flex-shrink: 0;
+  border-right: 1px solid #E1E4EA;
+}
+
+.page-header { padding: 20px 24px 0; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.page-dot { width: 7px; height: 7px; background: #3d64d7; border-radius: 50%; }
+.page-title { font-size: 15px; font-weight: 600; color: #0A0A0A; }
+
+.action-bar { padding: 12px 24px 0; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.pill-btn { height: 30px; padding: 0 10px; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 12px; color: #0E121B; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+.pill-btn:hover { background: #F9FAFB; }
+
+.table-wrap { flex: 1; overflow-y: auto; margin-top: 12px; padding: 0 24px 24px; }
+
+/* Full table (uncollapsed) */
+table.full { width: 100%; border-collapse: collapse; font-size: 12px; }
+table.full thead th { text-align: left; font-size: 11px; font-weight: 500; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em; padding: 0 10px 8px 0; white-space: nowrap; border-bottom: 1px solid #E1E4EA; }
+table.full thead th:first-child { padding-left: 0; }
+table.full tbody tr { border-bottom: 1px solid #F3F4F6; cursor: pointer; }
+table.full tbody tr:hover { background: rgba(0,0,0,0.02); }
+table.full tbody tr.selected { background: #F0F4FF; }
+table.full tbody td { padding: 9px 10px 9px 0; color: #0E121B; white-space: nowrap; }
+table.full tbody td:first-child { padding-left: 0; }
+
+/* Collapsed mini-list */
+table.mini { width: 100%; border-collapse: collapse; font-size: 12px; }
+table.mini thead th { text-align: left; font-size: 11px; font-weight: 500; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em; padding: 0 0 8px; border-bottom: 1px solid #E1E4EA; }
+table.mini tbody tr { border-bottom: 1px solid #F3F4F6; cursor: pointer; }
+table.mini tbody tr:hover { background: rgba(0,0,0,0.02); }
+table.mini tbody tr.selected { background: #F0F4FF; }
+table.mini tbody td { padding: 8px 0; color: #0E121B; }
+
+.td-muted { color: #6B7280; }
+.pill { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+.pill-ended { background: #F3F4F6; color: #374151; }
+.pill-positive { background: #DCFCE7; color: #15803D; }
+.pill-negative { background: #FEE2E2; color: #B91C1C; }
+.pill-neutral { background: #F3F4F6; color: #374151; }
+.lang-pill { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500; background: #EFF6FF; color: #1D4ED8; }
+.lang-pill-es { background: #FFF7ED; color: #C2410C; }
+.lang-pill-fr { background: #F5F3FF; color: #6D28D9; }
+
+/* ─── DETAIL PANEL ────────────────────────────────────────────── */
+.detail-panel {
+  display: none;
+  flex: 1;
   flex-direction: column;
   overflow: hidden;
   background: #fff;
 }
+.detail-panel.visible { display: flex; }
 
-.page-header {
-  padding: 24px 32px 0;
+.detail-header {
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid #E1E4EA;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.detail-header-left { flex: 1; min-width: 0; }
+.detail-call-id { font-size: 16px; font-weight: 600; color: #0E121B; }
+.detail-meta { font-size: 11px; color: #6B7280; margin-top: 3px; line-height: 1.6; }
+.detail-meta span { margin-right: 12px; }
+.detail-close { width: 28px; height: 28px; border-radius: 6px; border: 1px solid #E1E4EA; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; color: #6B7280; font-size: 14px; }
+.detail-close:hover { background: #F9FAFB; }
+
+/* Audio player */
+.audio-bar {
+  margin: 12px 20px 0;
+  height: 36px;
+  background: #F5F7FA;
+  border: 1px solid #E1E4EA;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 0 12px;
   flex-shrink: 0;
 }
-.page-dot { width: 8px; height: 8px; background: #3d64d7; border-radius: 50%; flex-shrink: 0; }
-.page-title { font-size: 16px; font-weight: 600; color: #0A0A0A; }
+.play-btn { width: 22px; height: 22px; background: #0E121B; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; }
+.scrubber { flex: 1; height: 3px; background: #E1E4EA; border-radius: 2px; position: relative; }
+.scrubber-fill { width: 22%; height: 100%; background: #0E121B; border-radius: 2px; }
+.scrubber-dot { width: 9px; height: 9px; background: #0E121B; border-radius: 50%; position: absolute; top: -3px; left: 22%; }
+.audio-time { font-size: 11px; color: #6B7280; flex-shrink: 0; }
+.audio-speed { font-size: 11px; color: #6B7280; border: 1px solid #E1E4EA; border-radius: 4px; padding: 2px 6px; cursor: pointer; flex-shrink: 0; }
+.rerun-btn { font-size: 11px; color: #6B7280; border: 1px solid #E1E4EA; border-radius: 4px; padding: 2px 8px; cursor: pointer; flex-shrink: 0; }
 
-/* Action bar */
-.action-bar {
-  padding: 16px 32px 0;
+/* Detail tabs */
+.detail-tabs { display: flex; gap: 20px; padding: 0 20px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; margin-top: 12px; }
+.detail-tab { font-size: 13px; color: #99A0AE; height: 36px; display: flex; align-items: center; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.detail-tab.active { color: #0E121B; font-weight: 600; border-bottom-color: #0E121B; }
+
+/* Detail body */
+.detail-body { flex: 1; overflow-y: auto; padding: 16px 20px 24px; }
+
+.detail-section { margin-bottom: 16px; }
+.detail-section-title { font-size: 12px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+
+/* Conversation analysis rows */
+.ca-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-.pill-btn {
-  height: 34px;
-  padding: 0 12px;
-  background: #fff;
-  border: 1px solid #E1E4EA;
-  border-radius: 7px;
-  font-size: 13px; color: #0E121B;
-  display: flex; align-items: center; gap: 6px;
-  cursor: pointer;
-}
-.pill-btn:hover { background: #F9FAFB; }
-.pill-btn svg { color: #525866; }
-.action-bar-spacer { flex: 1; }
-.export-btn {
-  height: 34px; padding: 0 14px;
-  background: #fff; border: 1px solid #E1E4EA;
-  border-radius: 7px; font-size: 13px; color: #0E121B;
-  display: flex; align-items: center; gap: 6px; cursor: pointer;
-}
-.export-btn:hover { background: #F9FAFB; }
-
-/* Table wrapper */
-.table-wrap {
-  flex: 1;
-  overflow-y: auto;
-  margin-top: 16px;
-  padding: 0 32px 32px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #F9FAFB;
   font-size: 13px;
 }
-thead tr {
-  border-bottom: 1px solid #E1E4EA;
-}
-thead th {
-  text-align: left;
-  font-size: 12px;
-  font-weight: 500;
-  color: #6B7280;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 0 12px 10px 0;
-  white-space: nowrap;
-}
-thead th:first-child { padding-left: 0; }
-tbody tr {
-  border-bottom: 1px solid #F3F4F6;
-  cursor: pointer;
-}
-tbody tr:hover { background: rgba(0,0,0,0.02); }
-tbody td {
-  padding: 11px 12px 11px 0;
-  font-size: 13px;
-  color: #0E121B;
-  white-space: nowrap;
-}
-tbody td:first-child { padding-left: 0; }
-.td-muted { color: #6B7280; font-size: 12px; }
-
-/* Status pills */
-.pill {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 8px; border-radius: 5px;
-  font-size: 12px; font-weight: 500;
-}
-.pill-ended { background: #F3F4F6; color: #374151; }
-.pill-green { background: #DCFCE7; color: #15803D; }
-.pill-red { background: #FEE2E2; color: #B91C1C; }
-.pill-neutral { background: #F3F4F6; color: #374151; }
-.pill-positive { background: #DCFCE7; color: #15803D; }
-.pill-negative { background: #FEE2E2; color: #B91C1C; }
-
-/* Language pills — styled like status pills but with globe icon feel */
-.lang-pill {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 3px 8px; border-radius: 5px;
-  font-size: 12px; font-weight: 500;
+.ca-row:last-child { border-bottom: none; }
+.ca-checkbox { width: 14px; height: 14px; border: 1.5px solid #D1D5DB; border-radius: 3px; background: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.ca-checkbox.checked { background: #0E121B; border-color: #0E121B; }
+.ca-label { flex: 1; color: #374151; }
+.ca-value { font-weight: 500; color: #0E121B; }
+.ca-value.green { color: #15803D; }
+.ca-value.blue { color: #1D4ED8; }
+.ca-value.red { color: #B91C1C; }
+.ca-value.highlight {
   background: #EFF6FF; color: #1D4ED8;
+  padding: 2px 8px; border-radius: 4px;
+  font-size: 12px;
 }
-.lang-pill-es {
+.ca-value.highlight-es {
   background: #FFF7ED; color: #C2410C;
+  padding: 2px 8px; border-radius: 4px;
+  font-size: 12px;
 }
-.lang-pill-fr {
+.ca-value.highlight-fr {
   background: #F5F3FF; color: #6D28D9;
+  padding: 2px 8px; border-radius: 4px;
+  font-size: 12px;
 }
+
+/* Summary */
+.summary-text { font-size: 13px; color: #374151; line-height: 1.6; }
+
+/* Transcript */
+.transcript-msg { margin-bottom: 10px; }
+.transcript-role { font-size: 11px; font-weight: 600; color: #99A0AE; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.03em; }
+.transcript-role.agent { color: #3d64d7; }
+.transcript-text { font-size: 13px; color: #374151; line-height: 1.5; }
+
+/* Contact info panel (far right) */
+.contact-panel {
+  width: 220px;
+  flex-shrink: 0;
+  border-left: 1px solid #E1E4EA;
+  padding: 16px;
+  overflow-y: auto;
+  display: none;
+}
+.contact-panel.visible { display: block; }
+.contact-panel-title { font-size: 12px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+.contact-panel-empty { font-size: 12px; color: #99A0AE; }
 
 /* Pagination */
-.pagination {
-  padding: 16px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 13px;
-  color: #6B7280;
-  border-top: 1px solid #F3F4F6;
-  flex-shrink: 0;
-}
-.page-btns { display: flex; align-items: center; gap: 6px; }
-.page-btn {
-  width: 28px; height: 28px; border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  border: 1px solid #E1E4EA; background: #fff;
-  font-size: 13px; cursor: pointer; color: #374151;
-}
+.pagination { padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #6B7280; border-top: 1px solid #F3F4F6; flex-shrink: 0; }
+.page-btns { display: flex; gap: 4px; }
+.page-btn { width: 24px; height: 24px; border-radius: 5px; display: flex; align-items: center; justify-content: center; border: 1px solid #E1E4EA; background: #fff; font-size: 12px; cursor: pointer; color: #374151; }
 .page-btn.active { background: #0E121B; color: #fff; border-color: #0E121B; }
-.page-btn:hover:not(.active) { background: #F9FAFB; }
-.per-page {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 13px; color: #6B7280;
-}
-.per-page select {
-  border: 1px solid #E1E4EA; border-radius: 6px;
-  padding: 3px 8px; font-size: 13px; color: #374151;
-  background: #fff; cursor: pointer;
-}
 </style>
 </head>
 <body>
@@ -297,334 +240,384 @@ tbody td:first-child { padding-left: 0; }
 <!-- SIDEBAR -->
 <aside>
   <div class="logo-area">
-    <svg width="73" height="20" viewBox="0 0 414 114" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#retell-logo)"><path d="M40.3722 92.687C34.6862 92.687 30.1372 96.996 30.1372 102.922C30.1372 108.848 34.6862 113.156 40.3722 113.156C46.0582 113.156 50.6072 108.847 50.6072 102.922C50.6072 96.997 46.0582 92.687 40.3722 92.687Z" fill="#0A0A0A"/><path d="M69.9401 92.687C64.2541 92.687 59.7051 96.996 59.7051 102.922C59.7051 108.848 64.2541 113.156 69.9401 113.156C75.6261 113.156 80.1751 108.847 80.1751 102.922C80.1751 96.997 75.6261 92.687 69.9401 92.687Z" fill="#0A0A0A"/><path d="M40.3722 0C34.6862 0 30.1372 4.309 30.1372 10.235C30.1372 16.161 34.6862 20.47 40.3722 20.47C46.0582 20.47 50.6072 16.161 50.6072 10.235C50.6072 4.309 46.0582 0 40.3722 0Z" fill="#0A0A0A"/><path d="M69.9401 0C64.2541 0 59.7051 4.309 59.7051 10.235C59.7051 16.161 64.2541 20.47 69.9401 20.47C75.6261 20.47 80.1751 16.161 80.1751 10.235C80.1751 4.309 75.6261 0 69.9401 0Z" fill="#0A0A0A"/><path d="M10.235 31.2751C4.549 31.2751 0 35.5842 0 41.5102C0 47.4362 4.549 51.7451 10.235 51.7451C15.921 51.7451 20.47 47.4362 20.47 41.5102C20.47 35.5842 15.921 31.2751 10.235 31.2751Z" fill="#0A0A0A"/><path d="M10.235 61.4121C4.549 61.4121 0 65.7211 0 71.6471C0 77.5731 4.549 81.8821 10.235 81.8821C15.921 81.8821 20.47 77.5731 20.47 71.6471C20.47 65.7211 15.921 61.4121 10.235 61.4121Z" fill="#0A0A0A"/><path d="M100.078 31.2751C94.3923 31.2751 89.8433 35.5842 89.8433 41.5102C89.8433 47.4362 94.3923 51.7451 100.078 51.7451C105.764 51.7451 110.313 47.4362 110.313 41.5102C110.313 35.5842 105.764 31.2751 100.078 31.2751Z" fill="#0A0A0A"/><path d="M100.078 61.4121C94.3923 61.4121 89.8433 65.7211 89.8433 71.6471C89.8433 77.5731 94.3923 81.8821 100.078 81.8821C105.764 81.8821 110.313 77.5731 110.313 71.6471C110.313 65.7211 105.764 61.4121 100.078 61.4121Z" fill="#0A0A0A"/><path d="M221.997 75.7282C221.418 63.5772 216.211 58.9472 209.267 57.2112C217.368 54.8962 224.312 50.2672 224.312 36.9592C224.312 23.6512 215.054 14.9712 196.537 14.9712H162.976V95.9812H176.289V62.9992H190.75C205.216 62.9992 208.688 68.2072 208.688 83.2512C208.688 89.5652 209.845 93.0882 211.003 95.9812H224.89C222.575 93.0882 221.997 84.5772 221.997 78.6222V75.7292V75.7282ZM205.216 49.6892C202.901 52.0042 199.43 52.5822 195.379 52.5822H176.284V26.5432H193.643C198.851 26.5432 201.744 27.1222 204.637 28.8582C208.109 30.5942 209.845 34.6442 209.845 39.2742C209.845 43.9042 208.109 47.3752 205.216 49.6902V49.6892Z" fill="#0A0A0A"/><path d="M255.558 34.645C238.199 34.645 226.626 47.954 226.626 66.47C226.626 84.986 242.249 98.295 256.137 98.295C270.025 98.295 279.861 90.194 283.333 78.621H269.446C267.71 82.671 264.817 87.301 256.137 87.301C247.457 87.301 239.935 81.515 239.935 69.942H283.912C283.912 49.69 272.917 34.645 255.558 34.645ZM240.513 60.105C241.092 51.425 246.878 45.06 255.558 45.06C264.238 45.06 270.024 51.425 270.024 60.105H240.513Z" fill="#0A0A0A"/><path d="M344.09 34.645C326.731 34.645 315.158 47.954 315.158 66.47C315.158 85.152 330.781 98.295 344.669 98.295C358.557 98.295 368.393 90.194 371.865 78.621H357.978C356.242 82.671 353.349 87.301 344.669 87.301C335.989 87.301 328.467 81.515 328.467 69.942H372.444C372.444 49.69 361.45 34.645 344.091 34.645H344.09ZM329.045 60.105C329.624 51.425 335.41 45.06 344.09 45.06C352.77 45.06 358.556 51.425 358.556 60.105H329.045Z" fill="#0A0A0A"/><path d="M390.96 14.9712H377.651V95.9182H390.96V14.9712Z" fill="#0A0A0A"/><path d="M413.527 14.9712H400.218V95.9182H413.527V14.9712Z" fill="#0A0A0A"/><path d="M304.171 17.2821L290.841 17.2751L290.851 34.6471H282.759V45.0001H290.851V82.8191C290.851 87.5761 291.802 90.4311 294.657 93.2851C297.512 96.1391 300.369 97.0941 305.126 97.0941H315.139V85.6731H309.88C308.162 85.6731 306.96 85.3702 306.126 85.1062C305.272 84.8352 304.609 84.1571 304.4 83.2861C304.171 82.3311 304.171 81.0862 304.171 79.9032V45.0001H315.138V34.6471H304.171V17.2821Z" fill="#0A0A0A"/></g><defs><clipPath id="retell-logo"><rect width="413.527" height="113.156" fill="white"/></clipPath></defs></svg>
+    <svg width="60" height="16" viewBox="0 0 414 114" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#rl)"><path d="M40.3722 92.687C34.6862 92.687 30.1372 96.996 30.1372 102.922C30.1372 108.848 34.6862 113.156 40.3722 113.156C46.0582 113.156 50.6072 108.847 50.6072 102.922C50.6072 96.997 46.0582 92.687 40.3722 92.687Z" fill="#0A0A0A"/><path d="M69.9401 92.687C64.2541 92.687 59.7051 96.996 59.7051 102.922C59.7051 108.848 64.2541 113.156 69.9401 113.156C75.6261 113.156 80.1751 108.847 80.1751 102.922C80.1751 96.997 75.6261 92.687 69.9401 92.687Z" fill="#0A0A0A"/><path d="M40.3722 0C34.6862 0 30.1372 4.309 30.1372 10.235C30.1372 16.161 34.6862 20.47 40.3722 20.47C46.0582 20.47 50.6072 16.161 50.6072 10.235C50.6072 4.309 46.0582 0 40.3722 0Z" fill="#0A0A0A"/><path d="M69.9401 0C64.2541 0 59.7051 4.309 59.7051 10.235C59.7051 16.161 64.2541 20.47 69.9401 20.47C75.6261 20.47 80.1751 16.161 80.1751 10.235C80.1751 4.309 75.6261 0 69.9401 0Z" fill="#0A0A0A"/><path d="M10.235 31.2751C4.549 31.2751 0 35.5842 0 41.5102C0 47.4362 4.549 51.7451 10.235 51.7451C15.921 51.7451 20.47 47.4362 20.47 41.5102C20.47 35.5842 15.921 31.2751 10.235 31.2751Z" fill="#0A0A0A"/><path d="M10.235 61.4121C4.549 61.4121 0 65.7211 0 71.6471C0 77.5731 4.549 81.8821 10.235 81.8821C15.921 81.8821 20.47 77.5731 20.47 71.6471C20.47 65.7211 15.921 61.4121 10.235 61.4121Z" fill="#0A0A0A"/><path d="M100.078 31.2751C94.3923 31.2751 89.8433 35.5842 89.8433 41.5102C89.8433 47.4362 94.3923 51.7451 100.078 51.7451C105.764 51.7451 110.313 47.4362 110.313 41.5102C110.313 35.5842 105.764 31.2751 100.078 31.2751Z" fill="#0A0A0A"/><path d="M100.078 61.4121C94.3923 61.4121 89.8433 65.7211 89.8433 71.6471C89.8433 77.5731 94.3923 81.8821 100.078 81.8821C105.764 81.8821 110.313 77.5731 110.313 71.6471C110.313 65.7211 105.764 61.4121 100.078 61.4121Z" fill="#0A0A0A"/><path d="M221.997 75.7282C221.418 63.5772 216.211 58.9472 209.267 57.2112C217.368 54.8962 224.312 50.2672 224.312 36.9592C224.312 23.6512 215.054 14.9712 196.537 14.9712H162.976V95.9812H176.289V62.9992H190.75C205.216 62.9992 208.688 68.2072 208.688 83.2512C208.688 89.5652 209.845 93.0882 211.003 95.9812H224.89C222.575 93.0882 221.997 84.5772 221.997 78.6222V75.7292V75.7282ZM205.216 49.6892C202.901 52.0042 199.43 52.5822 195.379 52.5822H176.284V26.5432H193.643C198.851 26.5432 201.744 27.1222 204.637 28.8582C208.109 30.5942 209.845 34.6442 209.845 39.2742C209.845 43.9042 208.109 47.3752 205.216 49.6902V49.6892Z" fill="#0A0A0A"/><path d="M255.558 34.645C238.199 34.645 226.626 47.954 226.626 66.47C226.626 84.986 242.249 98.295 256.137 98.295C270.025 98.295 279.861 90.194 283.333 78.621H269.446C267.71 82.671 264.817 87.301 256.137 87.301C247.457 87.301 239.935 81.515 239.935 69.942H283.912C283.912 49.69 272.917 34.645 255.558 34.645ZM240.513 60.105C241.092 51.425 246.878 45.06 255.558 45.06C264.238 45.06 270.024 51.425 270.024 60.105H240.513Z" fill="#0A0A0A"/><path d="M344.09 34.645C326.731 34.645 315.158 47.954 315.158 66.47C315.158 85.152 330.781 98.295 344.669 98.295C358.557 98.295 368.393 90.194 371.865 78.621H357.978C356.242 82.671 353.349 87.301 344.669 87.301C335.989 87.301 328.467 81.515 328.467 69.942H372.444C372.444 49.69 361.45 34.645 344.091 34.645H344.09ZM329.045 60.105C329.624 51.425 335.41 45.06 344.09 45.06C352.77 45.06 358.556 51.425 358.556 60.105H329.045Z" fill="#0A0A0A"/><path d="M390.96 14.9712H377.651V95.9182H390.96V14.9712Z" fill="#0A0A0A"/><path d="M413.527 14.9712H400.218V95.9182H413.527V14.9712Z" fill="#0A0A0A"/><path d="M304.171 17.2821L290.841 17.2751L290.851 34.6471H282.759V45.0001H290.851V82.8191C290.851 87.5761 291.802 90.4311 294.657 93.2851C297.512 96.1391 300.369 97.0941 305.126 97.0941H315.139V85.6731H309.88C308.162 85.6731 306.96 85.3702 306.126 85.1062C305.272 84.8352 304.609 84.1571 304.4 83.2861C304.171 82.3311 304.171 81.0862 304.171 79.9032V45.0001H315.138V34.6471H304.171V17.2821Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.527" height="113.156" fill="white"/></clipPath></defs></svg>
   </div>
-
   <div class="workspace-sel">
     <div class="ws-avatar">R</div>
     <span class="ws-name">Retell AI Workspace</span>
-    <svg class="ws-chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 6l3-3 3 3M5 10l3 3 3-3" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4-4 4 4M4 10l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </div>
-
   <div class="nav-scroll">
     <div class="nav-section">
       <div class="nav-label">Build</div>
       <div class="nav-items">
-        <div class="nav-item">
-          <div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M2 4a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V4z"/></svg></div>
-          Agents
-        </div>
-        <div class="nav-item">
-          <div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M2 3h12v2H2V3zm0 4h8v2H2V7zm0 4h10v2H2v-2z"/></svg></div>
-          Knowledge Base
-        </div>
+        <div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2"/></svg></div>Agents</div>
+        <div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M2 3h12v2H2V3zm0 4h8v2H2V7zm0 4h10v2H2v-2z"/></svg></div>Knowledge Base</div>
       </div>
     </div>
-
     <div class="nav-section">
       <div class="nav-label">Deploy</div>
       <div class="nav-items">
-        <div class="nav-item">
-          <div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a5 5 0 110 10A5 5 0 018 3z"/></svg></div>
-          Phone Numbers
-        </div>
-        <div class="nav-item">
-          <div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M3 3h10v2H3V3zm2 4h6v2H5V7zm1 4h4v2H6v-2z"/></svg></div>
-          Batch Call
-        </div>
+        <div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1z"/></svg></div>Phone Numbers</div>
+        <div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M3 3h10v2H3V3zm2 4h6v2H5V7zm1 4h4v2H6v-2z"/></svg></div>Batch Call</div>
       </div>
     </div>
-
     <div class="nav-section">
       <div class="nav-label">Monitor</div>
       <div class="nav-items">
-        <div class="nav-item active">
-          <div class="nav-icon"><svg viewBox="0 0 16 16" fill="#3d64d7"><path d="M2 2h12v10H2V2zm1 1v8h10V3H3zm1 9v1h8v-1H4z"/></svg></div>
-          Call History
-        </div>
-        <div class="nav-item">
-          <div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M2 2h12v10H2V2zm1 1v8h10V3H3zm1 9v1h8v-1H4z"/></svg></div>
-          Chat History
-        </div>
-        <div class="nav-item">
-          <div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M2 12l3-4 3 2 3-5 3 3v4H2z"/></svg></div>
-          Analytics
-        </div>
-        <div class="nav-item">
-          <div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M8 1l2 4 5 .7-3.5 3.4.8 5L8 12l-4.3 2.1.8-5L1 5.7 6 5z"/></svg></div>
-          AI Quality Assurance
-        </div>
-        <div class="nav-item">
-          <div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3v4l3 2-1 1.5L7 9V4h1z"/></svg></div>
-          Alerting
-        </div>
+        <div class="nav-item active"><div class="nav-icon"><svg viewBox="0 0 16 16" fill="#3d64d7"><path d="M2 2h12v10H2V2z"/></svg></div>Call History</div>
+        <div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M2 2h12v10H2V2z"/></svg></div>Chat History</div>
+        <div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M2 12l3-4 3 2 3-5 3 3v4H2z"/></svg></div>Analytics</div>
+        <div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M8 1l2 4 5 .7-3.5 3.4.8 5L8 12l-4.3 2.1.8-5L1 5.7 6 5z"/></svg></div>AI Quality Assurance</div>
+        <div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3v4l3 2-1 1.5L7 9V4h1z"/></svg></div>Alerting</div>
       </div>
     </div>
-
     <div class="nav-section">
       <div class="nav-label">System</div>
       <div class="nav-items">
-        <div class="nav-item">
-          <div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M2 4h12v2H2V4zm2 4h8v2H4V8zm1 4h6v2H5v-2z"/></svg></div>
-          Billing
-        </div>
-        <div class="nav-item">
-          <div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a5 5 0 110 10A5 5 0 018 3z"/></svg></div>
-          Settings
-        </div>
+        <div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 16 16"><path d="M2 4h12v2H2V4zm2 4h8v2H4V8zm1 4h6v2H5v-2z"/></svg></div>Billing</div>
+        <div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg></div>Settings</div>
       </div>
     </div>
   </div>
-
   <div class="sidebar-footer">
-    <div class="billing-card">
-      <div class="billing-badge"><div class="billing-badge-dot"></div> Pay As You Go</div>
-      <svg class="billing-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 6l3-3 3 3M5 10l3 3 3-3" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </div>
     <div class="user-card">
       <div class="user-avatar">B</div>
       <span class="user-email">brandon@retellai.com</span>
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 6l3-3 3 3M5 10l3 3 3-3" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
-    <div class="footer-links">
-      <div class="footer-link">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#525866" stroke-width="1.4"/><path d="M8 7v5M8 5v1" stroke="#525866" stroke-width="1.4" stroke-linecap="round"/></svg>
-        Help
-      </div>
-      <div class="footer-divider"></div>
-      <div class="footer-link">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1l1.5 4.5H14l-3.7 2.7 1.4 4.4L8 10l-3.7 2.6 1.4-4.4L2 5.5h4.5z" stroke="#525866" stroke-width="1.3"/></svg>
-        Updates
-      </div>
-    </div>
+    <div style="padding:4px 2px;"><span class="billing-pill"><span class="billing-dot"></span> Pay As You Go</span></div>
   </div>
 </aside>
 
-<!-- MAIN CONTENT -->
-<main>
-  <div class="page-header">
-    <div class="page-dot"></div>
-    <div class="page-title">Call History</div>
-  </div>
+<!-- CONTENT -->
+<div class="content-area">
 
-  <div class="action-bar">
-    <button class="pill-btn">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4 8h8M6 12h4" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
-      Date Range
-    </button>
-    <button class="pill-btn">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 8h6M8 12h0" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
-      Filter
-    </button>
-    <div class="action-bar-spacer"></div>
-    <button class="export-btn">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v8m-3-3l3 3 3-3M3 12h10" stroke="#525866" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Export
-    </button>
-  </div>
+  <!-- TABLE PANEL -->
+  <div class="table-panel" id="tablePanel">
+    <div class="page-header">
+      <div class="page-dot"></div>
+      <div class="page-title">Call History</div>
+    </div>
+    <div class="action-bar">
+      <button class="pill-btn">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4 8h8M6 12h4" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Date Range
+      </button>
+      <button class="pill-btn">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 8h6M8 12h0" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Filter
+      </button>
+    </div>
 
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Duration</th>
-          <th>Channel Type</th>
-          <th>Cost</th>
-          <th>Session ID</th>
-          <th>End Reason</th>
-          <th>Session Status</th>
-          <th>User Sentiment</th>
-          <th style="color:#1D4ED8;">Language</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Jun 8, 2026 4:47 PM</td>
-          <td class="td-muted">0:18</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$0.053</td>
-          <td class="td-muted" style="font-size:11px;">call_8f3a...b91c</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-neutral">Neutral</span></td>
-          <td><span class="lang-pill">English</span></td>
-        </tr>
-        <tr>
-          <td>Jun 8, 2026 4:45 PM</td>
-          <td class="td-muted">0:05</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$0.021</td>
-          <td class="td-muted" style="font-size:11px;">call_2d1e...f44a</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-neutral">Unknown</span></td>
-          <td><span class="lang-pill">English</span></td>
-        </tr>
-        <tr>
-          <td>Jun 8, 2026 4:34 PM</td>
-          <td class="td-muted">0:22</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$0.067</td>
-          <td class="td-muted" style="font-size:11px;">call_9c7b...12de</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-positive">Positive</span></td>
-          <td><span class="lang-pill lang-pill-es">Spanish</span></td>
-        </tr>
-        <tr>
-          <td>Jun 8, 2026 4:32 PM</td>
-          <td class="td-muted">0:16</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$0.048</td>
-          <td class="td-muted" style="font-size:11px;">call_5a2f...77bc</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-neutral">Neutral</span></td>
-          <td><span class="lang-pill">English</span></td>
-        </tr>
-        <tr>
-          <td>Jun 8, 2026 4:31 PM</td>
-          <td class="td-muted">0:07</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$0.024</td>
-          <td class="td-muted" style="font-size:11px;">call_3e8d...a5c1</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-neutral">Neutral</span></td>
-          <td><span class="lang-pill">English</span></td>
-        </tr>
-        <tr>
-          <td>Jun 8, 2026 4:28 PM</td>
-          <td class="td-muted">1:04</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$0.312</td>
-          <td class="td-muted" style="font-size:11px;">call_1b4c...d82f</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-positive">Positive</span></td>
-          <td><span class="lang-pill">English</span></td>
-        </tr>
-        <tr>
-          <td>Jun 8, 2026 4:09 PM</td>
-          <td class="td-muted">0:07</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$0.021</td>
-          <td class="td-muted" style="font-size:11px;">call_6f9a...e31b</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-neutral">Neutral</span></td>
-          <td><span class="lang-pill lang-pill-fr">French</span></td>
-        </tr>
-        <tr>
-          <td>Jun 8, 2026 3:57 PM</td>
-          <td class="td-muted">0:11</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$0.033</td>
-          <td class="td-muted" style="font-size:11px;">call_4d2e...c90a</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-neutral">Neutral</span></td>
-          <td><span class="lang-pill">English</span></td>
-        </tr>
-        <tr>
-          <td>Jun 8, 2026 3:44 PM</td>
-          <td class="td-muted">0:27</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$0.081</td>
-          <td class="td-muted" style="font-size:11px;">call_7e5f...b14c</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-positive">Positive</span></td>
-          <td><span class="lang-pill">English</span></td>
-        </tr>
-        <tr>
-          <td>Jun 8, 2026 3:37 PM</td>
-          <td class="td-muted">7:08</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$1.293</td>
-          <td class="td-muted" style="font-size:11px;">call_2c8b...f56d</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-negative">Negative</span></td>
-          <td><span class="lang-pill lang-pill-es">Spanish</span></td>
-        </tr>
-        <tr>
-          <td>Jun 8, 2026 3:27 PM</td>
-          <td class="td-muted">0:17</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$0.051</td>
-          <td class="td-muted" style="font-size:11px;">call_8a1d...4e7c</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-neutral">Neutral</span></td>
-          <td><span class="lang-pill">English</span></td>
-        </tr>
-        <tr>
-          <td>Jun 8, 2026 3:18 PM</td>
-          <td class="td-muted">0:44</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$0.132</td>
-          <td class="td-muted" style="font-size:11px;">call_5b3e...9a2f</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-positive">Positive</span></td>
-          <td><span class="lang-pill">English</span></td>
-        </tr>
-        <tr>
-          <td>Jun 8, 2026 3:04 PM</td>
-          <td class="td-muted">0:09</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$0.027</td>
-          <td class="td-muted" style="font-size:11px;">call_3f7c...1d8b</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-neutral">Neutral</span></td>
-          <td><span class="lang-pill">English</span></td>
-        </tr>
-        <tr>
-          <td>Jun 8, 2026 2:54 PM</td>
-          <td class="td-muted">0:33</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$0.099</td>
-          <td class="td-muted" style="font-size:11px;">call_9d4a...7c3e</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-neutral">Neutral</span></td>
-          <td><span class="lang-pill">English</span></td>
-        </tr>
-        <tr>
-          <td>Jun 8, 2026 2:46 PM</td>
-          <td class="td-muted">0:48</td>
-          <td class="td-muted">web_call</td>
-          <td class="td-muted">$0.291</td>
-          <td class="td-muted" style="font-size:11px;">call_1e6b...d49f</td>
-          <td class="td-muted">user hangup</td>
-          <td><span class="pill pill-ended">ended</span></td>
-          <td><span class="pill pill-positive">Positive</span></td>
-          <td><span class="lang-pill">English</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <div class="table-wrap">
+      <!-- Full table -->
+      <table class="full" id="fullTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Duration</th>
+            <th>Channel</th>
+            <th>Cost</th>
+            <th>Session ID</th>
+            <th>End Reason</th>
+            <th>Status</th>
+            <th>Sentiment</th>
+            <th style="color:#1D4ED8;">Language</th>
+          </tr>
+        </thead>
+        <tbody id="fullBody"></tbody>
+      </table>
+      <!-- Mini table (when collapsed) -->
+      <table class="mini" id="miniTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Language</th>
+          </tr>
+        </thead>
+        <tbody id="miniBody"></tbody>
+      </table>
+    </div>
 
-  <div class="pagination">
-    <div>Page 1 of 1 · Total Session: 15</div>
-    <div style="display:flex;align-items:center;gap:16px;">
+    <div class="pagination">
+      <div>Page 1 of 1 · Total Session: 15</div>
       <div class="page-btns">
         <button class="page-btn">‹</button>
         <button class="page-btn active">1</button>
         <button class="page-btn">›</button>
       </div>
-      <div class="per-page">
-        <select>
-          <option>25 / page</option>
-          <option>50 / page</option>
-        </select>
-      </div>
     </div>
   </div>
-</main>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-header">
+      <div class="detail-header-left">
+        <div class="detail-call-id" id="detailCallId"></div>
+        <div class="detail-meta" id="detailMeta"></div>
+      </div>
+      <div class="detail-close" onclick="closeDetail()">✕</div>
+    </div>
+
+    <div class="audio-bar">
+      <div class="play-btn">
+        <svg width="8" height="10" viewBox="0 0 8 10" fill="white"><path d="M1 1l6 4-6 4V1z"/></svg>
+      </div>
+      <div class="scrubber"><div class="scrubber-fill"></div><div class="scrubber-dot"></div></div>
+      <span class="audio-time" id="audioTime">0:00 / 0:18</span>
+      <span class="audio-speed">1x</span>
+      <span class="rerun-btn">Rerun</span>
+    </div>
+
+    <div class="detail-tabs">
+      <div class="detail-tab active" onclick="switchTab(this,'transcript')">Transcription</div>
+      <div class="detail-tab" onclick="switchTab(this,'data')">Data</div>
+      <div class="detail-tab" onclick="switchTab(this,'logs')">Detail Logs</div>
+    </div>
+
+    <div class="detail-body" id="detailBody"></div>
+  </div>
+
+  <!-- CONTACT PANEL -->
+  <div class="contact-panel" id="contactPanel">
+    <div class="contact-panel-title">Contact Information</div>
+    <div class="contact-panel-empty">No phone number associated with this conversation.</div>
+  </div>
+
+</div>
+
+<script>
+const rows = [
+  { date: 'Jun 8, 2026 4:47 PM', duration: '0:18', channel: 'web_call', cost: '$0.053', id: 'call_8f3a…b91c', endReason: 'user hangup', status: 'ended', sentiment: 'Neutral', lang: 'English', langClass: '' },
+  { date: 'Jun 8, 2026 4:45 PM', duration: '0:05', channel: 'web_call', cost: '$0.021', id: 'call_2d1e…f44a', endReason: 'user hangup', status: 'ended', sentiment: 'Unknown', lang: 'English', langClass: '' },
+  { date: 'Jun 8, 2026 4:34 PM', duration: '0:22', channel: 'web_call', cost: '$0.067', id: 'call_9c7b…12de', endReason: 'user hangup', status: 'ended', sentiment: 'Positive', lang: 'Spanish', langClass: 'es' },
+  { date: 'Jun 8, 2026 4:32 PM', duration: '0:16', channel: 'web_call', cost: '$0.048', id: 'call_5a2f…77bc', endReason: 'user hangup', status: 'ended', sentiment: 'Neutral', lang: 'English', langClass: '' },
+  { date: 'Jun 8, 2026 4:31 PM', duration: '0:07', channel: 'web_call', cost: '$0.024', id: 'call_3e8d…a5c1', endReason: 'user hangup', status: 'ended', sentiment: 'Neutral', lang: 'English', langClass: '' },
+  { date: 'Jun 8, 2026 4:28 PM', duration: '1:04', channel: 'web_call', cost: '$0.312', id: 'call_1b4c…d82f', endReason: 'user hangup', status: 'ended', sentiment: 'Positive', lang: 'English', langClass: '' },
+  { date: 'Jun 8, 2026 4:09 PM', duration: '0:07', channel: 'web_call', cost: '$0.021', id: 'call_6f9a…e31b', endReason: 'user hangup', status: 'ended', sentiment: 'Neutral', lang: 'French', langClass: 'fr' },
+  { date: 'Jun 8, 2026 3:57 PM', duration: '0:11', channel: 'web_call', cost: '$0.033', id: 'call_4d2e…c90a', endReason: 'user hangup', status: 'ended', sentiment: 'Neutral', lang: 'English', langClass: '' },
+  { date: 'Jun 8, 2026 3:44 PM', duration: '0:27', channel: 'web_call', cost: '$0.081', id: 'call_7e5f…b14c', endReason: 'user hangup', status: 'ended', sentiment: 'Positive', lang: 'English', langClass: '' },
+  { date: 'Jun 8, 2026 3:37 PM', duration: '7:08', channel: 'web_call', cost: '$1.293', id: 'call_2c8b…f56d', endReason: 'user hangup', status: 'ended', sentiment: 'Negative', lang: 'Spanish', langClass: 'es' },
+  { date: 'Jun 8, 2026 3:27 PM', duration: '0:17', channel: 'web_call', cost: '$0.051', id: 'call_8a1d…4e7c', endReason: 'user hangup', status: 'ended', sentiment: 'Neutral', lang: 'English', langClass: '' },
+  { date: 'Jun 8, 2026 3:18 PM', duration: '0:44', channel: 'web_call', cost: '$0.132', id: 'call_5b3e…9a2f', endReason: 'user hangup', status: 'ended', sentiment: 'Positive', lang: 'English', langClass: '' },
+  { date: 'Jun 8, 2026 3:04 PM', duration: '0:09', channel: 'web_call', cost: '$0.027', id: 'call_3f7c…1d8b', endReason: 'user hangup', status: 'ended', sentiment: 'Neutral', lang: 'English', langClass: '' },
+  { date: 'Jun 8, 2026 2:54 PM', duration: '0:33', channel: 'web_call', cost: '$0.099', id: 'call_9d4a…7c3e', endReason: 'user hangup', status: 'ended', sentiment: 'Neutral', lang: 'English', langClass: '' },
+  { date: 'Jun 8, 2026 2:46 PM', duration: '0:48', channel: 'web_call', cost: '$0.291', id: 'call_1e6b…d49f', endReason: 'user hangup', status: 'ended', sentiment: 'Positive', lang: 'English', langClass: '' },
+];
+
+const summaries = {
+  '': 'The agent greeted the caller and collected their information. The conversation ended after the user received the information they needed.',
+  'es': 'El agente saludó al usuario y recopiló información básica. La llamada concluyó después de que el usuario confirmó sus datos.',
+  'fr': 'L\'agent a accueilli l\'utilisateur et collecté les informations nécessaires. La conversation s\'est terminée après confirmation.',
+};
+
+const transcripts = {
+  '': [
+    { role: 'Agent', text: 'Hi there, thanks for calling. How can I help you today?' },
+    { role: 'User', text: 'Hey, I had a question about my account.' },
+    { role: 'Agent', text: 'Of course, I\'d be happy to help. Can you confirm your name for me?' },
+    { role: 'User', text: 'Sure, it\'s Alex Johnson.' },
+    { role: 'Agent', text: 'Thanks Alex. Let me pull that up for you.' },
+  ],
+  'es': [
+    { role: 'Agent', text: 'Hola, gracias por llamar. ¿En qué puedo ayudarle hoy?' },
+    { role: 'User', text: 'Hola, tenía una pregunta sobre mi cuenta.' },
+    { role: 'Agent', text: 'Por supuesto, con mucho gusto le ayudo. ¿Puede confirmar su nombre?' },
+    { role: 'User', text: 'Claro, soy María García.' },
+    { role: 'Agent', text: 'Gracias, María. Déjeme revisar su información.' },
+  ],
+  'fr': [
+    { role: 'Agent', text: 'Bonjour, merci d\'appeler. Comment puis-je vous aider aujourd\'hui?' },
+    { role: 'User', text: 'Bonjour, j\'avais une question concernant mon compte.' },
+    { role: 'Agent', text: 'Bien sûr, je serais ravi de vous aider. Pouvez-vous confirmer votre nom?' },
+    { role: 'User', text: 'Oui, je m\'appelle Jean Dupont.' },
+    { role: 'Agent', text: 'Merci Jean. Laissez-moi regarder ça pour vous.' },
+  ],
+};
+
+let activeTab = 'transcript';
+
+function sentimentClass(s) {
+  if (s === 'Positive') return 'pill-positive';
+  if (s === 'Negative') return 'pill-negative';
+  return 'pill-neutral';
+}
+
+function langPillClass(lc) {
+  if (lc === 'es') return 'lang-pill lang-pill-es';
+  if (lc === 'fr') return 'lang-pill lang-pill-fr';
+  return 'lang-pill';
+}
+
+function caValueClass(lc) {
+  if (lc === 'es') return 'ca-value highlight-es';
+  if (lc === 'fr') return 'ca-value highlight-fr';
+  return 'ca-value highlight';
+}
+
+function buildFullTable() {
+  const tbody = document.getElementById('fullBody');
+  tbody.innerHTML = '';
+  rows.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.date}</td>
+      <td class="td-muted">${r.duration}</td>
+      <td class="td-muted">${r.channel}</td>
+      <td class="td-muted">${r.cost}</td>
+      <td class="td-muted" style="font-size:11px;">${r.id}</td>
+      <td class="td-muted">${r.endReason}</td>
+      <td><span class="pill pill-ended">${r.status}</span></td>
+      <td><span class="pill ${sentimentClass(r.sentiment)}">${r.sentiment}</span></td>
+      <td><span class="${langPillClass(r.langClass)}">${r.lang}</span></td>
+    `;
+    tr.onclick = () => openDetail(i);
+    tbody.appendChild(tr);
+  });
+}
+
+function buildMiniTable(activeIdx) {
+  const tbody = document.getElementById('miniBody');
+  tbody.innerHTML = '';
+  rows.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    if (i === activeIdx) tr.classList.add('selected');
+    tr.innerHTML = `
+      <td><div style="font-size:12px;color:#0E121B;">${r.date.split(' ').slice(0,3).join(' ')}</div><div style="font-size:11px;color:#6B7280;">${r.duration}</div></td>
+      <td><span class="${langPillClass(r.langClass)}">${r.lang}</span></td>
+    `;
+    tr.onclick = () => openDetail(i);
+    tbody.appendChild(tr);
+  });
+}
+
+function openDetail(idx) {
+  const r = rows[idx];
+
+  // Collapse table to mini
+  const tablePanel = document.getElementById('tablePanel');
+  tablePanel.classList.add('collapsed');
+  document.getElementById('fullTable').style.display = 'none';
+  document.getElementById('miniTable').style.display = '';
+  buildMiniTable(idx);
+
+  // Show detail + contact panels
+  document.getElementById('detailPanel').classList.add('visible');
+  document.getElementById('contactPanel').classList.add('visible');
+
+  // Populate header
+  document.getElementById('detailCallId').textContent = r.date.replace(' ', ' ') + ' ' + r.channel;
+  document.getElementById('detailMeta').innerHTML = `
+    <span>Agent: Support Agent</span>
+    <span>Session ID: ${r.id}</span>
+    <span>Duration: ${r.duration}</span>
+    <span>Cost: ${r.cost}</span>
+  `;
+  document.getElementById('audioTime').textContent = '0:00 / ' + r.duration;
+
+  // Reset tab
+  activeTab = 'transcript';
+  document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.detail-tab')[0].classList.add('active');
+
+  renderDetailBody(r);
+}
+
+function renderDetailBody(r) {
+  const body = document.getElementById('detailBody');
+
+  if (activeTab === 'transcript') {
+    const convAnalysis = `
+      <div class="detail-section">
+        <div class="detail-section-title">Conversation Analysis</div>
+        <div class="ca-row">
+          <div class="ca-checkbox checked"><svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="ca-label">Call Successful</div>
+          <div class="ca-value green">Successful</div>
+        </div>
+        <div class="ca-row">
+          <div class="ca-checkbox checked"><svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="ca-label">Call Status</div>
+          <div class="ca-value">Ended</div>
+        </div>
+        <div class="ca-row">
+          <div class="ca-checkbox checked"><svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="ca-label">User Sentiment</div>
+          <div class="ca-value">${r.sentiment}</div>
+        </div>
+        <div class="ca-row">
+          <div class="ca-checkbox checked"><svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="ca-label">Language</div>
+          <div class="${caValueClass(r.langClass)}">${r.lang}</div>
+        </div>
+        <div class="ca-row">
+          <div class="ca-checkbox checked"><svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="ca-label">Disconnection Reason</div>
+          <div class="ca-value">user hangup</div>
+        </div>
+        <div class="ca-row">
+          <div class="ca-checkbox checked"><svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="ca-label">End to End Latency</div>
+          <div class="ca-value">277ms ⓘ</div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Summary</div>
+        <div class="summary-text">${summaries[r.langClass]}</div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Transcription</div>
+        ${(transcripts[r.langClass] || transcripts['']).map(m => `
+          <div class="transcript-msg">
+            <div class="transcript-role ${m.role === 'Agent' ? 'agent' : ''}">${m.role}</div>
+            <div class="transcript-text">${m.text}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    body.innerHTML = convAnalysis;
+  } else if (activeTab === 'data') {
+    body.innerHTML = `
+      <div class="detail-section">
+        <div class="detail-section-title">Dynamic Variables</div>
+        <div style="font-size:13px;color:#99A0AE;">No Dynamic Variables</div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Contact Variables</div>
+        <div style="font-size:13px;color:#99A0AE;">No Contact Variables</div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Extracted Dynamic Variables</div>
+        <div style="font-size:13px;color:#99A0AE;">No Extracted Dynamic Variables</div>
+      </div>
+    `;
+  } else {
+    body.innerHTML = `<div style="font-size:12px;color:#6B7280;font-family:monospace;line-height:1.6;">No detail logs available for this session.</div>`;
+  }
+}
+
+function switchTab(el, tab) {
+  activeTab = tab;
+  document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  // Find active row
+  const miniRows = document.querySelectorAll('#miniBody tr');
+  let activeIdx = 0;
+  miniRows.forEach((tr, i) => { if (tr.classList.contains('selected')) activeIdx = i; });
+  renderDetailBody(rows[activeIdx]);
+}
+
+function closeDetail() {
+  document.getElementById('tablePanel').classList.remove('collapsed');
+  document.getElementById('fullTable').style.display = '';
+  document.getElementById('miniTable').style.display = 'none';
+  document.getElementById('detailPanel').classList.remove('visible');
+  document.getElementById('contactPanel').classList.remove('visible');
+  document.querySelectorAll('#fullBody tr').forEach(tr => tr.classList.remove('selected'));
+}
+
+buildFullTable();
+</script>
 
 </body>
 </html>

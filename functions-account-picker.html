@@ -193,6 +193,42 @@ body {
 /* Divider */
 .divider { height: 1px; background: #E9EAEC; margin: 0 0; }
 
+/* Footer */
+.footer-divider { height: 1px; background: #E9EAEC; }
+.picker-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 14px;
+}
+.btn-cancel {
+  height: 34px;
+  padding: 0 14px;
+  background: #fff;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-cancel:hover { background: #F9FAFB; }
+.btn-save {
+  height: 34px;
+  padding: 0 14px;
+  background: #0E121B;
+  border: 1px solid #0E121B;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-save:hover { background: #000; }
+
 </style>
 </head>
 <body>
@@ -333,6 +369,14 @@ body {
         <path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="currentColor"/>
       </svg>
       Show all 7 functions
+    </div>
+
+    <div class="footer-divider"></div>
+
+    <!-- Footer -->
+    <div class="picker-footer">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-save">Save</button>
     </div>
 
   </div>

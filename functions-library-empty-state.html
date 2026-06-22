@@ -45,11 +45,12 @@ aside { width: 280px; min-width: 280px; background: #F5F7FA; display: flex; flex
 .cat-nav-header { padding: 14px 16px 10px; flex-shrink: 0; }
 .cat-nav-title { font-size: 12px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.05em; }
 .cat-items { padding: 4px 8px; display: flex; flex-direction: column; gap: 2px; flex: 1; }
-.cat-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border-radius: 6px; font-size: 13.5px; color: #525866; cursor: pointer; }
+.cat-item { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 6px; font-size: 13.5px; color: #525866; cursor: pointer; }
 .cat-item:hover { background: rgba(0,0,0,0.03); }
 .cat-item.active { background: #ecf3ff; color: #3d64d7; font-weight: 500; }
-.cat-count { font-size: 11.5px; color: #B0B7C3; background: #F3F4F6; border-radius: 4px; padding: 1px 6px; line-height: 1.5; }
+.cat-count { font-size: 11.5px; color: #B0B7C3; background: #F3F4F6; border-radius: 4px; padding: 1px 6px; line-height: 1.5; margin-left: auto; }
 .cat-item.active .cat-count { background: #dbe8ff; color: #3d64d7; }
+.cat-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
 
 /* ── Content area ── */
 .content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
@@ -75,8 +76,11 @@ aside { width: 280px; min-width: 280px; background: #F5F7FA; display: flex; flex
 .empty-icon { width: 56px; height: 56px; border-radius: 14px; border: 1.5px solid #E1E4EA; background: #FAFAFA; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
 .empty-title { font-size: 18px; font-weight: 600; color: #0A0A0A; margin-bottom: 8px; text-align: center; }
 .empty-subtitle { font-size: 13.5px; color: #525866; text-align: center; max-width: 380px; line-height: 1.6; margin-bottom: 20px; }
-.empty-cta { display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; background: #0E121B; color: #fff; border: none; border-radius: 7px; font-size: 13.5px; font-weight: 500; cursor: pointer; font-family: inherit; }
+.empty-cta-wrap { display: flex; align-items: center; gap: 8px; }
+.empty-cta { display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; background: #0E121B; color: #fff; border: 1px solid transparent; border-radius: 7px; font-size: 13.5px; font-weight: 500; cursor: pointer; font-family: inherit; }
 .empty-cta:hover { background: #1a2030; }
+.empty-cta.empty-cta-outline { background: #fff; color: #0A0A0A; border-color: #E1E4EA; }
+.empty-cta.empty-cta-outline:hover { background: #F5F7FA; }
 </style>
 </head>
 <body>
@@ -202,20 +206,32 @@ aside { width: 280px; min-width: 280px; background: #F5F7FA; display: flex; flex
       <div class="cat-nav-title">When it runs</div>
     </div>
     <div class="cat-items">
-      <div class="cat-item active">
+      <div class="cat-item active" id="cat-all" onclick="setCategory('all')">
         All Functions
         <span class="cat-count">0</span>
       </div>
-      <div class="cat-item">
-        Before Conversation
+      <div class="cat-item" id="cat-pcde" onclick="setCategory('pcde')">
+        <span class="cat-dot" style="background:#CA8A04"></span>Post-call Data Extraction
         <span class="cat-count">0</span>
       </div>
-      <div class="cat-item">
-        During Conversation
+      <div class="cat-item" id="cat-before" onclick="setCategory('before')">
+        <span class="cat-dot" style="background:#1D4ED8"></span>Before Conversation
         <span class="cat-count">0</span>
       </div>
-      <div class="cat-item">
-        After Conversation
+      <div class="cat-item" id="cat-during" onclick="setCategory('during')">
+        <span class="cat-dot" style="background:#166534"></span>During Conversation
+        <span class="cat-count">0</span>
+      </div>
+      <div class="cat-item" id="cat-after" onclick="setCategory('after')">
+        <span class="cat-dot" style="background:#9A3412"></span>After Conversation
+        <span class="cat-count">0</span>
+      </div>
+      <div class="cat-item" id="cat-custom" onclick="setCategory('custom')">
+        <span class="cat-dot" style="background:#3d64d7"></span>Custom Functions
+        <span class="cat-count">0</span>
+      </div>
+      <div class="cat-item" id="cat-mcp" style="opacity:0.45;pointer-events:none;">
+        <span class="cat-dot" style="background:#6B7280"></span>MCP Connectors
         <span class="cat-count">0</span>
       </div>
     </div>
@@ -253,23 +269,87 @@ aside { width: 280px; min-width: 280px; background: #F5F7FA; display: flex; flex
 
     <!-- Empty state -->
     <div class="empty-wrap">
-      <div class="empty-icon">
+      <div class="empty-icon" id="empty-icon">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
           <path d="M4 6h16M4 10h16M4 14h10" stroke="#C4C9D4" stroke-width="1.6" stroke-linecap="round"/>
           <circle cx="18" cy="17" r="4" stroke="#C4C9D4" stroke-width="1.5"/>
           <path d="M16.5 17l1 1 2-2" stroke="#C4C9D4" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
-      <div class="empty-title">Functions Library</div>
-      <div class="empty-subtitle">Build once, use everywhere. Functions you create here run before, during, or after conversations and are available to every agent in your workspace.</div>
-      <button class="empty-cta">
-        <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
-        New Function
-      </button>
+      <div class="empty-title" id="empty-title">Functions Library</div>
+      <div class="empty-subtitle" id="empty-subtitle">Build once, use everywhere. Functions you create here run before, during, or after conversations and are available to every agent in your workspace.</div>
+      <div class="empty-cta-wrap" id="empty-cta-wrap">
+        <button class="empty-cta">
+          <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+          New Function
+        </button>
+      </div>
     </div>
 
   </div>
 </div>
+
+<script>
+const CATS = {
+  all: {
+    pageTitle: 'Functions Library',
+    emptyTitle: 'Functions Library',
+    subtitle: 'Build once, use everywhere. Functions you create here run before, during, or after conversations and are available to every agent in your workspace.',
+    btns: [{ label: 'New Function', primary: true }]
+  },
+  pcde: {
+    pageTitle: 'Post-call Data Extraction',
+    emptyTitle: 'Post-call Data Extraction',
+    subtitle: 'Define the fields you want Retell to extract from every call transcript. Save them once and reuse them across every agent.',
+    btns: [
+      { label: 'Create New', primary: false },
+      { label: 'Browse Templates', primary: true }
+    ]
+  },
+  before: {
+    pageTitle: 'Before Conversation',
+    emptyTitle: 'Before Conversation',
+    subtitle: 'Fetch CRM records and load data into the agent before the call connects. Connect an integration to get started.',
+    btns: [{ label: 'New Function', primary: true }]
+  },
+  during: {
+    pageTitle: 'During Conversation',
+    emptyTitle: 'During Conversation',
+    subtitle: 'Let the agent trigger live actions during a call, such as sending a Slack alert or booking an appointment.',
+    btns: [{ label: 'New Function', primary: true }]
+  },
+  after: {
+    pageTitle: 'After Conversation',
+    emptyTitle: 'After Conversation',
+    subtitle: 'Write call outcomes back to Salesforce, HubSpot, Zendesk, and other systems as soon as the call ends.',
+    btns: [{ label: 'New Function', primary: true }]
+  },
+  custom: {
+    pageTitle: 'Custom Functions',
+    emptyTitle: 'Custom Functions',
+    subtitle: 'Call any API endpoint during a conversation. Build a custom function with your endpoint URL, method, and parameters.',
+    btns: [{ label: 'New Function', primary: true }]
+  }
+};
+
+function setCategory(key) {
+  document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('cat-' + key).classList.add('active');
+
+  const cat = CATS[key];
+  document.querySelector('.page-title').textContent = cat.pageTitle;
+  document.getElementById('empty-title').textContent = cat.emptyTitle;
+  document.getElementById('empty-subtitle').textContent = cat.subtitle;
+
+  const wrap = document.getElementById('empty-cta-wrap');
+  wrap.innerHTML = cat.btns.map(b => `
+    <button class="empty-cta${b.primary ? '' : ' empty-cta-outline'}">
+      <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="${b.primary ? '#fff' : '#0A0A0A'}" stroke-width="2" stroke-linecap="round"/></svg>
+      ${b.label}
+    </button>
+  `).join('');
+}
+</script>
 
 </body>
 </html>

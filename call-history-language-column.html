@@ -311,7 +311,7 @@ tbody td:first-child { padding-left: 20px; }
         </div>
         <div class="an-row">
           <div class="an-check"><svg width="7" height="7" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <span class="an-label">Language</span><span class="an-lang-val" id="rpLang">English</span>
+          <span class="an-label">Language</span><span id="rpLangContainer"><span class="an-lang-val">English</span></span>
         </div>
         <div class="an-row">
           <div class="an-check"><svg width="7" height="7" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -380,16 +380,16 @@ tbody td:first-child { padding-left: 20px; }
 
 <script>
 const rows = [
-  { time: '2026-05-01 09:42:18 PDT', dur: '1:24', cost: '$0.180', id: 'call_a3c7e4f1d92b87a4', lang: 'English', lc: '', sentiment: 'Positive',  latency: '982ms' },
-  { time: '2026-05-01 09:21:07 PDT', dur: '2:08', cost: '$0.260', id: 'call_e92f7821c3a4d6e0', lang: 'English', lc: '', sentiment: 'Neutral',   latency: '1021ms' },
-  { time: '2026-05-01 08:58:34 PDT', dur: '3:11', cost: '$0.480', id: 'call_71a0e548b29f3c1b', lang: 'Spanish', lc: 'es', sentiment: 'Positive', latency: '877ms' },
-  { time: '2026-05-01 08:33:02 PDT', dur: '1:46', cost: '$0.230', id: 'call_d04a7f8c2e1b9530', lang: 'English', lc: '', sentiment: 'Neutral',   latency: '1139ms' },
-  { time: '2026-05-01 07:57:55 PDT', dur: '0:51', cost: '$0.110', id: 'call_5b8c3104f2917a24', lang: 'English', lc: '', sentiment: 'Neutral',   latency: '1055ms' },
-  { time: '2026-05-01 07:11:43 PDT', dur: '2:24', cost: '$0.330', id: 'call_a118fe402b7c3d1b', lang: 'French',  lc: 'fr', sentiment: 'Neutral', latency: '903ms' },
-  { time: '2026-05-01 06:48:09 PDT', dur: '1:01', cost: '$0.140', id: 'call_60e2bf9a45c1d0e3', lang: 'English', lc: '', sentiment: 'Positive',  latency: '991ms' },
-  { time: '2026-04-30 22:14:25 PDT', dur: '1:53', cost: '$0.220', id: 'call_2c4f8b1e90a3d76b', lang: 'English', lc: '', sentiment: 'Neutral',   latency: '1202ms' },
-  { time: '2026-04-30 21:09:38 PDT', dur: '0:48', cost: '$0.090', id: 'call_88a3201ce4f5b91d', lang: 'Spanish', lc: 'es', sentiment: 'Negative',latency: '1388ms' },
-  { time: '2026-04-30 20:36:11 PDT', dur: '3:07', cost: '$0.470', id: 'call_d51a3b29e74c8f0a', lang: 'English', lc: '', sentiment: 'Positive',  latency: '849ms' },
+  { time: '2026-05-01 09:42:18 PDT', dur: '1:24', cost: '$0.180', id: 'call_a3c7e4f1d92b87a4', lang: 'English', lc: '', sentiment: 'Positive',  latency: '982ms',  allLangs: [{lang:'English',lc:''}] },
+  { time: '2026-05-01 09:21:07 PDT', dur: '2:08', cost: '$0.260', id: 'call_e92f7821c3a4d6e0', lang: 'English', lc: '', sentiment: 'Neutral',   latency: '1021ms', allLangs: [{lang:'English',lc:''}] },
+  { time: '2026-05-01 08:58:34 PDT', dur: '3:11', cost: '$0.480', id: 'call_71a0e548b29f3c1b', lang: 'Spanish', lc: 'es', sentiment: 'Positive', latency: '877ms', allLangs: [{lang:'Spanish',lc:'es'},{lang:'English',lc:''}] },
+  { time: '2026-05-01 08:33:02 PDT', dur: '1:46', cost: '$0.230', id: 'call_d04a7f8c2e1b9530', lang: 'English', lc: '', sentiment: 'Neutral',   latency: '1139ms', allLangs: [{lang:'English',lc:''}] },
+  { time: '2026-05-01 07:57:55 PDT', dur: '0:51', cost: '$0.110', id: 'call_5b8c3104f2917a24', lang: 'English', lc: '', sentiment: 'Neutral',   latency: '1055ms', allLangs: [{lang:'English',lc:''}] },
+  { time: '2026-05-01 07:11:43 PDT', dur: '2:24', cost: '$0.330', id: 'call_a118fe402b7c3d1b', lang: 'French',  lc: 'fr', sentiment: 'Neutral', latency: '903ms',  allLangs: [{lang:'French',lc:'fr'},{lang:'English',lc:''}] },
+  { time: '2026-05-01 06:48:09 PDT', dur: '1:01', cost: '$0.140', id: 'call_60e2bf9a45c1d0e3', lang: 'English', lc: '', sentiment: 'Positive',  latency: '991ms',  allLangs: [{lang:'English',lc:''}] },
+  { time: '2026-04-30 22:14:25 PDT', dur: '1:53', cost: '$0.220', id: 'call_2c4f8b1e90a3d76b', lang: 'English', lc: '', sentiment: 'Neutral',   latency: '1202ms', allLangs: [{lang:'English',lc:''}] },
+  { time: '2026-04-30 21:09:38 PDT', dur: '0:48', cost: '$0.090', id: 'call_88a3201ce4f5b91d', lang: 'Spanish', lc: 'es', sentiment: 'Negative', latency: '1388ms', allLangs: [{lang:'Spanish',lc:'es'},{lang:'English',lc:''}] },
+  { time: '2026-04-30 20:36:11 PDT', dur: '3:07', cost: '$0.470', id: 'call_d51a3b29e74c8f0a', lang: 'English', lc: '', sentiment: 'Positive',  latency: '849ms',  allLangs: [{lang:'English',lc:''}] },
 ];
 
 const summaries = {
@@ -434,9 +434,10 @@ function selectRow(i) {
   document.getElementById('rpLatency').textContent = r.latency;
   document.getElementById('rpSummary').textContent = summaries[r.lc] || summaries[''];
 
-  const langEl = document.getElementById('rpLang');
-  langEl.textContent = r.lang;
-  langEl.className = 'an-lang-val' + (r.lc ? ' ' + r.lc : '');
+  const langContainer = document.getElementById('rpLangContainer');
+  langContainer.innerHTML = r.allLangs.map(l =>
+    `<span class="an-lang-val${l.lc ? ' '+l.lc : ''}" style="margin-right:4px;">${l.lang}</span>`
+  ).join('');
 
   const lines = tx[r.lc] || tx[''];
   const msgs = lines[0];

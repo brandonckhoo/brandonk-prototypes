@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Copilot @ Picker</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased; }
+
+/* ─── SIDEBAR ─── */
+.sidebar { width: 280px; min-width: 280px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; }
+.sidebar-logo { padding: 20px 10px 12px 20px; }
+.workspace { display: flex; align-items: center; gap: 8px; padding: 10px 10px 10px 12px; margin: 0 14px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; }
+.workspace-avatar { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; flex-shrink: 0; }
+.workspace-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-scroll { padding: 8px 0 16px; flex: 1; overflow-y: auto; }
+.section-group { margin-top: 8px; }
+.section-group.top { margin-top: 0; }
+.section-label { padding: 4px; margin: 0 14px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; line-height: 16px; height: 24px; }
+.nav-items { list-style: none; padding: 0 14px; }
+.nav-items .nav-item + .nav-item { margin-top: 4px; }
+.nav-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; font-size: 14px; font-weight: 400; color: #525866; cursor: pointer; border-radius: 6px; white-space: nowrap; }
+.nav-item:hover { background: rgba(0,0,0,0.03); }
+.nav-item.current { color: #0A0A0A; font-weight: 500; background: #FFFFFF; }
+.footer { padding: 16px 14px; }
+.footer-card { display: flex; align-items: center; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; box-shadow: rgba(0,0,0,0.1) 0px 1px 3px, rgba(0,0,0,0.1) 0px 1px 2px -1px; cursor: pointer; width: 100%; }
+.footer-card.pay { padding: 16px; height: 58px; margin-bottom: 8px; }
+.footer-card.user { padding: 10px 10px 10px 12px; height: 40px; margin-bottom: 12px; gap: 8px; }
+.footer-badge-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px 4px 4px; background: #ecf3ff; border-radius: 6px; font-size: 12px; font-weight: 500; color: #3d64d7; }
+.footer-card .spacer { flex: 1; }
+.user-name { font-size: 14px; color: #525866; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.footer-links { display: flex; align-items: center; gap: 4px; }
+.footer-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; font-size: 14px; color: #525866; cursor: pointer; height: 36px; border-radius: 6px; }
+.footer-link:hover { background: rgba(0,0,0,0.03); }
+.footer-divider { width: 1px; height: 12px; background: #D1D5DB; flex-shrink: 0; }
+
+/* ─── MAIN CONTENT ─── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff; min-width: 0; }
+.main-header { padding: 20px 32px 0; display: flex; align-items: center; gap: 8px; }
+.header-dot { width: 8px; height: 8px; background: #3d64d7; border-radius: 50%; flex-shrink: 0; }
+.header-title { font-size: 16px; font-weight: 600; color: #0A0A0A; }
+.main-toolbar { display: flex; align-items: center; padding: 16px 32px 0; gap: 8px; }
+.toolbar-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; background: #fff; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 13px; font-weight: 500; color: #525866; cursor: pointer; }
+.toolbar-btn:hover { background: #F9FAFB; }
+.toolbar-spacer { flex: 1; }
+.sparkles-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #0E121B; border: none; border-radius: 7px; font-size: 13px; font-weight: 500; color: #fff; cursor: pointer; }
+.table-wrap { padding: 16px 32px 0; flex: 1; overflow-y: auto; }
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th { padding: 10px 12px; text-align: left; font-size: 12px; font-weight: 500; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid #E1E4EA; white-space: nowrap; }
+.tbl td { padding: 11px 12px; font-size: 14px; color: #0A0A0A; border-bottom: 1px solid #F3F4F6; white-space: nowrap; }
+.tbl tr:hover td { background: rgba(0,0,0,0.015); }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.badge-fail { background: #FEE2E2; color: #DC2626; }
+.badge-ok { background: #DCFCE7; color: #16A34A; }
+.badge-neutral { background: #F3F4F6; color: #374151; }
+.tdim { color: #99A0AE; font-size: 13px; }
+.agent-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: #525866; }
+
+/* ─── COPILOT PANEL ─── */
+.cp { width: 392px; min-width: 392px; height: 100vh; background: #fff; border-left: 1px solid #E1E4EA; display: flex; flex-direction: column; }
+.cp-topbar { display: flex; align-items: center; padding: 11px 14px; gap: 6px; border-bottom: 1px solid #E1E4EA; }
+.cp-title { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; color: #0A0A0A; }
+.cp-orb-sm { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #cdd9ff 0%, #6d7cf5 50%, #4f46e5 100%); flex-shrink: 0; }
+.cp-topbar .spacer { flex: 1; }
+.cp-iconbtn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: #525866; cursor: pointer; }
+.cp-iconbtn:hover { background: rgba(0,0,0,0.04); }
+
+/* auto chip bar */
+.auto-bar { padding: 8px 16px; border-bottom: 1px solid #E1E4EA; background: #FAFAFA; display: flex; align-items: center; gap: 6px; }
+.auto-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px 3px 6px; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 11px; font-weight: 500; color: #525866; cursor: pointer; }
+.auto-chip-dot { width: 6px; height: 6px; background: #3d64d7; border-radius: 50%; flex-shrink: 0; }
+.auto-bar-label { font-size: 11px; color: #99A0AE; }
+
+/* chat */
+.chat-area { flex: 1; padding: 16px 16px 8px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+.msg-row { display: flex; flex-direction: column; gap: 3px; }
+.msg-row.user { align-items: flex-end; }
+.msg-label { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #99A0AE; margin-bottom: 2px; }
+.bubble-user { background: #0E121B; color: #fff; border-radius: 14px 14px 2px 14px; padding: 9px 13px; font-size: 13.5px; max-width: 88%; line-height: 1.45; }
+.bubble-cp { background: #F5F7FA; color: #0A0A0A; border-radius: 14px 14px 14px 2px; padding: 11px 13px; font-size: 13.5px; max-width: 97%; line-height: 1.55; }
+.bubble-cp p + p { margin-top: 8px; }
+.bubble-cp strong { font-weight: 600; }
+.finding-row { display: flex; align-items: flex-start; gap: 7px; margin-top: 6px; font-size: 13px; }
+.finding-num { width: 18px; height: 18px; background: #E1E4EA; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #525866; flex-shrink: 0; margin-top: 1px; }
+.nav-card { display: inline-flex; align-items: center; gap: 7px; margin-top: 10px; padding: 7px 12px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 12.5px; font-weight: 500; color: #0A0A0A; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.nav-card:hover { background: #F9FAFB; }
+
+/* ─── COMPOSER ZONE ─── */
+.composer-zone { padding: 10px 14px 14px; position: relative; background: #fff; }
+.composer { border: 1.5px solid #3d64d7; border-radius: 12px; background: #fff; box-shadow: 0 0 0 3px rgba(61,100,215,0.08); }
+.composer-chips { display: flex; flex-wrap: wrap; gap: 5px; padding: 9px 10px 0; }
+.ctx-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 7px 3px 8px; background: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 6px; font-size: 11.5px; font-weight: 500; color: #3730A3; cursor: pointer; white-space: nowrap; }
+.ctx-chip-x { display: flex; align-items: center; color: #818CF8; font-size: 14px; line-height: 1; margin-left: 1px; }
+.composer-input-row { padding: 6px 12px 4px; font-size: 13.5px; color: #99A0AE; line-height: 1.5; min-height: 32px; }
+.composer-toolbar { display: flex; align-items: center; padding: 4px 8px 8px; gap: 2px; }
+.comp-btn { width: 28px; height: 28px; border-radius: 6px; border: none; background: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #525866; font-family: inherit; }
+.comp-btn:hover { background: rgba(0,0,0,0.04); }
+.at-btn-active { font-size: 14px; font-weight: 800; color: #3d64d7; background: rgba(61,100,215,0.08) !important; border-radius: 6px; }
+.comp-spacer { flex: 1; }
+.send-btn { width: 32px; height: 32px; border-radius: 50%; background: #0E121B; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+
+/* ─── @ PICKER ─── */
+.at-picker { position: absolute; bottom: calc(100% + 4px); left: 14px; right: 14px; background: #fff; border: 1px solid #E1E4EA; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.05); z-index: 100; overflow: hidden; }
+.at-search-row { padding: 9px 10px 7px; border-bottom: 1px solid #F3F4F6; }
+.at-search-wrap { position: relative; }
+.at-search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: #99A0AE; pointer-events: none; }
+.at-search-input { width: 100%; padding: 7px 10px 7px 30px; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 13px; color: #0A0A0A; outline: none; font-family: inherit; }
+.at-tabs-row { display: flex; gap: 2px; padding: 7px 10px 5px; overflow-x: auto; border-bottom: 1px solid #E1E4EA; scrollbar-width: none; }
+.at-tabs-row::-webkit-scrollbar { display: none; }
+.at-tab { padding: 4px 9px; font-size: 12px; font-weight: 500; color: #525866; background: none; border: none; border-radius: 5px; cursor: pointer; white-space: nowrap; font-family: inherit; }
+.at-tab:hover { background: #F3F4F6; color: #0A0A0A; }
+.at-tab.active { background: #0E121B; color: #fff; }
+.at-filters { display: flex; align-items: center; gap: 5px; padding: 7px 10px; border-bottom: 1px solid #E1E4EA; background: #FAFAFA; }
+.at-filter { display: inline-flex; align-items: center; gap: 3px; padding: 4px 8px; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 11.5px; font-weight: 500; color: #525866; cursor: pointer; white-space: nowrap; font-family: inherit; }
+.at-filter:hover { border-color: #3d64d7; color: #3d64d7; }
+.at-filter.active-filter { border-color: #C7D2FE; color: #3730A3; background: #EEF2FF; }
+.at-results { max-height: 192px; overflow-y: auto; }
+.at-result { display: flex; align-items: center; gap: 9px; padding: 8px 10px; cursor: pointer; }
+.at-result:hover { background: #F9FAFB; }
+.at-result.selected { background: #F5F7FF; }
+.at-cb { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid #D1D5DB; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.at-cb.checked { background: #3d64d7; border-color: #3d64d7; }
+.at-result-info { flex: 1; min-width: 0; }
+.at-primary { font-size: 13px; font-weight: 500; color: #0A0A0A; }
+.at-secondary { font-size: 11px; color: #99A0AE; margin-top: 2px; display: flex; align-items: center; gap: 5px; }
+.at-badge { display: inline-flex; align-items: center; padding: 1px 5px; border-radius: 3px; font-size: 11px; font-weight: 500; }
+.at-badge-fail { background: #FEE2E2; color: #DC2626; }
+.at-badge-ok { background: #DCFCE7; color: #16A34A; }
+.at-footer { padding: 8px 10px; border-top: 1px solid #E1E4EA; display: flex; align-items: center; gap: 8px; background: #FAFAFA; }
+.at-count { font-size: 12px; color: #99A0AE; flex: 1; }
+.at-attach { padding: 6px 14px; background: #0E121B; color: #fff; border-radius: 7px; font-size: 12.5px; font-weight: 500; cursor: pointer; border: none; font-family: inherit; }
+.at-attach:hover { opacity: 0.88; }
+</style>
+</head>
+<body>
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#0A0A0A"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73ZM205.22 49.69C202.9 52 199.43 52.58 195.38 52.58H176.28V26.54H193.64C198.85 26.54 201.74 27.12 204.64 28.86C208.11 30.59 209.85 34.64 209.85 39.27C209.85 43.9 208.11 47.38 205.22 49.69Z" fill="#0A0A0A"/><path d="M255.56 34.65C238.2 34.65 226.63 47.95 226.63 66.47C226.63 84.99 242.25 98.3 256.14 98.3C270.03 98.3 279.86 90.19 283.33 78.62H269.45C267.71 82.67 264.82 87.3 256.14 87.3C247.46 87.3 239.94 81.52 239.94 69.94H283.91C283.91 49.69 272.92 34.65 255.56 34.65ZM240.51 60.11C241.09 51.43 246.88 45.06 255.56 45.06C264.24 45.06 270.02 51.43 270.02 60.11H240.51Z" fill="#0A0A0A"/><path d="M344.09 34.65C326.73 34.65 315.16 47.95 315.16 66.47C315.16 85.15 330.78 98.3 344.67 98.3C358.56 98.3 368.39 90.19 371.87 78.62H357.98C356.24 82.67 353.35 87.3 344.67 87.3C335.99 87.3 328.47 81.52 328.47 69.94H372.44C372.44 49.69 361.45 34.65 344.09 34.65ZM329.05 60.11C329.62 51.43 335.41 45.06 344.09 45.06C352.77 45.06 358.56 51.43 358.56 60.11H329.05Z" fill="#0A0A0A"/><path d="M390.96 14.97H377.65V95.92H390.96V14.97Z" fill="#0A0A0A"/><path d="M413.53 14.97H400.22V95.92H413.53V14.97Z" fill="#0A0A0A"/><path d="M304.17 17.28L290.84 17.28L290.85 34.65H282.76V45H290.85V82.82C290.85 87.58 291.8 90.43 294.66 93.29C297.51 96.14 300.37 97.09 305.13 97.09H315.14V85.67H309.88C308.16 85.67 306.96 85.37 306.13 85.11C305.27 84.84 304.61 84.16 304.4 83.29C304.17 82.33 304.17 81.09 304.17 79.9V45H315.14V34.65H304.17V17.28Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="workspace">
+    <div class="workspace-avatar">R</div>
+    <span class="workspace-name">Retell AI</span>
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.31 7.95L10 3.64L5.69 7.95L6.67 8.93L10 5.6L13.33 8.93L14.31 7.95ZM5.69 12.05L10 16.36L14.31 12.05L13.33 11.07L10 14.4L6.67 11.07L5.69 12.05Z" fill="#99A0AE"/></svg>
+  </div>
+  <div class="nav-scroll">
+    <div class="section-group top">
+      <div class="section-label">Build</div>
+      <ul class="nav-items">
+        <li class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M11.125 2.5C11.125 2.833 10.98 3.133 10.75 3.339V4.75H14.5C15.743 4.75 16.75 5.757 16.75 7V14.5C16.75 15.743 15.743 16.75 14.5 16.75H5.5C4.257 16.75 3.25 15.743 3.25 14.5V7C3.25 5.757 4.257 4.75 5.5 4.75H9.25V3.339C9.02 3.133 8.875 2.833 8.875 2.5C8.875 1.879 9.379 1.375 10 1.375C10.621 1.375 11.125 1.879 11.125 2.5ZM5.5 6.25C5.086 6.25 4.75 6.586 4.75 7V14.5C4.75 14.914 5.086 15.25 5.5 15.25H14.5C14.914 15.25 15.25 14.914 15.25 14.5V7C15.25 6.586 14.914 6.25 14.5 6.25H5.5ZM2.5 8.5H1V13H2.5V8.5ZM17.5 8.5H19V13H17.5V8.5ZM7.75 11.875C8.371 11.875 8.875 11.371 8.875 10.75C8.875 10.129 8.371 9.625 7.75 9.625C7.129 9.625 6.625 10.129 6.625 10.75C6.625 11.371 7.129 11.875 7.75 11.875ZM12.25 11.875C12.871 11.875 13.375 11.371 13.375 10.75C13.375 10.129 12.871 9.625 12.25 9.625C11.629 9.625 11.125 10.129 11.125 10.75C11.125 11.371 11.629 11.875 12.25 11.875Z" fill="#525866"/></svg>Agents</li>
+        <li class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3.25 14.875V4.75C3.25 4.153 3.487 3.581 3.909 3.159C4.331 2.737 4.903 2.5 5.5 2.5H16C16.199 2.5 16.39 2.579 16.53 2.72C16.671 2.86 16.75 3.051 16.75 3.25V16.75C16.75 16.949 16.671 17.14 16.53 17.28C16.39 17.421 16.199 17.5 16 17.5H5.875C5.179 17.5 4.511 17.223 4.019 16.731C3.527 16.239 3.25 15.571 3.25 14.875ZM15.25 16V13.75H5.875C5.577 13.75 5.29 13.869 5.08 14.08C4.869 14.291 4.75 14.577 4.75 14.875C4.75 15.173 4.869 15.46 5.08 15.671C5.29 15.882 5.577 16 5.875 16H15.25ZM4.75 12.503C5.102 12.336 5.486 12.25 5.875 12.25H15.25V4H5.5C5.301 4 5.11 4.079 4.97 4.22C4.829 4.36 4.75 4.551 4.75 4.75V12.503Z" fill="#525866"/></svg>Knowledge Base</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Deploy</div>
+      <ul class="nav-items">
+        <li class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6.25 2.5H14.5C14.699 2.5 14.89 2.579 15.03 2.72C15.171 2.86 15.25 3.051 15.25 3.25V16.75C15.25 16.949 15.171 17.14 15.03 17.28C14.89 17.421 14.699 17.5 14.5 17.5H5.5C5.301 17.5 5.11 17.421 4.97 17.28C4.829 17.14 4.75 16.949 4.75 16.75V1H6.25V2.5ZM6.25 7.75H13.75V4H6.25V7.75ZM6.25 9.25V16H13.75V9.25H6.25Z" fill="#525866"/></svg>Phone Numbers</li>
+        <li class="nav-item"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.0245 9.0115C8.72825 10.2479 9.75214 11.2717 10.9885 11.9755L11.6515 11.047C11.7581 10.8977 11.9158 10.7927 12.0946 10.7517C12.2734 10.7108 12.4611 10.7369 12.622 10.825C13.6827 11.4047 14.8542 11.7533 16.0592 11.848C16.2473 11.8629 16.4229 11.9482 16.5509 12.0867C16.6789 12.2253 16.75 12.4071 16.75 12.5958V15.9423C16.75 16.1279 16.6812 16.3071 16.5568 16.4449C16.4324 16.5828 16.2612 16.6696 16.0765 16.6885C15.679 16.7297 15.2785 16.75 14.875 16.75C8.455 16.75 3.25 11.545 3.25 5.125C3.25 4.7215 3.27025 4.321 3.3115 3.9235C3.33044 3.73877 3.41724 3.56764 3.55509 3.44323C3.69295 3.31881 3.87205 3.24996 4.05775 3.25H7.40425C7.59292 3.24998 7.77467 3.32106 7.91326 3.44909C8.05185 3.57711 8.13709 3.75267 8.152 3.94075C8.24667 5.14584 8.59531 6.31726 9.175 7.378C9.2631 7.53892 9.28916 7.72656 9.24825 7.9054C9.20734 8.08424 9.1023 8.24188 8.953 8.3485L8.0245 9.0115Z" fill="#525866"/></svg>Batch Call</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">Monitor</div>
+      <ul class="nav-items">
+        <li class="nav-item current"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C5.85775 17.5 2.5 14.1423 2.5 10H4C4 13.3135 6.6865 16 10 16C13.3135 16 16 13.3135 16 10C16 6.6865 13.3135 4 10 4C7.9375 4 6.118 5.04025 5.03875 6.625H7V8.125H2.5V3.625H4V5.5C5.368 3.6775 7.54675 2.5 10 2.5ZM10.75 6.25V9.68875L13.1823 12.121L12.121 13.1823L9.25 10.3098V6.25H10.75Z" fill="#3d64d7"/></svg>Call History</li>
+        <li class="nav-item"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C8.7235 17.5 7.52125 17.1813 6.469 16.6188L2.5 17.5L3.382 13.5325C2.8195 12.4795 2.5 11.2773 2.5 10C2.5 5.85775 5.85775 2.5 10 2.5Z" fill="#525866"/></svg>Chat History</li>
+        <li class="nav-item"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 17.5C5.85775 17.5 2.5 14.1423 2.5 10C2.5 6.6415 4.70725 3.799 7.75 2.8435V4.4365C5.58 5.29 4 7.48 4 10C4 13.3135 6.6865 16 10 16C13.3135 16 16 13.3135 16 10H17.5C17.5 14.1423 14.1423 17.5 10 17.5Z" fill="#525866"/></svg>Analytics</li>
+        <li class="nav-item"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="#525866" stroke-width="1.5"/><path d="M13.5 13.5L17 17" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/><path d="M6 9L8 11L12 7" stroke="#525866" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>AI Quality Assurance</li>
+        <li class="nav-item"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 16V11.5C4 9.9 4.63 8.38 5.76 7.26C6.88 6.13 8.41 5.5 10 5.5C11.59 5.5 13.12 6.13 14.24 7.26C15.37 8.38 16 9.9 16 11.5V16H16.75V17.5H3.25V16H4Z" fill="#525866"/></svg>Alerting</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <div class="section-label">System</div>
+      <ul class="nav-items">
+        <li class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M16 17.5H4C3.801 17.5 3.61 17.421 3.47 17.28C3.329 17.14 3.25 16.949 3.25 16.75V3.25C3.25 3.051 3.329 2.86 3.47 2.72C3.61 2.579 3.801 2.5 4 2.5H16C16.199 2.5 16.39 2.579 16.53 2.72C16.671 2.86 16.75 3.051 16.75 3.25V16.75C16.75 16.949 16.671 17.14 16.53 17.28C16.39 17.421 16.199 17.5 16 17.5ZM15.25 16V4H4.75V16H15.25ZM7 7.75H13V9.25H7V7.75ZM7 10.75H13V12.25H7V10.75Z" fill="#525866"/></svg>Billing</li>
+        <li class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1.75L17.125 5.875V14.125L10 18.25L2.875 14.125V5.875L10 1.75ZM10 3.483L4.375 6.74V13.26L10 16.517L15.625 13.26V6.74L10 3.483ZM10 13C9.204 13 8.441 12.684 7.879 12.121C7.316 11.559 7 10.796 7 10C7 9.204 7.316 8.441 7.879 7.879C8.441 7.316 9.204 7 10 7C10.796 7 11.559 7.316 12.121 7.879C12.684 8.441 13 9.204 13 10C13 10.796 12.684 11.559 12.121 12.121C11.559 12.684 10.796 13 10 13ZM10 11.5C10.398 11.5 10.779 11.342 11.061 11.061C11.342 10.779 11.5 10.398 11.5 10C11.5 9.602 11.342 9.221 11.061 8.939C10.779 8.658 10.398 8.5 10 8.5C9.602 8.5 9.221 8.658 8.939 8.939C8.658 9.221 8.5 9.602 8.5 10C8.5 10.398 8.658 10.779 8.939 11.061C9.221 11.342 9.602 11.5 10 11.5Z" fill="#525866"/></svg>Settings</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="footer-card pay">
+      <div class="footer-badge-pill">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 14C4.686 14 2 11.314 2 8C2 4.686 4.686 2 8 2C11.314 2 14 4.686 14 8C14 11.314 11.314 14 8 14ZM7.402 10.4L11.644 6.157L10.795 5.309L7.402 8.703L5.704 7.006L4.856 7.854L7.402 10.4Z" fill="#3d64d7"/></svg>
+        Pay As You Go
+      </div>
+      <span class="spacer"></span>
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.31 7.95L10 3.64L5.69 7.95L6.67 8.93L10 5.6L13.33 8.93L14.31 7.95ZM5.69 12.05L10 16.36L14.31 12.05L13.33 11.07L10 14.4L6.67 11.07L5.69 12.05Z" fill="#9CA3AF"/></svg>
+    </div>
+    <div class="footer-card user">
+      <div style="width:20px;height:20px;border-radius:50%;background:#6d4aff;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:600;flex-shrink:0;">B</div>
+      <span class="user-name">brandon@retellai.com</span>
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.31 7.95L10 3.64L5.69 7.95L6.67 8.93L10 5.6L13.33 8.93L14.31 7.95ZM5.69 12.05L10 16.36L14.31 12.05L13.33 11.07L10 14.4L6.67 11.07L5.69 12.05Z" fill="#9CA3AF"/></svg>
+    </div>
+    <div class="footer-links">
+      <a class="footer-link"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 16.25C6.548 16.25 3.75 13.452 3.75 10C3.75 6.548 6.548 3.75 10 3.75C13.452 3.75 16.25 6.548 16.25 10C16.25 13.452 13.452 16.25 10 16.25ZM10.625 9.063V11.875H11.25V13.125H8.75V11.875H9.375V10.313H8.75V9.063H10.625ZM10.938 7.5C10.938 8.018 10.518 8.438 10 8.438C9.482 8.438 9.063 8.018 9.063 7.5C9.063 6.982 9.482 6.563 10 6.563C10.518 6.563 10.938 6.982 10.938 7.5Z" fill="#525866"/></svg>Help</a>
+      <div class="footer-divider"></div>
+      <a class="footer-link"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M8.125 13.125C8.125 13.125 12.5 13.75 14.375 15.625H15C15.345 15.625 15.625 15.345 15.625 15V11.211C16.164 11.072 16.563 10.582 16.563 10C16.563 9.418 16.164 8.928 15.625 8.789V5C15.625 4.655 15.345 4.375 15 4.375H14.375C12.5 6.25 8.125 6.875 8.125 6.875H5.625C4.935 6.875 4.375 7.435 4.375 8.125V11.875C4.375 12.565 4.935 13.125 5.625 13.125H6.25L6.875 16.25H8.125V13.125Z" fill="#525866"/></svg>Updates</a>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── MAIN: CALL HISTORY ─── -->
+<main class="main">
+  <div class="main-header">
+    <div class="header-dot"></div>
+    <span class="header-title">Call History</span>
+  </div>
+  <div class="main-toolbar">
+    <button class="toolbar-btn">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M5 10h10M7 15h6" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Filter
+    </button>
+    <button class="toolbar-btn">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M4 10h8M4 14h4" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Customize View
+    </button>
+    <div class="toolbar-spacer"></div>
+    <button class="toolbar-btn">Export</button>
+    <button class="sparkles-btn">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2L11.5 7.5L17 9L11.5 10.5L10 16L8.5 10.5L3 9L8.5 7.5L10 2Z" fill="white"/></svg>
+      Copilot
+    </button>
+  </div>
+  <div class="table-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th></th>
+          <th>From</th>
+          <th>Agent</th>
+          <th>Duration</th>
+          <th>Status</th>
+          <th>Sentiment</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="checkbox" style="accent-color:#3d64d7;"></td>
+          <td style="font-weight:500;">+1 (415) 555-0192</td>
+          <td><span class="agent-tag">Healthcare Check-In</span></td>
+          <td class="tdim">2m 14s</td>
+          <td><span class="badge badge-fail">Failed</span></td>
+          <td class="tdim">Negative</td>
+          <td class="tdim">Today, 10:42 AM</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" style="accent-color:#3d64d7;"></td>
+          <td style="font-weight:500;">+1 (628) 555-0847</td>
+          <td><span class="agent-tag">Healthcare Check-In</span></td>
+          <td class="tdim">0m 48s</td>
+          <td><span class="badge badge-fail">Failed</span></td>
+          <td class="tdim">Neutral</td>
+          <td class="tdim">Today, 9:17 AM</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" style="accent-color:#3d64d7;"></td>
+          <td style="font-weight:500;">+1 (510) 555-2891</td>
+          <td><span class="agent-tag">Healthcare Check-In</span></td>
+          <td class="tdim">3m 52s</td>
+          <td><span class="badge badge-ok">Successful</span></td>
+          <td class="tdim">Positive</td>
+          <td class="tdim">Today, 8:55 AM</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" style="accent-color:#3d64d7;"></td>
+          <td style="font-weight:500;">+1 (707) 555-1244</td>
+          <td><span class="agent-tag">Appointment Reminder</span></td>
+          <td class="tdim">1m 03s</td>
+          <td><span class="badge badge-fail">Failed</span></td>
+          <td class="tdim">Negative</td>
+          <td class="tdim">Today, 8:31 AM</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" style="accent-color:#3d64d7;"></td>
+          <td style="font-weight:500;">+1 (415) 555-8823</td>
+          <td><span class="agent-tag">Healthcare Check-In</span></td>
+          <td class="tdim">4m 20s</td>
+          <td><span class="badge badge-ok">Successful</span></td>
+          <td class="tdim">Positive</td>
+          <td class="tdim">Yesterday, 4:12 PM</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" style="accent-color:#3d64d7;"></td>
+          <td style="font-weight:500;">+1 (650) 555-7701</td>
+          <td><span class="agent-tag">Healthcare Check-In</span></td>
+          <td class="tdim">1m 29s</td>
+          <td><span class="badge badge-fail">Failed</span></td>
+          <td class="tdim">Neutral</td>
+          <td class="tdim">Yesterday, 2:48 PM</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" style="accent-color:#3d64d7;"></td>
+          <td style="font-weight:500;">+1 (408) 555-3302</td>
+          <td><span class="agent-tag">Appointment Reminder</span></td>
+          <td class="tdim">2m 41s</td>
+          <td><span class="badge badge-ok">Successful</span></td>
+          <td class="tdim">Positive</td>
+          <td class="tdim">Yesterday, 11:05 AM</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" style="accent-color:#3d64d7;"></td>
+          <td style="font-weight:500;">+1 (925) 555-0481</td>
+          <td><span class="agent-tag">Healthcare Check-In</span></td>
+          <td class="tdim">0m 33s</td>
+          <td><span class="badge badge-fail">Failed</span></td>
+          <td class="tdim">Negative</td>
+          <td class="tdim">Jun 22, 3:22 PM</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- ─── COPILOT PANEL ─── -->
+<aside class="cp">
+  <div class="cp-topbar">
+    <div class="cp-title">
+      <div class="cp-orb-sm"></div>
+      Copilot
+    </div>
+    <span class="spacer"></span>
+    <div class="cp-iconbtn" title="New chat">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 4.5V15.5M4.5 10H15.5" stroke="#525866" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </div>
+    <div class="cp-iconbtn" title="Chat history">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M3 10a7 7 0 1 1 2.05 4.95" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/><path d="M3 14V10.5H6.5" stroke="#525866" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 6.5V10L12.5 11.5" stroke="#525866" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="cp-iconbtn" title="Expand">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M8 4H4V8M12 16H16V12" stroke="#525866" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="cp-iconbtn" title="Close">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 5L15 15M15 5L5 15" stroke="#525866" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+
+  <!-- auto context chip -->
+  <div class="auto-bar">
+    <span class="auto-bar-label">Auto-included:</span>
+    <div class="auto-chip">
+      <div class="auto-chip-dot"></div>
+      Call History · Last 7 days
+      <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 5L15 15M15 5L5 15" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+
+  <!-- chat messages -->
+  <div class="chat-area">
+    <div class="msg-row user">
+      <div class="bubble-user">Why did my recent calls fail?</div>
+    </div>
+    <div class="msg-row">
+      <div class="msg-label">
+        <div class="cp-orb-sm"></div>
+        Copilot
+      </div>
+      <div class="bubble-cp">
+        <p>I reviewed the last 7 days of Call History for Healthcare Check-In and found <strong>18 failed calls</strong> out of 31 total — a 58% failure rate.</p>
+        <div class="finding-row">
+          <div class="finding-num">1</div>
+          <div><strong>Caller hung up during hold</strong> — 9 calls. The agent placed callers on hold while fetching availability, with no estimated wait time given.</div>
+        </div>
+        <div class="finding-row">
+          <div class="finding-num">2</div>
+          <div><strong>Confirmation loop</strong> — 6 calls. The agent asked to confirm the appointment date 3+ times before callers dropped.</div>
+        </div>
+        <div class="finding-row">
+          <div class="finding-num">3</div>
+          <div><strong>Tool failure on CRM lookup</strong> — 3 calls. The get_patient_record function timed out, causing the agent to stall.</div>
+        </div>
+        <div style="margin-top:10px;font-size:13px;color:#525866;">Want to dig into specific calls? Use @ to add them to context.</div>
+        <button class="nav-card">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M11.125 2.5C11.125 2.833 10.98 3.133 10.75 3.339V4.75H14.5C15.743 4.75 16.75 5.757 16.75 7V14.5C16.75 15.743 15.743 16.75 14.5 16.75H5.5C4.257 16.75 3.25 15.743 3.25 14.5V7C3.25 5.757 4.257 4.75 5.5 4.75H9.25V3.339C9.02 3.133 8.875 2.833 8.875 2.5C8.875 1.879 9.379 1.375 10 1.375C10.621 1.375 11.125 1.879 11.125 2.5Z" fill="#525866"/></svg>
+          View Healthcare Check-In
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M7.5 5L12.5 10L7.5 15" stroke="#525866" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="msg-row user">
+      <div class="bubble-user">Can you look at the two calls from this morning?</div>
+    </div>
+  </div>
+
+  <!-- composer zone (@ picker open) -->
+  <div class="composer-zone">
+
+    <!-- @ PICKER DROPDOWN -->
+    <div class="at-picker">
+      <!-- search -->
+      <div class="at-search-row">
+        <div class="at-search-wrap">
+          <svg class="at-search-icon" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16ZM17 17l-2-2" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input class="at-search-input" type="text" value="@" placeholder="Search agents, calls, charts…" />
+        </div>
+      </div>
+      <!-- category tabs -->
+      <div class="at-tabs-row">
+        <button class="at-tab">Agents</button>
+        <button class="at-tab active">Calls</button>
+        <button class="at-tab">Charts</button>
+        <button class="at-tab">Dashboards</button>
+        <button class="at-tab">AI QA</button>
+        <button class="at-tab">KB</button>
+        <button class="at-tab">CRM</button>
+        <button class="at-tab">Simulations</button>
+      </div>
+      <!-- filters (Calls tab) -->
+      <div class="at-filters">
+        <button class="at-filter">
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M11.125 2.5C11.125 2.833 10.98 3.133 10.75 3.339V4.75H14.5C15.743 4.75 16.75 5.757 16.75 7V14.5C16.75 15.743 15.743 16.75 14.5 16.75H5.5C4.257 16.75 3.25 15.743 3.25 14.5V7C3.25 5.757 4.257 4.75 5.5 4.75H9.25V3.339C9.02 3.133 8.875 2.833 8.875 2.5C8.875 1.879 9.379 1.375 10 1.375C10.621 1.375 11.125 1.879 11.125 2.5Z" fill="#525866"/></svg>
+          Healthcare Check-In
+          <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="at-filter active-filter">
+          Unsuccessful
+          <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#3730A3" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="at-filter">
+          Last 7 days
+          <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <!-- results -->
+      <div class="at-results">
+        <div class="at-result selected">
+          <div class="at-cb checked">
+            <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="at-result-info">
+            <div class="at-primary">+1 (415) 555-0192</div>
+            <div class="at-secondary">Today, 10:42 AM <span class="at-badge at-badge-fail">Failed</span></div>
+          </div>
+        </div>
+        <div class="at-result selected">
+          <div class="at-cb checked">
+            <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="at-result-info">
+            <div class="at-primary">+1 (628) 555-0847</div>
+            <div class="at-secondary">Today, 9:17 AM <span class="at-badge at-badge-fail">Failed</span></div>
+          </div>
+        </div>
+        <div class="at-result">
+          <div class="at-cb"></div>
+          <div class="at-result-info">
+            <div class="at-primary">+1 (650) 555-7701</div>
+            <div class="at-secondary">Yesterday, 2:48 PM <span class="at-badge at-badge-fail">Failed</span></div>
+          </div>
+        </div>
+        <div class="at-result">
+          <div class="at-cb"></div>
+          <div class="at-result-info">
+            <div class="at-primary">+1 (925) 555-0481</div>
+            <div class="at-secondary">Jun 22, 3:22 PM <span class="at-badge at-badge-fail">Failed</span></div>
+          </div>
+        </div>
+        <div class="at-result">
+          <div class="at-cb"></div>
+          <div class="at-result-info">
+            <div class="at-primary">+1 (707) 555-1244</div>
+            <div class="at-secondary">Jun 22, 10:05 AM <span class="at-badge at-badge-fail">Failed</span></div>
+          </div>
+        </div>
+        <div class="at-result">
+          <div class="at-cb"></div>
+          <div class="at-result-info">
+            <div class="at-primary">+1 (415) 555-3318</div>
+            <div class="at-secondary">Jun 21, 4:37 PM <span class="at-badge at-badge-fail">Failed</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- footer -->
+      <div class="at-footer">
+        <span class="at-count">2 selected</span>
+        <button class="at-attach">Attach 2 calls</button>
+      </div>
+    </div>
+
+    <!-- composer -->
+    <div class="composer">
+      <div class="composer-chips">
+        <div class="ctx-chip">
+          <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C5.85775 17.5 2.5 14.1423 2.5 10H4C4 13.3135 6.6865 16 10 16C13.3135 16 16 13.3135 16 10C16 6.6865 13.3135 4 10 4C7.9375 4 6.118 5.04025 5.03875 6.625H7V8.125H2.5V3.625H4V5.5C5.368 3.6775 7.54675 2.5 10 2.5ZM10.75 6.25V9.68875L13.1823 12.121L12.121 13.1823L9.25 10.3098V6.25H10.75Z" fill="#3730A3"/></svg>
+          Call · +1 (415) 555-0192
+          <span class="ctx-chip-x">×</span>
+        </div>
+        <div class="ctx-chip">
+          <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C5.85775 17.5 2.5 14.1423 2.5 10H4C4 13.3135 6.6865 16 10 16C13.3135 16 16 13.3135 16 10C16 6.6865 13.3135 4 10 4C7.9375 4 6.118 5.04025 5.03875 6.625H7V8.125H2.5V3.625H4V5.5C5.368 3.6775 7.54675 2.5 10 2.5ZM10.75 6.25V9.68875L13.1823 12.121L12.121 13.1823L9.25 10.3098V6.25H10.75Z" fill="#3730A3"/></svg>
+          Call · +1 (628) 555-0847
+          <span class="ctx-chip-x">×</span>
+        </div>
+      </div>
+      <div class="composer-input-row">@</div>
+      <div class="composer-toolbar">
+        <button class="comp-btn at-btn-active" title="Add context">@</button>
+        <button class="comp-btn" title="Attach file">
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M16.5 10.5L9.5 17.5C8.1 18.9 5.9 18.9 4.5 17.5C3.1 16.1 3.1 13.9 4.5 12.5L11.5 5.5C12.4 4.6 13.9 4.6 14.8 5.5C15.7 6.4 15.7 7.9 14.8 8.8L8 15.6C7.6 16 7 16 6.6 15.6C6.2 15.2 6.2 14.6 6.6 14.2L12.5 8.3" stroke="#525866" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </button>
+        <div class="comp-spacer"></div>
+        <div class="send-btn">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 15.5V5M5.5 9L10 4.5L14.5 9" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+</body>
+</html>

@@ -106,16 +106,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
 .at-search-wrap { position: relative; }
 .at-search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: #99A0AE; pointer-events: none; }
 .at-search-input { width: 100%; padding: 7px 10px 7px 30px; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 13px; color: #0A0A0A; outline: none; font-family: inherit; }
-.at-tabs-row { display: flex; gap: 2px; padding: 7px 10px 5px; overflow-x: auto; border-bottom: 1px solid #E1E4EA; scrollbar-width: none; }
-.at-tabs-row::-webkit-scrollbar { display: none; }
-.at-tab { padding: 4px 9px; font-size: 12px; font-weight: 500; color: #525866; background: none; border: none; border-radius: 5px; cursor: pointer; white-space: nowrap; font-family: inherit; }
-.at-tab:hover { background: #F3F4F6; color: #0A0A0A; }
-.at-tab.active { background: #0E121B; color: #fff; }
-.at-filters { display: flex; align-items: center; gap: 5px; padding: 7px 10px; border-bottom: 1px solid #E1E4EA; background: #FAFAFA; }
+.at-body { display: flex; min-height: 252px; }
+.at-cat-col { width: 140px; min-width: 140px; border-right: 1px solid #E1E4EA; padding: 4px 0; overflow-y: auto; }
+.at-cat-item { display: flex; align-items: center; gap: 7px; padding: 7px 12px; font-size: 12.5px; color: #525866; cursor: pointer; font-family: inherit; line-height: 1.3; }
+.at-cat-item:hover { background: #F5F7FA; color: #0A0A0A; }
+.at-cat-item.active { background: #EEF2FF; color: #3d64d7; font-weight: 500; }
+.at-cat-item.active svg { color: #3d64d7; }
+.at-content-col { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.at-filters { display: flex; align-items: center; gap: 5px; padding: 7px 10px; border-bottom: 1px solid #E1E4EA; background: #FAFAFA; flex-shrink: 0; }
 .at-filter { display: inline-flex; align-items: center; gap: 3px; padding: 4px 8px; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 11.5px; font-weight: 500; color: #525866; cursor: pointer; white-space: nowrap; font-family: inherit; }
 .at-filter:hover { border-color: #3d64d7; color: #3d64d7; }
 .at-filter.active-filter { border-color: #C7D2FE; color: #3730A3; background: #EEF2FF; }
-.at-results { max-height: 192px; overflow-y: auto; }
+.at-results { max-height: 170px; overflow-y: auto; flex-shrink: 0; }
 .at-result { display: flex; align-items: center; gap: 9px; padding: 8px 10px; cursor: pointer; }
 .at-result:hover { background: #F9FAFB; }
 .at-result.selected { background: #F5F7FF; }
@@ -391,89 +393,119 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
       <div class="at-search-row">
         <div class="at-search-wrap">
           <svg class="at-search-icon" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16ZM17 17l-2-2" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round"/></svg>
-          <input class="at-search-input" type="text" value="@" placeholder="Search agents, calls, charts…" />
+          <input class="at-search-input" type="text" value="" placeholder="Search agents, calls, charts…" />
         </div>
       </div>
-      <!-- category tabs -->
-      <div class="at-tabs-row">
-        <button class="at-tab">Agents</button>
-        <button class="at-tab active">Call IDs</button>
-        <button class="at-tab">Charts</button>
-        <button class="at-tab">Dashboards</button>
-        <button class="at-tab">AI QA</button>
-        <button class="at-tab">KB</button>
-        <button class="at-tab">CRM</button>
-        <button class="at-tab">Test Cases</button>
-      </div>
-      <!-- filters (Calls tab) -->
-      <div class="at-filters">
-        <button class="at-filter">
-          <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M11.125 2.5C11.125 2.833 10.98 3.133 10.75 3.339V4.75H14.5C15.743 4.75 16.75 5.757 16.75 7V14.5C16.75 15.743 15.743 16.75 14.5 16.75H5.5C4.257 16.75 3.25 15.743 3.25 14.5V7C3.25 5.757 4.257 4.75 5.5 4.75H9.25V3.339C9.02 3.133 8.875 2.833 8.875 2.5C8.875 1.879 9.379 1.375 10 1.375C10.621 1.375 11.125 1.879 11.125 2.5Z" fill="#525866"/></svg>
-          Healthcare Check-In
-          <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </button>
-        <button class="at-filter active-filter">
-          Unsuccessful
-          <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#3730A3" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </button>
-        <button class="at-filter">
-          Last 7 days
-          <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </button>
-      </div>
-      <!-- results -->
-      <div class="at-results">
-        <div class="at-result selected">
-          <div class="at-cb checked">
-            <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <!-- two-column body -->
+      <div class="at-body">
+        <!-- left: category list -->
+        <div class="at-cat-col">
+          <div class="at-cat-item">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M11.125 2.5C11.125 2.833 10.98 3.133 10.75 3.339V4.75H14.5C15.743 4.75 16.75 5.757 16.75 7V14.5C16.75 15.743 15.743 16.75 14.5 16.75H5.5C4.257 16.75 3.25 15.743 3.25 14.5V7C3.25 5.757 4.257 4.75 5.5 4.75H9.25V3.339C9.02 3.133 8.875 2.833 8.875 2.5C8.875 1.879 9.379 1.375 10 1.375C10.621 1.375 11.125 1.879 11.125 2.5Z" fill="currentColor"/></svg>
+            Agents
           </div>
-          <div class="at-result-info">
-            <div class="at-primary">+1 (415) 555-0192</div>
-            <div class="at-secondary">Today, 10:42 AM <span class="at-badge at-badge-fail">Failed</span></div>
+          <div class="at-cat-item active">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C5.85775 17.5 2.5 14.1423 2.5 10H4C4 13.3135 6.6865 16 10 16C13.3135 16 16 13.3135 16 10C16 6.6865 13.3135 4 10 4C7.9375 4 6.118 5.04025 5.03875 6.625H7V8.125H2.5V3.625H4V5.5C5.368 3.6775 7.54675 2.5 10 2.5ZM10.75 6.25V9.68875L13.1823 12.121L12.121 13.1823L9.25 10.3098V6.25H10.75Z" fill="currentColor"/></svg>
+            Call IDs
           </div>
-        </div>
-        <div class="at-result selected">
-          <div class="at-cb checked">
-            <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="at-cat-item">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M3.25 15.25V10H5.5V15.25H3.25ZM8.875 15.25V4.75H11.125V15.25H8.875ZM14.5 15.25V7H16.75V15.25H14.5Z" fill="currentColor"/></svg>
+            Charts
           </div>
-          <div class="at-result-info">
-            <div class="at-primary">+1 (628) 555-0847</div>
-            <div class="at-secondary">Today, 9:17 AM <span class="at-badge at-badge-fail">Failed</span></div>
+          <div class="at-cat-item">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="2.5" y="2.5" width="6.5" height="6.5" rx="1.5" fill="currentColor"/><rect x="11" y="2.5" width="6.5" height="6.5" rx="1.5" fill="currentColor"/><rect x="2.5" y="11" width="6.5" height="6.5" rx="1.5" fill="currentColor"/><rect x="11" y="11" width="6.5" height="6.5" rx="1.5" fill="currentColor"/></svg>
+            Dashboards
+          </div>
+          <div class="at-cat-item">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M6 9L8 11L12 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            AI QA
+          </div>
+          <div class="at-cat-item">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M3.25 14.875V4.75C3.25 4.153 3.487 3.581 3.909 3.159C4.331 2.737 4.903 2.5 5.5 2.5H16C16.199 2.5 16.39 2.579 16.53 2.72C16.671 2.86 16.75 3.051 16.75 3.25V16.75C16.75 16.949 16.671 17.14 16.53 17.28C16.39 17.421 16.199 17.5 16 17.5H5.875C5.179 17.5 4.511 17.223 4.019 16.731C3.527 16.239 3.25 15.571 3.25 14.875ZM15.25 16V13.75H5.875C5.577 13.75 5.29 13.869 5.08 14.08C4.869 14.291 4.75 14.577 4.75 14.875C4.75 15.173 4.869 15.46 5.08 15.671C5.29 15.882 5.577 16 5.875 16H15.25ZM4.75 12.503C5.102 12.336 5.486 12.25 5.875 12.25H15.25V4H5.5C5.301 4 5.11 4.079 4.97 4.22C4.829 4.36 4.75 4.551 4.75 4.75V12.503Z" fill="currentColor"/></svg>
+            KB
+          </div>
+          <div class="at-cat-item">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C13.314 2.5 16 5.186 16 8.5C16 11.814 13.314 14.5 10 14.5C6.686 14.5 4 11.814 4 8.5C4 5.186 6.686 2.5 10 2.5ZM10 4C7.515 4 5.5 6.015 5.5 8.5C5.5 10.985 7.515 13 10 13C12.485 13 14.5 10.985 14.5 8.5C14.5 6.015 12.485 4 10 4ZM4.75 14.5L7.25 17.5H12.75L15.25 14.5H4.75Z" fill="currentColor"/></svg>
+            CRM
+          </div>
+          <div class="at-cat-item">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7.25 2.5H12.75L14.5 8L10 11.5L5.5 8L7.25 2.5ZM10 13V17.5M7 17.5H13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Test Cases
           </div>
         </div>
-        <div class="at-result">
-          <div class="at-cb"></div>
-          <div class="at-result-info">
-            <div class="at-primary">+1 (650) 555-7701</div>
-            <div class="at-secondary">Yesterday, 2:48 PM <span class="at-badge at-badge-fail">Failed</span></div>
+        <!-- right: content for selected category (Call IDs) -->
+        <div class="at-content-col">
+          <!-- filters -->
+          <div class="at-filters">
+            <button class="at-filter">
+              <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M11.125 2.5C11.125 2.833 10.98 3.133 10.75 3.339V4.75H14.5C15.743 4.75 16.75 5.757 16.75 7V14.5C16.75 15.743 15.743 16.75 14.5 16.75H5.5C4.257 16.75 3.25 15.743 3.25 14.5V7C3.25 5.757 4.257 4.75 5.5 4.75H9.25V3.339C9.02 3.133 8.875 2.833 8.875 2.5C8.875 1.879 9.379 1.375 10 1.375C10.621 1.375 11.125 1.879 11.125 2.5Z" fill="#525866"/></svg>
+              Healthcare Check-In
+              <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+            <button class="at-filter active-filter">
+              Unsuccessful
+              <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#3730A3" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+            <button class="at-filter">
+              Last 7 days
+              <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <!-- results -->
+          <div class="at-results">
+            <div class="at-result selected">
+              <div class="at-cb checked">
+                <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="at-result-info">
+                <div class="at-primary">+1 (415) 555-0192</div>
+                <div class="at-secondary">Today, 10:42 AM <span class="at-badge at-badge-fail">Failed</span></div>
+              </div>
+            </div>
+            <div class="at-result selected">
+              <div class="at-cb checked">
+                <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="at-result-info">
+                <div class="at-primary">+1 (628) 555-0847</div>
+                <div class="at-secondary">Today, 9:17 AM <span class="at-badge at-badge-fail">Failed</span></div>
+              </div>
+            </div>
+            <div class="at-result">
+              <div class="at-cb"></div>
+              <div class="at-result-info">
+                <div class="at-primary">+1 (650) 555-7701</div>
+                <div class="at-secondary">Yesterday, 2:48 PM <span class="at-badge at-badge-fail">Failed</span></div>
+              </div>
+            </div>
+            <div class="at-result">
+              <div class="at-cb"></div>
+              <div class="at-result-info">
+                <div class="at-primary">+1 (925) 555-0481</div>
+                <div class="at-secondary">Jun 22, 3:22 PM <span class="at-badge at-badge-fail">Failed</span></div>
+              </div>
+            </div>
+            <div class="at-result">
+              <div class="at-cb"></div>
+              <div class="at-result-info">
+                <div class="at-primary">+1 (707) 555-1244</div>
+                <div class="at-secondary">Jun 22, 10:05 AM <span class="at-badge at-badge-fail">Failed</span></div>
+              </div>
+            </div>
+            <div class="at-result">
+              <div class="at-cb"></div>
+              <div class="at-result-info">
+                <div class="at-primary">+1 (415) 555-3318</div>
+                <div class="at-secondary">Jun 21, 4:37 PM <span class="at-badge at-badge-fail">Failed</span></div>
+              </div>
+            </div>
+          </div>
+          <!-- footer -->
+          <div class="at-footer">
+            <span class="at-count">2 selected</span>
+            <button class="at-attach">Attach 2 calls</button>
           </div>
         </div>
-        <div class="at-result">
-          <div class="at-cb"></div>
-          <div class="at-result-info">
-            <div class="at-primary">+1 (925) 555-0481</div>
-            <div class="at-secondary">Jun 22, 3:22 PM <span class="at-badge at-badge-fail">Failed</span></div>
-          </div>
-        </div>
-        <div class="at-result">
-          <div class="at-cb"></div>
-          <div class="at-result-info">
-            <div class="at-primary">+1 (707) 555-1244</div>
-            <div class="at-secondary">Jun 22, 10:05 AM <span class="at-badge at-badge-fail">Failed</span></div>
-          </div>
-        </div>
-        <div class="at-result">
-          <div class="at-cb"></div>
-          <div class="at-result-info">
-            <div class="at-primary">+1 (415) 555-3318</div>
-            <div class="at-secondary">Jun 21, 4:37 PM <span class="at-badge at-badge-fail">Failed</span></div>
-          </div>
-        </div>
-      </div>
-      <!-- footer -->
-      <div class="at-footer">
-        <span class="at-count">2 selected</span>
-        <button class="at-attach">Attach 2 calls</button>
       </div>
     </div>
 
@@ -491,7 +523,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
           <span class="ctx-chip-x">×</span>
         </div>
       </div>
-      <div class="composer-input-row">@</div>
+      <div class="composer-input-row" style="color:#99A0AE;font-size:14px;">Ask Copilot to help you build, debug, or improve anything in Retell…</div>
       <div class="composer-toolbar">
         <button class="comp-btn" title="Add context" style="font-size:18px;font-weight:400;color:#3d64d7;background:rgba(61,100,215,0.08);border-radius:6px;">+</button>
         <button class="comp-btn" title="Attach file">

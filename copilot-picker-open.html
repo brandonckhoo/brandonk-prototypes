@@ -99,10 +99,29 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
 .at-cat-item.active { background: #EEF2FF; color: #3d64d7; font-weight: 500; }
 .at-cat-icon { width: 16px; height: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 
-.at-content-col { flex: 1; display: flex; align-items: center; justify-content: center; }
-.at-placeholder { text-align: center; }
-.at-placeholder-icon { font-size: 24px; margin-bottom: 8px; }
-.at-placeholder-text { font-size: 12.5px; color: #C5C9D2; }
+.at-content-col { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.at-filters { display: flex; align-items: center; gap: 4px; padding: 7px 10px; border-bottom: 1px solid #E1E4EA; background: #FAFAFA; flex-shrink: 0; }
+.at-filter { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 11.5px; font-weight: 500; color: #525866; cursor: pointer; white-space: nowrap; font-family: inherit; flex-shrink: 0; }
+.at-filter:hover { border-color: #3d64d7; color: #3d64d7; }
+.at-filter-lbl { font-size: 10px; color: #99A0AE; letter-spacing: 0.02em; }
+.at-filter-active { border-color: #C7D2FE !important; color: #3730A3 !important; background: #EEF2FF !important; }
+.at-filter-active .at-filter-lbl { color: #A5B4FC; }
+.at-count-pull { margin-left: auto; font-size: 11px; color: #99A0AE; flex-shrink: 0; }
+.at-results { overflow-y: auto; flex: 1; max-height: 168px; }
+.at-result { display: flex; align-items: center; gap: 9px; padding: 8px 10px; cursor: pointer; }
+.at-result:hover { background: #F9FAFB; }
+.at-result.selected { background: #F5F7FF; }
+.at-cb { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid #D1D5DB; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.at-cb.checked { background: #3d64d7; border-color: #3d64d7; }
+.at-result-info { flex: 1; min-width: 0; }
+.at-primary { font-size: 13px; font-weight: 500; color: #0A0A0A; }
+.at-secondary { font-size: 11px; color: #99A0AE; margin-top: 2px; display: flex; align-items: center; gap: 5px; }
+.at-badge { display: inline-flex; align-items: center; padding: 1px 5px; border-radius: 3px; font-size: 11px; font-weight: 500; }
+.at-badge-fail { background: #FEE2E2; color: #DC2626; }
+.at-badge-ok { background: #DCFCE7; color: #16A34A; }
+.at-footer { padding: 7px 10px; border-top: 1px solid #E1E4EA; display: flex; align-items: center; background: #FAFAFA; flex-shrink: 0; gap: 8px; }
+.at-footer-hint { font-size: 11.5px; color: #C5C9D2; flex: 1; }
+.at-attach-dim { padding: 5px 12px; background: #F3F4F6; color: #C5C9D2; border-radius: 7px; font-size: 12px; font-weight: 500; border: none; font-family: inherit; cursor: default; }
 </style>
 </head>
 <body>
@@ -193,13 +212,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
       <div class="at-body">
         <!-- left: category list -->
         <div class="at-cat-col">
-          <div class="at-cat-item">
-            <div class="at-cat-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M11.125 2.5C11.125 2.833 10.98 3.133 10.75 3.339V4.75H14.5C15.743 4.75 16.75 5.757 16.75 7V14.5C16.75 15.743 15.743 16.75 14.5 16.75H5.5C4.257 16.75 3.25 15.743 3.25 14.5V7C3.25 5.757 4.257 4.75 5.5 4.75H9.25V3.339C9.02 3.133 8.875 2.833 8.875 2.5C8.875 1.879 9.379 1.375 10 1.375C10.621 1.375 11.125 1.879 11.125 2.5Z" fill="currentColor"/></svg></div>
-            Agents
+          <div class="at-cat-item active">
+            <div class="at-cat-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C5.85775 17.5 2.5 14.1423 2.5 10H4C4 13.3135 6.6865 16 10 16C13.3135 16 16 13.3135 16 10C16 6.6865 13.3135 4 10 4C7.9375 4 6.118 5.04025 5.03875 6.625H7V8.125H2.5V3.625H4V5.5C5.368 3.6775 7.54675 2.5 10 2.5ZM10.75 6.25V9.68875L13.1823 12.121L12.121 13.1823L9.25 10.3098V6.25H10.75Z" fill="currentColor"/></svg></div>
+            Call IDs
           </div>
           <div class="at-cat-item">
-            <div class="at-cat-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C5.85775 17.5 2.5 14.1423 2.5 10H4C4 13.3135 6.6865 16 10 16C13.3135 16 16 13.3135 16 10C16 6.6865 13.3135 4 10 4C7.9375 4 6.118 5.04025 5.03875 6.625H7V8.125H2.5V3.625H4V5.5C5.368 3.6775 7.54675 2.5 10 2.5Z" fill="currentColor"/></svg></div>
-            Call IDs
+            <div class="at-cat-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M3.25 14.875V4.75C3.25 4.153 3.487 3.581 3.909 3.159C4.331 2.737 4.903 2.5 5.5 2.5H16C16.199 2.5 16.39 2.579 16.53 2.72C16.671 2.86 16.75 3.051 16.75 3.25V16.75C16.75 16.949 16.671 17.14 16.53 17.28C16.39 17.421 16.199 17.5 16 17.5H5.875C5.179 17.5 4.511 17.223 4.019 16.731C3.527 16.239 3.25 15.571 3.25 14.875ZM15.25 16V13.75H5.875C5.577 13.75 5.29 13.869 5.08 14.08C4.869 14.291 4.75 14.577 4.75 14.875C4.75 15.173 4.869 15.46 5.08 15.671C5.29 15.882 5.577 16 5.875 16H15.25ZM4.75 12.503C5.102 12.336 5.486 12.25 5.875 12.25H15.25V4H5.5C5.301 4 5.11 4.079 4.97 4.22C4.829 4.36 4.75 4.551 4.75 4.75V12.503Z" fill="currentColor"/></svg></div>
+            KB
+          </div>
+          <div class="at-cat-item">
+            <div class="at-cat-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 2.5H5.5C4.672 2.5 4 3.172 4 4v12c0 .828.672 1.5 1.5 1.5H10M10 2.5h2.5L16 6v4M10 2.5v3.5c0 .276.224.5.5.5H16M10 12l-2 5h1l.5-1.5h2L12 17h1l-2-5h-1zm0 2.5.6 1.5h-1.2L10 15z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Test Cases
+          </div>
+          <div class="at-cat-item">
+            <div class="at-cat-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M6 9L8 11L12 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            AI QA
           </div>
           <div class="at-cat-item">
             <div class="at-cat-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M3 14h2V9H3v5zm4 0h2V6H7v8zm4 0h2V3h-2v11zm4 0h2v-3h-2v3z" fill="currentColor"/></svg></div>
@@ -210,27 +237,84 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
             Dashboards
           </div>
           <div class="at-cat-item">
-            <div class="at-cat-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M6 9L8 11L12 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            AI QA
-          </div>
-          <div class="at-cat-item">
-            <div class="at-cat-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M3.25 14.875V4.75C3.25 4.153 3.487 3.581 3.909 3.159C4.331 2.737 4.903 2.5 5.5 2.5H16C16.199 2.5 16.39 2.579 16.53 2.72C16.671 2.86 16.75 3.051 16.75 3.25V16.75C16.75 16.949 16.671 17.14 16.53 17.28C16.39 17.421 16.199 17.5 16 17.5H5.875C5.179 17.5 4.511 17.223 4.019 16.731C3.527 16.239 3.25 15.571 3.25 14.875Z" stroke="currentColor" stroke-width="1.5"/></svg></div>
-            KB
-          </div>
-          <div class="at-cat-item">
             <div class="at-cat-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17C3.5 14 6.46 11.5 10 11.5C13.54 11.5 16.5 14 16.5 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
             CRM
           </div>
           <div class="at-cat-item">
-            <div class="at-cat-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.5 8H18L13.5 11.5L15.5 17.5L10 14L4.5 17.5L6.5 11.5L2 8H7.5L10 2Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></div>
-            Test Cases
+            <div class="at-cat-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M11.125 2.5C11.125 2.833 10.98 3.133 10.75 3.339V4.75H14.5C15.743 4.75 16.75 5.757 16.75 7V14.5C16.75 15.743 15.743 16.75 14.5 16.75H5.5C4.257 16.75 3.25 15.743 3.25 14.5V7C3.25 5.757 4.257 4.75 5.5 4.75H9.25V3.339C9.02 3.133 8.875 2.833 8.875 2.5C8.875 1.879 9.379 1.375 10 1.375C10.621 1.375 11.125 1.879 11.125 2.5Z" fill="currentColor"/></svg></div>
+            Agents
           </div>
         </div>
-        <!-- right: placeholder -->
+        <!-- right: Call IDs content (default view) -->
         <div class="at-content-col">
-          <div class="at-placeholder">
-            <div class="at-placeholder-icon">←</div>
-            <div class="at-placeholder-text">Select a category</div>
+          <!-- filter row: labeled chips + count -->
+          <div class="at-filters">
+            <button class="at-filter">
+              <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M11.125 2.5C11.125 2.833 10.98 3.133 10.75 3.339V4.75H14.5C15.743 4.75 16.75 5.757 16.75 7V14.5C16.75 15.743 15.743 16.75 14.5 16.75H5.5C4.257 16.75 3.25 15.743 3.25 14.5V7C3.25 5.757 4.257 4.75 5.5 4.75H9.25V3.339C9.02 3.133 8.875 2.833 8.875 2.5C8.875 1.879 9.379 1.375 10 1.375C10.621 1.375 11.125 1.879 11.125 2.5Z" fill="#525866"/></svg>
+              <span class="at-filter-lbl">Agent:</span> Healthcare Check-In
+              <svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+            <button class="at-filter at-filter-active">
+              <svg width="7" height="7" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#3730A3"/></svg>
+              <span class="at-filter-lbl">Outcome:</span> Unsuccessful
+              <svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#3730A3" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+            <button class="at-filter">
+              <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="12" rx="2" stroke="#525866" stroke-width="1.4"/><path d="M7 3v4M13 3v4M3 9h14" stroke="#525866" stroke-width="1.4" stroke-linecap="round"/></svg>
+              <span class="at-filter-lbl">Date:</span> Last 7 days
+              <svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+            <span class="at-count-pull">6 calls</span>
+          </div>
+          <!-- results: none selected yet -->
+          <div class="at-results">
+            <div class="at-result">
+              <div class="at-cb"></div>
+              <div class="at-result-info">
+                <div class="at-primary">+1 (415) 555-0192</div>
+                <div class="at-secondary">Healthcare Check-In · Today 10:42 AM <span class="at-badge at-badge-fail">Failed</span></div>
+              </div>
+            </div>
+            <div class="at-result">
+              <div class="at-cb"></div>
+              <div class="at-result-info">
+                <div class="at-primary">+1 (628) 555-0847</div>
+                <div class="at-secondary">Healthcare Check-In · Today 9:17 AM <span class="at-badge at-badge-fail">Failed</span></div>
+              </div>
+            </div>
+            <div class="at-result">
+              <div class="at-cb"></div>
+              <div class="at-result-info">
+                <div class="at-primary">+1 (650) 555-7701</div>
+                <div class="at-secondary">Healthcare Check-In · Yesterday 2:48 PM <span class="at-badge at-badge-fail">Failed</span></div>
+              </div>
+            </div>
+            <div class="at-result">
+              <div class="at-cb"></div>
+              <div class="at-result-info">
+                <div class="at-primary">+1 (925) 555-0481</div>
+                <div class="at-secondary">Healthcare Check-In · Jun 22, 3:22 PM <span class="at-badge at-badge-fail">Failed</span></div>
+              </div>
+            </div>
+            <div class="at-result">
+              <div class="at-cb"></div>
+              <div class="at-result-info">
+                <div class="at-primary">+1 (707) 555-1244</div>
+                <div class="at-secondary">Healthcare Check-In · Jun 22, 10:05 AM <span class="at-badge at-badge-fail">Failed</span></div>
+              </div>
+            </div>
+            <div class="at-result">
+              <div class="at-cb"></div>
+              <div class="at-result-info">
+                <div class="at-primary">+1 (415) 555-3318</div>
+                <div class="at-secondary">Healthcare Check-In · Jun 21, 4:37 PM <span class="at-badge at-badge-fail">Failed</span></div>
+              </div>
+            </div>
+          </div>
+          <!-- footer: nothing selected yet -->
+          <div class="at-footer">
+            <span class="at-footer-hint">Select calls to attach as context</span>
+            <button class="at-attach-dim">Attach calls</button>
           </div>
         </div>
       </div>

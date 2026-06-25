@@ -100,6 +100,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
 .at-cat-icon { width: 16px; height: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 
 .at-content-col { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.at-nodes-header { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border-bottom: 1px solid #E1E4EA; background: #FAFAFA; flex-shrink: 0; }
+.at-nodes-label { font-size: 11.5px; font-weight: 500; color: #525866; flex: 1; }
+.node-icon { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .at-filters { display: flex; align-items: center; gap: 4px; padding: 7px 10px; border-bottom: 1px solid #E1E4EA; background: #FAFAFA; flex-shrink: 0; overflow-x: auto; scrollbar-width: none; }
 .at-filters::-webkit-scrollbar { display: none; }
 .at-filter { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 11.5px; font-weight: 500; color: #525866; cursor: pointer; white-space: nowrap; font-family: inherit; flex-shrink: 0; }
@@ -214,6 +217,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
         <!-- left: category list -->
         <div class="at-cat-col">
           <div class="at-cat-item active">
+            <div class="at-cat-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="11" y="3" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="7" y="11" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M6 9v2M14 9v2M10 9v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+            Nodes
+          </div>
+          <div class="at-cat-item">
             <div class="at-cat-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C5.85775 17.5 2.5 14.1423 2.5 10H4C4 13.3135 6.6865 16 10 16C13.3135 16 16 13.3135 16 10C16 6.6865 13.3135 4 10 4C7.9375 4 6.118 5.04025 5.03875 6.625H7V8.125H2.5V3.625H4V5.5C5.368 3.6775 7.54675 2.5 10 2.5ZM10.75 6.25V9.68875L13.1823 12.121L12.121 13.1823L9.25 10.3098V6.25H10.75Z" fill="currentColor"/></svg></div>
             Call IDs
           </div>
@@ -246,76 +253,68 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
             Agents
           </div>
         </div>
-        <!-- right: Call IDs content (default view) -->
+        <!-- right: Nodes content (default view) -->
         <div class="at-content-col">
-          <!-- filter row: labeled chips + count -->
-          <div class="at-filters">
-            <button class="at-filter">
-              <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M11.125 2.5C11.125 2.833 10.98 3.133 10.75 3.339V4.75H14.5C15.743 4.75 16.75 5.757 16.75 7V14.5C16.75 15.743 15.743 16.75 14.5 16.75H5.5C4.257 16.75 3.25 15.743 3.25 14.5V7C3.25 5.757 4.257 4.75 5.5 4.75H9.25V3.339C9.02 3.133 8.875 2.833 8.875 2.5C8.875 1.879 9.379 1.375 10 1.375C10.621 1.375 11.125 1.879 11.125 2.5Z" fill="#525866"/></svg>
-              <span class="at-filter-lbl">Agent:</span> Healthcare Check-In
-              <svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
-            </button>
-            <button class="at-filter at-filter-active">
-              <svg width="7" height="7" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#3730A3"/></svg>
-              <span class="at-filter-lbl">Outcome:</span> Unsuccessful
-              <svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#3730A3" stroke-width="1.5" stroke-linecap="round"/></svg>
-            </button>
-            <button class="at-filter">
-              <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="12" rx="2" stroke="#525866" stroke-width="1.4"/><path d="M7 3v4M13 3v4M3 9h14" stroke="#525866" stroke-width="1.4" stroke-linecap="round"/></svg>
-              <span class="at-filter-lbl">Date:</span> Last 7 days
-              <svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M5 8L10 13L15 8" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>
-            </button>
-            <span class="at-count-pull">6 calls</span>
+          <div class="at-nodes-header">
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M11.125 2.5C11.125 2.833 10.98 3.133 10.75 3.339V4.75H14.5C15.743 4.75 16.75 5.757 16.75 7V14.5C16.75 15.743 15.743 16.75 14.5 16.75H5.5C4.257 16.75 3.25 15.743 3.25 14.5V7C3.25 5.757 4.257 4.75 5.5 4.75H9.25V3.339C9.02 3.133 8.875 2.833 8.875 2.5C8.875 1.879 9.379 1.375 10 1.375C10.621 1.375 11.125 1.879 11.125 2.5Z" fill="#99A0AE"/></svg>
+            <span class="at-nodes-label">Healthcare Check-In</span>
+            <span class="at-count-pull">5 nodes</span>
           </div>
-          <!-- results: none selected yet -->
           <div class="at-results">
             <div class="at-result">
               <div class="at-cb"></div>
+              <div class="node-icon" style="background:#EDE9FE;">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C8.7235 17.5 7.52125 17.1813 6.469 16.6188L2.5 17.5L3.382 13.5325C2.8195 12.4795 2.5 11.2773 2.5 10C2.5 5.85775 5.85775 2.5 10 2.5Z" fill="#7C3AED"/></svg>
+              </div>
               <div class="at-result-info">
-                <div class="at-primary">+1 (415) 555-0192</div>
-                <div class="at-secondary">Today 10:42 AM <span class="at-badge at-badge-fail">Failed</span></div>
+                <div class="at-primary">Welcome Node</div>
+                <div class="at-secondary">Entry point</div>
               </div>
             </div>
             <div class="at-result">
               <div class="at-cb"></div>
+              <div class="node-icon" style="background:#DBEAFE;">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M16 17.5H4C3.801 17.5 3.61 17.421 3.47 17.28C3.329 17.14 3.25 16.949 3.25 16.75V3.25C3.25 3.051 3.329 2.86 3.47 2.72C3.61 2.579 3.801 2.5 4 2.5H16C16.199 2.5 16.39 2.579 16.53 2.72C16.671 2.86 16.75 3.051 16.75 3.25V16.75C16.75 16.949 16.671 17.14 16.53 17.28C16.39 17.421 16.199 17.5 16 17.5ZM15.25 16V4H4.75V16H15.25ZM7 7.75H13V9.25H7V7.75ZM7 10.75H10V12.25H7V10.75Z" fill="#1D4ED8"/></svg>
+              </div>
               <div class="at-result-info">
-                <div class="at-primary">+1 (628) 555-0847</div>
-                <div class="at-secondary">Today 9:17 AM <span class="at-badge at-badge-fail">Failed</span></div>
+                <div class="at-primary">Collect Patient Info</div>
+                <div class="at-secondary">Prompt node</div>
               </div>
             </div>
             <div class="at-result">
               <div class="at-cb"></div>
+              <div class="node-icon" style="background:#FEF3C7;">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 1.75L17.125 5.875V14.125L10 18.25L2.875 14.125V5.875L10 1.75Z" stroke="#D97706" stroke-width="1.5" stroke-linejoin="round"/><circle cx="10" cy="10" r="2" fill="#D97706"/></svg>
+              </div>
               <div class="at-result-info">
-                <div class="at-primary">+1 (650) 555-7701</div>
-                <div class="at-secondary">Yesterday 2:48 PM <span class="at-badge at-badge-fail">Failed</span></div>
+                <div class="at-primary">Check Availability</div>
+                <div class="at-secondary">Function call</div>
               </div>
             </div>
             <div class="at-result">
               <div class="at-cb"></div>
+              <div class="node-icon" style="background:#D1FAE5;">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C5.85775 17.5 2.5 14.1423 2.5 10C2.5 5.85775 5.85775 2.5 10 2.5ZM6 10L8.5 12.5L14 7" stroke="#059669" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
               <div class="at-result-info">
-                <div class="at-primary">+1 (925) 555-0481</div>
-                <div class="at-secondary">Jun 22, 3:22 PM <span class="at-badge at-badge-fail">Failed</span></div>
+                <div class="at-primary">Confirm Appointment</div>
+                <div class="at-secondary">Prompt node</div>
               </div>
             </div>
             <div class="at-result">
               <div class="at-cb"></div>
-              <div class="at-result-info">
-                <div class="at-primary">+1 (707) 555-1244</div>
-                <div class="at-secondary">Jun 22, 10:05 AM <span class="at-badge at-badge-fail">Failed</span></div>
+              <div class="node-icon" style="background:#FEE2E2;">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M8.0245 9.0115C8.72825 10.2479 9.75214 11.2717 10.9885 11.9755L11.6515 11.047C11.9158 10.7927 12.622 10.825 13.6827 11.4047C14.8542 11.7533 16.0592 11.848 16.75 12.5958V15.9423C16.75 16.6885 16.0765 16.6885 14.875 16.75C8.455 16.75 3.25 11.545 3.25 5.125C3.25 4.321 3.3115 3.9235 4.05775 3.25H7.40425C8.152 3.94075 8.24667 5.14584 9.175 7.378C9.20734 8.08424 8.953 8.3485L8.0245 9.0115Z" fill="#DC2626"/></svg>
               </div>
-            </div>
-            <div class="at-result">
-              <div class="at-cb"></div>
               <div class="at-result-info">
-                <div class="at-primary">+1 (415) 555-3318</div>
-                <div class="at-secondary">Jun 21, 4:37 PM <span class="at-badge at-badge-fail">Failed</span></div>
+                <div class="at-primary">End Call</div>
+                <div class="at-secondary">Terminal node</div>
               </div>
             </div>
           </div>
-          <!-- footer: nothing selected yet -->
           <div class="at-footer">
-            <span class="at-footer-hint">Select calls to attach as context</span>
-            <button class="at-attach-dim">Attach calls</button>
+            <span class="at-footer-hint">Select nodes to attach as context</span>
+            <button class="at-attach-dim">Attach nodes</button>
           </div>
         </div>
       </div>

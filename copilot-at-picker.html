@@ -113,6 +113,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
 .at-cat-item.active { background: #EEF2FF; color: #3d64d7; font-weight: 500; }
 .at-cat-item.active svg { color: #3d64d7; }
 .at-content-col { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.at-nodes-header { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border-bottom: 1px solid #E1E4EA; background: #FAFAFA; flex-shrink: 0; }
+.at-nodes-label { font-size: 11.5px; font-weight: 500; color: #525866; flex: 1; }
+.node-icon { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .at-filters { display: flex; align-items: center; gap: 4px; padding: 7px 10px; border-bottom: 1px solid #E1E4EA; background: #FAFAFA; flex-shrink: 0; overflow-x: auto; scrollbar-width: none; }
 .at-filters::-webkit-scrollbar { display: none; }
 .at-filter { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 11.5px; font-weight: 500; color: #525866; cursor: pointer; white-space: nowrap; font-family: inherit; flex-shrink: 0; }
@@ -402,8 +405,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
       </div>
       <!-- two-column body -->
       <div class="at-body">
-        <!-- left: category list (Call IDs first) -->
+        <!-- left: category list (Nodes first, Call IDs active) -->
         <div class="at-cat-col">
+          <div class="at-cat-item">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="11" y="3" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="7" y="11" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M6 9v2M14 9v2M10 9v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Nodes
+          </div>
           <div class="at-cat-item active">
             <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C5.85775 17.5 2.5 14.1423 2.5 10H4C4 13.3135 6.6865 16 10 16C13.3135 16 16 13.3135 16 10C16 6.6865 13.3135 4 10 4C7.9375 4 6.118 5.04025 5.03875 6.625H7V8.125H2.5V3.625H4V5.5C5.368 3.6775 7.54675 2.5 10 2.5ZM10.75 6.25V9.68875L13.1823 12.121L12.121 13.1823L9.25 10.3098V6.25H10.75Z" fill="currentColor"/></svg>
             Call IDs

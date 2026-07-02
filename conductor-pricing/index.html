@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conductor — Credits &amp; Overage Prototypes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #F5F7FA; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 56px 24px 80px; }
+  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+  .logo svg { display: block; }
+  h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 6px; }
+  .sub { font-size: 15px; color: #99A0AE; line-height: 22px; margin-bottom: 36px; max-width: 680px; }
+
+  .steps { background: #fff; border: 1px solid #E1E4EA; border-radius: 14px; padding: 8px 22px; margin-bottom: 40px; }
+  .step { display: flex; gap: 16px; padding: 18px 0; border-top: 1px solid #F0F1F4; }
+  .step:first-child { border-top: none; }
+  .step .n { width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%; background: #0E121B; color: #fff; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  .step .t { font-size: 14px; line-height: 21px; color: #525866; }
+  .step .t b { color: #0A0A0A; font-weight: 600; }
+
+  .section-label { font-size: 12px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card { display: block; background: #fff; border: 1px solid #E1E4EA; border-radius: 12px; padding: 20px; text-decoration: none; color: inherit; transition: box-shadow 0.15s, transform 0.15s; }
+  .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-2px); }
+  .card .ct { font-size: 15px; font-weight: 600; color: #0A0A0A; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .card .cd { font-size: 13px; color: #99A0AE; line-height: 19px; }
+  .card .arrow { margin-left: auto; color: #CACFD8; }
+  .card.picked { border-color: #1FC16B; box-shadow: 0 0 0 1px #1FC16B; background: #F2FBF6; }
+  .card.picked:hover { box-shadow: 0 0 0 1px #1FC16B, 0 8px 24px rgba(0,0,0,0.08); }
+  .tag-green { font-size: 11px; font-weight: 600; color: #1F9E5A; background: #E3F8ED; border-radius: 5px; padding: 2px 7px; }
+  .tag-alt { font-size: 11px; font-weight: 600; color: #99A0AE; background: #F1F2F4; border-radius: 5px; padding: 2px 7px; }
+  .foot { margin-top: 40px; font-size: 13px; color: #99A0AE; line-height: 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">
+    <svg width="80" height="22" viewBox="0 0 414 114" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#rl)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#0A0A0A"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73ZM205.22 49.69C202.9 52 199.43 52.58 195.38 52.58H176.28V26.54H193.64C198.85 26.54 201.74 27.12 204.64 28.86C208.11 30.59 209.85 34.64 209.85 39.27C209.85 43.9 208.11 47.38 205.22 49.69Z" fill="#0A0A0A"/><path d="M255.56 34.65C238.2 34.65 226.63 47.95 226.63 66.47C226.63 84.99 242.25 98.3 256.14 98.3C270.03 98.3 279.86 90.19 283.33 78.62H269.45C267.71 82.67 264.82 87.3 256.14 87.3C247.46 87.3 239.94 81.52 239.94 69.94H283.91C283.91 49.69 272.92 34.65 255.56 34.65ZM240.51 60.11C241.09 51.43 246.88 45.06 255.56 45.06C264.24 45.06 270.02 51.43 270.02 60.11H240.51Z" fill="#0A0A0A"/><path d="M344.09 34.65C326.73 34.65 315.16 47.95 315.16 66.47C315.16 85.15 330.78 98.3 344.67 98.3C358.56 98.3 368.39 90.19 371.87 78.62H357.98C356.24 82.67 353.35 87.3 344.67 87.3C335.99 87.3 328.47 81.52 328.47 69.94H372.44C372.44 49.69 361.45 34.65 344.09 34.65ZM329.05 60.11C329.62 51.43 335.41 45.06 344.09 45.06C352.77 45.06 358.56 51.43 358.56 60.11H329.05Z" fill="#0A0A0A"/><path d="M390.96 14.97H377.65V95.92H390.96V14.97Z" fill="#0A0A0A"/><path d="M413.53 14.97H400.22V95.92H413.53V14.97Z" fill="#0A0A0A"/><path d="M304.17 17.28L290.84 17.28L290.85 34.65H282.76V45H290.85V82.82C290.85 87.58 291.8 90.43 294.66 93.29C297.51 96.14 300.37 97.09 305.13 97.09H315.14V85.67H309.88C308.16 85.67 306.96 85.37 306.13 85.11C305.27 84.84 304.61 84.16 304.4 83.29C304.17 82.33 304.17 81.09 304.17 79.9V45H315.14V34.65H304.17V17.28Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg>
+    <span style="font-size:15px;color:#99A0AE;font-weight:500;">Conductor</span>
+  </div>
+
+  <h1>Credits &amp; Overage</h1>
+  <div class="sub">Credit based freemium. 30 free credits per user per day, 1 credit per message. Past the free limit, if the workspace has overage on, Conductor keeps working and bills $0.20 per credit up to the monthly cap. If overage is off, Conductor pauses until the daily reset. There is no buy-credits purchase.</div>
+
+  <div class="section-label">The flow</div>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><div class="t"><b>Open and build.</b> User clicks into Conductor and starts chatting. Each message spends 1 credit from their 30 free daily credits.</div></div>
+    <div class="step"><div class="n">2</div><div class="t"><b>Track usage.</b> The credit pill in the header counts down. Opening it shows credits remaining, when they reset at midnight, and the workspace overage status.</div></div>
+    <div class="step"><div class="n">3</div><div class="t"><b>Low warning.</b> With a few credits left, a heads-up appears with two paths, keep going or wait for the free reset tomorrow.</div></div>
+    <div class="step"><div class="n">4</div><div class="t"><b>Hit zero.</b> Overage on means Conductor keeps working and bills $0.20 per message, no interruption. Overage off means Conductor pauses until reset, and an admin can enable overage to continue.</div></div>
+    <div class="step"><div class="n">5</div><div class="t"><b>Pay path.</b> Enabling overage (org level, admin only, with a monthly cap) is the entire keep-going-and-pay mechanism. No buy-credits or top-up screen.</div></div>
+  </div>
+
+  <div class="section-label">Prototypes</div>
+  <div class="cards">
+    <a class="card picked" href="conductor-credits-states.html">
+      <div class="ct">Conductor panel states <span class="tag-green">Chosen</span><span class="arrow">→</span></div>
+      <div class="cd">In-chat: usage meter, running low, out of credits (admin and member), and overage billing. Enabling overage deep-links to the Limits page (no modal).</div>
+    </a>
+    <a class="card picked" href="conductor-limits-tab.html">
+      <div class="ct">Option 1 · In the Limits tab <span class="tag-green">Chosen</span><span class="arrow">→</span></div>
+      <div class="cd">Conductor credits as a card in the Limits tab, next to Concurrent Calls and CPS limits. Same overage toggle and Adjust limit.</div>
+    </a>
+    <a class="card" href="conductor-settings.html">
+      <div class="ct">Option 2 · New Conductor tab <span class="tag-alt">Alternative</span><span class="arrow">→</span></div>
+      <div class="cd">Interactive. Usage at user and workspace level, the overage toggle (flip it on/off), and the Adjust limit modal, all in one page.</div>
+    </a>
+  </div>
+
+  <div class="foot">Prototype for review. Values are illustrative. Based on the 06/30 Conductor pricing decisions.</div>
+</div>
+</body>
+</html>

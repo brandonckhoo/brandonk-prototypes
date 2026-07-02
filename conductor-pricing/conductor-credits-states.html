@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conductor — Credits & Overage States</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #F5F7FA; padding: 40px; }
+
+  .gallery-title { font-size: 20px; font-weight: 600; color: #0A0A0A; margin-bottom: 4px; }
+  .gallery-sub { font-size: 14px; color: #99A0AE; margin-bottom: 32px; max-width: 900px; line-height: 20px; }
+  .gallery-points { list-style: none; max-width: 940px; margin: 0 0 32px; padding: 0; }
+  .gallery-points li { font-size: 14px; color: #525866; line-height: 21px; padding-left: 18px; position: relative; margin-bottom: 9px; }
+  .gallery-points li::before { content: '•'; position: absolute; left: 4px; color: #99A0AE; }
+  .gallery-points b { color: #0A0A0A; font-weight: 600; }
+  .row { display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; }
+  .frame { display: flex; flex-direction: column; }
+  .frame-label { font-size: 12px; font-weight: 600; color: #525866; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .frame-desc { font-size: 13px; color: #99A0AE; margin-bottom: 12px; max-width: 440px; line-height: 18px; }
+
+  .panel { width: 440px; height: 660px; background: #fff; border: 1px solid #E1E4EA; border-radius: 14px; box-shadow: 0 6px 24px rgba(0,0,0,0.06); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+  .cp-topbar { display: flex; align-items: center; padding: 12px 14px; gap: 8px; border-bottom: 1px solid #F0F1F4; }
+  .cp-newchat { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 14px; font-weight: 500; color: #0A0A0A; cursor: pointer; }
+  .cp-topbar .spacer { flex: 1; }
+  .cp-iconbtn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: #525866; cursor: pointer; }
+  .cp-iconbtn:hover { background: rgba(0,0,0,0.04); }
+
+  .credit-pill { display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px; border: 1px solid #E1E4EA; border-radius: 999px; font-size: 13px; font-weight: 500; color: #0A0A0A; cursor: pointer; background: #fff; }
+  .credit-pill:hover { background: rgba(0,0,0,0.02); }
+  .credit-pill.low { border-color: #FCE3C4; background: #FFF7ED; color: #B54708; }
+  .credit-pill.empty { border-color: #FCC9C9; background: #FEF2F2; color: #C0362C; }
+  .credit-pill.over { border-color: #D6E4FF; background: #ecf3ff; color: #3d64d7; }
+  .credit-pill .bolt { display: flex; }
+  .credit-pill .meter { width: 34px; height: 5px; border-radius: 3px; background: #E1E4EA; overflow: hidden; }
+  .credit-pill .meter-fill { height: 100%; background: #3d64d7; border-radius: 3px; }
+  .credit-pill.low .meter { background: #F6DDBE; } .credit-pill.low .meter-fill { background: #FF9147; }
+  .credit-pill.empty .meter { background: #F3C9C6; } .credit-pill.empty .meter-fill { background: #FB3748; }
+
+  .cp-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 20px 20px 0; gap: 16px; }
+  .msg { max-width: 90%; }
+  .msg.user { align-self: flex-end; background: #F5F7FA; border-radius: 12px 12px 4px 12px; padding: 10px 14px; font-size: 14px; color: #0A0A0A; line-height: 20px; }
+  .msg.bot { align-self: flex-start; display: flex; gap: 10px; }
+  .bot-orb { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; background: radial-gradient(circle at 35% 30%, #cdd9ff 0%, #6d7cf5 45%, #4f46e5 100%); margin-top: 2px; }
+  .bot-text { font-size: 14px; color: #0A0A0A; line-height: 21px; }
+  .bot-text .done { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 13px; color: #1F9E5A; font-weight: 500; }
+
+  .callout { border-radius: 12px; padding: 14px; display: flex; gap: 12px; align-items: flex-start; }
+  .callout .c-icon { width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .callout .c-body { flex: 1; }
+  .callout .c-title { font-size: 14px; font-weight: 600; color: #0A0A0A; margin-bottom: 3px; }
+  .callout .c-text { font-size: 13px; color: #525866; line-height: 19px; }
+  .callout .c-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .callout.warn { background: #FFF7ED; border: 1px solid #FCE3C4; } .callout.warn .c-icon { background: #FFE9D2; color: #E4791E; }
+  .callout.danger { background: #FEF2F2; border: 1px solid #FCC9C9; } .callout.danger .c-icon { background: #FBDCDA; color: #D3382C; }
+  .callout.info { background: #ecf3ff; border: 1px solid #D6E4FF; } .callout.info .c-icon { background: #DBE7FF; color: #3d64d7; }
+
+  /* Slim inline overage-billing strip */
+  .strip { display: flex; align-items: center; gap: 8px; background: #ecf3ff; border: 1px solid #D6E4FF; border-radius: 10px; padding: 9px 12px; font-size: 13px; color: #3d64d7; }
+  .strip b { font-weight: 600; }
+  .strip-x { margin-left: auto; display: flex; cursor: pointer; color: #8AA4E4; flex-shrink: 0; }
+  .strip-x:hover { color: #3d64d7; }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent; }
+  .btn.primary { background: #0E121B; color: #fff; }
+  .btn.ghost { background: #fff; color: #0A0A0A; border-color: #E1E4EA; }
+  .btn.link { background: transparent; color: #525866; padding: 8px 6px; }
+
+  .composer-wrap { padding: 14px 16px 16px; }
+  .composer { border: 1px solid #E1E4EA; border-radius: 14px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); min-height: 92px; display: flex; flex-direction: column; }
+  .composer-placeholder { font-size: 14px; color: #99A0AE; }
+  .composer-actions { display: flex; align-items: center; margin-top: auto; }
+  .add-context { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; font-weight: 500; color: #0A0A0A; cursor: pointer; }
+  .composer .spacer { flex: 1; }
+  .send-btn { width: 34px; height: 34px; border-radius: 50%; background: #0E121B; display: flex; align-items: center; justify-content: center; }
+  .composer.disabled { background: #FAFAFB; border-style: dashed; }
+  .composer.disabled .composer-placeholder { color: #CACFD8; }
+  .composer.disabled .send-btn { background: #E1E4EA; }
+  .composer.disabled .add-context { color: #CACFD8; border-color: #EDEFF2; }
+  .composer-hint { font-size: 12px; color: #99A0AE; margin-top: 10px; text-align: center; }
+  .composer-hint b { color: #525866; font-weight: 600; }
+
+  .pop { position: absolute; top: 54px; right: 14px; width: 316px; background: #fff; border: 1px solid #E1E4EA; border-radius: 14px; box-shadow: 0 12px 36px rgba(0,0,0,0.14); padding: 18px; z-index: 5; }
+  .pop-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .pop-title { font-size: 14px; font-weight: 600; color: #0A0A0A; }
+  .pop-reset-chip { font-size: 12px; color: #525866; background: #F5F7FA; border-radius: 6px; padding: 3px 8px; }
+  .pop-bar { height: 8px; border-radius: 5px; background: #EDEFF2; overflow: hidden; margin-bottom: 10px; }
+  .pop-bar-fill { height: 100%; border-radius: 5px; background: #3d64d7; }
+  .pop-count { font-size: 14px; color: #0A0A0A; font-weight: 500; margin-bottom: 2px; }
+  .pop-count b { font-weight: 600; }
+  .pop-reset { font-size: 13px; color: #525866; line-height: 19px; }
+  .pop-divider { height: 1px; background: #F0F1F4; margin: 16px 0; }
+  .pop-line { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #525866; margin-bottom: 8px; }
+  .pop-line span.v { color: #0A0A0A; font-weight: 500; }
+  .pop-manage { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #3d64d7; cursor: pointer; margin-top: 4px; }
+
+  .modal-frame { width: 560px; }
+  .overlay { background: rgba(14,18,27,0.06); border: 1px solid #E1E4EA; border-radius: 14px; padding: 40px; display: flex; align-items: center; justify-content: center; }
+  .modal { width: 480px; background: #fff; border-radius: 16px; box-shadow: 0 24px 60px rgba(0,0,0,0.18); overflow: hidden; }
+  .modal-head { padding: 20px 22px 0; display: flex; align-items: flex-start; justify-content: space-between; }
+  .modal-title { font-size: 16px; font-weight: 600; color: #0A0A0A; }
+  .modal-body { padding: 8px 22px 4px; }
+  .modal-lead { font-size: 14px; color: #525866; line-height: 21px; margin: 10px 0 20px; }
+  .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-top: 1px solid #F0F1F4; }
+  .setting-row .s-label { font-size: 14px; font-weight: 500; color: #0A0A0A; }
+  .setting-row .s-help { font-size: 13px; color: #99A0AE; margin-top: 2px; line-height: 18px; max-width: 300px; }
+  .toggle { width: 40px; height: 24px; border-radius: 999px; background: #CACFD8; position: relative; flex-shrink: 0; cursor: pointer; }
+  .toggle.on { background: #3d64d7; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .toggle.on::after { left: 18px; }
+  .field-label { font-size: 13px; font-weight: 500; color: #0A0A0A; margin-bottom: 6px; }
+  .input-money { display: flex; align-items: center; border: 1px solid #E1E4EA; border-radius: 8px; padding: 0 12px; height: 40px; max-width: 200px; }
+  .input-money .cur { color: #99A0AE; font-size: 14px; margin-right: 6px; }
+  .input-money input { border: none; outline: none; font-size: 14px; color: #0A0A0A; width: 100%; font-family: inherit; }
+  .field-help { font-size: 12px; color: #99A0AE; margin-top: 6px; }
+  .modal-note { display: flex; gap: 8px; align-items: flex-start; background: #F5F7FA; border-radius: 10px; padding: 12px; margin-top: 18px; font-size: 13px; color: #525866; line-height: 19px; }
+  .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 18px 22px 22px; }
+  .btn.lg { padding: 9px 16px; font-size: 14px; }
+  .input-money.full { max-width: none; width: 100%; height: 44px; }
+  .modal-kv { margin-top: 16px; } .modal-kv .kk { font-size: 13px; font-weight: 500; color: #0A0A0A; } .modal-kv .vv { font-size: 14px; color: #525866; margin-top: 3px; }
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;bottom:20px;right:20px;z-index:9999;display:inline-flex;align-items:center;gap:6px;background:#0E121B;color:#fff;padding:9px 15px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,0.22);font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;">← Overview</a>
+
+<div class="gallery-title">Conductor — Credits &amp; Overage</div>
+<ul class="gallery-points">
+  <li><b>Credit based freemium:</b> 30 free credits per user per day, with a shared cap of 200 credits per workspace per day. 1 credit per turn, and there is no "buy credits" purchase.</li>
+  <li><b>Past the free limit:</b> if the workspace has overage on, Conductor keeps working and bills $0.20 per credit up to the monthly cap. If overage is off, Conductor pauses until the daily reset.</li>
+  <li><b>Admin only:</b> only workspace Admins can enable overage. Members are pointed to an Admin (see frame 4).</li>
+  <li><b>Enabling overage:</b> happens on the Limits page via "Manage overage", not a modal.</li>
+  <li><b>Auto compression, no new-chat prompt:</b> Conductor automatically compresses long chats to keep context and cost in check, so a user can stay in one chat indefinitely with no extra cost to Retell. We do not prompt users to start a new thread.</li>
+</ul>
+
+<div class="row">
+
+  <!-- FRAME 1: Usage meter & daily reset -->
+  <div class="frame">
+    <div class="frame-label">1 · Usage meter &amp; daily reset</div>
+    <div class="frame-desc">Credit pill in the header. Opening it leads with the daily reset and shows the workspace overage status, so waiting reads as a real option.</div>
+    <div class="panel">
+      <div class="cp-topbar">
+        <button class="cp-newchat"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 4.5V15.5M4.5 10H15.5" stroke="#0A0A0A" stroke-width="1.6" stroke-linecap="round"/></svg>New chat</button>
+        <span class="spacer"></span>
+        <div class="credit-pill">
+          <span class="bolt"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M11 2L4 11H9L8 18L15 9H10L11 2Z" fill="#3d64d7"/></svg></span>
+          24
+          <span class="meter"><span class="meter-fill" style="width:20%"></span></span>
+        </div>
+        <div class="cp-iconbtn" title="Close"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 5L15 15M15 5L5 15" stroke="#525866" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="cp-body">
+        <div class="msg user">Add a call transfer node to the billing agent when the caller asks for a human.</div>
+        <div class="msg bot"><div class="bot-orb"></div><div class="bot-text">Done. I added a Call Transfer node after the intent check and routed "speak to a person" to it.<span class="done"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8.5 15L16 6" stroke="#1F9E5A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Changes applied</span></div></div>
+      </div>
+      <div class="composer-wrap">
+        <div class="composer">
+          <div class="composer-placeholder">Ask a question or / for commands</div>
+          <div class="composer-actions">
+            <button class="add-context"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 4.5V15.5M4.5 10H15.5" stroke="#0A0A0A" stroke-width="1.6" stroke-linecap="round"/></svg>Add context</button>
+            <span class="spacer"></span>
+            <div class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 15.5V5M5.5 9L10 4.5L14.5 9" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+      <div class="pop">
+        <div class="pop-head"><span class="pop-title">Free credits</span><span class="pop-reset-chip">Resets at midnight</span></div>
+        <div class="pop-bar"><div class="pop-bar-fill" style="width:20%"></div></div>
+        <div class="pop-count"><b>6 of 30</b> credits used today</div>
+        <div class="pop-reset">Free credits reset at midnight and don't roll over.</div>
+        <div class="pop-divider"></div>
+        <div class="pop-line">Cost per message <span class="v">1 credit</span></div>
+        <div class="pop-line">Overage <span class="v">Off</span></div>
+        <div class="pop-manage">Manage overage<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7.5 5L12.5 10L7.5 15" stroke="#3d64d7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FRAME 2: Running low (overage off) -->
+  <div class="frame">
+    <div class="frame-label">2 · Running low · overage off</div>
+    <div class="frame-desc">Fires at 80% of daily credits used (6 of 30 left). Overage is off, so Conductor will pause at 0. This is the Admin view, only Admins can enable overage; everyone can continue on remaining credits. No "buy credits".</div>
+    <div class="panel">
+      <div class="cp-topbar">
+        <button class="cp-newchat"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 4.5V15.5M4.5 10H15.5" stroke="#0A0A0A" stroke-width="1.6" stroke-linecap="round"/></svg>New chat</button>
+        <span class="spacer"></span>
+        <div class="credit-pill low">
+          <span class="bolt"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M11 2L4 11H9L8 18L15 9H10L11 2Z" fill="#FF9147"/></svg></span>
+          6 left
+          <span class="meter"><span class="meter-fill" style="width:80%"></span></span>
+        </div>
+        <div class="cp-iconbtn" title="Close"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 5L15 15M15 5L5 15" stroke="#525866" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="cp-body">
+        <div class="msg user">Now tighten the greeting and shorten the confirmation step.</div>
+        <div class="msg bot"><div class="bot-orb"></div><div class="bot-text">Updated the greeting and trimmed the confirmation to a single line.<span class="done"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8.5 15L16 6" stroke="#1F9E5A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Changes applied</span></div></div>
+        <div class="callout warn">
+          <div class="c-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 6.5V11M10 13.5H10.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="10" r="7.25" stroke="currentColor" stroke-width="1.5"/></svg></div>
+          <div class="c-body">
+            <div class="c-title">You're running low on credits</div>
+            <div class="c-text">You've used 80% of your free credits, with 6 left. Overage is off, so Conductor will pause when you reach 0. Enable overage to keep building now, or wait for your free credits to reset at midnight.</div>
+            <div class="c-actions">
+              <button class="btn ghost">Continue</button>
+              <button class="btn primary">Enable overage</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="composer-wrap">
+        <div class="composer">
+          <div class="composer-placeholder">Ask a question or / for commands</div>
+          <div class="composer-actions">
+            <button class="add-context"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 4.5V15.5M4.5 10H15.5" stroke="#0A0A0A" stroke-width="1.6" stroke-linecap="round"/></svg>Add context</button>
+            <span class="spacer"></span>
+            <div class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 15.5V5M5.5 9L10 4.5L14.5 9" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FRAME 3: Out of credits · overage off · admin -->
+  <div class="frame">
+    <div class="frame-label">3 · Out of credits · overage off · admin</div>
+    <div class="frame-desc">Free credits spent and overage off, so Conductor pauses. Admin view only, an Admin can enable overage inline; reset time is shown up front.</div>
+    <div class="panel">
+      <div class="cp-topbar">
+        <button class="cp-newchat"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 4.5V15.5M4.5 10H15.5" stroke="#0A0A0A" stroke-width="1.6" stroke-linecap="round"/></svg>New chat</button>
+        <span class="spacer"></span>
+        <div class="credit-pill empty">
+          <span class="bolt"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M11 2L4 11H9L8 18L15 9H10L11 2Z" fill="#FB3748"/></svg></span>
+          0 left
+          <span class="meter"><span class="meter-fill" style="width:100%"></span></span>
+        </div>
+        <div class="cp-iconbtn" title="Close"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 5L15 15M15 5L5 15" stroke="#525866" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="cp-body">
+        <div class="msg user">Great, one more — add a fallback when the caller goes silent.</div>
+        <div class="callout danger">
+          <div class="c-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M11 2L4 11H9L8 18L15 9H10L11 2Z" fill="currentColor"/></svg></div>
+          <div class="c-body">
+            <div class="c-title">Out of free credits</div>
+            <div class="c-text">Enable overage to keep building now for $0.20 per message, or wait for your free credits to reset at midnight.</div>
+            <div class="c-actions">
+              <button class="btn primary">Enable overage</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="composer-wrap">
+        <div class="composer disabled">
+          <div class="composer-placeholder">Paused until credits reset or overage is on</div>
+          <div class="composer-actions">
+            <button class="add-context"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 4.5V15.5M4.5 10H15.5" stroke="#CACFD8" stroke-width="1.6" stroke-linecap="round"/></svg>Add context</button>
+            <span class="spacer"></span>
+            <div class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 15.5V5M5.5 9L10 4.5L14.5 9" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+        <div class="composer-hint">Free credits reset at midnight</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="height:44px"></div>
+<div class="row">
+
+  <!-- FRAME 4: Out of credits · overage off · non-admin -->
+  <div class="frame">
+    <div class="frame-label">4 · Out of credits · non-admin (edge case, nice to have)</div>
+    <div class="frame-desc">Edge case, nice to have. A Member can't enable overage; it needs the Admin role, same as Adjust Concurrency and Concurrency Burst. They can still open Settings and see the overage control greyed out with a role tooltip, no separate notify action since we don't have notifications.</div>
+    <div class="panel">
+      <div class="cp-topbar">
+        <button class="cp-newchat"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 4.5V15.5M4.5 10H15.5" stroke="#0A0A0A" stroke-width="1.6" stroke-linecap="round"/></svg>New chat</button>
+        <span class="spacer"></span>
+        <div class="credit-pill empty">
+          <span class="bolt"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M11 2L4 11H9L8 18L15 9H10L11 2Z" fill="#FB3748"/></svg></span>
+          0 left
+          <span class="meter"><span class="meter-fill" style="width:100%"></span></span>
+        </div>
+        <div class="cp-iconbtn" title="Close"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 5L15 15M15 5L5 15" stroke="#525866" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="cp-body">
+        <div class="msg user">Great, one more — add a fallback when the caller goes silent.</div>
+        <div class="callout danger">
+          <div class="c-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M11 2L4 11H9L8 18L15 9H10L11 2Z" fill="currentColor"/></svg></div>
+          <div class="c-body">
+            <div class="c-title">Out of free credits</div>
+            <div class="c-text">Only workspace Admins can enable overage. Contact an Admin to keep building now, or wait for your free credits to reset at midnight.</div>
+            <div class="c-actions">
+              <button class="btn ghost">View limits</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="composer-wrap">
+        <div class="composer disabled">
+          <div class="composer-placeholder">Paused until credits reset</div>
+          <div class="composer-actions">
+            <button class="add-context"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 4.5V15.5M4.5 10H15.5" stroke="#CACFD8" stroke-width="1.6" stroke-linecap="round"/></svg>Add context</button>
+            <span class="spacer"></span>
+            <div class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 15.5V5M5.5 9L10 4.5L14.5 9" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+        <div class="composer-hint">Free credits reset at midnight</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FRAME 5: Overage on · now billing -->
+  <div class="frame">
+    <div class="frame-label">5 · Overage on · past free limit</div>
+    <div class="frame-desc">With overage on, Conductor does not stop at 0. It keeps working and bills at $0.20 per message. A slim, non-blocking strip makes the switch visible once and is dismissible; the header "Overage" pill and the footer keep the state visible after.</div>
+    <div class="panel">
+      <div class="cp-topbar">
+        <button class="cp-newchat"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 4.5V15.5M4.5 10H15.5" stroke="#0A0A0A" stroke-width="1.6" stroke-linecap="round"/></svg>New chat</button>
+        <span class="spacer"></span>
+        <div class="credit-pill over">
+          <span class="bolt"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M11 2L4 11H9L8 18L15 9H10L11 2Z" fill="#3d64d7"/></svg></span>
+          Overage
+        </div>
+        <div class="cp-iconbtn" title="Close"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 5L15 15M15 5L5 15" stroke="#525866" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="cp-body">
+        <div class="strip">
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 9V14M10 6.5H10.01" stroke="#3d64d7" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="10" r="7.25" stroke="#3d64d7" stroke-width="1.5"/></svg>
+          <div><b>Overage is enabled.</b> Additional messages cost $0.20 each.</div>
+          <span class="strip-x" title="Dismiss"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        </div>
+        <div class="msg user">Add a fallback when the caller goes silent for 5 seconds.</div>
+        <div class="msg bot"><div class="bot-orb"></div><div class="bot-text">Added a silence fallback that reprompts once at 5s, then transfers if still silent.<span class="done"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8.5 15L16 6" stroke="#1F9E5A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Changes applied</span></div></div>
+      </div>
+      <div class="composer-wrap">
+        <div class="composer">
+          <div class="composer-placeholder">Ask a question or / for commands</div>
+          <div class="composer-actions">
+            <button class="add-context"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 4.5V15.5M4.5 10H15.5" stroke="#0A0A0A" stroke-width="1.6" stroke-linecap="round"/></svg>Add context</button>
+            <span class="spacer"></span>
+            <div class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 15.5V5M5.5 9L10 4.5L14.5 9" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+        <div class="composer-hint"><b>$0.20</b> per message · overage on</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

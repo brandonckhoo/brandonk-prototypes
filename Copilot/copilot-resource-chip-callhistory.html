@@ -100,13 +100,13 @@
 
   /* ============ RESOURCE CHIP ============ */
   .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-  .ctx-chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px 0 7px; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12px; max-width: 100%; cursor: default; }
+  .ctx-chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px 0 7px; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12px; max-width: 100%; cursor: default; position: relative; }
   .ctx-chip .chip-icon { display: inline-flex; color: #525866; flex-shrink: 0; }
   .ctx-chip .chip-name { font-weight: 500; color: #0E121B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ctx-chip .chip-meta { color: #99A0AE; white-space: nowrap; }
-  .ctx-chip .chip-x { display: none; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 4px; color: #99A0AE; cursor: pointer; margin-left: 1px; }
+  .ctx-chip .chip-x { display: none; align-items: center; justify-content: center; position: absolute; top: -6px; right: -6px; width: 15px; height: 15px; border-radius: 50%; background: #0E121B; color: #fff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
   .ctx-chip:hover .chip-x { display: inline-flex; }
-  .ctx-chip .chip-x:hover { background: rgba(0,0,0,0.06); color: #525866; }
+  .ctx-chip .chip-x:hover { background: #000; }
 
   .input-text { font-size: 13px; color: #99A0AE; min-height: 38px; line-height: 1.45; }
   .input-toolbar { display: flex; align-items: center; gap: 2px; margin-top: 6px; }

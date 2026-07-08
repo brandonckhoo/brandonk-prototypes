@@ -32,13 +32,13 @@
   .send-btn { width: 28px; height: 28px; border-radius: 8px; background: transparent; color: #99A0AE; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
 
   /* Resource chip */
-  .ctx-chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px 0 7px; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12px; max-width: 100%; cursor: default; }
+  .ctx-chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px 0 7px; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12px; max-width: 100%; cursor: default; position: relative; }
   .ctx-chip .chip-icon { display: inline-flex; color: #525866; flex-shrink: 0; }
   .ctx-chip .chip-name { font-weight: 500; color: #0E121B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ctx-chip .chip-meta { color: #99A0AE; white-space: nowrap; }
-  .ctx-chip .chip-x { display: none; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 4px; color: #99A0AE; cursor: pointer; margin-left: 1px; }
+  .ctx-chip .chip-x { display: none; align-items: center; justify-content: center; position: absolute; top: -6px; right: -6px; width: 15px; height: 15px; border-radius: 50%; background: #0E121B; color: #fff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
   .ctx-chip:hover .chip-x, .ctx-chip.show-x .chip-x { display: inline-flex; }
-  .ctx-chip .chip-x:hover { background: rgba(0,0,0,0.06); color: #525866; }
+  .ctx-chip .chip-x:hover { background: #000; }
 
   /* Anatomy */
   .anatomy { background: #fff; border: 1px solid #E1E4EA; border-radius: 12px; padding: 22px; margin-bottom: 4px; display: flex; gap: 40px; align-items: flex-start; }
@@ -90,7 +90,7 @@
         <b>Icon</b> — resource type, matches the sidebar icon for that surface<br>
         <b>Name</b> — 12px medium #0E121B, the resource itself<br>
         <b>Qualifier</b> — 12px #99A0AE, time range / timestamp after a middle dot<br>
-        <b>Remove ×</b> — hover only, detaches the resource from context
+        <b>Remove ×</b> — hover only, floats at the chip's top right corner, detaches the resource from context (never touches the page's filters)
       </div>
     </div>
     <div class="behavior-col" style="flex:1">
@@ -254,6 +254,53 @@
     </div>
 
     <div class="card">
+      <div class="card-tag">Chip clicked · multiple filters</div>
+      <div class="card-pattern">Every filter gets its own row, breakdown shown but not counted</div>
+      <div class="input-box" style="padding-top:186px;">
+        <div class="chip-row">
+          <span class="tip-wrap">
+            <span class="popover">
+              <div class="popover-head">In context</div>
+              <div class="popover-row">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M15 3H17C17.265 3 17.52 3.105 17.707 3.293C17.895 3.48 18 3.735 18 4V16C18 16.265 17.895 16.52 17.707 16.707C17.52 16.895 17.265 17 17 17H3C2.735 17 2.48 16.895 2.293 16.707C2.105 16.52 2 16.265 2 16V4C2 3.735 2.105 3.48 2.293 3.293C2.48 3.105 2.735 3 3 3H5V1H7V3H13V1H15V3ZM16 9H4V15H16V9Z" fill="currentColor"/></svg>
+                <span><span class="row-label">Date range</span> Jun 11 – Jul 8</span>
+              </div>
+              <div class="popover-row">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M3 4H17V6H3V4ZM5 9H15V11H5V9ZM8 14H12V16H8V14Z" fill="currentColor"/></svg>
+                <span><span class="row-label">Agent</span> Inbound Scheduler</span>
+              </div>
+              <div class="popover-row">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M3 4H17V6H3V4ZM5 9H15V11H5V9ZM8 14H12V16H8V14Z" fill="currentColor"/></svg>
+                <span><span class="row-label">User Sentiment</span> Negative</span>
+              </div>
+              <div class="popover-row">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 17.5C5.85775 17.5 2.5 14.1423 2.5 10C2.5 6.6415 4.70725 3.799 7.75 2.8435V4.4365C6.46069 4.96003 5.39335 5.91528 4.73054 7.13884C4.06774 8.36239 3.85066 9.77823 4.11644 11.1442C4.38222 12.5101 5.11434 13.7412 6.18757 14.627C7.2608 15.5128 8.60846 15.9981 10 16C11.1953 16 12.3634 15.643 13.3546 14.9749C14.3458 14.3068 15.115 13.358 15.5635 12.25H17.1565C16.201 15.2928 13.3585 17.5 10 17.5ZM17.4625 10.75H9.25V2.5375C9.49675 2.51275 9.74725 2.5 10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 10.2527 17.4873 10.5033 17.4625 10.75ZM10.75 4.0465V9.25H15.9535C15.7866 7.92821 15.1846 6.6995 14.2426 5.75743C13.3005 4.81535 12.0718 4.21344 10.75 4.0465Z" fill="currentColor"/></svg>
+                <span><span class="row-label">Breakdown</span> by Agent</span>
+              </div>
+              <div class="popover-foot">
+                <span class="popover-link">Edit filters on page<svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M7 4H16V13" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M16 4L4 16" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></span>
+              </div>
+            </span>
+            <span class="ctx-chip active">
+              <span class="chip-icon"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 17.5C5.85775 17.5 2.5 14.1423 2.5 10C2.5 6.6415 4.70725 3.799 7.75 2.8435V4.4365C6.46069 4.96003 5.39335 5.91528 4.73054 7.13884C4.06774 8.36239 3.85066 9.77823 4.11644 11.1442C4.38222 12.5101 5.11434 13.7412 6.18757 14.627C7.2608 15.5128 8.60846 15.9981 10 16C11.1953 16 12.3634 15.643 13.3546 14.9749C14.3458 14.3068 15.115 13.358 15.5635 12.25H17.1565C16.201 15.2928 13.3585 17.5 10 17.5ZM17.4625 10.75H9.25V2.5375C9.49675 2.51275 9.74725 2.5 10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 10.2527 17.4873 10.5033 17.4625 10.75ZM10.75 4.0465V9.25H15.9535C15.7866 7.92821 15.1846 6.6995 14.2426 5.75743C13.3005 4.81535 12.0718 4.21344 10.75 4.0465Z" fill="currentColor"/></svg></span>
+              <span class="chip-name">Call Dashboard</span>
+              <span class="chip-meta">· Jun 11 – Jul 8 · +2 filters</span>
+            </span>
+          </span>
+        </div>
+        <div class="input-text">Ask Conductor to help you understand, debug, or improve anything in Retell.</div>
+        <div class="input-toolbar">
+          <button class="tool-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="currentColor"/></svg></button>
+          <button class="tool-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.5 9.5L9.6 14.4C8.4 15.6 6.4 15.6 5.2 14.4C4 13.2 4 11.2 5.2 10L11.2 4C12 3.2 13.3 3.2 14.1 4C14.9 4.8 14.9 6.1 14.1 6.9L8.5 12.5C8.1 12.9 7.5 12.9 7.1 12.5C6.7 12.1 6.7 11.5 7.1 11.1L11.8 6.4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></button>
+          <span class="credits"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 2L18 10L10 18L2 10L10 2Z" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>30</span>
+          <span class="tool-spacer"></span>
+          <button class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 16V4M10 4L5 9M10 4L15 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="card-note"><b>Click behavior:</b> one row per filter with its value, regardless of which tab it came from. Breakdown gets a row (it shapes the query) but does not count toward +{n} — the label counts filters only. "Edit filters on page" opens the dashboard's Filter control.</div>
+    </div>
+
+    <div class="card">
       <div class="card-tag">Detail page · Single chart</div>
       <div class="card-pattern"><code>{chart.name} · {time_range}</code></div>
       <div class="input-box">
@@ -327,6 +374,45 @@
         </div>
       </div>
       <div class="card-note"><b>Context resource:</b> the QA test (config + resolution criteria) plus its metrics and detailed calls for the date range selected on the page. Page filters (Agent, Score, Evaluation Status, Reviewed, Disconnection Reason) fold into +{n}. Same chip on both tabs (Call QA Overview and Detailed Calls). Uses the page's date picker, not the test's sampling window.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-tag">Chip clicked · read-only popover</div>
+      <div class="card-pattern">Same pattern on every surface</div>
+      <div class="input-box" style="padding-top:132px;">
+        <div class="chip-row">
+          <span class="tip-wrap">
+            <span class="popover">
+              <div class="popover-head">In context</div>
+              <div class="popover-row">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M15 3H17C17.265 3 17.52 3.105 17.707 3.293C17.895 3.48 18 3.735 18 4V16C18 16.265 17.895 16.52 17.707 16.707C17.52 16.895 17.265 17 17 17H3C2.735 17 2.48 16.895 2.293 16.707C2.105 16.52 2 16.265 2 16V4C2 3.735 2.105 3.48 2.293 3.293C2.48 3.105 2.735 3 3 3H5V1H7V3H13V1H15V3ZM16 9H4V15H16V9Z" fill="currentColor"/></svg>
+                <span><span class="row-label">Date range</span> Jul 2 – Jul 8</span>
+              </div>
+              <div class="popover-row">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M3 4H17V6H3V4ZM5 9H15V11H5V9ZM8 14H12V16H8V14Z" fill="currentColor"/></svg>
+                <span><span class="row-label">Score</span> &lt; 70</span>
+              </div>
+              <div class="popover-foot">
+                <span class="popover-link">Edit filters on page<svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M7 4H16V13" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M16 4L4 16" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></span>
+              </div>
+            </span>
+            <span class="ctx-chip active">
+              <span class="chip-icon"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="10" cy="10" r="1" fill="currentColor"/></svg></span>
+              <span class="chip-name">Test 2</span>
+              <span class="chip-meta">· Jul 2 – Jul 8 · +1 filter</span>
+            </span>
+          </span>
+        </div>
+        <div class="input-text">Ask Conductor to help you understand, debug, or improve anything in Retell.</div>
+        <div class="input-toolbar">
+          <button class="tool-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="currentColor"/></svg></button>
+          <button class="tool-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.5 9.5L9.6 14.4C8.4 15.6 6.4 15.6 5.2 14.4C4 13.2 4 11.2 5.2 10L11.2 4C12 3.2 13.3 3.2 14.1 4C14.9 4.8 14.9 6.1 14.1 6.9L8.5 12.5C8.1 12.9 7.5 12.9 7.1 12.5C6.7 12.1 6.7 11.5 7.1 11.1L11.8 6.4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></button>
+          <span class="credits"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 2L18 10L10 18L2 10L10 2Z" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>30</span>
+          <span class="tool-spacer"></span>
+          <button class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 16V4M10 4L5 9M10 4L15 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="card-note"><b>Click behavior:</b> identical to Call History — date range row plus one row per filter, read-only, "Edit filters on page" deep links to the QA test's Filter control. One popover pattern serves all three surfaces.</div>
     </div>
   </div>
 

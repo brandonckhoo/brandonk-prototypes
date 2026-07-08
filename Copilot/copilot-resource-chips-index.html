@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copilot resource chips</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #F5F7FA; padding: 48px; }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  p.sub { font-size: 13px; color: #525866; line-height: 1.55; margin-bottom: 24px; }
+  a.card { display: block; background: #fff; border: 1px solid #E1E4EA; border-radius: 12px; padding: 18px 20px; text-decoration: none; color: inherit; margin-bottom: 12px; }
+  a.card:hover { border-color: #C9D6F5; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .card-title { font-size: 14px; font-weight: 600; color: #0E121B; margin-bottom: 4px; }
+  .card-desc { font-size: 12px; color: #525866; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Copilot resource chips</h1>
+  <p class="sub">Auto attached context chip in the Copilot composer. One chip equals one whole resource. Landing chips are queries (the page's time range + filters, resolved at ask time); detail chips are references to one entity.</p>
+  <a class="card" href="/variants.html">
+    <div class="card-title">Chip spec — all surfaces and states</div>
+    <div class="card-desc">Call History, Analytics, AI QA. Grouped by landing page and detail page. Anatomy, behavior rules, +N filters label, hover tooltip, clicked read-only popover, corner remove.</div>
+  </a>
+  <a class="card" href="/callhistory.html">
+    <div class="card-title">In context — Call History</div>
+    <div class="card-desc">Full console view. Filtered Call History (date range + Duration &gt; 10 mins) with the Conductor panel open and the chip auto attached in the composer.</div>
+  </a>
+</div>
+</body>
+</html>

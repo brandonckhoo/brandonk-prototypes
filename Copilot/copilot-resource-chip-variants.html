@@ -11,7 +11,8 @@
   h1 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
   .intro { font-size: 13px; color: #525866; line-height: 1.55; max-width: 720px; margin-bottom: 28px; }
 
-  .surface-label { font-size: 12px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; margin: 26px 0 10px; }
+  .surface-label { font-size: 13px; font-weight: 700; color: #0A0A0A; text-transform: uppercase; letter-spacing: 0.04em; margin: 30px 0 4px; padding-bottom: 8px; border-bottom: 1px solid #E1E4EA; }
+  .page-label { font-size: 12px; font-weight: 600; color: #525866; margin: 14px 0 8px; padding-left: 8px; border-left: 2px solid #3d64d7; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .card { background: #fff; border: 1px solid #E1E4EA; border-radius: 12px; padding: 18px; }
   .card-tag { font-size: 11px; font-weight: 600; color: #525866; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 3px; }
@@ -110,9 +111,10 @@
 
   <!-- =================== CALL HISTORY =================== -->
   <div class="surface-label">Call History</div>
+  <div class="page-label">Landing page · Call History list</div>
   <div class="grid">
     <div class="card">
-      <div class="card-tag">Landing page · Call History list</div>
+      <div class="card-tag">Default state</div>
       <div class="card-pattern"><code>Call History · {time_range}</code></div>
       <div class="input-box">
         <div class="chip-row">
@@ -136,7 +138,7 @@
     </div>
 
     <div class="card">
-      <div class="card-tag">Landing page · non-date filters active</div>
+      <div class="card-tag">Non-date filters active</div>
       <div class="card-pattern"><code>Call History · {time_range} · +{n} filters</code></div>
       <div class="input-box" style="padding-top:52px;">
         <div class="chip-row">
@@ -200,9 +202,12 @@
       </div>
       <div class="card-note"><b>Click behavior:</b> chip highlights, popover lists the full query read-only. "Edit filters on page" closes the popover and opens the page's Filter control. Click away dismisses. The × on hover remains the only way to detach.</div>
     </div>
+  </div>
 
+  <div class="page-label">Detail page · Single call</div>
+  <div class="grid">
     <div class="card">
-      <div class="card-tag">Detail page · Single call</div>
+      <div class="card-tag">Default state</div>
       <div class="card-pattern"><code>Call · {from_number} · {start_timestamp}</code></div>
       <div class="input-box">
         <div class="chip-row">
@@ -228,9 +233,10 @@
 
   <!-- =================== ANALYTICS =================== -->
   <div class="surface-label">Analytics</div>
+  <div class="page-label">Landing page · Dashboard</div>
   <div class="grid">
     <div class="card">
-      <div class="card-tag">Landing page · Dashboard</div>
+      <div class="card-tag">Default state (filters applied)</div>
       <div class="card-pattern"><code>{dashboard.name} · {time_range}</code></div>
       <div class="input-box">
         <div class="chip-row">
@@ -299,9 +305,12 @@
       </div>
       <div class="card-note"><b>Click behavior:</b> one row per filter with its value, regardless of which tab it came from. Breakdown gets a row (it shapes the query) but does not count toward +{n} — the label counts filters only. "Edit filters on page" opens the dashboard's Filter control.</div>
     </div>
+  </div>
 
+  <div class="page-label">Detail page · Single chart</div>
+  <div class="grid">
     <div class="card">
-      <div class="card-tag">Detail page · Single chart</div>
+      <div class="card-tag">Default state</div>
       <div class="card-pattern"><code>{chart.name} · {time_range}</code></div>
       <div class="input-box">
         <div class="chip-row">
@@ -327,9 +336,10 @@
 
   <!-- =================== AI QA =================== -->
   <div class="surface-label">AI QA</div>
+  <div class="page-label">Landing page · QA test list</div>
   <div class="grid">
     <div class="card">
-      <div class="card-tag">Landing page · QA test list</div>
+      <div class="card-tag">Default state (no time range or filters on this page)</div>
       <div class="card-pattern"><code>AI QA · {test_count} tests</code></div>
       <div class="input-box">
         <div class="chip-row">
@@ -351,9 +361,12 @@
       </div>
       <div class="card-note"><b>Context resource:</b> QA test list. The landing page has no time range or filters, so the qualifier is the test count. Carries each test's config (agent, sampling window, duration rule, sampling %, weekly cap) and headline stats (resolution rate, calls analyzed).</div>
     </div>
+  </div>
 
+  <div class="page-label">Detail page · Single QA test</div>
+  <div class="grid">
     <div class="card">
-      <div class="card-tag">Detail page · Single QA test</div>
+      <div class="card-tag">Default state (filter applied)</div>
       <div class="card-pattern"><code>{cohort.name} · {time_range}</code> &nbsp;+ same <code>+{n} filters</code> rule</div>
       <div class="input-box">
         <div class="chip-row">

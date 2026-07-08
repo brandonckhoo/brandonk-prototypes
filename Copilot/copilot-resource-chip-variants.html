@@ -55,6 +55,19 @@
   .tip { position: absolute; bottom: calc(100% + 8px); left: 0; background: #0E121B; color: #fff; font-size: 11px; line-height: 1.5; padding: 7px 10px; border-radius: 7px; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
   .tip::after { content: ''; position: absolute; top: 100%; left: 16px; border: 5px solid transparent; border-top-color: #0E121B; }
   .tip .tip-dim { color: #99A0AE; }
+
+  /* Popover demo (chip clicked) */
+  .popover { position: absolute; bottom: calc(100% + 8px); left: 0; width: 240px; background: #fff; border: 1px solid #E1E4EA; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06); text-align: left; }
+  .popover::after { content: ''; position: absolute; top: 100%; left: 18px; border: 6px solid transparent; border-top-color: #fff; filter: drop-shadow(0 1px 0 #E1E4EA); }
+  .popover-head { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.03em; padding: 10px 12px 6px; }
+  .popover-row { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font-size: 12px; color: #0E121B; }
+  .popover-row svg { color: #99A0AE; flex-shrink: 0; }
+  .popover-row .row-label { color: #99A0AE; margin-right: 2px; }
+  .popover-foot { border-top: 1px solid #F1F3F5; margin-top: 6px; padding: 8px 12px; }
+  .popover-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; color: #3d64d7; cursor: pointer; }
+  .popover-link:hover { text-decoration: underline; }
+  .ctx-chip.active { border-color: #C9D6F5; background: #ecf3ff; }
+  .ctx-chip.active .chip-name { color: #0E121B; }
 </style>
 </head>
 <body>
@@ -147,6 +160,45 @@
         </div>
       </div>
       <div class="card-note"><b>Label rule:</b> time range stays visible, every other filter collapses into +{n}. Hover shows the full list. The context resource carries the complete query either way.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-tag">Chip clicked · read-only popover</div>
+      <div class="card-pattern">Inspect the query, never edit it here</div>
+      <div class="input-box" style="padding-top:132px;">
+        <div class="chip-row">
+          <span class="tip-wrap">
+            <span class="popover">
+              <div class="popover-head">In context</div>
+              <div class="popover-row">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M15 3H17C17.265 3 17.52 3.105 17.707 3.293C17.895 3.48 18 3.735 18 4V16C18 16.265 17.895 16.52 17.707 16.707C17.52 16.895 17.265 17 17 17H3C2.735 17 2.48 16.895 2.293 16.707C2.105 16.52 2 16.265 2 16V4C2 3.735 2.105 3.48 2.293 3.293C2.48 3.105 2.735 3 3 3H5V1H7V3H13V1H15V3ZM16 9H4V15H16V9Z" fill="currentColor"/></svg>
+                <span><span class="row-label">Date range</span> Jun 11 – Jul 8</span>
+              </div>
+              <div class="popover-row">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M3 4H17V6H3V4ZM5 9H15V11H5V9ZM8 14H12V16H8V14Z" fill="currentColor"/></svg>
+                <span><span class="row-label">Duration</span> &gt; 10 mins</span>
+              </div>
+              <div class="popover-foot">
+                <span class="popover-link">Edit filters on page<svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M7 4H16V13" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M16 4L4 16" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></span>
+              </div>
+            </span>
+            <span class="ctx-chip active">
+              <span class="chip-icon"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C5.85775 17.5 2.5 14.1423 2.5 10H4C4 13.3135 6.6865 16 10 16C13.3135 16 16 13.3135 16 10C16 6.6865 13.3135 4 10 4C7.9375 4 6.118 5.04025 5.03875 6.625H7V8.125H2.5V3.625H4V5.5C5.368 3.6775 7.54675 2.5 10 2.5ZM10.75 6.25V9.68875L13.1823 12.121L12.121 13.1823L9.25 10.3098V6.25H10.75Z" fill="currentColor"/></svg></span>
+              <span class="chip-name">Call History</span>
+              <span class="chip-meta">· Jun 11 – Jul 8 · +1 filter</span>
+            </span>
+          </span>
+        </div>
+        <div class="input-text">Ask Conductor to help you understand, debug, or improve anything in Retell.</div>
+        <div class="input-toolbar">
+          <button class="tool-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="currentColor"/></svg></button>
+          <button class="tool-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.5 9.5L9.6 14.4C8.4 15.6 6.4 15.6 5.2 14.4C4 13.2 4 11.2 5.2 10L11.2 4C12 3.2 13.3 3.2 14.1 4C14.9 4.8 14.9 6.1 14.1 6.9L8.5 12.5C8.1 12.9 7.5 12.9 7.1 12.5C6.7 12.1 6.7 11.5 7.1 11.1L11.8 6.4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></button>
+          <span class="credits"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 2L18 10L10 18L2 10L10 2Z" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>30</span>
+          <span class="tool-spacer"></span>
+          <button class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 16V4M10 4L5 9M10 4L15 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="card-note"><b>Click behavior:</b> chip highlights, popover lists the full query read-only. "Edit filters on page" closes the popover and opens the page's Filter control. Click away dismisses. The × on hover remains the only way to detach.</div>
     </div>
 
     <div class="card">

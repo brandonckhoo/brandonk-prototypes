@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Home Copilot (Side view docked)</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; min-width: 1280px; }
+
+/* ── Sidebar (production template) ── */
+aside { width: 280px; min-width: 280px; background: #F5F7FA; display: flex; flex-direction: column; height: 100vh; border-right: 1px solid #E1E4EA; overflow: hidden; flex-shrink: 0; }
+.sb-logo { padding: 20px 10px 12px 20px; }
+.sb-ws { display: flex; align-items: center; gap: 8px; margin: 0 14px 6px; padding: 10px 10px 10px 12px; height: 40px; background: #F5F7FA; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; }
+.ws-av { width: 20px; height: 20px; background: #3d64d7; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.ws-name { font-size: 13px; font-weight: 500; color: #0A0A0A; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb-nav { flex: 1; overflow-y: auto; padding: 4px 0 16px; }
+.sb-section { margin-top: 8px; }
+.sb-label { display: flex; align-items: center; padding: 4px; margin: 0 14px; height: 24px; font-size: 12px; font-weight: 500; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; }
+.sb-items { padding: 0 14px; }
+.sb-item { display: flex; align-items: center; gap: 8px; padding: 8px; height: 36px; border-radius: 6px; font-size: 14px; color: #525866; cursor: pointer; margin-top: 4px; white-space: nowrap; }
+.sb-item:first-child { margin-top: 0; }
+.sb-item:hover { background: rgba(0,0,0,0.03); }
+.sb-item.active { background: #fff; color: #0A0A0A; font-weight: 500; }
+.sb-item svg { flex-shrink: 0; width: 20px; height: 20px; }
+.sb-item:not(.active) svg { color: #525866; }
+.sb-item.active svg { color: #3d64d7; }
+.sb-footer { padding: 16px 14px; flex-shrink: 0; }
+.payg-card { background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1),0 1px 2px -1px rgba(0,0,0,0.1); height: 58px; padding: 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.payg-badge { background: #ecf3ff; color: #3d64d7; font-size: 12px; font-weight: 500; padding: 4px 8px 4px 4px; border-radius: 4px; white-space: nowrap; }
+.user-card { background: #fff; border: 1px solid #E1E4EA; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1),0 1px 2px -1px rgba(0,0,0,0.1); height: 40px; padding: 10px 10px 10px 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.user-av { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg,#667eea,#764ba2); display: flex; align-items: center; justify-content: center; font-size: 9px; color: #fff; font-weight: 600; flex-shrink: 0; }
+.user-email { font-size: 14px; color: #525866; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb-links { display: flex; align-items: center; gap: 4px; }
+.sb-link { display: flex; align-items: center; gap: 5px; padding: 8px 12px; font-size: 14px; color: #525866; cursor: pointer; height: 36px; border-radius: 6px; }
+.sb-link:hover { background: rgba(0,0,0,0.03); }
+.sb-divider-v { width: 1px; height: 12px; background: #D1D5DB; }
+
+/* ── Column 2: chat history rail ── */
+.chat-rail { width: 248px; min-width: 248px; background: #FAFBFC; border-right: 1px solid #E1E4EA; display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0; }
+.cr-top { padding: 12px 12px 6px; flex-shrink: 0; }
+.cr-new { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; padding: 9px 12px; background: #0E121B; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+.cr-new:hover { background: #1c2333; }
+.cr-section { padding: 12px 14px 4px; font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.06em; flex-shrink: 0; }
+.cr-list { flex: 1; overflow-y: auto; padding: 0 8px 16px; }
+.cr-item { padding: 8px 10px; border-radius: 7px; cursor: pointer; margin-top: 1px; }
+.cr-item:hover { background: rgba(0,0,0,0.04); }
+.cr-item.active { background: #EEF3FF; }
+.cr-title { font-size: 13px; color: #0A0A0A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cr-time { font-size: 11px; color: #99A0AE; margin-top: 2px; }
+
+/* ── Column 3: Home main ── */
+.home-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff; }
+.home-hdr { display: flex; align-items: center; padding: 0 20px 0 24px; height: 53px; border-bottom: 1px solid #E1E4EA; flex-shrink: 0; gap: 12px; }
+.home-title-group { display: flex; align-items: center; gap: 8px; flex: 1; }
+.blue-dot { width: 8px; height: 8px; background: #3d64d7; border-radius: 50%; flex-shrink: 0; }
+.home-title { font-size: 16px; font-weight: 600; color: #0A0A0A; }
+.hdr-right { display: flex; align-items: center; gap: 10px; }
+.getstarted-pill { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12.5px; color: #0A0A0A; cursor: pointer; }
+.gs-track { width: 56px; height: 4px; background: #E1E4EA; border-radius: 2px; }
+.gs-fill { width: 33%; height: 100%; background: #1FC16B; border-radius: 2px; }
+.team-avatars { display: flex; align-items: center; }
+.team-av { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: #fff; margin-left: -7px; flex-shrink: 0; }
+.team-av:first-child { margin-left: 0; }
+.team-av-overflow { background: #F3F4F6; color: #525866; }
+.invite-btn { display: flex; align-items: center; gap: 5px; padding: 6px 12px; background: #fff; border: 1px solid #E1E4EA; border-radius: 6px; font-size: 13px; font-weight: 500; color: #0A0A0A; cursor: pointer; font-family: inherit; white-space: nowrap; }
+.invite-btn:hover { background: #F9FAFB; border-color: #D1D5DB; }
+.hdr-divider { width: 1px; height: 20px; background: #E1E4EA; }
+.side-view-btn { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 11px; border-radius: 7px; font-size: 13px; font-weight: 500; color: #525866; background: #fff; border: 1px solid #E1E4EA; cursor: pointer; font-family: inherit; white-space: nowrap; }
+.side-view-btn:hover { background: #F9FAFB; border-color: #D1D5DB; }
+
+/* scroll body */
+.home-scroll { flex: 1; overflow-y: auto; }
+
+/* Copilot hero */
+.hero { display: flex; flex-direction: column; align-items: center; padding: 56px 24px 36px; }
+.hero-inner { width: 100%; max-width: 680px; display: flex; flex-direction: column; align-items: center; }
+.orb { width: 88px; height: 88px; border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #aab9f7 0%, #7d96f2 38%, #4f6ee6 78%, #3f5cd8 100%);
+  box-shadow: 0 0 42px 9px rgba(96,124,240,0.26), inset -7px -9px 19px rgba(40,60,160,0.35);
+  margin-bottom: 24px; flex-shrink: 0; }
+.greeting { font-size: 25px; font-weight: 700; letter-spacing: -0.02em; color: #0A0A0A; text-align: center; margin-bottom: 22px; }
+.composer { width: 100%; border: 1px solid #D1D5DB; border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); padding: 16px 14px 10px; transition: border-color 0.15s, box-shadow 0.15s; }
+.composer:focus-within { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.1); }
+.composer-input { width: 100%; border: none; outline: none; resize: none; font-family: inherit; font-size: 15px; color: #0A0A0A; line-height: 1.5; min-height: 42px; background: transparent; }
+.composer-input::placeholder { color: #9CA3AF; }
+.composer-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+.plus-btn { width: 34px; height: 34px; border: 1px solid #E1E4EA; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: #525866; cursor: pointer; background: #fff; }
+.plus-btn:hover { background: #F9FAFB; }
+.send-btn { width: 38px; height: 38px; border-radius: 50%; background: #0E121B; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+.send-btn:hover { background: #1c2333; }
+.chips { display: flex; gap: 11px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
+.chip { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 15px; border: 1px solid #E1E4EA; border-radius: 999px; font-size: 13.5px; font-weight: 500; color: #0A0A0A; cursor: pointer; background: #fff; }
+.chip:hover { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.08); }
+.chip svg { color: #525866; }
+
+/* Sections */
+.section { max-width: 1180px; margin: 0 auto; padding: 8px 32px 0; width: 100%; }
+.section-hdr { display: flex; align-items: center; margin-bottom: 14px; }
+.section-title { font-size: 15px; font-weight: 600; color: #0A0A0A; flex: 1; }
+.section-link { font-size: 13px; color: #3d64d7; font-weight: 500; cursor: pointer; }
+.section-controls { display: flex; align-items: center; gap: 8px; }
+.mini-btn { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12.5px; color: #525866; cursor: pointer; background: #fff; }
+
+/* Recents grid */
+.recents-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.rec-card { border: 1px solid #E1E4EA; border-radius: 10px; padding: 14px; display: flex; gap: 12px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; background: #fff; }
+.rec-card:hover { border-color: #C7CDD6; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.rec-icon { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.rec-body { flex: 1; min-width: 0; }
+.rec-name { font-size: 13.5px; font-weight: 600; color: #0A0A0A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rec-meta { display: flex; align-items: center; gap: 7px; margin-top: 5px; }
+.rec-badge { font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 5px; }
+.b-agent { background: #ecf3ff; color: #3d64d7; }
+.b-kb { background: #F0FDF4; color: #16A34A; }
+.b-flow { background: #FEF3F2; color: #D9480F; }
+.rec-time { font-size: 11.5px; color: #99A0AE; }
+
+/* Education */
+.edu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding-bottom: 40px; }
+.edu-card { cursor: pointer; }
+.edu-thumb { aspect-ratio: 16/9; border-radius: 10px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.edu-thumb svg.play { position: absolute; width: 38px; height: 38px; opacity: 0.95; }
+.edu-title { font-size: 13px; font-weight: 500; color: #0A0A0A; margin-top: 8px; line-height: 1.35; }
+
+/* Invite modal */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 50; }
+.modal { background: #fff; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.25); width: 460px; padding: 22px; }
+.modal-hdr { display: flex; align-items: flex-start; }
+.modal-title { font-size: 16px; font-weight: 600; color: #0A0A0A; }
+.modal-sub { font-size: 13px; color: #6B7280; margin-top: 6px; line-height: 1.5; }
+.modal-x { margin-left: auto; cursor: pointer; color: #9CA3AF; }
+.field-label { font-size: 13px; font-weight: 500; color: #0A0A0A; margin: 18px 0 6px; }
+.field { width: 100%; height: 40px; border: 1px solid #E1E4EA; border-radius: 8px; padding: 0 12px; font-size: 14px; font-family: inherit; color: #0A0A0A; }
+.field:focus { outline: none; border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.1); }
+.field::placeholder { color: #9CA3AF; }
+.select { width: 100%; height: 40px; border: 1px solid #E1E4EA; border-radius: 8px; padding: 0 12px; font-size: 14px; font-family: inherit; color: #0A0A0A; display: flex; align-items: center; cursor: pointer; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+.btn-secondary { height: 38px; padding: 0 16px; border: 1px solid #E1E4EA; border-radius: 8px; background: #fff; font-size: 13.5px; font-weight: 500; color: #0A0A0A; cursor: pointer; font-family: inherit; }
+.btn-primary { height: 38px; padding: 0 16px; border: none; border-radius: 8px; background: #0E121B; font-size: 13.5px; font-weight: 500; color: #fff; cursor: pointer; font-family: inherit; }
+
+/* ── Docked Copilot side panel (PostHog layout) ── */
+.dock { width: 545px; min-width: 545px; border-left: 1px solid #E1E4EA; display: flex; flex-direction: column; background: #fff; flex-shrink: 0; }
+.dock-toolbar { display: flex; align-items: center; gap: 4px; height: 44px; padding: 0 8px; flex-shrink: 0; }
+.dock-ico { width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; justify-content: center; color: #525866; cursor: pointer; }
+.dock-ico:hover { background: #F4F4F5; }
+.dock-spacer { flex: 1; }
+.dock-title { font-size: 14px; font-weight: 600; color: #0A0A0A; padding: 0 16px 8px; }
+.dock-scroll { flex: 1; overflow-y: auto; padding: 6px 16px 22px; display: flex; flex-direction: column; }
+.dock-hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 56px 0 14px; }
+.dock-orb { width: 54px; height: 54px; border-radius: 50%; background: radial-gradient(circle at 34% 30%, #aab9f7 0%, #7d96f2 40%, #4f6ee6 80%, #3f5cd8 100%); box-shadow: 0 0 22px 4px rgba(96,124,240,0.25); margin-bottom: 12px; }
+.dock-q { font-size: 18px; font-weight: 700; color: #0A0A0A; letter-spacing: -0.01em; }
+.dock-sub { font-size: 12.5px; color: #99A0AE; font-style: italic; margin-top: 6px; }
+.dc-box { border: 1px solid #D1D5DB; border-radius: 12px; padding: 10px; margin-top: 4px; position: relative; }
+.dc-ctxchips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.dc-ctxchips:empty { display: none; }
+.dc-ctxchip { display: inline-flex; align-items: center; gap: 5px; background: #F4F4F5; border: 1px solid #E5E7EB; border-radius: 6px; padding: 3px 7px; font-size: 11.5px; color: #0A0A0A; }
+.dc-ctxchip .x { color: #99A0AE; cursor: pointer; }
+.dc-input { font-size: 13.5px; color: #9CA3AF; min-height: 20px; }
+.dc-row { display: flex; align-items: center; gap: 7px; margin-top: 10px; }
+.dc-ctxbtn { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12.5px; font-weight: 500; color: #525866; background: #fff; cursor: pointer; font-family: inherit; }
+.dc-ctxbtn:hover { background: #F9FAFB; border-color: #D1D5DB; }
+.dc-spacer { flex: 1; }
+.dc-send { width: 30px; height: 30px; border-radius: 50%; background: #0E121B; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.dock-seclabel { font-size: 12.5px; color: #99A0AE; text-align: center; margin: 20px 0 12px; }
+.dock-genchips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.dock-genchip { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 10px; border: 1px solid #E1E4EA; border-radius: 999px; font-size: 12.5px; font-weight: 500; color: #0A0A0A; cursor: pointer; background: #fff; }
+.dock-genchip:hover { border-color: #3d64d7; background: #F7F9FF; }
+.dock-genchip.open { border-color: #3d64d7; background: #F7F9FF; }
+.dock-genchip svg { color: #525866; }
+.dc-box.expanded { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.dock-chippop { margin-top: -1px; border: 1px solid #D1D5DB; border-top: 1px solid #F0F2F5; border-radius: 0 0 12px 12px; box-shadow: 0 14px 28px rgba(0,0,0,0.07); padding: 6px; background: #fff; }
+.dock-chippop-title { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; padding: 8px 10px 4px; }
+.dock-chippop-item { padding: 9px 10px; border-radius: 8px; font-size: 13.5px; color: #0A0A0A; cursor: pointer; }
+.dock-chippop-item:hover { background: #F4F7FF; }
+.dock-recent-hd { display: flex; align-items: center; margin: auto 0 6px; padding-top: 24px; font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; }
+.dock-recent-hd span { margin-left: auto; color: #3d64d7; text-transform: none; font-weight: 500; cursor: pointer; }
+.dock-recent-item { padding: 8px; border-radius: 7px; cursor: pointer; }
+.dock-recent-item:hover { background: rgba(0,0,0,0.04); }
+.dock-recent-title { font-size: 13px; color: #0A0A0A; }
+.dock-recent-time { font-size: 11px; color: #99A0AE; margin-top: 2px; }
+/* @ menu (opens downward, anchored to composer box) */
+.dc-menu { position: absolute; left: 0; right: 0; top: 100%; margin-top: 6px; max-height: 440px; overflow-y: auto; border: 1px solid #E1E4EA; border-radius: 14px; box-shadow: 0 12px 34px rgba(0,0,0,0.16); padding: 8px; background: #fff; z-index: 30; }
+.dc-menu .ctx-search { padding: 2px 2px 6px; }
+.dc-menu .ctx-search input { width: 100%; height: 40px; border: 1px solid #D1D5DB; border-radius: 9px; padding: 0 12px; outline: none; font-family: inherit; font-size: 14px; background: #fff; color: #0A0A0A; }
+.dc-menu .ctx-search input:focus { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.1); }
+.dc-menu .ctx-search input::placeholder { color: #9CA3AF; }
+.ctx-group { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; padding: 10px 10px 4px; }
+.ctxr { display: flex; align-items: center; gap: 11px; padding: 8px 10px; border-radius: 9px; cursor: pointer; }
+.ctxr:hover { background: #F7F9FC; }
+.ctxr-ic { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ctxr-ic.ag { background: #E7F7EE; color: #16A34A; }
+.ctxr-ic.node { background: #FBF1E3; color: #B45309; }
+.ctxr-ic.call { background: #EAF1FF; color: #3d64d7; }
+.ctxr-txt { flex: 1; min-width: 0; }
+.ctxr-name { font-size: 13.5px; font-weight: 600; color: #0A0A0A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ctxr-sub { font-size: 11.5px; color: #99A0AE; margin-top: 2px; }
+.ctxr-check { width: 20px; height: 20px; border: 1.5px solid #D1D5DB; border-radius: 5px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.ctxr-check svg { display: none; }
+.ctxr.sel .ctxr-check { background: #3d64d7; border-color: #3d64d7; }
+.ctxr.sel .ctxr-check svg { display: block; }
+.ctx-divider { height: 1px; background: #F0F2F5; margin: 8px 4px; }
+.ctx-foot { display: flex; align-items: center; padding: 8px 6px 4px; }
+.ctx-foot-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #E1E4EA; display: flex; align-items: center; justify-content: center; color: #525866; cursor: pointer; background: #fff; }
+.ctx-foot-btn:hover { background: #F4F4F5; }
+
+/* auto-included context chip */
+.dc-ctxchip.auto { background: #ecf3ff; border: 1px dashed #9bb8f5; color: #1e3a8a; }
+.dc-ctxchip.auto svg { color: #3d64d7; }
+
+/* hover tooltip */
+.tip { position: relative; }
+.tip::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 0; background: #1f2430; color: #fff; font-size: 11.5px; line-height: 1.35; padding: 7px 10px; border-radius: 8px; white-space: normal; width: max-content; max-width: 260px; text-align: left; opacity: 0; pointer-events: none; transition: opacity .12s; z-index: 60; }
+.tip:hover::after { opacity: 1; }
+
+/* Overview dashboard (4 charts) */
+.dash-header { display: flex; align-items: center; margin-bottom: 18px; }
+.dash-titlegroup { display: flex; align-items: center; gap: 8px; flex: 1; }
+.dash-title { font-size: 16px; font-weight: 600; color: #0A0A0A; }
+.dash-pills { display: flex; gap: 8px; }
+.dash-pill { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 11px; border: 1px solid #E1E4EA; border-radius: 8px; font-size: 13px; color: #0A0A0A; cursor: pointer; }
+.dash-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.ch-card { border: 1px solid #E1E4EA; border-radius: 10px; padding: 16px; }
+.ch-hd { display: flex; align-items: flex-start; gap: 8px; }
+.ch-hd .ch-title { flex: 1; }
+.ch-kebab { color: #99A0AE; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+.ch-title { font-size: 13.5px; font-weight: 600; color: #0A0A0A; }
+.ch-sub { font-size: 11.5px; color: #99A0AE; margin-top: 2px; margin-bottom: 14px; }
+.ch-area svg { width: 100%; height: 116px; display: block; }
+.ch-bars { display: flex; align-items: flex-end; gap: 12px; height: 116px; }
+.ch-barwrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+.ch-bar { width: 100%; max-width: 38px; background: #3d64d7; border-radius: 4px 4px 0 0; }
+.ch-bar.light { background: #aab9f7; }
+.ch-blabel { font-size: 10.5px; color: #99A0AE; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- COLUMN 1: Retell sidebar -->
+<aside>
+  <div class="sb-logo">
+    <svg width="73" height="20" viewBox="0 0 414 114" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#rl)"><path d="M40.3722 92.687C34.6862 92.687 30.1372 96.996 30.1372 102.922C30.1372 108.848 34.6862 113.156 40.3722 113.156C46.0582 113.156 50.6072 108.847 50.6072 102.922C50.6072 96.997 46.0582 92.687 40.3722 92.687Z" fill="#0A0A0A"/><path d="M69.9401 92.687C64.2541 92.687 59.7051 96.996 59.7051 102.922C59.7051 108.848 64.2541 113.156 69.9401 113.156C75.6261 113.156 80.1751 108.847 80.1751 102.922C80.1751 96.997 75.6261 92.687 69.9401 92.687Z" fill="#0A0A0A"/><path d="M40.3722 0C34.6862 0 30.1372 4.309 30.1372 10.235C30.1372 16.161 34.6862 20.47 40.3722 20.47C46.0582 20.47 50.6072 16.161 50.6072 10.235C50.6072 4.309 46.0582 0 40.3722 0Z" fill="#0A0A0A"/><path d="M69.9401 0C64.2541 0 59.7051 4.309 59.7051 10.235C59.7051 16.161 64.2541 20.47 69.9401 20.47C75.6261 20.47 80.1751 16.161 80.1751 10.235C80.1751 4.309 75.6261 0 69.9401 0Z" fill="#0A0A0A"/><path d="M10.235 31.2751C4.549 31.2751 0 35.5842 0 41.5102C0 47.4362 4.549 51.7451 10.235 51.7451C15.921 51.7451 20.47 47.4362 20.47 41.5102C20.47 35.5842 15.921 31.2751 10.235 31.2751Z" fill="#0A0A0A"/><path d="M10.235 61.4121C4.549 61.4121 0 65.7211 0 71.6471C0 77.5731 4.549 81.8821 10.235 81.8821C15.921 81.8821 20.47 77.5731 20.47 71.6471C20.47 65.7211 15.921 61.4121 10.235 61.4121Z" fill="#0A0A0A"/><path d="M100.078 31.2751C94.3923 31.2751 89.8433 35.5842 89.8433 41.5102C89.8433 47.4362 94.3923 51.7451 100.078 51.7451C105.764 51.7451 110.313 47.4362 110.313 41.5102C110.313 35.5842 105.764 31.2751 100.078 31.2751Z" fill="#0A0A0A"/><path d="M100.078 61.4121C94.3923 61.4121 89.8433 65.7211 89.8433 71.6471C89.8433 77.5731 94.3923 81.8821 100.078 81.8821C105.764 81.8821 110.313 77.5731 110.313 71.6471C110.313 65.7211 105.764 61.4121 100.078 61.4121Z" fill="#0A0A0A"/><path d="M221.997 75.7282C221.418 63.5772 216.211 58.9472 209.267 57.2112C217.368 54.8962 224.312 50.2672 224.312 36.9592C224.312 23.6512 215.054 14.9712 196.537 14.9712H162.976V95.9812H176.289V62.9992H190.75C205.216 62.9992 208.688 68.2072 208.688 83.2512C208.688 89.5652 209.845 93.0882 211.003 95.9812H224.89C222.575 93.0882 221.997 84.5772 221.997 78.6222V75.7292V75.7282Z" fill="#0A0A0A"/><path d="M255.558 34.645C238.199 34.645 226.626 47.954 226.626 66.47C226.626 84.986 242.249 98.295 256.137 98.295C270.025 98.295 279.861 90.194 283.333 78.621H269.446C267.71 82.671 264.817 87.301 256.137 87.301C247.457 87.301 239.935 81.515 239.935 69.942H283.912C283.912 49.69 272.917 34.645 255.558 34.645ZM240.513 60.105C241.092 51.425 246.878 45.06 255.558 45.06C264.238 45.06 270.024 51.425 270.024 60.105H240.513Z" fill="#0A0A0A"/><path d="M344.09 34.645C326.731 34.645 315.158 47.954 315.158 66.47C315.158 85.152 330.781 98.295 344.669 98.295C358.557 98.295 368.393 90.194 371.865 78.621H357.978C356.242 82.671 353.349 87.301 344.669 87.301C335.989 87.301 328.467 81.515 328.467 69.942H372.444C372.444 49.69 361.45 34.645 344.091 34.645H344.09ZM329.045 60.105C329.624 51.425 335.41 45.06 344.09 45.06C352.77 45.06 358.556 51.425 358.556 60.105H329.045Z" fill="#0A0A0A"/><path d="M390.96 14.9712H377.651V95.9182H390.96V14.9712Z" fill="#0A0A0A"/><path d="M413.527 14.9712H400.218V95.9182H413.527V14.9712Z" fill="#0A0A0A"/><path d="M304.171 17.2821L290.841 17.2751L290.851 34.6471H282.759V45.0001H290.851V82.8191C290.851 87.5761 291.802 90.4311 294.657 93.2851C297.512 96.1391 300.369 97.0941 305.126 97.0941H315.139V85.6731H309.88C308.162 85.6731 306.96 85.3702 306.126 85.1062C305.272 84.8352 304.609 84.1571 304.4 83.2861C304.171 82.3311 304.171 81.0862 304.171 79.9032V45.0001H315.138V34.6471H304.171V17.2821Z" fill="#0A0A0A"/></g><defs><clipPath id="rl"><rect width="413.527" height="113.156" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="sb-ws">
+    <div class="ws-av">R</div>
+    <span class="ws-name">Retell AI</span>
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 3l3-3 3 3M5 9l3 3 3-3" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-items" style="margin-top: 4px;">
+      <div class="sb-item active" style="margin-top: 0;">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M3 9.5L10 3.5l7 6V17a.5.5 0 01-.5.5h-4.25V13h-4.5v4.5H3.5A.5.5 0 013 17V9.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        Home
+      </div>
+    </div>
+    <div class="sb-section">
+      <span class="sb-label">Build</span>
+      <div class="sb-items">
+        <div class="sb-item"><svg viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 8h6M7 11h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Agents</div>
+        <div class="sb-item"><svg viewBox="0 0 20 20" fill="none"><path d="M5 4h10v12H5z" stroke="currentColor" stroke-width="1.5"/><path d="M8 8h4M8 11h4M8 14h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Knowledge Base</div>
+      </div>
+    </div>
+    <div class="sb-section">
+      <span class="sb-label">Deploy</span>
+      <div class="sb-items">
+        <div class="sb-item"><svg viewBox="0 0 20 20" fill="none"><rect x="4" y="6" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M7 6V5a3 3 0 016 0v1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Phone Numbers</div>
+        <div class="sb-item"><svg viewBox="0 0 20 20" fill="none"><path d="M3 6h14M3 10h14M3 14h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Batch Call</div>
+      </div>
+    </div>
+    <div class="sb-section">
+      <span class="sb-label">Monitor</span>
+      <div class="sb-items">
+        <div class="sb-item"><svg viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Call History</div>
+        <div class="sb-item"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4h12v10H4zM8 14v2M12 14v2M6 16h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Chat History</div>
+        <div class="sb-item"><svg viewBox="0 0 20 20" fill="none"><path d="M3 14l4-4 3 2 4-6 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Analytics</div>
+        <div class="sb-item"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M10 7v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>AI Quality Assurance</div>
+        <div class="sb-item"><svg viewBox="0 0 20 20" fill="none"><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5.636 5.636l1.414 1.414M12.95 12.95l1.414 1.414M5.636 14.364l1.414-1.414M12.95 7.05l1.414-1.414" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Alerting</div>
+      </div>
+    </div>
+    <div class="sb-section">
+      <span class="sb-label">System</span>
+      <div class="sb-items">
+        <div class="sb-item"><svg viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M7 9h.01M10 9h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Billing</div>
+        <div class="sb-item"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M4.929 4.929l1.414 1.414M13.657 13.657l1.414 1.414M4.929 15.071l1.414-1.414M13.657 6.343l1.414-1.414" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Settings</div>
+      </div>
+    </div>
+  </div>
+  <div class="sb-footer">
+    <div class="payg-card">
+      <span class="payg-badge">Pay As You Go</span>
+      <span style="flex:1"></span>
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 5l5 5 5-5M3 9l5 5 5-5" stroke="#9CA3AF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="user-card">
+      <div class="user-av">B</div>
+      <span class="user-email">brandon@retellai.com</span>
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;color:#9CA3AF"><path d="M3 5l5 5 5-5M3 9l5 5 5-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="sb-links">
+      <div class="sb-link"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#525866" stroke-width="1.4"/><path d="M8 7v5M8 5v.5" stroke="#525866" stroke-width="1.4" stroke-linecap="round"/></svg>Help</div>
+      <div class="sb-divider-v"></div>
+      <div class="sb-link"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v2M8 12v2M2 8h2M12 8h2M4.343 4.343l1.414 1.414M10.243 10.243l1.414 1.414" stroke="#525866" stroke-width="1.4" stroke-linecap="round"/></svg>Updates</div>
+    </div>
+  </div>
+</aside>
+
+<!-- Home main (chat-history column removed — PostHog keeps recent chats inside the panel) -->
+<div class="home-main">
+
+  <div class="home-scroll" style="padding-top:36px;">
+    <!-- Hero moved into docked panel. Home content stays behind (no empty state). -->
+
+    <!-- Overview dashboard: title + 4 charts -->
+    <div class="section">
+      <div class="dash-header">
+        <div class="dash-titlegroup">
+          <span class="blue-dot"></span>
+          <span class="dash-title">Call Analytics Overview</span>
+        </div>
+        <div class="dash-pills">
+          <div class="dash-pill">Last 7 days <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <div class="dash-pill">All agents <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        </div>
+      </div>
+      <div class="dash-grid">
+        <!-- 1. Call Counts (area) -->
+        <div class="ch-card">
+          <div class="ch-hd"><span class="ch-title">Call Counts</span><svg class="ch-kebab" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></div>
+          <div class="ch-sub">1,284 calls · last 7 days</div>
+          <div class="ch-area"><svg viewBox="0 0 300 116" preserveAspectRatio="none"><polyline fill="rgba(61,100,215,0.12)" points="0,116 0,72 50,66 100,48 150,54 200,34 250,40 300,30 300,116"/><polyline fill="none" stroke="#3d64d7" stroke-width="2.5" points="0,72 50,66 100,48 150,54 200,34 250,40 300,30"/></svg></div>
+        </div>
+        <!-- 2. Call Successful (bar) -->
+        <div class="ch-card">
+          <div class="ch-hd"><span class="ch-title">Call Successful</span><svg class="ch-kebab" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></div>
+          <div class="ch-sub">73% success rate</div>
+          <div class="ch-bars">
+            <div class="ch-barwrap"><div class="ch-bar" style="height:62%"></div><div class="ch-blabel">Mon</div></div>
+            <div class="ch-barwrap"><div class="ch-bar" style="height:71%"></div><div class="ch-blabel">Tue</div></div>
+            <div class="ch-barwrap"><div class="ch-bar" style="height:58%"></div><div class="ch-blabel">Wed</div></div>
+            <div class="ch-barwrap"><div class="ch-bar" style="height:80%"></div><div class="ch-blabel">Thu</div></div>
+            <div class="ch-barwrap"><div class="ch-bar" style="height:88%"></div><div class="ch-blabel">Fri</div></div>
+          </div>
+        </div>
+        <!-- 3. Disconnection Reason (bar) -->
+        <div class="ch-card">
+          <div class="ch-hd"><span class="ch-title">Disconnection Reason</span><svg class="ch-kebab" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></div>
+          <div class="ch-sub">By count · last 7 days</div>
+          <div class="ch-bars">
+            <div class="ch-barwrap"><div class="ch-bar" style="height:90%"></div><div class="ch-blabel">User hangup</div></div>
+            <div class="ch-barwrap"><div class="ch-bar light" style="height:52%"></div><div class="ch-blabel">Transfer</div></div>
+            <div class="ch-barwrap"><div class="ch-bar light" style="height:34%"></div><div class="ch-blabel">Voicemail</div></div>
+            <div class="ch-barwrap"><div class="ch-bar light" style="height:20%"></div><div class="ch-blabel">No answer</div></div>
+          </div>
+        </div>
+        <!-- 4. User Sentiment (bar) -->
+        <div class="ch-card">
+          <div class="ch-hd"><span class="ch-title">User Sentiment</span><svg class="ch-kebab" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></div>
+          <div class="ch-sub">Positive / Neutral / Negative</div>
+          <div class="ch-bars">
+            <div class="ch-barwrap"><div class="ch-bar" style="height:64%;background:#1FC16B"></div><div class="ch-blabel">Positive</div></div>
+            <div class="ch-barwrap"><div class="ch-bar" style="height:46%;background:#FF9147"></div><div class="ch-blabel">Neutral</div></div>
+            <div class="ch-barwrap"><div class="ch-bar" style="height:22%;background:#FB3748"></div><div class="ch-blabel">Negative</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Docked Copilot side panel (PostHog layout, generic) -->
+<div class="dock">
+  <div class="dock-toolbar">
+    <div class="dock-ico" title="New chat"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+    <div class="dock-ico" title="Chat history"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/><path d="M12 8v4l3 2"/></svg></div>
+    <div class="dock-spacer"></div>
+    <div class="dock-ico" title="Open in full view" onclick="location.href='copilot-home-fullview.html'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></div>
+    <div class="dock-ico" title="Close"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+  </div>
+  <div class="dock-scroll">
+    <div class="dock-hero">
+      <div class="dock-orb"></div>
+      <div class="dock-q">What do you want to know?</div>
+      <div class="dock-sub">Build, test, and improve your agents.</div>
+    </div>
+
+    <div class="dc-box">
+      <div class="dc-ctxchips" id="dCtxChips"><span class="dc-ctxchip auto tip" data-tip="This context is auto-included from the current view"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/></svg>Call Analytics Overview</span></div>
+      <div class="dc-input">Ask a question or / for commands</div>
+      <div class="dc-row">
+        <button class="dc-ctxbtn tip" data-tip="@context to help Retell AI answer your question" onclick="dToggleCtx(event)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add context</button>
+        <div class="dc-spacer"></div>
+        <div class="dc-send"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/></svg></div>
+      </div>
+
+      <!-- @ Add context menu (CEO reference: Search + Agents / Nodes / Call IDs, multi-select) -->
+      <div id="dCtxMenu" class="dc-menu" style="display:none;" onclick="event.stopPropagation()">
+        <div class="ctx-search"><input placeholder="Search…"></div>
+
+        <div class="ctx-group">Agents</div>
+        <div class="ctxr" data-optkey="a1" onclick="dCtxToggle(this,'a1','Patient Screening Agent')">
+          <div class="ctxr-ic ag"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8.5 14a4 4 0 0 0 7 0" stroke-linecap="round"/><circle cx="9" cy="10" r="0.6" fill="currentColor"/><circle cx="15" cy="10" r="0.6" fill="currentColor"/></svg></div>
+          <div class="ctxr-txt"><div class="ctxr-name">Patient Screening Agent</div><div class="ctxr-sub">Last edited 2 hours ago</div></div>
+          <div class="ctxr-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="ctxr" data-optkey="a2" onclick="dCtxToggle(this,'a2','Appointment Booking Agent')">
+          <div class="ctxr-ic ag"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8.5 14a4 4 0 0 0 7 0" stroke-linecap="round"/><circle cx="9" cy="10" r="0.6" fill="currentColor"/><circle cx="15" cy="10" r="0.6" fill="currentColor"/></svg></div>
+          <div class="ctxr-txt"><div class="ctxr-name">Appointment Booking Agent</div><div class="ctxr-sub">Last edited 5 hours ago</div></div>
+          <div class="ctxr-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="ctxr" data-optkey="a3" onclick="dCtxToggle(this,'a3','Outbound Sales Agent')">
+          <div class="ctxr-ic ag"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8.5 14a4 4 0 0 0 7 0" stroke-linecap="round"/><circle cx="9" cy="10" r="0.6" fill="currentColor"/><circle cx="15" cy="10" r="0.6" fill="currentColor"/></svg></div>
+          <div class="ctxr-txt"><div class="ctxr-name">Outbound Sales Agent</div><div class="ctxr-sub">Last edited 1 day ago</div></div>
+          <div class="ctxr-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="ctx-divider"></div>
+        <div class="ctx-group">Nodes</div>
+        <div class="ctxr" data-optkey="n1" onclick="dCtxToggle(this,'n1','Obtain Confirmation')">
+          <div class="ctxr-ic node"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="14" rx="2"/><line x1="9" y1="5" x2="9" y2="19"/></svg></div>
+          <div class="ctxr-txt"><div class="ctxr-name">Obtain Confirmation</div><div class="ctxr-sub">Patient Screening Agent</div></div>
+          <div class="ctxr-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="ctxr" data-optkey="n2" onclick="dCtxToggle(this,'n2','Greetings')">
+          <div class="ctxr-ic node"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="14" rx="2"/><line x1="9" y1="5" x2="9" y2="19"/></svg></div>
+          <div class="ctxr-txt"><div class="ctxr-name">Greetings</div><div class="ctxr-sub">Patient Screening Agent</div></div>
+          <div class="ctxr-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="ctx-divider"></div>
+        <div class="ctx-group">Calls</div>
+        <div class="ctxr" data-optkey="c1" onclick="dCtxToggle(this,'c1','Call · +1 (415) 555-0192 · 10:42 AM')" title="call_70d10ac19485587a197037ef82a">
+          <div class="ctxr-ic call"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5a2 2 0 0 1 2-2h2l2 5-2 1a11 11 0 0 0 5 5l1-2 5 2v2a2 2 0 0 1-2 2A16 16 0 0 1 3 5z"/></svg></div>
+          <div class="ctxr-txt"><div class="ctxr-name">+1 (415) 555-0192</div><div class="ctxr-sub">Failed · 3 minutes ago · Healthcare Check-In</div></div>
+          <div class="ctxr-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="ctxr" data-optkey="c2" onclick="dCtxToggle(this,'c2','Call · +1 (628) 555-0847 · 10:17 AM')" title="call_8f2e4bc73a91d42e5b0123cf91d">
+          <div class="ctxr-ic call"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5a2 2 0 0 1 2-2h2l2 5-2 1a11 11 0 0 0 5 5l1-2 5 2v2a2 2 0 0 1-2 2A16 16 0 0 1 3 5z"/></svg></div>
+          <div class="ctxr-txt"><div class="ctxr-name">+1 (628) 555-0847</div><div class="ctxr-sub">Failed · 28 minutes ago · Healthcare Check-In</div></div>
+          <div class="ctxr-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="ctxr" data-optkey="c3" onclick="dCtxToggle(this,'c3','Call · +1 (510) 555-2891 · 9:45 AM')" title="call_3a7f9de28c44a61b8d5902ae47b">
+          <div class="ctxr-ic call"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5a2 2 0 0 1 2-2h2l2 5-2 1a11 11 0 0 0 5 5l1-2 5 2v2a2 2 0 0 1-2 2A16 16 0 0 1 3 5z"/></svg></div>
+          <div class="ctxr-txt"><div class="ctxr-name">+1 (510) 555-2891</div><div class="ctxr-sub">Successful · 1 hour ago · Appointment Reminder</div></div>
+          <div class="ctxr-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="ctx-divider"></div>
+        <div class="ctx-foot"><div class="ctx-foot-btn" title="Add by ID"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div></div>
+      </div>
+    </div>
+
+    <!-- chip drill-down questions appear flush under the chat (PostHog style) -->
+    <div id="dockChipPop" class="dock-chippop" style="display:none;" onclick="event.stopPropagation()"></div>
+
+    <div class="dock-seclabel">Try Retell Copilot for…</div>
+    <div class="dock-genchips">
+      <button class="dock-genchip" onclick="dockOpenChip(event,'agents','Agents',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="11" rx="2"/><path d="M12 8V4"/></svg>Agents</button>
+      <button class="dock-genchip" onclick="dockOpenChip(event,'simulations','Simulations',this)"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>Simulations</button>
+      <button class="dock-genchip" onclick="dockOpenChip(event,'analytics','Analytics',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>Analytics</button>
+      <button class="dock-genchip" onclick="dockOpenChip(event,'callhistory','Call History',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/><path d="M12 8v4l3 2"/></svg>Call History</button>
+      <button class="dock-genchip" onclick="dockOpenChip(event,'aiqa','AI QA',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/><polyline points="8.5 11 10.5 13 14 9"/></svg>AI QA</button>
+      <button class="dock-genchip" onclick="dockOpenChip(event,'docs','Docs',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><polyline points="14 3 14 8 19 8"/></svg>Docs</button>
+    </div>
+
+    <div class="dock-recent-hd">Recent chats <span>View all</span></div>
+    <div class="dock-recent-item"><div class="dock-recent-title">Set up Wagatosh mobile provider</div><div class="dock-recent-time">2 hours ago</div></div>
+    <div class="dock-recent-item"><div class="dock-recent-title">Add transfer node to Hardware Houseki</div><div class="dock-recent-time">Yesterday</div></div>
+    <div class="dock-recent-item"><div class="dock-recent-title">Outbound lead campaign Q3</div><div class="dock-recent-time">2 days ago</div></div>
+  </div>
+</div>
+
+<script>
+function dToggleCtx(e) {
+  e.stopPropagation();
+  const m = document.getElementById('dCtxMenu');
+  m.style.display = m.style.display === 'block' ? 'none' : 'block';
+  if (m.style.display === 'block') { const i = m.querySelector('input'); if (i) i.focus(); }
+}
+function dCloseCtx() { document.getElementById('dCtxMenu').style.display = 'none'; }
+
+/* multi-select: toggling a row adds/removes a context chip (menu stays open) */
+function dCtxToggle(el, key, chipLabel) {
+  el.classList.toggle('sel');
+  const wrap = document.getElementById('dCtxChips');
+  const existing = wrap.querySelector('[data-key="' + key + '"]');
+  if (el.classList.contains('sel')) {
+    if (!existing) {
+      const chip = document.createElement('span');
+      chip.className = 'dc-ctxchip';
+      chip.setAttribute('data-key', key);
+      chip.innerHTML = `${chipLabel} <span class="x" onclick="dCtxRemove('${key}')">✕</span>`;
+      wrap.appendChild(chip);
+    }
+  } else if (existing) {
+    existing.remove();
+  }
+}
+function dCtxRemove(key) {
+  const chip = document.querySelector('.dc-ctxchip[data-key="' + key + '"]');
+  if (chip) chip.remove();
+  const opt = document.querySelector('.ctxr[data-optkey="' + key + '"]');
+  if (opt) opt.classList.remove('sel');
+}
+document.addEventListener('click', dCloseCtx);
+
+/* chip drill-down — generic questions suited to an empty Home state */
+const HOME_SUBTASKS = {
+  agents: ['How do I create an agent?', 'Edit an agent prompt', 'Convert an agent to a Flow', 'Configure a tool or function'],
+  simulations: ['How do simulations work?', 'Run a simulation', 'Generate test scenarios'],
+  analytics: ['What can I track here?', 'Build a chart', 'Explain a metric'],
+  callhistory: ['What gets logged for each call?', 'How do I read a transcript?', 'Diagnose a call'],
+  aiqa: ['How does AI QA work?', 'Create a QA cohort', 'What should I measure?'],
+  docs: ['Explain a feature', 'Look up API documentation']
+};
+function dockOpenChip(e, key, label, el) {
+  e.stopPropagation();
+  dCloseCtx();
+  const pop = document.getElementById('dockChipPop');
+  const box = document.querySelector('.dc-box');
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.dock-genchip').forEach(c => c.classList.remove('open'));
+  if (wasOpen) { pop.style.display = 'none'; box.classList.remove('expanded'); return; }
+  el.classList.add('open');
+  pop.innerHTML = `<div class="dock-chippop-title">${label}</div>` +
+    HOME_SUBTASKS[key].map(q => `<div class="dock-chippop-item" onclick="dockPickQ(this)">${q}</div>`).join('');
+  pop.style.display = 'block';
+  box.classList.add('expanded');
+}
+function dockCloseChip() {
+  document.querySelectorAll('.dock-genchip').forEach(c => c.classList.remove('open'));
+  const p = document.getElementById('dockChipPop');
+  if (p) p.style.display = 'none';
+  const box = document.querySelector('.dc-box');
+  if (box) box.classList.remove('expanded');
+}
+function dockPickQ(el) {
+  document.querySelector('.dc-input').textContent = el.textContent;
+  dockCloseChip();
+}
+document.addEventListener('click', dockCloseChip);
+</script>
+
+</body>
+</html>

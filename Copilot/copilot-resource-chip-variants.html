@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Copilot resource chip variants</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #F5F7FA; padding: 40px; }
+  .sheet { max-width: 1060px; margin: 0 auto; }
+  h1 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .intro { font-size: 13px; color: #525866; line-height: 1.55; max-width: 720px; margin-bottom: 28px; }
+
+  .surface-label { font-size: 12px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; margin: 26px 0 10px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .card { background: #fff; border: 1px solid #E1E4EA; border-radius: 12px; padding: 18px; }
+  .card-tag { font-size: 11px; font-weight: 600; color: #525866; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 3px; }
+  .card-pattern { font-size: 12px; color: #99A0AE; margin-bottom: 12px; font-variant-ligatures: none; }
+  .card-pattern code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #525866; background: #F5F7FA; border: 1px solid #EEF0F3; border-radius: 4px; padding: 1px 5px; }
+  .card-note { font-size: 12px; color: #525866; line-height: 1.5; margin-top: 12px; }
+  .card-note b { color: #0E121B; font-weight: 600; }
+
+  /* Mini composer */
+  .input-box { border: 1px solid #E1E4EA; border-radius: 14px; padding: 10px 12px 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); background: #fff; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .input-text { font-size: 13px; color: #99A0AE; min-height: 20px; line-height: 1.45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .input-toolbar { display: flex; align-items: center; gap: 2px; margin-top: 6px; }
+  .tool-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 7px; color: #525866; cursor: pointer; border: none; background: transparent; }
+  .tool-icon:hover { background: rgba(0,0,0,0.04); }
+  .credits { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; background: #DCFCE7; border-radius: 7px; font-size: 11px; font-weight: 600; color: #16A34A; margin-left: 4px; }
+  .tool-spacer { flex: 1; }
+  .send-btn { width: 28px; height: 28px; border-radius: 8px; background: transparent; color: #99A0AE; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+
+  /* Resource chip */
+  .ctx-chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px 0 7px; background: #F5F7FA; border: 1px solid #E1E4EA; border-radius: 7px; font-size: 12px; max-width: 100%; cursor: default; }
+  .ctx-chip .chip-icon { display: inline-flex; color: #525866; flex-shrink: 0; }
+  .ctx-chip .chip-name { font-weight: 500; color: #0E121B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ctx-chip .chip-meta { color: #99A0AE; white-space: nowrap; }
+  .ctx-chip .chip-x { display: none; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 4px; color: #99A0AE; cursor: pointer; margin-left: 1px; }
+  .ctx-chip:hover .chip-x, .ctx-chip.show-x .chip-x { display: inline-flex; }
+  .ctx-chip .chip-x:hover { background: rgba(0,0,0,0.06); color: #525866; }
+
+  /* Anatomy */
+  .anatomy { background: #fff; border: 1px solid #E1E4EA; border-radius: 12px; padding: 22px; margin-bottom: 4px; display: flex; gap: 40px; align-items: flex-start; }
+  .anatomy .big { transform: scale(1.6); transform-origin: left top; margin: 8px 0 18px 2px; }
+  .legend { font-size: 12px; color: #525866; line-height: 1.7; }
+  .legend b { color: #0E121B; font-weight: 600; }
+  .behavior { font-size: 12px; color: #525866; line-height: 1.7; }
+  .behavior li { margin-left: 16px; }
+  .behavior b { color: #0E121B; font-weight: 600; }
+  .anatomy-col h3, .behavior-col h3 { font-size: 12px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>Copilot resource chip</h1>
+  <p class="intro">One chip equals one whole resource. The chip is auto attached from the page the user has open when the panel opens, sits at the top of the composer, and carries the resource name plus its qualifier (time range, timestamp, or time window). Removing it detaches the resource from context. The + button re-attaches it.</p>
+
+  <div class="anatomy">
+    <div class="anatomy-col" style="flex:1">
+      <h3>Anatomy</h3>
+      <div class="big">
+        <span class="ctx-chip show-x">
+          <span class="chip-icon"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C5.85775 17.5 2.5 14.1423 2.5 10H4C4 13.3135 6.6865 16 10 16C13.3135 16 16 13.3135 16 10C16 6.6865 13.3135 4 10 4C7.9375 4 6.118 5.04025 5.03875 6.625H7V8.125H2.5V3.625H4V5.5C5.368 3.6775 7.54675 2.5 10 2.5ZM10.75 6.25V9.68875L13.1823 12.121L12.121 13.1823L9.25 10.3098V6.25H10.75Z" fill="currentColor"/></svg></span>
+          <span class="chip-name">Call History</span>
+          <span class="chip-meta">· Jun 1 – Jun 9</span>
+          <span class="chip-x"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
+        </span>
+      </div>
+      <div class="legend">
+        <b>Icon</b> — resource type, matches the sidebar icon for that surface<br>
+        <b>Name</b> — 12px medium #0E121B, the resource itself<br>
+        <b>Qualifier</b> — 12px #99A0AE, time range / timestamp after a middle dot<br>
+        <b>Remove ×</b> — hover only, detaches the resource from context
+      </div>
+    </div>
+    <div class="behavior-col" style="flex:1">
+      <h3>Behavior</h3>
+      <ul class="behavior">
+        <li><b>Auto attach</b> — chip appears when the panel opens, scoped to the current page</li>
+        <li><b>Static</b> — no intent classification, no partial fragments</li>
+        <li><b>Whole resource</b> — the chip carries the full view (range, filters, rows in view)</li>
+        <li><b>Navigation swaps it</b> — moving landing → detail replaces the chip, never stacks</li>
+        <li><b>Truncation</b> — name truncates with ellipsis, qualifier never wraps</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- =================== CALL HISTORY =================== -->
+  <div class="surface-label">Call History</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-tag">Landing page · Call History list</div>
+      <div class="card-pattern"><code>Call History · {time_range}</code></div>
+      <div class="input-box">
+        <div class="chip-row">
+          <span class="ctx-chip">
+            <span class="chip-icon"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C5.85775 17.5 2.5 14.1423 2.5 10H4C4 13.3135 6.6865 16 10 16C13.3135 16 16 13.3135 16 10C16 6.6865 13.3135 4 10 4C7.9375 4 6.118 5.04025 5.03875 6.625H7V8.125H2.5V3.625H4V5.5C5.368 3.6775 7.54675 2.5 10 2.5ZM10.75 6.25V9.68875L13.1823 12.121L12.121 13.1823L9.25 10.3098V6.25H10.75Z" fill="currentColor"/></svg></span>
+            <span class="chip-name">Call History</span>
+            <span class="chip-meta">· Jun 1 – Jun 9</span>
+            <span class="chip-x"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
+          </span>
+        </div>
+        <div class="input-text">Ask Conductor to help you understand, debug, or improve anything in Retell.</div>
+        <div class="input-toolbar">
+          <button class="tool-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="currentColor"/></svg></button>
+          <button class="tool-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.5 9.5L9.6 14.4C8.4 15.6 6.4 15.6 5.2 14.4C4 13.2 4 11.2 5.2 10L11.2 4C12 3.2 13.3 3.2 14.1 4C14.9 4.8 14.9 6.1 14.1 6.9L8.5 12.5C8.1 12.9 7.5 12.9 7.1 12.5C6.7 12.1 6.7 11.5 7.1 11.1L11.8 6.4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></button>
+          <span class="credits"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 2L18 10L10 18L2 10L10 2Z" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>30</span>
+          <span class="tool-spacer"></span>
+          <button class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 16V4M10 4L5 9M10 4L15 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="card-note"><b>Context resource:</b> Call History view. Includes the current time range, filters, and calls in view.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-tag">Detail page · Single call</div>
+      <div class="card-pattern"><code>Call · {from_number} · {start_timestamp}</code></div>
+      <div class="input-box">
+        <div class="chip-row">
+          <span class="ctx-chip">
+            <span class="chip-icon"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M8.0245 9.0115C8.72825 10.2479 9.75214 11.2717 10.9885 11.9755L11.6515 11.047C11.7581 10.8977 11.9158 10.7927 12.0946 10.7517C12.2734 10.7108 12.4611 10.7369 12.622 10.825C13.6827 11.4047 14.8542 11.7533 16.0592 11.848C16.2473 11.8629 16.4229 11.9482 16.5509 12.0867C16.6789 12.2253 16.75 12.4071 16.75 12.5958V15.9423C16.75 16.1279 16.6812 16.3071 16.5568 16.4449C16.4324 16.5828 16.2612 16.6696 16.0765 16.6885C15.679 16.7297 15.2785 16.75 14.875 16.75C8.455 16.75 3.25 11.545 3.25 5.125C3.25 4.7215 3.27025 4.321 3.3115 3.9235C3.33044 3.73877 3.41724 3.56764 3.55509 3.44323C3.69295 3.31881 3.87205 3.24996 4.05775 3.25H7.40425C7.59292 3.24998 7.77467 3.32106 7.91326 3.44909C8.05185 3.57711 8.13709 3.75267 8.152 3.94075C8.24667 5.14584 8.59531 6.31726 9.175 7.378C9.2631 7.53892 9.28916 7.72656 9.24825 7.9054C9.20734 8.08424 9.1023 8.24188 8.953 8.3485L8.0245 9.0115Z" fill="currentColor"/></svg></span>
+            <span class="chip-name">Call · +1 415 555 0132</span>
+            <span class="chip-meta">· Jun 9, 9:41 PM</span>
+            <span class="chip-x"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
+          </span>
+        </div>
+        <div class="input-text">Ask Conductor to help you understand, debug, or improve anything in Retell.</div>
+        <div class="input-toolbar">
+          <button class="tool-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="currentColor"/></svg></button>
+          <button class="tool-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.5 9.5L9.6 14.4C8.4 15.6 6.4 15.6 5.2 14.4C4 13.2 4 11.2 5.2 10L11.2 4C12 3.2 13.3 3.2 14.1 4C14.9 4.8 14.9 6.1 14.1 6.9L8.5 12.5C8.1 12.9 7.5 12.9 7.1 12.5C6.7 12.1 6.7 11.5 7.1 11.1L11.8 6.4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></button>
+          <span class="credits"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 2L18 10L10 18L2 10L10 2Z" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>30</span>
+          <span class="tool-spacer"></span>
+          <button class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 16V4M10 4L5 9M10 4L15 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="card-note"><b>Context resource:</b> Single call. Transcript, recording metadata, analysis, and outcome for one call.</div>
+    </div>
+  </div>
+
+  <!-- =================== ANALYTICS =================== -->
+  <div class="surface-label">Analytics</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-tag">Landing page · Dashboard</div>
+      <div class="card-pattern"><code>{dashboard.name} · {time_range}</code></div>
+      <div class="input-box">
+        <div class="chip-row">
+          <span class="ctx-chip">
+            <span class="chip-icon"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 17.5C5.85775 17.5 2.5 14.1423 2.5 10C2.5 6.6415 4.70725 3.799 7.75 2.8435V4.4365C6.46069 4.96003 5.39335 5.91528 4.73054 7.13884C4.06774 8.36239 3.85066 9.77823 4.11644 11.1442C4.38222 12.5101 5.11434 13.7412 6.18757 14.627C7.2608 15.5128 8.60846 15.9981 10 16C11.1953 16 12.3634 15.643 13.3546 14.9749C14.3458 14.3068 15.115 13.358 15.5635 12.25H17.1565C16.201 15.2928 13.3585 17.5 10 17.5ZM17.4625 10.75H9.25V2.5375C9.49675 2.51275 9.74725 2.5 10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 10.2527 17.4873 10.5033 17.4625 10.75ZM10.75 4.0465V9.25H15.9535C15.7866 7.92821 15.1846 6.6995 14.2426 5.75743C13.3005 4.81535 12.0718 4.21344 10.75 4.0465Z" fill="currentColor"/></svg></span>
+            <span class="chip-name">Call Performance Overview</span>
+            <span class="chip-meta">· Last 30 days</span>
+            <span class="chip-x"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
+          </span>
+        </div>
+        <div class="input-text">Ask Conductor to help you understand, debug, or improve anything in Retell.</div>
+        <div class="input-toolbar">
+          <button class="tool-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="currentColor"/></svg></button>
+          <button class="tool-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.5 9.5L9.6 14.4C8.4 15.6 6.4 15.6 5.2 14.4C4 13.2 4 11.2 5.2 10L11.2 4C12 3.2 13.3 3.2 14.1 4C14.9 4.8 14.9 6.1 14.1 6.9L8.5 12.5C8.1 12.9 7.5 12.9 7.1 12.5C6.7 12.1 6.7 11.5 7.1 11.1L11.8 6.4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></button>
+          <span class="credits"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 2L18 10L10 18L2 10L10 2Z" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>30</span>
+          <span class="tool-spacer"></span>
+          <button class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 16V4M10 4L5 9M10 4L15 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="card-note"><b>Context resource:</b> Dashboard. All charts on the board with the selected time range and filters.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-tag">Detail page · Single chart</div>
+      <div class="card-pattern"><code>{chart.name} · {time_range}</code></div>
+      <div class="input-box">
+        <div class="chip-row">
+          <span class="ctx-chip">
+            <span class="chip-icon"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M3.5 16.5V3.5H5V15H16.5V16.5H3.5ZM6.5 13V8H8.5V13H6.5ZM10 13V4.5H12V13H10ZM13.5 13V10H15.5V13H13.5Z" fill="currentColor"/></svg></span>
+            <span class="chip-name">Call Success Rate</span>
+            <span class="chip-meta">· Last 30 days</span>
+            <span class="chip-x"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
+          </span>
+        </div>
+        <div class="input-text">Ask Conductor to help you understand, debug, or improve anything in Retell.</div>
+        <div class="input-toolbar">
+          <button class="tool-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="currentColor"/></svg></button>
+          <button class="tool-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.5 9.5L9.6 14.4C8.4 15.6 6.4 15.6 5.2 14.4C4 13.2 4 11.2 5.2 10L11.2 4C12 3.2 13.3 3.2 14.1 4C14.9 4.8 14.9 6.1 14.1 6.9L8.5 12.5C8.1 12.9 7.5 12.9 7.1 12.5C6.7 12.1 6.7 11.5 7.1 11.1L11.8 6.4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></button>
+          <span class="credits"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 2L18 10L10 18L2 10L10 2Z" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>30</span>
+          <span class="tool-spacer"></span>
+          <button class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 16V4M10 4L5 9M10 4L15 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="card-note"><b>Context resource:</b> Single chart. The chart definition, its series data, and the selected time range.</div>
+    </div>
+  </div>
+
+  <!-- =================== AI QA =================== -->
+  <div class="surface-label">AI QA</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-tag">Landing page · Cohort list</div>
+      <div class="card-pattern"><code>AI QA · {time_range}</code></div>
+      <div class="input-box">
+        <div class="chip-row">
+          <span class="ctx-chip">
+            <span class="chip-icon"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M14.5232 13.4627L17.7355 16.6742L16.6742 17.7355L13.4627 14.5232C12.2678 15.4812 10.7815 16.0022 9.25 16C5.524 16 2.5 12.976 2.5 9.25C2.5 5.524 5.524 2.5 9.25 2.5C12.976 2.5 16 5.524 16 9.25C16.0022 10.7815 15.4812 12.2678 14.5232 13.4627ZM13.0187 12.9062C13.9706 11.9274 14.5021 10.6153 14.5 9.25C14.5 6.349 12.1502 4 9.25 4C6.349 4 4 6.349 4 9.25C4 12.1502 6.349 14.5 9.25 14.5C10.6153 14.5021 11.9274 13.9706 12.9062 13.0187L13.0187 12.9062Z" fill="currentColor"/><path d="M5 9L7.58065 9.09524L8.70968 7L10.5161 11L11.6452 9.09524H13.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></span>
+            <span class="chip-name">AI QA</span>
+            <span class="chip-meta">· Last 7 days</span>
+            <span class="chip-x"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
+          </span>
+        </div>
+        <div class="input-text">Ask Conductor to help you understand, debug, or improve anything in Retell.</div>
+        <div class="input-toolbar">
+          <button class="tool-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="currentColor"/></svg></button>
+          <button class="tool-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.5 9.5L9.6 14.4C8.4 15.6 6.4 15.6 5.2 14.4C4 13.2 4 11.2 5.2 10L11.2 4C12 3.2 13.3 3.2 14.1 4C14.9 4.8 14.9 6.1 14.1 6.9L8.5 12.5C8.1 12.9 7.5 12.9 7.1 12.5C6.7 12.1 6.7 11.5 7.1 11.1L11.8 6.4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></button>
+          <span class="credits"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 2L18 10L10 18L2 10L10 2Z" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>30</span>
+          <span class="tool-spacer"></span>
+          <button class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 16V4M10 4L5 9M10 4L15 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="card-note"><b>Context resource:</b> AI QA cohort list. All cohorts with their scores and the selected time range.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-tag">Detail page · Single cohort</div>
+      <div class="card-pattern"><code>{cohort.name} · {time_window}</code></div>
+      <div class="input-box">
+        <div class="chip-row">
+          <span class="ctx-chip">
+            <span class="chip-icon"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="10" cy="10" r="1" fill="currentColor"/></svg></span>
+            <span class="chip-name">Refund Requests</span>
+            <span class="chip-meta">· May 26 – Jun 9</span>
+            <span class="chip-x"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
+          </span>
+        </div>
+        <div class="input-text">Ask Conductor to help you understand, debug, or improve anything in Retell.</div>
+        <div class="input-toolbar">
+          <button class="tool-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="currentColor"/></svg></button>
+          <button class="tool-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.5 9.5L9.6 14.4C8.4 15.6 6.4 15.6 5.2 14.4C4 13.2 4 11.2 5.2 10L11.2 4C12 3.2 13.3 3.2 14.1 4C14.9 4.8 14.9 6.1 14.1 6.9L8.5 12.5C8.1 12.9 7.5 12.9 7.1 12.5C6.7 12.1 6.7 11.5 7.1 11.1L11.8 6.4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></button>
+          <span class="credits"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 2L18 10L10 18L2 10L10 2Z" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>30</span>
+          <span class="tool-spacer"></span>
+          <button class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 16V4M10 4L5 9M10 4L15 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="card-note"><b>Context resource:</b> AI QA cohort. The cohort definition, resolution criteria, scores, and calls in its time window.</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

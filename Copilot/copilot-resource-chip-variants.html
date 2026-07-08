@@ -49,12 +49,18 @@
   .behavior li { margin-left: 16px; }
   .behavior b { color: #0E121B; font-weight: 600; }
   .anatomy-col h3, .behavior-col h3 { font-size: 12px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+
+  /* Tooltip demo */
+  .tip-wrap { position: relative; display: inline-block; }
+  .tip { position: absolute; bottom: calc(100% + 8px); left: 0; background: #0E121B; color: #fff; font-size: 11px; line-height: 1.5; padding: 7px 10px; border-radius: 7px; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
+  .tip::after { content: ''; position: absolute; top: 100%; left: 16px; border: 5px solid transparent; border-top-color: #0E121B; }
+  .tip .tip-dim { color: #99A0AE; }
 </style>
 </head>
 <body>
 <div class="sheet">
   <h1>Copilot resource chip</h1>
-  <p class="intro">One chip equals one whole resource. The chip is auto attached from the page the user has open when the panel opens, sits at the top of the composer, and carries the resource name plus its qualifier (time range, timestamp, or time window). Removing it detaches the resource from context. The + button re-attaches it.</p>
+  <p class="intro">One chip equals one whole resource. The chip is auto attached from the page the user has open when the panel opens, sits at the top of the composer, and carries the resource name plus its qualifier (time range, timestamp, or time window). Landing chips are queries (the page's filter state, resolved at ask time); detail chips are references to one entity. Removing the chip detaches the resource from context. The + button re-attaches it.</p>
 
   <div class="anatomy">
     <div class="anatomy-col" style="flex:1">
@@ -79,7 +85,10 @@
       <ul class="behavior">
         <li><b>Auto attach</b> — chip appears when the panel opens, scoped to the current page</li>
         <li><b>Static</b> — no intent classification, no partial fragments</li>
-        <li><b>Whole resource</b> — the chip carries the full view (range, filters, rows in view)</li>
+        <li><b>It is a query</b> — landing chips carry time range + all filters + sort, resolved at ask time. Full filtered set, not the rows on the current page</li>
+        <li><b>Label rule</b> — time range always visible; other filters collapse to +N, full list on hover</li>
+        <li><b>Chip follows the page</b> — changing the date range or filters updates it live</li>
+        <li><b>Empty result</b> — 0 matches keeps the chip valid; Copilot reports no matching calls and offers to widen</li>
         <li><b>Navigation swaps it</b> — moving landing → detail replaces the chip, never stacks</li>
         <li><b>Truncation</b> — name truncates with ellipsis, qualifier never wraps</li>
       </ul>
@@ -110,7 +119,34 @@
           <button class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 16V4M10 4L5 9M10 4L15 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
       </div>
-      <div class="card-note"><b>Context resource:</b> Call History view. Includes the current time range, filters, and calls in view.</div>
+      <div class="card-note"><b>Context resource:</b> Call History query. Time range + all filters + sort, resolved at ask time. Full filtered set, not just the page in view.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-tag">Landing page · non-date filters active</div>
+      <div class="card-pattern"><code>Call History · {time_range} · +{n} filters</code></div>
+      <div class="input-box" style="padding-top:52px;">
+        <div class="chip-row">
+          <span class="tip-wrap">
+            <span class="tip">Jun 11 – Jul 8 <span class="tip-dim">·</span> Duration &gt; 10 mins</span>
+            <span class="ctx-chip show-x">
+              <span class="chip-icon"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C14.1423 2.5 17.5 5.85775 17.5 10C17.5 14.1423 14.1423 17.5 10 17.5C5.85775 17.5 2.5 14.1423 2.5 10H4C4 13.3135 6.6865 16 10 16C13.3135 16 16 13.3135 16 10C16 6.6865 13.3135 4 10 4C7.9375 4 6.118 5.04025 5.03875 6.625H7V8.125H2.5V3.625H4V5.5C5.368 3.6775 7.54675 2.5 10 2.5ZM10.75 6.25V9.68875L13.1823 12.121L12.121 13.1823L9.25 10.3098V6.25H10.75Z" fill="currentColor"/></svg></span>
+              <span class="chip-name">Call History</span>
+              <span class="chip-meta">· Jun 11 – Jul 8 · +1 filter</span>
+              <span class="chip-x"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
+            </span>
+          </span>
+        </div>
+        <div class="input-text">Ask Conductor to help you understand, debug, or improve anything in Retell.</div>
+        <div class="input-toolbar">
+          <button class="tool-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="currentColor"/></svg></button>
+          <button class="tool-icon"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.5 9.5L9.6 14.4C8.4 15.6 6.4 15.6 5.2 14.4C4 13.2 4 11.2 5.2 10L11.2 4C12 3.2 13.3 3.2 14.1 4C14.9 4.8 14.9 6.1 14.1 6.9L8.5 12.5C8.1 12.9 7.5 12.9 7.1 12.5C6.7 12.1 6.7 11.5 7.1 11.1L11.8 6.4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></button>
+          <span class="credits"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M10 2L18 10L10 18L2 10L10 2Z" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>30</span>
+          <span class="tool-spacer"></span>
+          <button class="send-btn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 16V4M10 4L5 9M10 4L15 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="card-note"><b>Label rule:</b> time range stays visible, every other filter collapses into +{n}. Hover shows the full list. The context resource carries the complete query either way.</div>
     </div>
 
     <div class="card">

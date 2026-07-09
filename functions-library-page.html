@@ -384,11 +384,9 @@
 <aside class="subnav">
   <div class="subnav-group" style="margin-top:0">
     <div class="subnav-group-label">Category</div>
-    <div class="subnav-item" id="cat-extractors" onclick="setCategory('extractors')"><span class="subnav-dot" style="background:#CA8A04"></span> Post-call Data Extraction <span class="count">6</span></div>
-    <div class="subnav-item" id="cat-pre" onclick="setCategory('pre')"><span class="subnav-dot" style="background:#1D4ED8"></span> Pre-conversation <span class="count">2</span></div>
-    <div class="subnav-item" id="cat-during" onclick="setCategory('during')"><span class="subnav-dot" style="background:#166534"></span> During-conversation <span class="count">3</span></div>
-    <div class="subnav-item" id="cat-post" onclick="setCategory('post')"><span class="subnav-dot" style="background:#9A3412"></span> Post-conversation <span class="count">3</span></div>
-    <div class="subnav-item active" id="cat-custom" onclick="setCategory('custom')"><span class="subnav-dot" style="background:#3d64d7"></span> Custom Functions <span class="count">4</span></div>
+    <div class="subnav-item active" id="cat-functions" onclick="setCategory('functions')"><span class="subnav-dot" style="background:#3d64d7"></span> Functions <span class="count">8</span></div>
+    <div class="subnav-item" id="cat-extractors" onclick="setCategory('extractors')"><span class="subnav-dot" style="background:#CA8A04"></span> Post Call Analysis <span class="count">6</span></div>
+    <div class="subnav-item" id="cat-custom" onclick="setCategory('custom')"><span class="subnav-dot" style="background:#3d64d7"></span> Custom Functions <span class="count">4</span></div>
     <div class="subnav-item" id="cat-mcp" style="opacity:0.45"><span class="subnav-dot" style="background:#6B7280"></span> MCP Connectors <span class="count">0</span></div>
   </div>
 
@@ -398,7 +396,7 @@
 <main class="main">
 
 <!-- VIEW: Functions (default) -->
-<div id="view-functions" hidden>
+<div id="view-functions">
   <div class="main-header">
     <div class="dot"></div>
     <h1>Functions</h1>
@@ -624,7 +622,7 @@
         <td class="edited">06/09/2026 16:57</td>
         <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
-      <!-- Row 7: Post-call Data Extraction -->
+      <!-- Row 7: Post Call Analysis -->
       <tr onclick="openFnPanel('qualification_result')" style="cursor:pointer">
         <td>
           <div class="fn-name">
@@ -635,7 +633,7 @@
             </div>
           </div>
         </td>
-        <td><span class="type-badge"><span class="tdot" style="background:#CA8A04"></span>Post-call Data Extraction</span></td>
+        <td><span class="type-badge"><span class="tdot" style="background:#CA8A04"></span>Post Call Analysis</span></td>
         <td><span class="timing-badge timing-pca">Extractor</span></td>
         <td>
           <div class="used-by">
@@ -651,7 +649,7 @@
         <td class="edited">06/09/2026 21:38</td>
         <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
-      <!-- Row 8: Post-call Data Extraction -->
+      <!-- Row 8: Post Call Analysis -->
       <tr onclick="openFnPanel('call_disposition')" style="cursor:pointer">
         <td>
           <div class="fn-name">
@@ -662,7 +660,7 @@
             </div>
           </div>
         </td>
-        <td><span class="type-badge"><span class="tdot" style="background:#CA8A04"></span>Post-call Data Extraction</span></td>
+        <td><span class="type-badge"><span class="tdot" style="background:#CA8A04"></span>Post Call Analysis</span></td>
         <td><span class="timing-badge timing-pca">Extractor</span></td>
         <td>
           <div class="used-by">
@@ -695,7 +693,7 @@
 <div id="view-extractors" hidden>
   <div class="main-header">
     <div class="dot" style="background:#CA8A04"></div>
-    <h1>Post-call Data Extraction</h1>
+    <h1>Post Call Analysis</h1>
     <span class="h-count">4</span>
   </div>
   <p class="subtitle">Define the information that you need to extract from the call</p>
@@ -714,7 +712,7 @@
         <div class="newfn-item" onclick="openNewPcaPanel()">
           <div class="newfn-item-icon" style="background:#FFFBEB"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="#CA8A04"/></svg></div>
           <div>
-            <div style="font-size:13px;font-weight:500;color:#0A0A0A">New Post-call Data Extraction</div>
+            <div style="font-size:13px;font-weight:500;color:#0A0A0A">New Post Call Analysis</div>
             <div style="font-size:12px;color:#9CA3AF;margin-top:1px">Create a new extraction field from scratch.</div>
           </div>
         </div>
@@ -806,7 +804,7 @@
 </div><!-- /view-extractors -->
 
 <!-- VIEW: Custom Functions -->
-<div id="view-custom">
+<div id="view-custom" hidden>
   <div class="main-header">
     <div class="dot" style="background:#3d64d7"></div>
     <h1>Custom Functions</h1>
@@ -985,7 +983,7 @@
 <!-- extraction field side panel -->
 <div class="pca-panel" id="pcaPanel">
   <div class="panel-header">
-    <span class="panel-title">New Post-call Data Extraction</span>
+    <span class="panel-title">New Post Call Analysis</span>
     <span class="panel-close" onclick="closePcaPanel()">×</span>
   </div>
   <div class="panel-body">
@@ -1232,7 +1230,7 @@
   }
 
   function openNewPcaPanel() {
-    document.querySelector('.panel-title').textContent = 'New Post-call Data Extraction';
+    document.querySelector('.panel-title').textContent = 'New Post Call Analysis';
     var nameInput = document.getElementById('pcaName');
     nameInput.value = '';
     nameInput.readOnly = false;
@@ -1287,7 +1285,7 @@
     try { document.getElementById('fnOverlay').classList.remove('open'); } catch(e){}
     try { document.getElementById('tmplOverlay').classList.remove('open'); } catch(e){}
     // update active state
-    ['extractors','pre','during','post','custom'].forEach(function(c) {
+    ['functions','extractors','custom'].forEach(function(c) {
       var el = document.getElementById('cat-' + c);
       if (el) el.classList.toggle('active', c === cat);
     });
@@ -1295,7 +1293,7 @@
     var fnView = document.getElementById('view-functions');
     var exView = document.getElementById('view-extractors');
     var cuView = document.getElementById('view-custom');
-    if (fnView) fnView.hidden = (cat === 'extractors' || cat === 'custom');
+    if (fnView) fnView.hidden = (cat !== 'functions');
     if (exView) exView.hidden = (cat !== 'extractors');
     if (cuView) cuView.hidden = (cat !== 'custom');
   }
@@ -1395,7 +1393,7 @@
 
   function openTmplPanel(name, type, desc) {
     document.getElementById('tmplOverlay').classList.remove('open');
-    document.querySelector('.panel-title').textContent = 'New Post-call Data Extraction';
+    document.querySelector('.panel-title').textContent = 'New Post Call Analysis';
     var nameInput = document.getElementById('pcaName');
     nameInput.value = name;
     nameInput.readOnly = false;
@@ -1440,10 +1438,10 @@
     transfer_to_human: { name: 'transfer_to_human', sub: 'Warm transfer to a live support queue', category: 'Call transfer', categoryColor: '#FF9147', timing: 'During-conversation', timingClass: 'timing-mid', agents: ['DR','LI','IV','SC'], agentColors: ['#3d64d7','#E5484D','#7D52F4','#1FC16B'], lastEdited: '06/12/2026 09:43', description: 'Performs a warm transfer to the next available agent in the support queue. Passes a summary of the call context to the receiving agent before the handoff completes.', endpoint: 'POST /v1/calls/transfer' },
     verify_customer_identity: { name: 'verify_customer_identity', sub: 'Checks name and DOB against the CRM record', category: 'Custom API', categoryColor: '#3d64d7', timing: 'Pre-conversation', timingClass: 'timing-pre', agents: ['IV','LI','BK'], agentColors: ['#7D52F4','#E5484D','#FF9147'], lastEdited: '06/10/2026 11:13', description: 'Verifies the caller\'s identity by matching their stated name and date of birth against the CRM record linked to their phone number. Returns a verified or failed status.', endpoint: 'POST https://api.yourcrm.com/v2/identity/verify' },
     send_slack_notification: { name: 'send_slack_notification', sub: 'Posts call summary to the team Slack channel', category: 'Slack', categoryColor: '#611F69', timing: 'Post-conversation', timingClass: 'timing-post', agents: ['DR','IV','SC','BK'], agentColors: ['#3d64d7','#7D52F4','#1FC16B','#E5484D'], lastEdited: '06/09/2026 16:57', description: 'Sends a formatted call summary to the designated Slack channel after each call ends. Includes the caller\'s name, outcome, and any flagged action items.', endpoint: 'POST https://slack.com/api/chat.postMessage' },
-    qualification_result: { name: 'qualification_result', sub: 'The outcome of qualifying the caller\'s case during intake', category: 'Post-call Data Extraction', categoryColor: '#CA8A04', timing: 'Extractor', timingClass: 'timing-pca', agents: ['DR','IV','SC','LI','BK','MO'], agentColors: ['#3d64d7','#7D52F4','#1FC16B','#E5484D','#FF9147','#525866'], lastEdited: '06/09/2026 21:38', description: 'After the call ends, the AI reads the transcript and determines whether the caller\'s case was qualified, not qualified, or escalated.', endpoint: null },
-    call_disposition: { name: 'call_disposition', sub: 'How the call ultimately concluded', category: 'Post-call Data Extraction', categoryColor: '#CA8A04', timing: 'Extractor', timingClass: 'timing-pca', agents: ['LI','IV'], agentColors: ['#E5484D','#7D52F4'], lastEdited: '06/03/2026 11:14', description: 'After the call ends, the AI reads the transcript and classifies the call outcome: resolved, transferred, voicemail, or abandoned.', endpoint: null },
-    call_summary: { name: 'call_summary', sub: 'A 2 to 3 sentence recap of what happened on the call', category: 'Post-call Data Extraction', categoryColor: '#CA8A04', timing: 'Extractor', timingClass: 'timing-pca', agents: ['DR','IV','SC','LI','BK','MO','KP'], agentColors: ['#3d64d7','#7D52F4','#1FC16B','#E5484D','#FF9147','#525866','#CA8A04'], lastEdited: '06/17/2026 08:30', description: 'After the call ends, the AI writes a 2 to 3 sentence summary covering the main topic, outcome, and any next steps mentioned by the caller.', endpoint: null },
-    callback_requested: { name: 'callback_requested', sub: 'Whether the caller asked to be called back', category: 'Post-call Data Extraction', categoryColor: '#CA8A04', timing: 'Extractor', timingClass: 'timing-pca', agents: ['LI'], agentColors: ['#E5484D'], lastEdited: '06/18/2026 14:45', description: 'After the call ends, the AI checks the transcript for any explicit request from the caller to receive a follow-up call.', endpoint: null }
+    qualification_result: { name: 'qualification_result', sub: 'The outcome of qualifying the caller\'s case during intake', category: 'Post Call Analysis', categoryColor: '#CA8A04', timing: 'Extractor', timingClass: 'timing-pca', agents: ['DR','IV','SC','LI','BK','MO'], agentColors: ['#3d64d7','#7D52F4','#1FC16B','#E5484D','#FF9147','#525866'], lastEdited: '06/09/2026 21:38', description: 'After the call ends, the AI reads the transcript and determines whether the caller\'s case was qualified, not qualified, or escalated.', endpoint: null },
+    call_disposition: { name: 'call_disposition', sub: 'How the call ultimately concluded', category: 'Post Call Analysis', categoryColor: '#CA8A04', timing: 'Extractor', timingClass: 'timing-pca', agents: ['LI','IV'], agentColors: ['#E5484D','#7D52F4'], lastEdited: '06/03/2026 11:14', description: 'After the call ends, the AI reads the transcript and classifies the call outcome: resolved, transferred, voicemail, or abandoned.', endpoint: null },
+    call_summary: { name: 'call_summary', sub: 'A 2 to 3 sentence recap of what happened on the call', category: 'Post Call Analysis', categoryColor: '#CA8A04', timing: 'Extractor', timingClass: 'timing-pca', agents: ['DR','IV','SC','LI','BK','MO','KP'], agentColors: ['#3d64d7','#7D52F4','#1FC16B','#E5484D','#FF9147','#525866','#CA8A04'], lastEdited: '06/17/2026 08:30', description: 'After the call ends, the AI writes a 2 to 3 sentence summary covering the main topic, outcome, and any next steps mentioned by the caller.', endpoint: null },
+    callback_requested: { name: 'callback_requested', sub: 'Whether the caller asked to be called back', category: 'Post Call Analysis', categoryColor: '#CA8A04', timing: 'Extractor', timingClass: 'timing-pca', agents: ['LI'], agentColors: ['#E5484D'], lastEdited: '06/18/2026 14:45', description: 'After the call ends, the AI checks the transcript for any explicit request from the caller to receive a follow-up call.', endpoint: null }
   };
   var AGENT_NAMES = {DR:'Dr. Rivera Agent', IV:'Ivan V. Agent', SC:'Sara Chen Agent', LI:'Linda Im Agent', BK:'Brandon K. Agent', MO:'Mike O. Agent', KP:'Karen P. Agent', AM:'Alex M. Agent'};
 

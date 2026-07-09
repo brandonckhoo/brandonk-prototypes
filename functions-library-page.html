@@ -166,6 +166,39 @@
   .cf-save { border: none; background: #0E121B; color: #fff; border-radius: 9px; padding: 10px 24px; font-size: 14.5px; font-weight: 500; cursor: pointer; }
   .cf-save:hover { background: #000; }
 
+  /* ============ NEW FUNCTION (integration) MODAL ============ */
+  .nf-modal { width: 560px; max-width: 100%; background: #fff; border-radius: 14px; box-shadow: 0 24px 60px rgba(0,0,0,0.28); display: flex; flex-direction: column; max-height: calc(100vh - 80px); overflow: hidden; }
+  .nf-screen { display: none; }
+  .nf-screen.active { display: block; }
+  .nf-list { display: flex; flex-direction: column; }
+  .nf-row { display: flex; align-items: center; gap: 12px; padding: 13px 8px; border-bottom: 1px solid #F0F1F3; cursor: pointer; border-radius: 8px; }
+  .nf-row:hover { background: #F7F8FA; }
+  .nf-row:last-child { border-bottom: none; }
+  .nf-logo { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .nf-logo svg { width: 20px; height: 20px; }
+  .nf-row-main { flex: 1; min-width: 0; }
+  .nf-row-name { font-size: 15px; font-weight: 600; color: #0A0A0A; }
+  .nf-row-desc { font-size: 13px; color: #6B7280; margin-top: 2px; }
+  .nf-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+  .nf-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .nf-badge.on { background: #E7F8EF; color: #137a43; }
+  .nf-badge.on .dot { background: #1FC16B; }
+  .nf-badge.off { background: #F3F4F6; color: #6B7280; }
+  .nf-badge.off .dot { background: #9CA3AF; }
+  .nf-connect { border: 1px solid #E5E7EB; background: #fff; border-radius: 8px; padding: 7px 14px; font-size: 13.5px; font-weight: 500; color: #0A0A0A; cursor: pointer; }
+  .nf-connect:hover { background: #F9FAFB; }
+  .nf-chev { color: #C4C9D4; flex-shrink: 0; font-size: 18px; line-height: 1; }
+  .nf-back { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: #6B7280; cursor: pointer; margin-bottom: 10px; }
+  .nf-back:hover { color: #0A0A0A; }
+  .nf-scope { display: flex; flex-direction: column; gap: 10px; }
+  .scope-card { border: 1px solid #E5E7EB; border-radius: 10px; padding: 14px; cursor: pointer; display: flex; gap: 12px; align-items: flex-start; }
+  .scope-card.sel { border-color: #3d64d7; background: #F5F8FF; }
+  .scope-radio { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #CBD2DC; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; }
+  .scope-card.sel .scope-radio { border-color: #3d64d7; }
+  .scope-card.sel .scope-radio::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: #3d64d7; }
+  .scope-title { font-size: 14.5px; font-weight: 600; color: #0A0A0A; }
+  .scope-desc { font-size: 13px; color: #6B7280; margin-top: 3px; line-height: 1.45; }
+
   /* scoped table search */
   .tbl-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; min-width: 320px; }
   .tbl-search:focus-within { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.1); }
@@ -515,28 +548,20 @@
         <svg width="13" height="13" viewBox="0 0 20 20" fill="none" style="margin-left:2px"><path d="M5 7l5 5 5-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
       <div class="newfn-dropdown" id="newfnDropdown">
-        <div class="newfn-section">Function type</div>
-        <div class="newfn-item" onclick="openNewCfPanel()">
-          <div class="newfn-item-icon" style="background:#EFEAFE"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 5h12v1.5H4V5zm0 4h12v1.5H4V9zm0 4h8v1.5H4V13z" fill="#7D52F4"/></svg></div>
-          Custom API
-        </div>
-        <div class="newfn-item">
-          <div class="newfn-item-icon" style="background:#E8EDFC"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M6 7l3 3-3 3m5 0h4" stroke="#3d64d7" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          Code tool
+        <div class="newfn-item" onclick="openNfModal()">
+          <div class="newfn-item-icon" style="background:#E3F4FC"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 3c1.4 0 2.6.8 3.2 2 .5-.2 1.1-.3 1.7-.3 2.3 0 4.1 1.8 4.1 4.1 0 .4-.1.8-.2 1.2.5.7.7 1.5.7 2.3 0 2.2-1.8 4-4 4H5C3.3 16.3 2 14.9 2 13.2c0-1 .5-1.9 1.3-2.5C3.1 10.3 3 9.9 3 9.5 3 7.7 4.8 6 7 6c.3-1.7 1.5-3 3-3z" fill="#00A1E0"/></svg></div>
+          <div>
+            <div style="font-size:14px;font-weight:500;color:#0A0A0A">Integration function</div>
+            <div style="font-size:12px;color:#9CA3AF;margin-top:1px">Build on Salesforce, HubSpot, Cal.com, Slack</div>
+          </div>
         </div>
         <div class="newfn-divider"></div>
-        <div class="newfn-section">Integration</div>
-        <div class="newfn-item">
-          <div class="newfn-item-icon" style="background:#E3F4FC"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 3c1.4 0 2.6.8 3.2 2 .5-.2 1.1-.3 1.7-.3 2.3 0 4.1 1.8 4.1 4.1 0 .4-.1.8-.2 1.2.5.7.7 1.5.7 2.3 0 2.2-1.8 4-4 4H5C3.3 16.3 2 14.9 2 13.2c0-1 .5-1.9 1.3-2.5C3.1 10.3 3 9.9 3 9.5 3 7.7 4.8 6 7 6c.3-1.7 1.5-3 3-3z" fill="#00A1E0"/></svg></div>
-          Salesforce
-        </div>
-        <div class="newfn-item">
-          <div class="newfn-item-icon" style="background:#FFF3EF"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M13.5 7.25a2.25 2.25 0 10-3.4 1.94V11.5l-2.5 1.5v1.5l2.5-1.5V14l-2 1V16.5l2-1V17h1.5v-2l2 1V14.5l-2-1v-.5l2.5 1.5V13l-2.5-1.5V9.19a2.25 2.25 0 001.9-1.94z" fill="#FF7A59"/></svg></div>
-          HubSpot
-        </div>
-        <div class="newfn-item">
-          <div class="newfn-item-icon" style="background:#E8F8F0"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 3h10a1 1 0 011 1v3H4V4a1 1 0 011-1zm-1 5h12v8a1 1 0 01-1 1H5a1 1 0 01-1-1V8zm3 2v1.5h6V10H7z" fill="#1FC16B"/></svg></div>
-          Cal.com
+        <div class="newfn-item" onclick="openNewCfPanel()">
+          <div class="newfn-item-icon" style="background:#EFEAFE"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 5h12v1.5H4V5zm0 4h12v1.5H4V9zm0 4h8v1.5H4V13z" fill="#7D52F4"/></svg></div>
+          <div>
+            <div style="font-size:14px;font-weight:500;color:#0A0A0A">Custom function</div>
+            <div style="font-size:12px;color:#9CA3AF;margin-top:1px">Call any API endpoint</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1775,6 +1800,124 @@
     closeNewCfPanel();
     showToast(acct ? 'Custom function published to library' : 'Custom function saved to this agent');
   }
+
+  // ===== NEW FUNCTION (INTEGRATION) MODAL =====
+  var NF_ICONS = {
+    salesforce: '<svg viewBox="0 0 20 20" fill="none"><path d="M10 3c1.4 0 2.6.8 3.2 2 .5-.2 1.1-.3 1.7-.3 2.3 0 4.1 1.8 4.1 4.1 0 .4-.1.8-.2 1.2.5.7.7 1.5.7 2.3 0 2.2-1.8 4-4 4H5C3.3 16.3 2 14.9 2 13.2c0-1 .5-1.9 1.3-2.5C3.1 10.3 3 9.9 3 9.5 3 7.7 4.8 6 7 6c.3-1.7 1.5-3 3-3z" fill="#00A1E0"/></svg>',
+    hubspot: '<svg viewBox="0 0 20 20" fill="none"><path d="M13.5 7.25a2.25 2.25 0 10-3.4 1.94V11.5l-2.5 1.5v1.5l2.5-1.5V14l-2 1v1.5l2-1V17h1.5v-2l2 1V14.5l-2-1v-.5l2.5 1.5V13l-2.5-1.5V9.19a2.25 2.25 0 001.9-1.94z" fill="#FF7A59"/></svg>',
+    calcom: '<svg viewBox="0 0 20 20" fill="none"><path d="M5 3h10a1 1 0 011 1v3H4V4a1 1 0 011-1zm-1 5h12v8a1 1 0 01-1 1H5a1 1 0 01-1-1V8zm3 2v1.5h6V10H7z" fill="#1FC16B"/></svg>',
+    slack: '<svg viewBox="0 0 20 20" fill="none"><path d="M7.5 3a1.5 1.5 0 00-1.5 1.5V6H4.5a1.5 1.5 0 000 3H6v1H4.5a1.5 1.5 0 000 3H6v.5a1.5 1.5 0 003 0V13h1v.5a1.5 1.5 0 003 0V13h.5a1.5 1.5 0 000-3H13V9h.5a1.5 1.5 0 000-3H13V5.5a1.5 1.5 0 00-3 0V6H9V4.5A1.5 1.5 0 007.5 3zM9 9V7h1v2H9zm0 4v-2h1v2H9z" fill="#611F69"/></svg>',
+    zendesk: '<span style="font-weight:700;font-size:13px;color:#03363D">Z</span>',
+    gcal: '<span style="font-weight:700;font-size:12px;color:#4285F4">31</span>'
+  };
+  var NF_INTEGRATIONS = [
+    { id:'salesforce', name:'Salesforce', color:'#00A1E0', bg:'#E3F4FC', connected:true },
+    { id:'hubspot', name:'HubSpot', color:'#FF7A59', bg:'#FFF3EF', connected:true },
+    { id:'calcom', name:'Cal.com', color:'#1FC16B', bg:'#E8F8F0', connected:true },
+    { id:'slack', name:'Slack', color:'#611F69', bg:'#F4F0FA', connected:true },
+    { id:'zendesk', name:'Zendesk', color:'#03363D', bg:'#E7EEEE', connected:false },
+    { id:'gcal', name:'Google Calendar', color:'#4285F4', bg:'#E8F0FE', connected:false }
+  ];
+  var NF_FUNCS = {
+    salesforce: [
+      { n:'Get Lead', d:'Fetch a lead record by phone or ID before the call' },
+      { n:'Get Contact', d:'Fetch a contact record and its fields' },
+      { n:'Get Opportunity', d:'Read deal stage and amount for a matched account' },
+      { n:'Create Task', d:'Log a follow up task on the record' },
+      { n:'Update Opportunity', d:'Move a deal stage or update fields after the call' }
+    ],
+    hubspot: [
+      { n:'Get Contact', d:'Fetch a contact record before the call' },
+      { n:'Update Deal', d:'Update deal stage and notes after the call' },
+      { n:'Create Note', d:'Attach a note to the contact or deal' },
+      { n:'Log Activity', d:'Record a call activity on the timeline' }
+    ],
+    calcom: [
+      { n:'Book Appointment', d:'Create an event on the customer chosen slot' },
+      { n:'Check Availability', d:'Return open slots for a date range' },
+      { n:'Cancel Booking', d:'Cancel an existing booking' }
+    ],
+    slack: [
+      { n:'Send Message', d:'Post a message to a channel' },
+      { n:'Post Call Summary', d:'Send a formatted call summary after the call' }
+    ]
+  };
+  var nfScope = 'account';
+
+  function openNfModal() {
+    try { closeAllFilters(); } catch (e) {}
+    var d = document.getElementById('newfnDropdown'); if (d) d.style.display = 'none';
+    renderNfIntegrations();
+    document.getElementById('nfTitle').textContent = 'New Function';
+    document.getElementById('nfScreenInt').classList.add('active');
+    document.getElementById('nfScreenFn').classList.remove('active');
+    document.getElementById('nfOverlay').classList.add('open');
+  }
+  function closeNfModal() { document.getElementById('nfOverlay').classList.remove('open'); }
+  function renderNfIntegrations() {
+    var html = '';
+    NF_INTEGRATIONS.forEach(function(it) {
+      var right = it.connected
+        ? '<span class="nf-badge on"><span class="dot"></span>Connected</span><span class="nf-chev">›</span>'
+        : '<span class="nf-badge off"><span class="dot"></span>Not connected</span><button class="nf-connect" onclick="event.stopPropagation(); nfConnect(\'' + it.id + '\')">Connect</button>';
+      html += '<div class="nf-row" ' + (it.connected ? 'onclick="nfPickIntegration(\'' + it.id + '\')"' : '') + '>' +
+        '<div class="nf-logo" style="background:' + it.bg + '">' + NF_ICONS[it.id] + '</div>' +
+        '<div class="nf-row-main"><div class="nf-row-name">' + it.name + '</div></div>' +
+        right + '</div>';
+    });
+    document.getElementById('nfIntList').innerHTML = html;
+  }
+  function nfPickIntegration(id) {
+    var it = NF_INTEGRATIONS.filter(function(x) { return x.id === id; })[0];
+    var funcs = NF_FUNCS[id] || [];
+    var html = '';
+    funcs.forEach(function(f) {
+      html += '<div class="nf-row" onclick="nfPickFunction(\'' + id + '\', \'' + f.n.replace(/'/g, "\\'") + '\')">' +
+        '<div class="nf-logo" style="background:' + it.bg + '">' + NF_ICONS[id] + '</div>' +
+        '<div class="nf-row-main"><div class="nf-row-name">' + f.n + '</div><div class="nf-row-desc">' + f.d + '</div></div>' +
+        '<span class="nf-chev">›</span></div>';
+    });
+    document.getElementById('nfFnList').innerHTML = html;
+    document.getElementById('nfFnHint').textContent = 'Choose a ' + it.name + ' function to add.';
+    document.getElementById('nfTitle').textContent = it.name + ' functions';
+    document.getElementById('nfScreenInt').classList.remove('active');
+    document.getElementById('nfScreenFn').classList.add('active');
+  }
+  function nfBackToInt() {
+    document.getElementById('nfTitle').textContent = 'New Function';
+    document.getElementById('nfScreenFn').classList.remove('active');
+    document.getElementById('nfScreenInt').classList.add('active');
+  }
+  function nfConnect(id) {
+    closeNfModal();
+    showToast('Opening System › Integrations › Available');
+  }
+  function nfPickFunction(intId, fname) {
+    closeNfModal();
+    var it = NF_INTEGRATIONS.filter(function(x) { return x.id === intId; })[0];
+    document.getElementById('nfConfigInt').innerHTML = '<span class="type-badge"><span class="tdot" style="background:' + it.color + '"></span>' + it.name + ' · ' + fname + '</span>';
+    var prefix = intId === 'calcom' ? 'cal' : intId;
+    document.getElementById('nfNameInput').value = prefix + '_' + fname.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    document.getElementById('nfMapFields').innerHTML =
+      '<div><div class="cf-hint" style="margin-bottom:4px">Match record by</div><input class="cf-input" value="Phone number"></div>' +
+      '<div><div class="cf-hint" style="margin-bottom:4px">Record ID</div><input class="cf-input" value="{{caller_id}}"></div>';
+    pickScope('account');
+    document.getElementById('nfConfigOverlay').classList.add('open');
+    document.getElementById('nfConfigPanel').classList.add('open');
+  }
+  function closeNfConfig() {
+    document.getElementById('nfConfigPanel').classList.remove('open');
+    document.getElementById('nfConfigOverlay').classList.remove('open');
+  }
+  function pickScope(s) {
+    nfScope = s;
+    document.getElementById('scopeAccount').classList.toggle('sel', s === 'account');
+    document.getElementById('scopeLocal').classList.toggle('sel', s === 'local');
+  }
+  function saveNfFunction() {
+    closeNfConfig();
+    showToast(nfScope === 'account' ? 'Function saved to the account library' : 'Function saved to this agent');
+  }
 </script>
 
 <!-- ===================== FUNCTION DETAIL PANEL ===================== -->
@@ -1916,6 +2059,65 @@
         <button class="cf-save" onclick="saveNewCf()">Save</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ===================== NEW FUNCTION (INTEGRATION) MODAL ===================== -->
+<div class="cf-overlay" id="nfOverlay" onclick="closeNfModal()">
+  <div class="nf-modal" onclick="event.stopPropagation()">
+    <div class="cf-head">
+      <span class="cf-title" id="nfTitle">New Function</span>
+      <span class="cf-x" onclick="closeNfModal()">×</span>
+    </div>
+    <div class="cf-body">
+      <div class="nf-screen active" id="nfScreenInt">
+        <div class="cf-hint" style="margin-bottom:10px">Pick an integration to build a function on. Connect a new one if it is not set up yet.</div>
+        <div class="nf-list" id="nfIntList"></div>
+      </div>
+      <div class="nf-screen" id="nfScreenFn">
+        <div class="nf-back" onclick="nfBackToInt()">‹ Back to integrations</div>
+        <div class="cf-hint" id="nfFnHint" style="margin-bottom:10px"></div>
+        <div class="nf-list" id="nfFnList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== NEW FUNCTION CONFIG PANEL ===================== -->
+<div class="panel-overlay" id="nfConfigOverlay" onclick="closeNfConfig()"></div>
+<div class="fn-panel" id="nfConfigPanel">
+  <div class="panel-header">
+    <span class="panel-title">Configure function</span>
+    <span class="panel-close" onclick="closeNfConfig()">×</span>
+  </div>
+  <div class="panel-body" style="gap:22px">
+    <div class="fn-info-row" id="nfConfigInt"></div>
+    <div class="cf-field">
+      <label class="cf-label">Field mapping</label>
+      <div class="cf-hint">Map the fields this function needs. Full field detail is defined per integration.</div>
+      <div id="nfMapFields" style="display:flex;flex-direction:column;gap:12px;margin-top:6px"></div>
+    </div>
+    <div class="cf-field">
+      <label class="cf-label">Function name</label>
+      <input class="cf-input" id="nfNameInput">
+    </div>
+    <div class="cf-field">
+      <label class="cf-label">Scope</label>
+      <div class="nf-scope">
+        <div class="scope-card sel" id="scopeAccount" onclick="pickScope('account')">
+          <div class="scope-radio"></div>
+          <div><div class="scope-title">Account (default)</div><div class="scope-desc">All agents in this workspace can link to this function.</div></div>
+        </div>
+        <div class="scope-card" id="scopeLocal" onclick="pickScope('local')">
+          <div class="scope-radio"></div>
+          <div><div class="scope-title">Local</div><div class="scope-desc">Only available to the agent it was created for. Can be promoted to account level at any time.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <button class="panel-cancel" onclick="closeNfConfig()">Cancel</button>
+    <button class="panel-save" onclick="saveNfFunction()">Save</button>
   </div>
 </div>
 

@@ -1169,7 +1169,7 @@
         <div class="cat-dot" style="background:#CA8A04"></div>
         <span class="cat-name">Post Call Analysis</span>
       </div>
-      <span class="cat-count">6</span>
+      <span class="cat-count">7</span>
     </div>
 
     <div class="cat-item">
@@ -1279,20 +1279,19 @@
           </thead>
           <tbody>
 
+            <tr onclick="openPanel('language')">
+              <td><div class="fn-name">language <span style="display:inline-block;margin-left:8px;padding:1px 8px;border-radius:10px;background:#EEF2FF;color:#3d64d7;font-size:11px;font-weight:600;vertical-align:middle">Default on</span></div></td>
+              <td><div class="fn-desc">The primary language detected on the call. Shown as a column in Call History.</div></td>
+              <td><span class="type-badge">Selector</span></td>
+              <td><span style="color:#525866;font-size:13px">All agents</span></td>
+              <td><span class="row-menu" onclick="openRowMenu(event,'language')"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.4"/><circle cx="10" cy="10" r="1.4"/><circle cx="10" cy="15.5" r="1.4"/></svg></span></td>
+            </tr>
+
             <tr onclick="openPanel('lead_qualification')">
               <td><div class="fn-name">lead_qualification</div></td>
               <td><div class="fn-desc">Based on their interest and responses during the call, is the lead qualified?</div></td>
               <td><span class="type-badge">Selector</span></td>
-              <td>
-                <div class="used-by">
-                  <div class="avatars">
-                    <div class="av" style="background:#3d64d7">DR</div>
-                    <div class="av" style="background:#E5484D">LI</div>
-                    <div class="av" style="background:#7D52F4">IV</div>
-                  </div>
-                  <span class="used-count">3 agents</span>
-                </div>
-              </td>
+              <td><span style="color:#9CA3AF;font-size:13px">—</span></td>
               <td><span class="row-menu" onclick="openRowMenu(event,'lead_qualification')"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.4"/><circle cx="10" cy="10" r="1.4"/><circle cx="10" cy="15.5" r="1.4"/></svg></span></td>
             </tr>
 
@@ -1300,17 +1299,7 @@
               <td><div class="fn-name">follow_up_action</div></td>
               <td><div class="fn-desc">What follow up action is needed after this call?</div></td>
               <td><span class="type-badge">Text</span></td>
-              <td>
-                <div class="used-by">
-                  <div class="avatars">
-                    <div class="av" style="background:#3d64d7">DR</div>
-                    <div class="av" style="background:#7D52F4">IV</div>
-                    <div class="av" style="background:#1FC16B">SC</div>
-                    <div class="av more">+2</div>
-                  </div>
-                  <span class="used-count">5 agents</span>
-                </div>
-              </td>
+              <td><span style="color:#9CA3AF;font-size:13px">—</span></td>
               <td><span class="row-menu" onclick="openRowMenu(event,'follow_up_action')"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.4"/><circle cx="10" cy="10" r="1.4"/><circle cx="10" cy="15.5" r="1.4"/></svg></span></td>
             </tr>
 
@@ -1318,15 +1307,7 @@
               <td><div class="fn-name">callback_requested</div></td>
               <td><div class="fn-desc">Did the user request a callback?</div></td>
               <td><span class="type-badge">Boolean</span></td>
-              <td>
-                <div class="used-by">
-                  <div class="avatars">
-                    <div class="av" style="background:#7D52F4">IV</div>
-                    <div class="av" style="background:#E5484D">LI</div>
-                  </div>
-                  <span class="used-count">2 agents</span>
-                </div>
-              </td>
+              <td><span style="color:#9CA3AF;font-size:13px">—</span></td>
               <td><span class="row-menu" onclick="openRowMenu(event,'callback_requested')"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.4"/><circle cx="10" cy="10" r="1.4"/><circle cx="10" cy="15.5" r="1.4"/></svg></span></td>
             </tr>
 
@@ -1334,16 +1315,7 @@
               <td><div class="fn-name">issue_description</div></td>
               <td><div class="fn-desc">Describe briefly the issue the user is facing.</div></td>
               <td><span class="type-badge">Text</span></td>
-              <td>
-                <div class="used-by">
-                  <div class="avatars">
-                    <div class="av" style="background:#7D52F4">IV</div>
-                    <div class="av" style="background:#1FC16B">SC</div>
-                    <div class="av more">+1</div>
-                  </div>
-                  <span class="used-count">3 agents</span>
-                </div>
-              </td>
+              <td><span style="color:#9CA3AF;font-size:13px">—</span></td>
               <td><span class="row-menu" onclick="openRowMenu(event,'issue_description')"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.4"/><circle cx="10" cy="10" r="1.4"/><circle cx="10" cy="15.5" r="1.4"/></svg></span></td>
             </tr>
 
@@ -1351,15 +1323,7 @@
               <td><div class="fn-name">escalation_required</div></td>
               <td><div class="fn-desc">Did the call need to be escalated to a human agent or supervisor?</div></td>
               <td><span class="type-badge">Boolean</span></td>
-              <td>
-                <div class="used-by">
-                  <div class="avatars">
-                    <div class="av" style="background:#1FC16B">SC</div>
-                    <div class="av" style="background:#E5484D">PM</div>
-                  </div>
-                  <span class="used-count">2 agents</span>
-                </div>
-              </td>
+              <td><span style="color:#9CA3AF;font-size:13px">—</span></td>
               <td><span class="row-menu" onclick="openRowMenu(event,'escalation_required')"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.4"/><circle cx="10" cy="10" r="1.4"/><circle cx="10" cy="15.5" r="1.4"/></svg></span></td>
             </tr>
 
@@ -1367,17 +1331,7 @@
               <td><div class="fn-name">dnd</div></td>
               <td><div class="fn-desc">Did the user request not to be called or contacted, or ask to be placed on the do not call list?</div></td>
               <td><span class="type-badge">Boolean</span></td>
-              <td>
-                <div class="used-by">
-                  <div class="avatars">
-                    <div class="av" style="background:#3d64d7">DR</div>
-                    <div class="av" style="background:#7D52F4">IV</div>
-                    <div class="av" style="background:#1FC16B">SC</div>
-                    <div class="av more">+1</div>
-                  </div>
-                  <span class="used-count">4 agents</span>
-                </div>
-              </td>
+              <td><span style="color:#9CA3AF;font-size:13px">—</span></td>
               <td><span class="row-menu" onclick="openRowMenu(event,'dnd')"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.4"/><circle cx="10" cy="10" r="1.4"/><circle cx="10" cy="15.5" r="1.4"/></svg></span></td>
             </tr>
 
@@ -1385,7 +1339,7 @@
         </table>
 
         <div class="pagination">
-          <span class="pg-info">Page 1 of 1 · 6 fields</span>
+          <span class="pg-info">Page 1 of 1 · 7 fields</span>
           <div class="pg-nav">
             <button class="pg-btn" disabled>‹</button>
             <button class="pg-btn active">1</button>
@@ -1788,66 +1742,47 @@
 
 <script>
   var DATA = {
+    language: {
+      name: 'language', type: 'selector',
+      prompt: 'The primary language detected on the call.',
+      choices: ['English', 'Spanish', 'French', 'German', 'Portuguese'], optional: false, account: true,
+      agents: []
+    },
     lead_qualification: {
       name: 'lead_qualification', type: 'selector',
       prompt: 'Based on their interest and responses during the call, is the lead qualified?',
       choices: ['Yes', 'No', 'Maybe'], optional: false, account: true,
-      agents: [
-        { i: 'DR', c: '#3d64d7', n: 'Defendant Intake' },
-        { i: 'LI', c: '#E5484D', n: 'Liability Check' },
-        { i: 'IV', c: '#7D52F4', n: 'Inbound Vetting' }
-      ]
+      agents: []
     },
     follow_up_action: {
       name: 'follow_up_action', type: 'text',
       prompt: 'What follow up action is needed after this call?',
       choices: [], optional: false, account: true,
-      agents: [
-        { i: 'DR', c: '#3d64d7', n: 'Defendant Intake' },
-        { i: 'IV', c: '#7D52F4', n: 'Inbound Vetting' },
-        { i: 'SC', c: '#1FC16B', n: 'Screening Call' },
-        { i: 'PM', c: '#E5484D', n: 'Personal Injury' },
-        { i: 'WC', c: '#F59E0B', n: 'Workers Comp' }
-      ]
+      agents: []
     },
     callback_requested: {
       name: 'callback_requested', type: 'boolean',
       prompt: 'Did the user request a callback?',
       choices: [], optional: false, account: true,
-      agents: [
-        { i: 'IV', c: '#7D52F4', n: 'Inbound Vetting' },
-        { i: 'LI', c: '#E5484D', n: 'Liability Check' }
-      ]
+      agents: []
     },
     issue_description: {
       name: 'issue_description', type: 'text',
       prompt: 'Describe briefly the issue the user is facing.',
       choices: [], optional: false, account: true,
-      agents: [
-        { i: 'IV', c: '#7D52F4', n: 'Inbound Vetting' },
-        { i: 'SC', c: '#1FC16B', n: 'Screening Call' },
-        { i: 'PM', c: '#E5484D', n: 'Personal Injury' }
-      ]
+      agents: []
     },
     escalation_required: {
       name: 'escalation_required', type: 'boolean',
       prompt: 'Did the call need to be escalated to a human agent or supervisor?',
       choices: [], optional: false, account: true,
-      agents: [
-        { i: 'SC', c: '#1FC16B', n: 'Screening Call' },
-        { i: 'PM', c: '#E5484D', n: 'Personal Injury' }
-      ]
+      agents: []
     },
     dnd: {
       name: 'dnd', type: 'boolean',
       prompt: 'Did the user request not to be called or contacted, or ask to be placed on the do not call list?',
       choices: [], optional: false, account: true,
-      agents: [
-        { i: 'DR', c: '#3d64d7', n: 'Defendant Intake' },
-        { i: 'IV', c: '#7D52F4', n: 'Inbound Vetting' },
-        { i: 'SC', c: '#1FC16B', n: 'Screening Call' },
-        { i: 'PM', c: '#E5484D', n: 'Personal Injury' }
-      ]
+      agents: []
     }
   };
 
@@ -2245,7 +2180,7 @@
   };
 
   /* ── Single Prompt Agent overlay ── */
-  var _spLinked = ['lead_qualification', 'follow_up_action', 'callback_requested', 'issue_description'];
+  var _spLinked = ['issue_description', 'escalation_required'];
 
   var SP_LIBRARY_FIELDS = [
     { key: 'escalation_required', type: 'boolean', label: 'escalation_required' },
@@ -2259,7 +2194,7 @@
 
   function openSPOverlay() {
     closeDropdown();
-    _spLinked = ['lead_qualification', 'follow_up_action', 'callback_requested', 'issue_description'];
+    _spLinked = ['issue_description', 'escalation_required'];
     renderSPPcdeList();
     document.getElementById('spOverlay').classList.add('open');
   }

@@ -1261,13 +1261,15 @@
       var b = w.querySelector('.filter-btn'); if (b) b.classList.remove('on');
     });
   }
+  var FACET2_LABEL = { functions: 'Integration', extractors: 'Type', custom: 'Method' };
   function renderFacets(dd, view) {
+    var f2 = FACET2_LABEL[view] || 'Integration';
     dd.innerHTML =
       '<div class="filter-sec">Filter by</div>' +
       '<div class="filter-facet" onclick="showAgentPicker(event, this)">' + PERSON_ICON +
-        ' Connected agent <span class="fchev">›</span></div>' +
+        ' Used by agent <span class="fchev">›</span></div>' +
       '<div class="filter-facet" onclick="showCategoryPicker(event, this)">' + CATEGORY_ICON +
-        ' Integrations <span class="fchev">›</span></div>';
+        ' ' + f2 + ' <span class="fchev">›</span></div>';
   }
   function collectCategories(wrap) {
     var view = wrap.closest('div[id^="view-"]');
@@ -1331,7 +1333,7 @@
     var cats = collectCategories(wrap);
     var html =
       '<div class="filter-back" onclick="backToFacets(event, this)">‹ Back</div>' +
-      '<div class="filter-sec">Integrations</div>' +
+      '<div class="filter-sec">' + (FACET2_LABEL[wrap.dataset.view] || 'Integration') + '</div>' +
       '<div class="filter-agent-list">';
     if (!cats.length) {
       html += '<div style="padding:8px 10px;font-size:13px;color:#99A0AE">No categories</div>';
@@ -1350,7 +1352,7 @@
     var wrap = el.closest('.filter-wrap');
     var pill = wrap.querySelector('.active-filter-pill');
     pill.innerHTML = '<span class="afp-av" style="background:' + col + '">' + code + '</span>' +
-      'Connected to ' + name + '<span class="afp-x" onclick="clearFilter(event, this)">×</span>';
+      'Used by ' + name + '<span class="afp-x" onclick="clearFilter(event, this)">×</span>';
     pill.style.display = 'inline-flex';
     closeAllFilters();
     applyRowFilter(wrap, 'agent', code);

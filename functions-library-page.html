@@ -108,6 +108,10 @@
   .active-filter-pill .afp-x { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; color: #5B6FB8; font-size: 15px; line-height: 1; }
   .active-filter-pill .afp-x:hover { background: rgba(61,100,215,0.14); }
   .active-filters { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .filter-agent .agent-check { width: 16px; height: 16px; border: 1.5px solid #D1D5DB; border-radius: 4px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+  .filter-agent.sel .agent-check { background: #3d64d7; border-color: #3d64d7; }
+  .filter-agent .agent-check svg { opacity: 0; }
+  .filter-agent.sel .agent-check svg { opacity: 1; }
 
   /* scoped table search */
   .tbl-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; min-width: 320px; }
@@ -442,11 +446,6 @@
   <p class="subtitle">Build a function once and reuse it across agents. One edit updates every agent that links to it.</p>
 
   <div class="actionbar">
-    <div class="tbl-search">
-      <svg class="ts-ic" width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M9 3a6 6 0 104.47 10.03l3.25 3.25 1.06-1.06-3.25-3.25A6 6 0 009 3zm0 1.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" fill="#9CA3AF"/></svg>
-      <span class="tbl-search-scope">Integration Functions</span>
-      <input placeholder="Search Integration Functions" oninput="onSearch(this, 'functions')">
-    </div>
     <div class="filter-wrap" data-view="functions">
       <button class="pill-btn filter-btn" onclick="toggleFilter(event, this)">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M6.5 10h7M9 14h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -455,7 +454,6 @@
       <div class="filter-dd"></div>
     </div>
     <div class="active-filters"></div>
-    <span class="search-count"></span>
     <span class="spacer"></span>
     <div class="btn-primary-wrap">
       <button class="btn-primary" onclick="toggleNewFnDropdown(event)">
@@ -615,7 +613,7 @@
           </div>
         </td>
         <td><span class="type-badge"><span class="tdot" style="background:#00A1E0"></span>Salesforce</span></td>
-        <td><span class="used-none">Not connected to any agent</span></td>
+        <td><span class="used-none">—</span></td>
         <td class="edited">06/18/2026 10:02</td>
         <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
@@ -644,11 +642,6 @@
   <p class="subtitle">Define the information that you need to extract from the call</p>
 
   <div class="actionbar">
-    <div class="tbl-search">
-      <svg class="ts-ic" width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M9 3a6 6 0 104.47 10.03l3.25 3.25 1.06-1.06-3.25-3.25A6 6 0 009 3zm0 1.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" fill="#9CA3AF"/></svg>
-      <span class="tbl-search-scope">Post Call Analysis</span>
-      <input placeholder="Search Post Call Analysis" oninput="onSearch(this, 'extractors')">
-    </div>
     <div class="filter-wrap" data-view="extractors">
       <button class="pill-btn filter-btn" onclick="toggleFilter(event, this)">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M6.5 10h7M9 14h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -657,7 +650,6 @@
       <div class="filter-dd"></div>
     </div>
     <div class="active-filters"></div>
-    <span class="search-count"></span>
     <span class="spacer"></span>
     <div class="btn-primary-wrap">
       <button class="btn-primary" onclick="togglePcaDropdown(event)">
@@ -770,11 +762,6 @@
   <p class="subtitle">Call any API endpoint during a conversation. One edit updates every agent that links to it.</p>
 
   <div class="actionbar">
-    <div class="tbl-search">
-      <svg class="ts-ic" width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M9 3a6 6 0 104.47 10.03l3.25 3.25 1.06-1.06-3.25-3.25A6 6 0 009 3zm0 1.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" fill="#9CA3AF"/></svg>
-      <span class="tbl-search-scope">Custom Functions</span>
-      <input placeholder="Search Custom Functions" oninput="onSearch(this, 'custom')">
-    </div>
     <div class="filter-wrap" data-view="custom">
       <button class="pill-btn filter-btn" onclick="toggleFilter(event, this)">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M6.5 10h7M9 14h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -783,7 +770,6 @@
       <div class="filter-dd"></div>
     </div>
     <div class="active-filters"></div>
-    <span class="search-count"></span>
     <span class="spacer"></span>
     <button class="btn-primary" style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;background:#0E121B;color:#fff;border:none;border-radius:7px;font-size:13.5px;font-weight:500;cursor:pointer;font-family:inherit">
       <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
@@ -1305,9 +1291,10 @@
   var STATUS_OPTS = [ {k:'active', label:'Active', col:'#1FC16B'}, {k:'error', label:'Error', col:'#FB3748'}, {k:'disabled', label:'Disabled', col:'#99A0AE'} ];
   var VS = {}, TOTALS = {};
   function getVS(view) {
-    if (!VS[view]) VS[view] = { agent:null, agentName:null, agentCol:null, category:null, catCol:null, usage:null, status:null, statusCol:null, q:'' };
+    if (!VS[view]) VS[view] = { agents:[], agentInfo:{}, category:null, catCol:null, status:null, statusCol:null };
     return VS[view];
   }
+  var CHECK_ICON = '<svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2l2.2 2.3 4.8-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   function viewOf(el) { return el.closest('.filter-wrap').dataset.view; }
 
   function closeAllFilters() {
@@ -1319,7 +1306,6 @@
   function facetList(view) {
     var arr = [ {f:'agent', icon:PERSON_ICON, label:'Used by agent'} ];
     arr.push({ f:'category', icon:CATEGORY_ICON, label:(FACET2_LABEL[view] || 'Integration') });
-    arr.push({ f:'usage', icon:USAGE_ICON, label:'Usage' });
     if (view === 'custom') arr.push({ f:'status', icon:STATUS_ICON, label:'Status' });
     return arr;
   }
@@ -1356,13 +1342,16 @@
   function showAgentPicker(e, el) {
     e.stopPropagation();
     var dd = el.closest('.filter-dd');
+    var st = getVS(dd.closest('.filter-wrap').dataset.view);
     var html =
       '<div class="filter-back" onclick="backToFacets(event, this)">‹ Back</div>' +
       '<div class="filter-fsearch"><input placeholder="Search agents" oninput="filterAgentList(this)" onclick="event.stopPropagation()"></div>' +
       '<div class="filter-agent-list">';
     FILTER_AGENTS.forEach(function(a) {
-      html += '<div class="filter-agent" data-name="' + a.n.toLowerCase() + '" ' +
-        'onclick="applyAgentFilter(event, this, \'' + a.c + '\', \'' + a.n + '\', \'' + a.col + '\')">' +
+      var on = st.agents.indexOf(a.c) !== -1;
+      html += '<div class="filter-agent' + (on ? ' sel' : '') + '" data-name="' + a.n.toLowerCase() + '" ' +
+        'onclick="toggleAgent(event, this, \'' + a.c + '\', \'' + a.n + '\', \'' + a.col + '\')">' +
+        '<span class="agent-check">' + CHECK_ICON + '</span>' +
         '<span class="fav" style="background:' + a.col + '">' + a.c + '</span>' +
         '<span class="fname">' + a.n + '</span></div>';
     });
@@ -1427,11 +1416,13 @@
     html += '</div>';
     dd.innerHTML = html;
   }
-  function applyAgentFilter(e, el, code, name, col) {
+  function toggleAgent(e, el, code, name, col) {
     e.stopPropagation();
     var view = viewOf(el), st = getVS(view);
-    st.agent = code; st.agentName = name; st.agentCol = col;
-    closeAllFilters(); applyAllFilters(view);
+    var i = st.agents.indexOf(code);
+    if (i === -1) { st.agents.push(code); st.agentInfo[code] = { n:name, col:col }; el.classList.add('sel'); }
+    else { st.agents.splice(i, 1); el.classList.remove('sel'); }
+    applyAllFilters(view);
   }
   function applyCategoryFilter(e, el, label, col) {
     e.stopPropagation();
@@ -1449,7 +1440,7 @@
   function removeFacet(e, view, facet) {
     e.stopPropagation();
     var st = getVS(view);
-    if (facet === 'agent') { st.agent = st.agentName = st.agentCol = null; }
+    if (facet === 'agent') { st.agents = []; st.agentInfo = {}; }
     else if (facet === 'category') { st.category = st.catCol = null; }
     else if (facet === 'status') { st.status = st.statusCol = null; }
     else st[facet] = null;
@@ -1467,10 +1458,11 @@
     return m ? parseInt(m[0], 10) : 0;
   }
   function rowMatches(r, st) {
-    if (st.agent) {
+    if (st.agents && st.agents.length) {
       var codes = [];
       r.querySelectorAll('.av').forEach(function(a) { if (!a.classList.contains('more')) codes.push(a.textContent.trim()); });
-      if (codes.indexOf(st.agent) === -1) return false;
+      var any = st.agents.some(function(c) { return codes.indexOf(c) !== -1; });
+      if (!any) return false;
     }
     if (st.category) {
       var b = r.querySelector('.type-badge') || r.querySelector('.method-badge');
@@ -1501,9 +1493,14 @@
     var vc = document.getElementById('view-' + view);
     var box = vc.querySelector('.active-filters'); if (!box) return;
     var st = getVS(view), html = '';
-    if (st.agent) html += chipHTML(view, 'agent', '<span class="afp-av" style="background:' + st.agentCol + '">' + st.agent + '</span>Used by ' + st.agentName);
+    if (st.agents.length) {
+      var avs = st.agents.map(function(c) {
+        return '<span class="afp-av" style="background:' + (st.agentInfo[c] ? st.agentInfo[c].col : '#99A0AE') + ';margin-left:-5px;border:1.5px solid #EEF3FF">' + c + '</span>';
+      }).join('');
+      var lab = st.agents.length === 1 ? 'Used by ' + st.agentInfo[st.agents[0]].n : 'Used by ' + st.agents.length + ' agents';
+      html += chipHTML(view, 'agent', '<span style="display:inline-flex;margin-left:5px;margin-right:3px">' + avs + '</span>' + lab);
+    }
     if (st.category) html += chipHTML(view, 'category', '<span class="subnav-dot" style="width:9px;height:9px;background:' + st.catCol + '"></span>' + st.category);
-    if (st.usage) html += chipHTML(view, 'usage', USAGE_LABEL[st.usage]);
     if (st.status) html += chipHTML(view, 'status', '<span class="subnav-dot" style="width:9px;height:9px;background:' + (st.statusCol || '#99A0AE') + '"></span>' + st.status.charAt(0).toUpperCase() + st.status.slice(1));
     box.innerHTML = html;
   }
@@ -1515,7 +1512,7 @@
     if (!TOTALS[view]) TOTALS[view] = rows.length;
     var shown = 0;
     rows.forEach(function(r) { var m = rowMatches(r, st); r.style.display = m ? '' : 'none'; if (m) shown++; });
-    var active = st.agent || st.category || st.usage || st.status || st.q;
+    var active = st.agents.length || st.category || st.status;
     var hc = vc.querySelector('.h-count');
     if (hc) {
       if (active) { if (!hc.dataset.total) hc.dataset.total = hc.textContent; hc.textContent = shown; }
@@ -1529,11 +1526,6 @@
         var noun = tail.trim().replace(/^\d+\s*/, '');
         pi.textContent = 'Page 1 of 1 · ' + shown + ' ' + noun;
       } else pi.textContent = pi.dataset.orig;
-    }
-    var sc = vc.querySelector('.search-count');
-    if (sc) {
-      if (st.q) { sc.textContent = shown + ' of ' + TOTALS[view] + ' in ' + TAB_NAME[view]; sc.style.display = 'inline'; }
-      else { sc.style.display = 'none'; sc.textContent = ''; }
     }
     renderChips(view);
   }

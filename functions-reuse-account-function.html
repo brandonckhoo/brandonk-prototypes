@@ -107,6 +107,64 @@ body {
 
 .hint { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); font-size: 13px; color: #99A0AE; background: #fff; border: 1px solid #E1E4EA; border-radius: 999px; padding: 7px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 .hint b { color: #525866; font-weight: 600; }
+
+/* clickable added rows */
+.fn-item.linked { cursor: pointer; }
+.fn-item.linked:hover { border-color: #C9D2E3; background: #FCFCFD; }
+.fn-item .fi-tag { font-size: 11px; font-weight: 500; color: #3d64d7; background: #ECF3FF; padding: 2px 7px; border-radius: 5px; margin-left: auto; }
+.fn-item .fi-edit { color: #C4C9D4; display: flex; margin-left: 8px; }
+.fn-item.linked:hover .fi-edit { color: #6B7280; }
+
+/* ===== Function config editor modal ===== */
+.cfg-overlay {
+  position: fixed; inset: 0; background: rgba(14,18,27,0.40);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  display: none; align-items: center; justify-content: center; padding: 40px 20px; z-index: 80;
+}
+.cfg-overlay.open { display: flex; }
+.cfg-modal { width: 640px; max-width: 100%; max-height: calc(100vh - 80px); background: #fff; border-radius: 16px; box-shadow: 0 20px 60px rgba(14,18,27,0.24); display: flex; flex-direction: column; overflow: hidden; }
+.cfg-head { display: flex; align-items: flex-start; gap: 12px; padding: 20px 22px 14px; }
+.cfg-hicon { width: 26px; height: 20px; display: flex; align-items: center; flex-shrink: 0; margin-top: 2px; }
+.cfg-title { font-size: 17px; font-weight: 600; color: #0A0A0A; }
+.cfg-sub { font-size: 13px; color: #99A0AE; margin-top: 2px; }
+.cfg-x { margin-left: auto; background: none; border: none; color: #99A0AE; cursor: pointer; font-size: 17px; line-height: 1; padding: 2px; }
+.cfg-x:hover { color: #525866; }
+.cfg-body { padding: 6px 22px 20px; overflow-y: auto; flex: 1; }
+.cfg-lbl { font-size: 14px; font-weight: 600; color: #0E121B; margin: 16px 0 7px; }
+.cfg-lbl:first-child { margin-top: 6px; }
+.cfg-input { width: 100%; height: 40px; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0 12px; font-size: 14px; color: #0A0A0A; font-family: inherit; background: #fff; }
+.cfg-input:focus { outline: none; border-color: #3d64d7; }
+.toggle-row { display: flex; align-items: center; gap: 10px; margin: 18px 0 10px; }
+.toggle { width: 38px; height: 22px; border-radius: 999px; background: #0E121B; position: relative; flex-shrink: 0; cursor: pointer; transition: background .15s; }
+.toggle::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: #fff; top: 2px; left: 18px; transition: left .15s; }
+.toggle.off { background: #D1D5DB; }
+.toggle.off::after { left: 2px; }
+.toggle-row .tl { font-size: 14px; font-weight: 600; color: #0E121B; }
+.cfg-box { background: #FAFBFC; border: 1px solid #EDEFF3; border-radius: 10px; padding: 14px; }
+.cond-head { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #525866; margin-bottom: 10px; }
+.mini-select { height: 32px; border: 1px solid #E5E7EB; border-radius: 7px; background: #fff; padding: 0 8px; font-size: 13px; font-family: inherit; color: #0A0A0A; }
+.cond-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.cond-row .ci { flex: 1; height: 36px; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0 10px; font-size: 13px; font-family: inherit; background: #fff; }
+.cond-row .op { width: 64px; height: 36px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; font-size: 13px; font-family: inherit; padding: 0 6px; }
+.cond-row .trash { width: 34px; height: 36px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; color: #99A0AE; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.cond-row .trash:hover { color: #FB3748; border-color: #FCA5A5; }
+.pill-btn { height: 32px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.pill-btn:hover { background: #F9FAFB; }
+.fld-row { display: grid; grid-template-columns: 210px 16px 1fr; align-items: center; gap: 8px; padding: 8px 0; }
+.fld-left { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #0E121B; }
+.fld-left .req { color: #FB3748; }
+.fld-left svg { color: #99A0AE; flex-shrink: 0; }
+.fld-dash { color: #C4C9D4; text-align: center; }
+.fld-val { height: 38px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; padding: 0 10px; font-size: 13.5px; font-family: inherit; color: #0A0A0A; display: flex; align-items: center; justify-content: space-between; }
+.fld-val.ph { color: #B0B8C1; }
+.fld-val select { border: none; background: transparent; font-size: 13.5px; font-family: inherit; width: 100%; color: #0A0A0A; }
+.cfg-desc { font-size: 13px; color: #99A0AE; margin: -2px 0 8px; }
+.cfg-foot { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-top: 1px solid #EDEFF3; }
+.cfg-foot .fr { display: flex; gap: 8px; }
+.btn-neutral { height: 38px; padding: 0 16px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 500; color: #374151; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 7px; }
+.btn-neutral:hover { background: #F9FAFB; }
+.btn-dark { height: 38px; padding: 0 18px; border: 1px solid #0E121B; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; font-family: inherit; }
+.btn-dark:hover { background: #000; }
 </style>
 </head>
 <body>
@@ -157,7 +215,81 @@ body {
   </div>
 </div>
 
-<div class="hint">Click <b>+ Add</b> → attach an existing account function → <b>Save</b></div>
+<!-- Function config editor -->
+<div class="cfg-overlay" id="cfgOverlay">
+  <div class="cfg-modal">
+    <div class="cfg-head">
+      <span class="cfg-hicon"><svg width="22" height="15" viewBox="0 0 48 32"><ellipse cx="19" cy="17" rx="10" ry="10" fill="#00A1E0"/><ellipse cx="31" cy="14" rx="8" ry="8" fill="#00A1E0"/><ellipse cx="38" cy="20" rx="6" ry="6" fill="#00A1E0"/><ellipse cx="11" cy="22" rx="8" ry="8" fill="#00A1E0"/><ellipse cx="24" cy="24" rx="9" ry="8" fill="#00A1E0"/></svg></span>
+      <div>
+        <div class="cfg-title" id="cfgTitle">Get salesforce contact</div>
+        <div class="cfg-sub">Salesforce - OAuth</div>
+      </div>
+      <button class="cfg-x" id="cfgClose">&#x2715;</button>
+    </div>
+    <div class="cfg-body">
+      <div class="cfg-lbl">Name</div>
+      <input class="cfg-input" id="cfgName" value="get_salesforce_contact">
+
+      <div class="toggle-row">
+        <span class="toggle" id="condToggle"></span>
+        <span class="tl">Configure conditions</span>
+      </div>
+      <div class="cfg-box" id="condBox">
+        <div class="cond-head">
+          <select class="mini-select"><option>All</option><option>Any</option></select>
+          of the following conditions match
+        </div>
+        <div id="condRows">
+          <div class="cond-row">
+            <input class="ci" value="billing_question_raised">
+            <select class="op"><option>=</option><option>≠</option><option>&gt;</option></select>
+            <input class="ci" value="yes">
+            <button class="trash" onclick="this.closest('.cond-row').remove()"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M8 6V4.5h4V6m-6 0 .7 9.3A1.2 1.2 0 007.9 16.5h4.2a1.2 1.2 0 001.2-1.2L14 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+        </div>
+        <button class="pill-btn" id="addCond"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 4.5v11M4.5 10h11" stroke="#374151" stroke-width="1.6" stroke-linecap="round"/></svg> Add condition</button>
+      </div>
+
+      <div class="cfg-lbl">Fields</div>
+      <div class="cfg-box">
+        <div class="fld-row">
+          <span class="fld-left"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 4v10l-7 4-7-4V7l7-4z" stroke="#99A0AE" stroke-width="1.5" stroke-linejoin="round"/></svg>Custom object <span class="req">*</span></span>
+          <span class="fld-dash">—</span>
+          <div class="fld-val"><select><option>Fuel_request_c</option><option>Contact</option><option>Lead</option></select></div>
+        </div>
+        <div class="fld-row">
+          <span class="fld-left"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 4v10l-7 4-7-4V7l7-4z" stroke="#99A0AE" stroke-width="1.5" stroke-linejoin="round"/></svg>Custom object 2 <span class="req">*</span></span>
+          <span class="fld-dash">—</span>
+          <div class="fld-val"><select><option>request_id_type</option><option>account_id</option></select></div>
+        </div>
+        <div class="fld-row">
+          <span class="fld-left"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6h12M9 6v12M15 6v12" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round"/></svg>id <span class="req">*</span></span>
+          <span class="fld-dash">—</span>
+          <div class="fld-val ph">{{value}}</div>
+        </div>
+        <div class="fld-row">
+          <span class="fld-left"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6h12M9 6v12M15 6v12" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round"/></svg>contact_id <span class="req">*</span></span>
+          <span class="fld-dash">—</span>
+          <div class="fld-val ph">{{value}}</div>
+        </div>
+        <button class="pill-btn" style="margin-top:6px"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 4.5v11M4.5 10h11" stroke="#374151" stroke-width="1.6" stroke-linecap="round"/></svg> Add fields (24)</button>
+      </div>
+
+      <div class="cfg-lbl">Store fields as variables</div>
+      <div class="cfg-desc">Extract values from function response and store as dynamic variables.</div>
+      <button class="pill-btn"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 4.5v11M4.5 10h11" stroke="#374151" stroke-width="1.6" stroke-linecap="round"/></svg> New key value pair</button>
+    </div>
+    <div class="cfg-foot">
+      <button class="btn-neutral"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M6 4.5l9 5.5-9 5.5V4.5z" stroke="#374151" stroke-width="1.5" stroke-linejoin="round"/></svg> Run a test</button>
+      <div class="fr">
+        <button class="btn-neutral" id="cfgCancel">Cancel</button>
+        <button class="btn-dark" id="cfgSave">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hint">Click <b>+ Add</b> → <b>Save</b> → click a function to <b>edit its mapping</b></div>
 
 <script>
 const sfCloud = '<svg width="16" height="16" viewBox="0 0 48 32"><ellipse cx="19" cy="17" rx="10" ry="10" fill="#00A1E0"/><ellipse cx="31" cy="14" rx="8" ry="8" fill="#00A1E0"/><ellipse cx="38" cy="20" rx="6" ry="6" fill="#00A1E0"/><ellipse cx="11" cy="22" rx="8" ry="8" fill="#00A1E0"/><ellipse cx="24" cy="24" rx="9" ry="8" fill="#00A1E0"/></svg>';
@@ -239,11 +371,39 @@ document.getElementById('btnSave').onclick = () => {
     added.add(name);
     const f = FUNCTIONS.find(x => x.name === name);
     const row = document.createElement('div');
-    row.className = 'fn-item new-anim';
-    row.innerHTML = `<span class="fi-icon">${f.icon}</span>${name}`;
+    row.className = 'fn-item linked new-anim';
+    row.innerHTML = `<span class="fi-icon">${f.icon}</span>${name}<span class="fi-tag">Account</span><span class="fi-edit"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M13 3.5l3.5 3.5L7 16.5H3.5V13L13 3.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>`;
+    row.onclick = () => openConfig(name);
     list.appendChild(row);
   });
   closePicker();
+};
+
+// ===== Function config editor =====
+const cfgOverlay = document.getElementById('cfgOverlay');
+function openConfig(name) {
+  document.getElementById('cfgTitle').textContent = name.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
+  document.getElementById('cfgName').value = name;
+  cfgOverlay.classList.add('open');
+}
+function closeConfig() { cfgOverlay.classList.remove('open'); }
+document.getElementById('cfgClose').onclick = closeConfig;
+document.getElementById('cfgCancel').onclick = closeConfig;
+document.getElementById('cfgSave').onclick = closeConfig;
+cfgOverlay.onclick = (e) => { if (e.target === cfgOverlay) closeConfig(); };
+
+const condToggle = document.getElementById('condToggle');
+const condBox = document.getElementById('condBox');
+condToggle.onclick = () => {
+  condToggle.classList.toggle('off');
+  condBox.style.display = condToggle.classList.contains('off') ? 'none' : 'block';
+};
+document.getElementById('addCond').onclick = () => {
+  const row = document.createElement('div');
+  row.className = 'cond-row';
+  row.innerHTML = `<input class="ci" placeholder="variable"><select class="op"><option>=</option><option>≠</option><option>&gt;</option></select><input class="ci" placeholder="value"><button class="trash"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M8 6V4.5h4V6m-6 0 .7 9.3A1.2 1.2 0 007.9 16.5h4.2a1.2 1.2 0 001.2-1.2L14 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
+  row.querySelector('.trash').onclick = () => row.remove();
+  document.getElementById('condRows').appendChild(row);
 };
 </script>
 </body>

@@ -165,6 +165,21 @@ body {
 .btn-neutral:hover { background: #F9FAFB; }
 .btn-dark { height: 38px; padding: 0 18px; border: 1px solid #0E121B; border-radius: 8px; background: #0E121B; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; font-family: inherit; }
 .btn-dark:hover { background: #000; }
+
+.fi-tag.local { color: #6B7280; background: #F3F4F6; }
+
+/* Localize warning modal */
+.warn-overlay { position: fixed; inset: 0; background: rgba(14,18,27,0.45); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; padding: 40px 20px; z-index: 90; }
+.warn-overlay.open { display: flex; }
+.warn-modal { width: 460px; max-width: 100%; background: #fff; border-radius: 16px; box-shadow: 0 20px 60px rgba(14,18,27,0.28); overflow: hidden; }
+.warn-head { display: flex; align-items: flex-start; gap: 12px; padding: 22px 22px 12px; }
+.warn-ico { width: 38px; height: 38px; border-radius: 10px; background: #ECF3FF; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.warn-title { font-size: 16px; font-weight: 600; color: #0A0A0A; }
+.warn-sub { font-size: 13.5px; color: #525866; line-height: 1.5; margin-top: 4px; }
+.warn-sub b { color: #0E121B; font-weight: 600; }
+.warn-note { display: flex; gap: 9px; margin: 12px 22px 0; padding: 11px 13px; background: #EEF3FF; border-radius: 10px; font-size: 12.5px; color: #3A4A63; line-height: 1.5; }
+.warn-note svg { flex-shrink: 0; margin-top: 1px; }
+.warn-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 18px 22px 20px; }
 </style>
 </head>
 <body>
@@ -289,7 +304,28 @@ body {
   </div>
 </div>
 
-<div class="hint">Click <b>+ Add</b> → <b>Save</b> → click a function to <b>edit its mapping</b></div>
+<!-- Localize warning -->
+<div class="warn-overlay" id="warnOverlay">
+  <div class="warn-modal">
+    <div class="warn-head">
+      <div class="warn-ico"><svg width="19" height="19" viewBox="0 0 20 20" fill="none"><rect x="7.5" y="7.5" width="9" height="9" rx="2" stroke="#3d64d7" stroke-width="1.5"/><path d="M4 12.5V5.5A1.5 1.5 0 015.5 4h7" stroke="#3d64d7" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      <div>
+        <div class="warn-title">Localize to this agent?</div>
+        <div class="warn-sub"><b id="warnFn">get_salesforce_contact</b> is a shared account function used by <b id="warnCount">8 agents</b>. Saving your changes here creates a copy for this agent only.</div>
+      </div>
+    </div>
+    <div class="warn-note">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#3d64d7" stroke-width="1.5"/><path d="M10 9.2v4M10 6.6h.01" stroke="#3d64d7" stroke-width="1.5" stroke-linecap="round"/></svg>
+      The shared version stays in the library and every other agent keeps using it. This agent stops syncing with the library.
+    </div>
+    <div class="warn-foot">
+      <button class="btn-neutral" id="warnCancel">Cancel</button>
+      <button class="btn-dark" id="warnConfirm">Localize &amp; save</button>
+    </div>
+  </div>
+</div>
+
+<div class="hint">Add a function → click it → change the mapping → <b>Save</b> → it localizes</div>
 
 <script>
 const sfCloud = '<svg width="16" height="16" viewBox="0 0 48 32"><ellipse cx="19" cy="17" rx="10" ry="10" fill="#00A1E0"/><ellipse cx="31" cy="14" rx="8" ry="8" fill="#00A1E0"/><ellipse cx="38" cy="20" rx="6" ry="6" fill="#00A1E0"/><ellipse cx="11" cy="22" rx="8" ry="8" fill="#00A1E0"/><ellipse cx="24" cy="24" rx="9" ry="8" fill="#00A1E0"/></svg>';
@@ -373,7 +409,7 @@ document.getElementById('btnSave').onclick = () => {
     const row = document.createElement('div');
     row.className = 'fn-item linked new-anim';
     row.innerHTML = `<span class="fi-icon">${f.icon}</span>${name}<span class="fi-tag">Account</span><span class="fi-edit"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M13 3.5l3.5 3.5L7 16.5H3.5V13L13 3.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>`;
-    row.onclick = () => openConfig(name);
+    row.onclick = () => openConfig(f, row);
     list.appendChild(row);
   });
   closePicker();
@@ -381,22 +417,53 @@ document.getElementById('btnSave').onclick = () => {
 
 // ===== Function config editor =====
 const cfgOverlay = document.getElementById('cfgOverlay');
-function openConfig(name) {
-  document.getElementById('cfgTitle').textContent = name.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
-  document.getElementById('cfgName').value = name;
+const warnOverlay = document.getElementById('warnOverlay');
+let cfgCurrent = null;   // { f, row }
+let cfgDirty = false;
+
+function openConfig(f, row) {
+  cfgCurrent = { f, row };
+  cfgDirty = false;
+  document.getElementById('cfgTitle').textContent = f.name.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
+  document.getElementById('cfgName').value = f.name;
+  document.getElementById('warnFn').textContent = f.name;
+  document.getElementById('warnCount').textContent = f.agents + ' agents';
   cfgOverlay.classList.add('open');
 }
-function closeConfig() { cfgOverlay.classList.remove('open'); }
+function closeConfig() { cfgOverlay.classList.remove('open'); cfgDirty = false; }
 document.getElementById('cfgClose').onclick = closeConfig;
 document.getElementById('cfgCancel').onclick = closeConfig;
-document.getElementById('cfgSave').onclick = closeConfig;
 cfgOverlay.onclick = (e) => { if (e.target === cfgOverlay) closeConfig(); };
+
+// Any edit inside the config marks it dirty
+const cfgBody = document.querySelector('.cfg-body');
+cfgBody.addEventListener('input', () => cfgDirty = true);
+cfgBody.addEventListener('change', () => cfgDirty = true);
+
+// Save: if you changed a still-shared function, warn that saving localizes it
+document.getElementById('cfgSave').onclick = () => {
+  const isShared = cfgCurrent && !cfgCurrent.row.classList.contains('is-local');
+  if (cfgDirty && isShared) warnOverlay.classList.add('open');
+  else closeConfig();
+};
+
+// Warning modal
+document.getElementById('warnCancel').onclick = () => warnOverlay.classList.remove('open');
+document.getElementById('warnConfirm').onclick = () => {
+  const tag = cfgCurrent.row.querySelector('.fi-tag');
+  if (tag) { tag.textContent = 'Local'; tag.classList.add('local'); }
+  cfgCurrent.row.classList.add('is-local');
+  warnOverlay.classList.remove('open');
+  closeConfig();
+};
+warnOverlay.onclick = (e) => { if (e.target === warnOverlay) warnOverlay.classList.remove('open'); };
 
 const condToggle = document.getElementById('condToggle');
 const condBox = document.getElementById('condBox');
 condToggle.onclick = () => {
   condToggle.classList.toggle('off');
   condBox.style.display = condToggle.classList.contains('off') ? 'none' : 'block';
+  cfgDirty = true;
 };
 document.getElementById('addCond').onclick = () => {
   const row = document.createElement('div');
@@ -404,6 +471,7 @@ document.getElementById('addCond').onclick = () => {
   row.innerHTML = `<input class="ci" placeholder="variable"><select class="op"><option>=</option><option>≠</option><option>&gt;</option></select><input class="ci" placeholder="value"><button class="trash"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M8 6V4.5h4V6m-6 0 .7 9.3A1.2 1.2 0 007.9 16.5h4.2a1.2 1.2 0 001.2-1.2L14 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
   row.querySelector('.trash').onclick = () => row.remove();
   document.getElementById('condRows').appendChild(row);
+  cfgDirty = true;
 };
 </script>
 </body>

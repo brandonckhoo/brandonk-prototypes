@@ -1267,7 +1267,7 @@
       '<div class="filter-facet" onclick="showAgentPicker(event, this)">' + PERSON_ICON +
         ' Connected agent <span class="fchev">›</span></div>' +
       '<div class="filter-facet" onclick="showCategoryPicker(event, this)">' + CATEGORY_ICON +
-        ' Category <span class="fchev">›</span></div>';
+        ' Integrations <span class="fchev">›</span></div>';
   }
   function collectCategories(wrap) {
     var view = wrap.closest('div[id^="view-"]');
@@ -1331,7 +1331,7 @@
     var cats = collectCategories(wrap);
     var html =
       '<div class="filter-back" onclick="backToFacets(event, this)">‹ Back</div>' +
-      '<div class="filter-sec">Category</div>' +
+      '<div class="filter-sec">Integrations</div>' +
       '<div class="filter-agent-list">';
     if (!cats.length) {
       html += '<div style="padding:8px 10px;font-size:13px;color:#99A0AE">No categories</div>';

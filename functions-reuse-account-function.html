@@ -179,6 +179,16 @@ body {
 .warn-sub b { color: #0E121B; font-weight: 600; }
 .warn-note { display: flex; gap: 9px; margin: 12px 22px 0; padding: 11px 13px; background: #EEF3FF; border-radius: 10px; font-size: 12.5px; color: #3A4A63; line-height: 1.5; }
 .warn-note svg { flex-shrink: 0; margin-top: 1px; }
+.warn-agents-lbl { font-size: 11px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em; padding: 16px 22px 6px; }
+.warn-agents { margin: 0 22px; border: 1px solid #E9EAEC; border-radius: 10px; overflow-y: auto; max-height: 168px; }
+.wa-row { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-bottom: 1px solid #F0F1F3; }
+.wa-row:last-child { border-bottom: none; }
+.wa-av { width: 24px; height: 24px; border-radius: 6px; color: #fff; font-size: 10.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.wa-name { font-size: 12.5px; font-weight: 500; color: #0A0A0A; flex: 1; }
+.wa-link { color: #C4C9D4; display: flex; }
+.warn-editlib { padding: 14px 22px 0; font-size: 12.5px; color: #525866; }
+.warn-editlib a { color: #3d64d7; font-weight: 500; text-decoration: none; cursor: pointer; }
+.warn-editlib a:hover { text-decoration: underline; }
 .warn-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 18px 22px 20px; }
 </style>
 </head>
@@ -314,10 +324,13 @@ body {
         <div class="warn-sub"><b id="warnFn">get_salesforce_contact</b> is a shared account function used by <b id="warnCount">8 agents</b>. Saving your changes here creates a copy for this agent only.</div>
       </div>
     </div>
+    <div class="warn-agents-lbl">Agents on the shared version</div>
+    <div class="warn-agents" id="warnAgents"></div>
     <div class="warn-note">
       <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#3d64d7" stroke-width="1.5"/><path d="M10 9.2v4M10 6.6h.01" stroke="#3d64d7" stroke-width="1.5" stroke-linecap="round"/></svg>
       The shared version stays in the library and every other agent keeps using it. This agent stops syncing with the library.
     </div>
+    <div class="warn-editlib">Want every agent to get this change? <a id="editLib">Edit in the library instead</a></div>
     <div class="warn-foot">
       <button class="btn-neutral" id="warnCancel">Cancel</button>
       <button class="btn-dark" id="warnConfirm">Localize &amp; save</button>
@@ -440,15 +453,39 @@ const cfgBody = document.querySelector('.cfg-body');
 cfgBody.addEventListener('input', () => cfgDirty = true);
 cfgBody.addEventListener('change', () => cfgDirty = true);
 
+// Sample agents on the shared version
+const AGENT_POOL = [
+  {n: 'Healthcare Check-In Agent', c: '#0EA5E9'},
+  {n: 'Sales Outreach Bot', c: '#059669'},
+  {n: 'Renewal Follow-up Agent', c: '#D97706'},
+  {n: 'Support Intake Agent', c: '#7C3AED'},
+  {n: 'Billing Reminder Agent', c: '#DB2777'},
+  {n: 'Appointment Scheduler', c: '#2563EB'},
+  {n: 'Lead Qualifier Bot', c: '#CA8A04'},
+  {n: 'Onboarding Assistant', c: '#DC2626'},
+];
+const extLink = '<svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M11 3h6v6m0-6L8 12m-1-7H3v14h14v-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function renderWarnAgents(count) {
+  const box = document.getElementById('warnAgents');
+  box.innerHTML = '';
+  AGENT_POOL.slice(0, Math.min(count, AGENT_POOL.length)).forEach(a => {
+    const r = document.createElement('div');
+    r.className = 'wa-row';
+    r.innerHTML = `<div class="wa-av" style="background:${a.c}">${a.n[0]}</div><span class="wa-name">${a.n}</span><span class="wa-link">${extLink}</span>`;
+    box.appendChild(r);
+  });
+}
+
 // Save: if you changed a still-shared function, warn that saving localizes it
 document.getElementById('cfgSave').onclick = () => {
   const isShared = cfgCurrent && !cfgCurrent.row.classList.contains('is-local');
-  if (cfgDirty && isShared) warnOverlay.classList.add('open');
+  if (cfgDirty && isShared) { renderWarnAgents(cfgCurrent.f.agents); warnOverlay.classList.add('open'); }
   else closeConfig();
 };
 
 // Warning modal
 document.getElementById('warnCancel').onclick = () => warnOverlay.classList.remove('open');
+document.getElementById('editLib').onclick = () => { warnOverlay.classList.remove('open'); closeConfig(); };
 document.getElementById('warnConfirm').onclick = () => {
   const tag = cfgCurrent.row.querySelector('.fi-tag');
   if (tag) { tag.textContent = 'Local'; tag.classList.add('local'); }

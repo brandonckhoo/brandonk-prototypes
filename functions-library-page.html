@@ -463,7 +463,7 @@
       </button>
       <div class="newfn-dropdown" id="newfnDropdown">
         <div class="newfn-section">Function type</div>
-        <div class="newfn-item">
+        <div class="newfn-item" onclick="openNewCfPanel()">
           <div class="newfn-item-icon" style="background:#EFEAFE"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 5h12v1.5H4V5zm0 4h12v1.5H4V9zm0 4h8v1.5H4V13z" fill="#7D52F4"/></svg></div>
           Custom API
         </div>
@@ -771,7 +771,7 @@
     </div>
     <div class="active-filters"></div>
     <span class="spacer"></span>
-    <button class="btn-primary" style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;background:#0E121B;color:#fff;border:none;border-radius:7px;font-size:13.5px;font-weight:500;cursor:pointer;font-family:inherit">
+    <button class="btn-primary" onclick="openNewCfPanel()" style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;background:#0E121B;color:#fff;border:none;border-radius:7px;font-size:13.5px;font-weight:500;cursor:pointer;font-family:inherit">
       <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
       New Function
     </button>
@@ -1700,6 +1700,34 @@
     document.getElementById('fnPanel').classList.remove('open');
     document.getElementById('fnOverlay').classList.remove('open');
   }
+
+  // ===== NEW CUSTOM FUNCTION PANEL =====
+  function openNewCfPanel() {
+    try { closeAllFilters(); } catch (e) {}
+    var d = document.getElementById('newfnDropdown'); if (d) d.style.display = 'none';
+    document.getElementById('cfOverlay').classList.add('open');
+    document.getElementById('cfPanel').classList.add('open');
+  }
+  function closeNewCfPanel() {
+    document.getElementById('cfPanel').classList.remove('open');
+    document.getElementById('cfOverlay').classList.remove('open');
+  }
+  function pickMethod(el) {
+    el.parentNode.querySelectorAll('.type-tab').forEach(function(t) { t.classList.remove('active'); });
+    el.classList.add('active');
+  }
+  function addCfRow(el) {
+    var list = el.previousElementSibling;
+    var row = document.createElement('div');
+    row.className = 'choice-row';
+    row.innerHTML = '<input class="choice-input"><span class="choice-del" onclick="this.parentNode.remove()">×</span>';
+    list.appendChild(row);
+  }
+  function saveNewCf() {
+    var acct = document.getElementById('cfAccountToggle').classList.contains('on');
+    closeNewCfPanel();
+    showToast(acct ? 'Custom function published to library' : 'Custom function saved to this agent');
+  }
 </script>
 
 <!-- ===================== FUNCTION DETAIL PANEL ===================== -->
@@ -1729,6 +1757,65 @@
   <div class="panel-footer">
     <button class="panel-cancel" onclick="closeFnPanel()">Close</button>
     <button class="panel-save" onclick="closeFnPanel(); showToast('Function updated')">Update</button>
+  </div>
+</div>
+
+<!-- ===================== NEW CUSTOM FUNCTION PANEL ===================== -->
+<div class="panel-overlay" id="cfOverlay" onclick="closeNewCfPanel()"></div>
+<div class="fn-panel" id="cfPanel">
+  <div class="panel-header">
+    <span class="panel-title">New Custom Function</span>
+    <span class="panel-close" onclick="closeNewCfPanel()">×</span>
+  </div>
+  <div class="panel-body">
+    <div class="panel-field">
+      <label class="panel-label">Function name</label>
+      <input class="panel-input" placeholder="get_customer_details">
+    </div>
+    <div class="panel-field">
+      <label class="panel-label">Description</label>
+      <textarea class="panel-textarea" rows="2" placeholder="Explain what this function does and when the agent should call it"></textarea>
+    </div>
+    <div class="panel-field">
+      <label class="panel-label">Method</label>
+      <div class="type-tabs">
+        <div class="type-tab" onclick="pickMethod(this)">GET</div>
+        <div class="type-tab active" onclick="pickMethod(this)">POST</div>
+        <div class="type-tab" onclick="pickMethod(this)">PUT</div>
+        <div class="type-tab" onclick="pickMethod(this)">DELETE</div>
+      </div>
+    </div>
+    <div class="panel-field">
+      <label class="panel-label">Endpoint URL</label>
+      <input class="panel-input" placeholder="https://api.example.com/v1/customers">
+    </div>
+    <div class="panel-field">
+      <label class="panel-label">Parameters</label>
+      <div class="panel-hint" style="margin-top:0;margin-bottom:6px">Values the agent pulls from the call and sends in the request.</div>
+      <div class="choices-list">
+        <div class="choice-row"><input class="choice-input" placeholder="customer_id"><span class="choice-del" onclick="this.parentNode.remove()">×</span></div>
+      </div>
+      <div class="add-choice" onclick="addCfRow(this)">+ Add parameter</div>
+    </div>
+    <div class="panel-field">
+      <label class="panel-label">Response variables</label>
+      <div class="panel-hint" style="margin-top:0;margin-bottom:6px">Fields from the response to store as dynamic variables.</div>
+      <div class="choices-list">
+        <div class="choice-row"><input class="choice-input" placeholder="account_status"><span class="choice-del" onclick="this.parentNode.remove()">×</span></div>
+      </div>
+      <div class="add-choice" onclick="addCfRow(this)">+ Add response variable</div>
+    </div>
+    <div class="optional-row">
+      <div>
+        <div class="optional-label">Account function</div>
+        <div class="optional-hint">Publish to the Functions library so any agent can reuse it. Leave off to keep it local to this agent.</div>
+      </div>
+      <div class="toggle on" id="cfAccountToggle" onclick="this.classList.toggle('on')"></div>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <button class="panel-cancel" onclick="closeNewCfPanel()">Cancel</button>
+    <button class="panel-save" onclick="saveNewCf()">Save</button>
   </div>
 </div>
 

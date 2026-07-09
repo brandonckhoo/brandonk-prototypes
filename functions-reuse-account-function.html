@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Reuse an Account Function</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  background: #F5F7FA;
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 56px 24px 120px; min-height: 100vh; color: #0A0A0A;
+  -webkit-font-smoothing: antialiased;
+}
+.stage { width: 500px; position: relative; }
+
+/* Functions panel */
+.panel {
+  background: #fff; border: 1px solid #E1E4EA; border-radius: 16px;
+  padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.panel-head { display: flex; align-items: center; gap: 10px; }
+.panel-head h2 { font-size: 16px; font-weight: 600; flex: 1; }
+.panel-head .chev { color: #99A0AE; }
+.panel-desc { margin-top: 8px; font-size: 14px; line-height: 1.45; color: #6B7280; }
+.fn-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.fn-item {
+  display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 14px;
+  border: 1px solid #E1E4EA; border-radius: 10px; background: #fff;
+  font-size: 15px; color: #0A0A0A;
+}
+.fn-item .fi-icon { flex-shrink: 0; display: flex; }
+.fn-item.new-anim { animation: pop .28s ease; }
+@keyframes pop { 0% { transform: scale(.98); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.add-btn {
+  margin-top: 8px; display: inline-flex; align-items: center; gap: 8px;
+  height: 44px; padding: 0 16px; background: #fff; border: 1px solid #E1E4EA;
+  border-radius: 10px; font-size: 15px; font-weight: 500; color: #0A0A0A;
+  cursor: pointer; font-family: inherit;
+}
+.add-btn:hover { background: #F9FAFB; }
+
+/* Picker popover */
+.picker {
+  margin-top: 10px; background: #fff; border: 1px solid #E1E4EA; border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(14,18,27,0.12), 0 2px 8px rgba(14,18,27,0.06);
+  overflow: hidden; display: none;
+}
+.picker.open { display: block; }
+.search-wrap { padding: 12px 14px 10px; border-bottom: 1px solid #F0F1F3; }
+.search-inner {
+  display: flex; align-items: center; gap: 8px; background: #F5F7FA;
+  border: 1px solid #E9EAEC; border-radius: 8px; padding: 0 12px; height: 38px;
+}
+.search-inner svg { color: #9CA3AF; flex-shrink: 0; }
+.search-inner input {
+  border: none; outline: none; background: transparent; font-size: 14px;
+  color: #0A0A0A; width: 100%; font-family: inherit;
+}
+.search-inner input::placeholder { color: #B0B8C1; }
+.section-header { display: flex; align-items: center; gap: 6px; padding: 12px 16px 6px; }
+.section-label { font-size: 11px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.06em; }
+.info-icon {
+  width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid #C4C9D4;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: #9CA3AF; flex-shrink: 0;
+}
+.fn-row { display: flex; align-items: center; gap: 8px; padding: 9px 14px; }
+.fn-row:hover { background: #FAFBFC; }
+.fn-row.added-row { background: #F8FAFF; }
+.fn-row.hidden-row { display: none; }
+.fn-logo {
+  width: 30px; height: 30px; border-radius: 8px; border: 1px solid #E9EAEC;
+  background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.fn-meta { flex: 1; min-width: 0; overflow: hidden; }
+.fn-name-row { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; overflow: hidden; }
+.fn-name { font-size: 13px; font-weight: 500; color: #0A0A0A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.fn-row.added-row .fn-name { color: #525866; }
+.fn-badge { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 5px; font-size: 11px; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+.badge-sf { background: #E3F4FC; color: #0284C7; }
+.badge-hs { background: #FFF3EF; color: #C2410C; }
+.fn-used { font-size: 12px; color: #9CA3AF; margin-top: 1px; }
+.row-add-btn {
+  height: 28px; padding: 0 10px; background: #fff; border: 1px solid #D1D5DB;
+  border-radius: 7px; font-size: 13px; font-weight: 500; color: #374151;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0; font-family: inherit;
+}
+.row-add-btn:hover { background: #F9FAFB; border-color: #9CA3AF; }
+.added-label { font-size: 13px; color: #B0B8C1; flex-shrink: 0; padding-right: 4px; }
+.link-icon {
+  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+  color: #C4C9D4; flex-shrink: 0; border-radius: 5px; cursor: pointer; margin-left: auto;
+}
+.link-icon:hover { color: #6B7280; background: #F3F4F6; }
+.show-all { display: flex; align-items: center; gap: 5px; padding: 8px 16px 12px; font-size: 13px; font-weight: 500; color: #3d64d7; cursor: pointer; }
+.show-all:hover { color: #2451c7; }
+.show-all.gone { display: none; }
+.no-results { padding: 20px 16px; font-size: 13px; color: #9CA3AF; text-align: center; display: none; }
+.footer-divider { height: 1px; background: #E9EAEC; }
+.picker-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 12px 14px; }
+.btn-cancel { height: 34px; padding: 0 14px; background: #fff; border: 1px solid #D1D5DB; border-radius: 8px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; font-family: inherit; }
+.btn-cancel:hover { background: #F9FAFB; }
+.btn-save { height: 34px; padding: 0 14px; background: #0E121B; border: 1px solid #0E121B; border-radius: 8px; font-size: 13px; font-weight: 500; color: #fff; cursor: pointer; font-family: inherit; }
+.btn-save:hover { background: #000; }
+
+.hint { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); font-size: 13px; color: #99A0AE; background: #fff; border: 1px solid #E1E4EA; border-radius: 999px; padding: 7px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.hint b { color: #525866; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="panel">
+    <div class="panel-head">
+      <span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2.5l7.5 4.33v8.66L12 19.82l-7.5-4.33V6.83L12 2.5z" stroke="#0A0A0A" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="11.5" r="3" stroke="#0A0A0A" stroke-width="1.6"/></svg>
+      </span>
+      <h2>Functions</h2>
+      <span class="chev"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </div>
+    <p class="panel-desc">Enable your agent with capabilities such as call termination and integrations.</p>
+
+    <div class="fn-list" id="fnList">
+      <div class="fn-item">
+        <span class="fi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15.5 4.5l4 4M19.5 4.5l-4 4" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/><path d="M3.5 5.5c0 7.2 5.8 13 13 13 .9 0 1.6-.7 1.6-1.6v-2.2c0-.7-.5-1.3-1.2-1.5l-2.4-.6c-.6-.1-1.2.1-1.5.6l-.6.9c-2-1-3.6-2.6-4.6-4.6l.9-.6c.5-.3.7-.9.6-1.5l-.6-2.4C8.4 4 7.8 3.5 7.1 3.5H5C4.1 3.5 3.5 4.6 3.5 5.5z" stroke="#525866" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+        end_call
+      </div>
+    </div>
+
+    <button class="add-btn" id="addBtn">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 4.2v11.6M4.2 10h11.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      Add
+    </button>
+
+    <!-- Account function picker -->
+    <div class="picker" id="picker">
+      <div class="search-wrap">
+        <div class="search-inner">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M14.52 13.46L17.74 16.67L16.67 17.74L13.46 14.52C12.27 15.48 10.78 16 9.25 16C5.52 16 2.5 12.98 2.5 9.25C2.5 5.52 5.52 2.5 9.25 2.5C12.98 2.5 16 5.52 16 9.25C16 10.78 15.48 12.27 14.52 13.46ZM13.02 12.91C13.97 11.93 14.5 10.62 14.5 9.25C14.5 6.35 12.15 4 9.25 4C6.35 4 4 6.35 4 9.25C4 12.15 6.35 14.5 9.25 14.5C10.62 14.5 11.93 13.97 12.91 13.02Z" fill="currentColor"/></svg>
+          <input type="text" id="searchInput" placeholder="Search functions...">
+        </div>
+      </div>
+      <div class="section-header">
+        <span class="section-label">Pre-Conversation Functions</span>
+        <span class="info-icon">i</span>
+      </div>
+      <div id="rows"></div>
+      <div class="no-results" id="noResults">No account functions match your search.</div>
+      <div class="show-all" id="showAll"></div>
+      <div class="footer-divider"></div>
+      <div class="picker-footer">
+        <button class="btn-cancel" id="btnCancel">Cancel</button>
+        <button class="btn-save" id="btnSave">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hint">Click <b>+ Add</b> → attach an existing account function → <b>Save</b></div>
+
+<script>
+const sfCloud = '<svg width="16" height="16" viewBox="0 0 48 32"><ellipse cx="19" cy="17" rx="10" ry="10" fill="#00A1E0"/><ellipse cx="31" cy="14" rx="8" ry="8" fill="#00A1E0"/><ellipse cx="38" cy="20" rx="6" ry="6" fill="#00A1E0"/><ellipse cx="11" cy="22" rx="8" ry="8" fill="#00A1E0"/><ellipse cx="24" cy="24" rx="9" ry="8" fill="#00A1E0"/></svg>';
+const hsIcon = '<svg width="16" height="16" viewBox="0 0 48 48" fill="none"><circle cx="32" cy="14" r="5" fill="#FF7A59"/><circle cx="32" cy="14" r="2.5" fill="#fff"/><path d="M27 14h-7a8 8 0 100 16h7V14z" fill="#FF7A59"/><circle cx="20" cy="22" r="4" fill="#fff"/></svg>';
+const linkSvg = '<svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M11 3h6v6m0-6L8 12m-1-7H3v14h14v-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+const FUNCTIONS = [
+  {name: 'get_salesforce_contact', badge: 'Salesforce', cls: 'badge-sf', icon: sfCloud, agents: 8},
+  {name: 'get_salesforce_lead', badge: 'Salesforce', cls: 'badge-sf', icon: sfCloud, agents: 7},
+  {name: 'get_salesforce_opportunity', badge: 'Salesforce', cls: 'badge-sf', icon: sfCloud, agents: 6},
+  {name: 'get_hubspot_contact', badge: 'HubSpot', cls: 'badge-hs', icon: hsIcon, agents: 5},
+  {name: 'get_salesforce_account', badge: 'Salesforce', cls: 'badge-sf', icon: sfCloud, agents: 4},
+  {name: 'get_salesforce_case', badge: 'Salesforce', cls: 'badge-sf', icon: sfCloud, agents: 3},
+  {name: 'create_salesforce_note', badge: 'Salesforce', cls: 'badge-sf', icon: sfCloud, agents: 2},
+];
+
+let expanded = false;
+const added = new Set();          // committed (already on the agent)
+const staged = new Set();         // added in this picker session, not yet saved
+
+const picker = document.getElementById('picker');
+const addBtn = document.getElementById('addBtn');
+const rowsEl = document.getElementById('rows');
+const showAll = document.getElementById('showAll');
+const searchInput = document.getElementById('searchInput');
+const noResults = document.getElementById('noResults');
+
+function render() {
+  const q = searchInput.value.trim().toLowerCase();
+  rowsEl.innerHTML = '';
+  let visibleCount = 0;
+  let matches = FUNCTIONS.filter(f => f.name.toLowerCase().includes(q) || f.badge.toLowerCase().includes(q));
+
+  matches.forEach((f, i) => {
+    const isAdded = staged.has(f.name) || added.has(f.name);
+    // when not searching, only show top 5 unless expanded
+    const beyondTop5 = !q && !expanded && i >= 5;
+    const row = document.createElement('div');
+    row.className = 'fn-row' + (isAdded ? ' added-row' : '') + (beyondTop5 ? ' hidden-row' : '');
+    if (!beyondTop5) visibleCount++;
+    row.innerHTML = `
+      <div class="fn-logo">${f.icon}</div>
+      <div class="fn-meta">
+        <div class="fn-name-row"><span class="fn-name">${f.name}</span><span class="fn-badge ${f.cls}">${f.badge}</span></div>
+        <div class="fn-used">Used by ${f.agents} agents</div>
+      </div>
+      <a class="link-icon" title="View in Components library">${linkSvg}</a>
+      ${isAdded ? '<span class="added-label">Added</span>' : '<button class="row-add-btn">+ Add</button>'}
+    `;
+    if (!isAdded) {
+      row.querySelector('.row-add-btn').onclick = () => { staged.add(f.name); render(); };
+    }
+    rowsEl.appendChild(row);
+  });
+
+  noResults.style.display = matches.length === 0 ? 'block' : 'none';
+
+  // Show-all control
+  const hiddenTotal = FUNCTIONS.length;
+  if (!q && !expanded && FUNCTIONS.length > 5) {
+    showAll.className = 'show-all';
+    showAll.innerHTML = `<svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4h1.5v5.25H16v1.5h-5.25V16h-1.5v-5.25H4v-1.5h5.25z" fill="currentColor"/></svg> Show all ${FUNCTIONS.length} functions`;
+    showAll.onclick = () => { expanded = true; render(); };
+  } else {
+    showAll.className = 'show-all gone';
+  }
+}
+
+function openPicker() { picker.classList.add('open'); expanded = false; searchInput.value = ''; staged.clear(); render(); }
+function closePicker() { picker.classList.remove('open'); }
+
+addBtn.onclick = () => picker.classList.contains('open') ? closePicker() : openPicker();
+searchInput.oninput = render;
+document.getElementById('btnCancel').onclick = closePicker;
+document.getElementById('btnSave').onclick = () => {
+  const list = document.getElementById('fnList');
+  staged.forEach(name => {
+    if (added.has(name)) return;
+    added.add(name);
+    const f = FUNCTIONS.find(x => x.name === name);
+    const row = document.createElement('div');
+    row.className = 'fn-item new-anim';
+    row.innerHTML = `<span class="fi-icon">${f.icon}</span>${name}`;
+    list.appendChild(row);
+  });
+  closePicker();
+};
+</script>
+</body>
+</html>

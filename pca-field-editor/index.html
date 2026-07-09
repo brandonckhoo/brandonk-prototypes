@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PCA field editor — account toggle</title>
+<style>
+  :root {
+    --canvas: #F4F4F6;
+    --dot: #E3E3E8;
+    --panel: #FFFFFF;
+    --panel-border: #EBEBEF;
+    --input: #FFFFFF;
+    --input-border: #E2E2E8;
+    --label: #18181B;
+    --value: #27272A;
+    --helper: #71717A;
+    --muted-icon: #8A8A93;
+    --accent: #635BFF;
+    --toggle-off: #D4D4D8;
+    --divider: #EDEDF1;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--canvas);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: var(--label);
+  }
+
+  .canvas {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 20px;
+    background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+
+  .panel {
+    width: 100%;
+    max-width: 500px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    padding: 26px 28px 22px;
+    box-shadow: 0 20px 48px rgba(24,24,27,0.10), 0 2px 8px rgba(24,24,27,0.05);
+  }
+
+  /* header */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 24px;
+  }
+  .header .title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+  .header .close {
+    margin-left: auto;
+    color: var(--muted-icon);
+    background: none; border: none; cursor: pointer;
+    display: flex; padding: 4px;
+  }
+  .ico { display: block; }
+
+  /* field blocks */
+  .field { margin-bottom: 22px; }
+  .field:last-of-type { margin-bottom: 0; }
+  .field > label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--label);
+    margin-bottom: 9px;
+    letter-spacing: -0.005em;
+  }
+
+  .input, .textarea {
+    width: 100%;
+    background: var(--input);
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+    color: var(--value);
+    font: inherit;
+    font-size: 14.5px;
+    padding: 11px 13px;
+    line-height: 1.45;
+  }
+  .input:focus, .textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+  .textarea { resize: none; min-height: 78px; }
+
+  .example-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .example-row .input { flex: 1; }
+  .example-row .trash {
+    color: var(--muted-icon);
+    background: none; border: none; cursor: pointer;
+    display: flex; padding: 4px;
+  }
+
+  .add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--input);
+    border: 1px solid var(--input-border);
+    color: var(--value);
+    border-radius: 10px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 9px 15px;
+    cursor: pointer;
+    margin-top: 2px;
+  }
+
+  .helper {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--helper);
+    margin: 0 0 12px;
+    max-width: 42ch;
+  }
+
+  /* toggle */
+  .toggle {
+    position: relative;
+    width: 38px; height: 22px;
+    border-radius: 999px;
+    background: var(--toggle-off);
+    border: none; cursor: pointer;
+    padding: 0;
+    transition: background .16s ease;
+    flex: none;
+  }
+  .toggle::after {
+    content: "";
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    transition: transform .16s ease;
+  }
+  .toggle[aria-checked="true"] { background: var(--accent); }
+  .toggle[aria-checked="true"]::after { transform: translateX(16px); }
+  .toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* the new publish row */
+  .publish {
+    margin-top: 24px;
+    padding-top: 22px;
+    border-top: 1px solid var(--divider);
+  }
+  .publish-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .publish-head label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--label);
+    letter-spacing: -0.005em;
+  }
+  .publish-head .toggle { margin-left: auto; }
+  .publish .helper { margin: 9px 0 0; }
+
+  /* footer */
+  .footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 26px;
+  }
+  .btn {
+    font: inherit;
+    font-size: 14.5px;
+    font-weight: 600;
+    border-radius: 11px;
+    padding: 10px 22px;
+    cursor: pointer;
+  }
+  .btn-cancel {
+    background: #FFFFFF;
+    border: 1px solid var(--input-border);
+    color: #3F3F46;
+  }
+  .btn-update {
+    background: #09090B;
+    border: 1px solid #09090B;
+    color: #FFFFFF;
+  }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="panel">
+    <div class="header">
+      <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round">
+        <line x1="4" y1="7" x2="20" y2="7"/>
+        <line x1="4" y1="12" x2="16" y2="12"/>
+        <line x1="4" y1="17" x2="12" y2="17"/>
+      </svg>
+      <span class="title">Text</span>
+      <button class="close" aria-label="Close">
+        <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="6" y1="6" x2="18" y2="18"/>
+          <line x1="18" y1="6" x2="6" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="field">
+      <label for="name">Name</label>
+      <input id="name" class="input" value="appointment_time" />
+    </div>
+
+    <div class="field">
+      <label for="desc">Description</label>
+      <textarea id="desc" class="textarea">The date and time of the scheduled service appointment, as discussed on the call.</textarea>
+    </div>
+
+    <div class="field">
+      <label>Format Example (Optional)</label>
+      <div class="example-row">
+        <input class="input" value="Tomorrow at 7:00 AM" />
+        <button class="trash" aria-label="Remove">
+          <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>
+          </svg>
+        </button>
+      </div>
+      <div class="example-row">
+        <input class="input" value="Saturday at 2:30 PM" />
+        <button class="trash" aria-label="Remove">
+          <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>
+          </svg>
+        </button>
+      </div>
+      <button class="add-btn">
+        <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add
+      </button>
+    </div>
+
+    <div class="field">
+      <label>Optional</label>
+      <p class="helper">Populate this field only when the call matches the conditions you define. Otherwise, it will be left empty.</p>
+      <button class="toggle" role="switch" aria-checked="false" aria-label="Optional"></button>
+    </div>
+
+    <!-- NEW: publish to account library -->
+    <div class="publish">
+      <div class="publish-head">
+        <label>Save as account Post Call Analysis field</label>
+        <button class="toggle" role="switch" aria-checked="true" aria-label="Save as account field"></button>
+      </div>
+      <p class="helper">Publish to the account library so every agent can reuse it. Leave it off to keep the field local to this agent.</p>
+    </div>
+
+    <div class="footer">
+      <button class="btn btn-cancel">Cancel</button>
+      <button class="btn btn-update">Update</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -107,6 +107,16 @@
   .active-filter-pill .afp-av { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; color: #fff; flex-shrink: 0; }
   .active-filter-pill .afp-x { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; color: #5B6FB8; font-size: 15px; line-height: 1; }
   .active-filter-pill .afp-x:hover { background: rgba(61,100,215,0.14); }
+  .active-filters { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  /* scoped table search */
+  .tbl-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; min-width: 320px; }
+  .tbl-search:focus-within { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.1); }
+  .tbl-search .ts-ic { color: #9CA3AF; flex-shrink: 0; }
+  .tbl-search-scope { display: inline-flex; align-items: center; font-size: 12px; font-weight: 500; color: #3d64d7; background: #EEF3FF; padding: 3px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
+  .tbl-search input { border: none; outline: none; font-size: 14px; color: #0A0A0A; background: transparent; width: 100%; min-width: 60px; }
+  .tbl-search input::placeholder { color: #9CA3AF; }
+  .search-count { display: none; font-size: 12.5px; color: #6B7280; white-space: nowrap; }
 
   /* ============ MAIN ============ */
   .main { flex: 1; overflow: auto; background: #fff; min-width: 0; }
@@ -412,7 +422,7 @@
 <aside class="subnav">
   <div class="subnav-group" style="margin-top:0">
     <div class="subnav-group-label">Category</div>
-    <div class="subnav-item active" id="cat-functions" onclick="setCategory('functions')"><span class="subnav-dot" style="background:#3d64d7"></span> Integration Functions <span class="count">4</span></div>
+    <div class="subnav-item active" id="cat-functions" onclick="setCategory('functions')"><span class="subnav-dot" style="background:#3d64d7"></span> Integration Functions <span class="count">5</span></div>
     <div class="subnav-item" id="cat-custom" onclick="setCategory('custom')"><span class="subnav-dot" style="background:#3d64d7"></span> Custom Functions <span class="count">4</span></div>
     <div class="subnav-item" id="cat-extractors" onclick="setCategory('extractors')"><span class="subnav-dot" style="background:#CA8A04"></span> Post Call Analysis <span class="count">6</span></div>
   </div>
@@ -427,19 +437,25 @@
   <div class="main-header">
     <div class="dot"></div>
     <h1>Integration Functions</h1>
-    <span class="h-count">4</span>
+    <span class="h-count">5</span>
   </div>
   <p class="subtitle">Build a function once and reuse it across agents. One edit updates every agent that links to it.</p>
 
   <div class="actionbar">
+    <div class="tbl-search">
+      <svg class="ts-ic" width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M9 3a6 6 0 104.47 10.03l3.25 3.25 1.06-1.06-3.25-3.25A6 6 0 009 3zm0 1.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" fill="#9CA3AF"/></svg>
+      <span class="tbl-search-scope">Integration Functions</span>
+      <input placeholder="Search Integration Functions" oninput="onSearch(this, 'functions')">
+    </div>
     <div class="filter-wrap" data-view="functions">
       <button class="pill-btn filter-btn" onclick="toggleFilter(event, this)">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M6.5 10h7M9 14h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         Filter <span class="chev">▾</span>
       </button>
       <div class="filter-dd"></div>
-      <span class="active-filter-pill"></span>
     </div>
+    <div class="active-filters"></div>
+    <span class="search-count"></span>
     <span class="spacer"></span>
     <div class="btn-primary-wrap">
       <button class="btn-primary" onclick="toggleNewFnDropdown(event)">
@@ -554,10 +570,8 @@
           <div class="used-by">
             <div class="avatars">
               <div class="av" style="background:#3d64d7">DR</div>
-              <div class="av" style="background:#E5484D">LI</div>
-              <div class="av more">+1</div>
             </div>
-            <span class="used-count">3 agents</span>
+            <span class="used-count">1 agent</span>
           </div>
         </td>
         <td class="edited">06/14/2026 11:05</td>
@@ -589,10 +603,26 @@
         <td class="edited">06/09/2026 16:57</td>
         <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
+      <!-- Row 5: Salesforce, unused (demonstrates Usage: Not used by any agent) -->
+      <tr onclick="openFnPanel('log_salesforce_activity')" style="cursor:pointer">
+        <td>
+          <div class="fn-name">
+            <div class="fn-icon" style="background:#E3F4FC"><svg viewBox="0 0 20 20" fill="none"><path d="M10 3c1.4 0 2.6.8 3.2 2 .5-.2 1.1-.3 1.7-.3 2.3 0 4.1 1.8 4.1 4.1 0 .4-.1.8-.2 1.2.5.7.7 1.5.7 2.3 0 2.2-1.8 4-4 4H5C3.3 16.3 2 14.9 2 13.2c0-1 .5-1.9 1.3-2.5C3.1 10.3 3 9.9 3 9.5 3 7.7 4.8 6 7 6c.3-1.7 1.5-3 3-3z" fill="#00A1E0"/></svg></div>
+            <div>
+              <div class="fn-title">log_salesforce_activity</div>
+              <div class="fn-sub">Writes a call activity record to the Salesforce contact after the call</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="type-badge"><span class="tdot" style="background:#00A1E0"></span>Salesforce</span></td>
+        <td><span class="used-none">Not connected to any agent</span></td>
+        <td class="edited">06/18/2026 10:02</td>
+        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+      </tr>
     </tbody>
   </table>
   <div class="pagination-bar">
-    <div class="page-info">Page 1 of 1 · 4 functions</div>
+    <div class="page-info">Page 1 of 1 · 5 functions</div>
     <div class="page-nav">
       <button class="page-btn" disabled>‹</button>
       <button class="page-btn active">1</button>
@@ -614,14 +644,20 @@
   <p class="subtitle">Define the information that you need to extract from the call</p>
 
   <div class="actionbar">
+    <div class="tbl-search">
+      <svg class="ts-ic" width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M9 3a6 6 0 104.47 10.03l3.25 3.25 1.06-1.06-3.25-3.25A6 6 0 009 3zm0 1.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" fill="#9CA3AF"/></svg>
+      <span class="tbl-search-scope">Post Call Analysis</span>
+      <input placeholder="Search Post Call Analysis" oninput="onSearch(this, 'extractors')">
+    </div>
     <div class="filter-wrap" data-view="extractors">
       <button class="pill-btn filter-btn" onclick="toggleFilter(event, this)">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M6.5 10h7M9 14h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         Filter <span class="chev">▾</span>
       </button>
       <div class="filter-dd"></div>
-      <span class="active-filter-pill"></span>
     </div>
+    <div class="active-filters"></div>
+    <span class="search-count"></span>
     <span class="spacer"></span>
     <div class="btn-primary-wrap">
       <button class="btn-primary" onclick="togglePcaDropdown(event)">
@@ -734,14 +770,20 @@
   <p class="subtitle">Call any API endpoint during a conversation. One edit updates every agent that links to it.</p>
 
   <div class="actionbar">
+    <div class="tbl-search">
+      <svg class="ts-ic" width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M9 3a6 6 0 104.47 10.03l3.25 3.25 1.06-1.06-3.25-3.25A6 6 0 009 3zm0 1.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" fill="#9CA3AF"/></svg>
+      <span class="tbl-search-scope">Custom Functions</span>
+      <input placeholder="Search Custom Functions" oninput="onSearch(this, 'custom')">
+    </div>
     <div class="filter-wrap" data-view="custom">
       <button class="pill-btn filter-btn" onclick="toggleFilter(event, this)">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M6.5 10h7M9 14h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         Filter <span class="chev">▾</span>
       </button>
       <div class="filter-dd"></div>
-      <span class="active-filter-pill"></span>
     </div>
+    <div class="active-filters"></div>
+    <span class="search-count"></span>
     <span class="spacer"></span>
     <button class="btn-primary" style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;background:#0E121B;color:#fff;border:none;border-radius:7px;font-size:13.5px;font-weight:500;cursor:pointer;font-family:inherit">
       <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
@@ -855,7 +897,7 @@
             <span class="used-count">4 agents</span>
           </div>
         </td>
-        <td><span class="status-cell"><span class="status-dot" style="background:#1FC16B"></span>Active</span></td>
+        <td><span class="status-cell"><span class="status-dot" style="background:#99A0AE"></span><span style="color:#99A0AE">Disabled</span></span></td>
         <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- lookup_property_record -->
@@ -1241,7 +1283,7 @@
     d.style.display = d.style.display === 'block' ? 'none' : 'block';
   }
 
-  // ===== FILTER DROPDOWN (Connected agent sub-filter) =====
+  // ===== FILTER + SEARCH ENGINE =====
   var FILTER_AGENTS = [
     {c:'DR', n:'Dr. Rivera Agent', col:'#3d64d7'},
     {c:'IV', n:'Ivan V. Agent',    col:'#7D52F4'},
@@ -1254,6 +1296,19 @@
   ];
   var PERSON_ICON = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 3.25a3 3 0 110 6 3 3 0 010-6zm0 7.5c3.04 0 5.75 1.4 5.75 3.4v1.6H4.25v-1.6c0-2 2.71-3.4 5.75-3.4z" fill="#525866"/></svg>';
   var CATEGORY_ICON = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 5.5A1.5 1.5 0 015.5 4h3A1.5 1.5 0 0110 5.5v3A1.5 1.5 0 018.5 10h-3A1.5 1.5 0 014 8.5v-3zm6 6A1.5 1.5 0 0111.5 10h3A1.5 1.5 0 0116 11.5v3a1.5 1.5 0 01-1.5 1.5h-3A1.5 1.5 0 0110 14.5v-3z" fill="#525866"/></svg>';
+  var USAGE_ICON = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 16V9M8 16V4M12 16v-5M16 16V7" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  var STATUS_ICON = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6.25" stroke="#525866" stroke-width="1.5"/><path d="M10 6.5V10l2.25 2.25" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  var FACET2_LABEL = { functions: 'Integration', extractors: 'Type', custom: 'Method' };
+  var TAB_NAME = { functions: 'Integration Functions', extractors: 'Post Call Analysis', custom: 'Custom Functions' };
+  var USAGE_OPTS = [ {k:'unused', label:'Not used by any agent'}, {k:'one', label:'Used by 1 agent'}, {k:'many', label:'Used by 2+ agents'} ];
+  var USAGE_LABEL = { unused:'Not used by any agent', one:'Used by 1 agent', many:'Used by 2+ agents' };
+  var STATUS_OPTS = [ {k:'active', label:'Active', col:'#1FC16B'}, {k:'error', label:'Error', col:'#FB3748'}, {k:'disabled', label:'Disabled', col:'#99A0AE'} ];
+  var VS = {}, TOTALS = {};
+  function getVS(view) {
+    if (!VS[view]) VS[view] = { agent:null, agentName:null, agentCol:null, category:null, catCol:null, usage:null, status:null, statusCol:null, q:'' };
+    return VS[view];
+  }
+  function viewOf(el) { return el.closest('.filter-wrap').dataset.view; }
 
   function closeAllFilters() {
     document.querySelectorAll('.filter-wrap').forEach(function(w) {
@@ -1261,30 +1316,25 @@
       var b = w.querySelector('.filter-btn'); if (b) b.classList.remove('on');
     });
   }
-  var FACET2_LABEL = { functions: 'Integration', extractors: 'Type', custom: 'Method' };
-  function renderFacets(dd, view) {
-    var f2 = FACET2_LABEL[view] || 'Integration';
-    dd.innerHTML =
-      '<div class="filter-sec">Filter by</div>' +
-      '<div class="filter-facet" onclick="showAgentPicker(event, this)">' + PERSON_ICON +
-        ' Used by agent <span class="fchev">›</span></div>' +
-      '<div class="filter-facet" onclick="showCategoryPicker(event, this)">' + CATEGORY_ICON +
-        ' ' + f2 + ' <span class="fchev">›</span></div>';
+  function facetList(view) {
+    var arr = [ {f:'agent', icon:PERSON_ICON, label:'Used by agent'} ];
+    arr.push({ f:'category', icon:CATEGORY_ICON, label:(FACET2_LABEL[view] || 'Integration') });
+    arr.push({ f:'usage', icon:USAGE_ICON, label:'Usage' });
+    if (view === 'custom') arr.push({ f:'status', icon:STATUS_ICON, label:'Status' });
+    return arr;
   }
-  function collectCategories(wrap) {
-    var view = wrap.closest('div[id^="view-"]');
-    var seen = {}, out = [];
-    if (!view) return out;
-    view.querySelectorAll('tbody tr').forEach(function(r) {
-      var badge = r.querySelector('.type-badge') || r.querySelector('.method-badge');
-      if (!badge) return;
-      var label = badge.textContent.trim();
-      if (!label || seen[label]) return;
-      seen[label] = 1;
-      var dot = badge.querySelector('.tdot');
-      out.push({ label: label, color: dot ? dot.style.background : '#99A0AE' });
+  function renderFacets(dd, view) {
+    var html = '<div class="filter-sec">Filter by</div>';
+    facetList(view).forEach(function(x) {
+      html += '<div class="filter-facet" onclick="openFacet(event, this, \'' + x.f + '\')">' + x.icon +
+        ' ' + x.label + ' <span class="fchev">›</span></div>';
     });
-    return out;
+    dd.innerHTML = html;
+  }
+  function openFacet(e, el, facet) {
+    if (facet === 'agent') return showAgentPicker(e, el);
+    if (facet === 'category') return showCategoryPicker(e, el);
+    return showListPicker(e, el, facet);
   }
   function toggleFilter(e, btn) {
     e.stopPropagation();
@@ -1297,6 +1347,11 @@
       dd.classList.add('open');
       btn.classList.add('on');
     }
+  }
+  function backToFacets(e, el) {
+    e.stopPropagation();
+    var dd = el.closest('.filter-dd');
+    renderFacets(dd, dd.closest('.filter-wrap').dataset.view);
   }
   function showAgentPicker(e, el) {
     e.stopPropagation();
@@ -1314,17 +1369,26 @@
     html += '</div>';
     dd.innerHTML = html;
   }
-  function backToFacets(e, el) {
-    e.stopPropagation();
-    var dd = el.closest('.filter-dd');
-    var wrap = dd.closest('.filter-wrap');
-    renderFacets(dd, wrap.dataset.view);
-  }
   function filterAgentList(input) {
     var q = input.value.toLowerCase();
     input.closest('.filter-dd').querySelectorAll('.filter-agent').forEach(function(r) {
       r.style.display = r.dataset.name.indexOf(q) !== -1 ? '' : 'none';
     });
+  }
+  function collectCategories(wrap) {
+    var view = wrap.closest('div[id^="view-"]');
+    var seen = {}, out = [];
+    if (!view) return out;
+    view.querySelectorAll('tbody tr').forEach(function(r) {
+      var badge = r.querySelector('.type-badge') || r.querySelector('.method-badge');
+      if (!badge) return;
+      var label = badge.textContent.trim();
+      if (!label || seen[label]) return;
+      seen[label] = 1;
+      var dot = badge.querySelector('.tdot');
+      out.push({ label: label, color: dot ? dot.style.background : '#99A0AE' });
+    });
+    return out;
   }
   function showCategoryPicker(e, el) {
     e.stopPropagation();
@@ -1335,9 +1399,7 @@
       '<div class="filter-back" onclick="backToFacets(event, this)">‹ Back</div>' +
       '<div class="filter-sec">' + (FACET2_LABEL[wrap.dataset.view] || 'Integration') + '</div>' +
       '<div class="filter-agent-list">';
-    if (!cats.length) {
-      html += '<div style="padding:8px 10px;font-size:13px;color:#99A0AE">No categories</div>';
-    }
+    if (!cats.length) html += '<div style="padding:8px 10px;font-size:13px;color:#99A0AE">None</div>';
     cats.forEach(function(c) {
       html += '<div class="filter-agent" ' +
         'onclick="applyCategoryFilter(event, this, \'' + c.label.replace(/'/g, "\\'") + '\', \'' + c.color + '\')">' +
@@ -1347,68 +1409,133 @@
     html += '</div>';
     dd.innerHTML = html;
   }
+  function showListPicker(e, el, kind) {
+    e.stopPropagation();
+    var dd = el.closest('.filter-dd');
+    var opts = kind === 'usage' ? USAGE_OPTS : STATUS_OPTS;
+    var title = kind === 'usage' ? 'Usage' : 'Status';
+    var html =
+      '<div class="filter-back" onclick="backToFacets(event, this)">‹ Back</div>' +
+      '<div class="filter-sec">' + title + '</div><div class="filter-agent-list">';
+    opts.forEach(function(o) {
+      var dot = kind === 'status'
+        ? '<span class="subnav-dot" style="width:9px;height:9px;background:' + o.col + '"></span>'
+        : '<span style="width:9px;display:inline-block"></span>';
+      html += '<div class="filter-agent" onclick="applySimpleFilter(event, this, \'' + kind + '\', \'' + o.k + '\', \'' + (o.col || '') + '\')">' +
+        dot + '<span class="fname">' + o.label + '</span></div>';
+    });
+    html += '</div>';
+    dd.innerHTML = html;
+  }
   function applyAgentFilter(e, el, code, name, col) {
     e.stopPropagation();
-    var wrap = el.closest('.filter-wrap');
-    var pill = wrap.querySelector('.active-filter-pill');
-    pill.innerHTML = '<span class="afp-av" style="background:' + col + '">' + code + '</span>' +
-      'Used by ' + name + '<span class="afp-x" onclick="clearFilter(event, this)">×</span>';
-    pill.style.display = 'inline-flex';
-    closeAllFilters();
-    applyRowFilter(wrap, 'agent', code);
+    var view = viewOf(el), st = getVS(view);
+    st.agent = code; st.agentName = name; st.agentCol = col;
+    closeAllFilters(); applyAllFilters(view);
   }
   function applyCategoryFilter(e, el, label, col) {
     e.stopPropagation();
-    var wrap = el.closest('.filter-wrap');
-    var pill = wrap.querySelector('.active-filter-pill');
-    pill.innerHTML = '<span class="subnav-dot" style="width:9px;height:9px;background:' + col + '"></span>' +
-      label + '<span class="afp-x" onclick="clearFilter(event, this)">×</span>';
-    pill.style.display = 'inline-flex';
-    closeAllFilters();
-    applyRowFilter(wrap, 'category', label);
+    var view = viewOf(el), st = getVS(view);
+    st.category = label; st.catCol = col;
+    closeAllFilters(); applyAllFilters(view);
   }
-  function clearFilter(e, x) {
+  function applySimpleFilter(e, el, kind, key, col) {
     e.stopPropagation();
-    var wrap = x.closest('.filter-wrap');
-    wrap.querySelector('.active-filter-pill').style.display = 'none';
-    applyRowFilter(wrap, null, null);
+    var view = viewOf(el), st = getVS(view);
+    if (kind === 'usage') st.usage = key;
+    else { st.status = key; st.statusCol = col; }
+    closeAllFilters(); applyAllFilters(view);
   }
-  function applyRowFilter(wrap, kind, value) {
-    var view = wrap.closest('div[id^="view-"]');
-    if (!view) return;
-    var rows = view.querySelectorAll('tbody tr');
-    var shown = 0;
-    rows.forEach(function(r) {
-      if (!kind) { r.style.display = ''; shown++; return; }
-      var match = false;
-      if (kind === 'agent') {
-        var codes = [];
-        r.querySelectorAll('.av').forEach(function(a) {
-          if (!a.classList.contains('more')) codes.push(a.textContent.trim());
-        });
-        match = codes.indexOf(value) !== -1;
-      } else if (kind === 'category') {
-        var badge = r.querySelector('.type-badge') || r.querySelector('.method-badge');
-        match = !!badge && badge.textContent.trim() === value;
-      }
-      r.style.display = match ? '' : 'none';
-      if (match) shown++;
-    });
-    var code = kind;
-    var hc = view.querySelector('.h-count');
-    if (hc) {
-      if (code) { if (!hc.dataset.total) hc.dataset.total = hc.textContent; hc.textContent = shown; }
-      else if (hc.dataset.total) { hc.textContent = hc.dataset.total; }
+  function removeFacet(e, view, facet) {
+    e.stopPropagation();
+    var st = getVS(view);
+    if (facet === 'agent') { st.agent = st.agentName = st.agentCol = null; }
+    else if (facet === 'category') { st.category = st.catCol = null; }
+    else if (facet === 'status') { st.status = st.statusCol = null; }
+    else st[facet] = null;
+    applyAllFilters(view);
+  }
+  function onSearch(input, view) {
+    getVS(view).q = input.value.trim().toLowerCase();
+    applyAllFilters(view);
+  }
+  function rowCount(r) {
+    if (r.querySelector('.used-none')) return 0;
+    var uc = r.querySelector('.used-count');
+    if (!uc) return 0;
+    var m = uc.textContent.match(/\d+/);
+    return m ? parseInt(m[0], 10) : 0;
+  }
+  function rowMatches(r, st) {
+    if (st.agent) {
+      var codes = [];
+      r.querySelectorAll('.av').forEach(function(a) { if (!a.classList.contains('more')) codes.push(a.textContent.trim()); });
+      if (codes.indexOf(st.agent) === -1) return false;
     }
-    var pi = view.querySelector('.page-info');
+    if (st.category) {
+      var b = r.querySelector('.type-badge') || r.querySelector('.method-badge');
+      if (!b || b.textContent.trim() !== st.category) return false;
+    }
+    if (st.usage) {
+      var c = rowCount(r);
+      if (st.usage === 'unused' && c !== 0) return false;
+      if (st.usage === 'one' && c !== 1) return false;
+      if (st.usage === 'many' && c < 2) return false;
+    }
+    if (st.status) {
+      var s = r.querySelector('.status-cell');
+      if (!s || s.textContent.trim().toLowerCase() !== st.status) return false;
+    }
+    if (st.q) {
+      var t = r.querySelector('.fn-title'), sub = r.querySelector('.fn-sub');
+      var hay = ((t ? t.textContent : '') + ' ' + (sub ? sub.textContent : '')).toLowerCase();
+      if (hay.indexOf(st.q) === -1) return false;
+    }
+    return true;
+  }
+  function chipHTML(view, facet, inner) {
+    return '<span class="active-filter-pill" style="display:inline-flex">' + inner +
+      '<span class="afp-x" onclick="removeFacet(event, \'' + view + '\', \'' + facet + '\')">×</span></span>';
+  }
+  function renderChips(view) {
+    var vc = document.getElementById('view-' + view);
+    var box = vc.querySelector('.active-filters'); if (!box) return;
+    var st = getVS(view), html = '';
+    if (st.agent) html += chipHTML(view, 'agent', '<span class="afp-av" style="background:' + st.agentCol + '">' + st.agent + '</span>Used by ' + st.agentName);
+    if (st.category) html += chipHTML(view, 'category', '<span class="subnav-dot" style="width:9px;height:9px;background:' + st.catCol + '"></span>' + st.category);
+    if (st.usage) html += chipHTML(view, 'usage', USAGE_LABEL[st.usage]);
+    if (st.status) html += chipHTML(view, 'status', '<span class="subnav-dot" style="width:9px;height:9px;background:' + (st.statusCol || '#99A0AE') + '"></span>' + st.status.charAt(0).toUpperCase() + st.status.slice(1));
+    box.innerHTML = html;
+  }
+  function applyAllFilters(view) {
+    var vc = document.getElementById('view-' + view);
+    if (!vc) return;
+    var st = getVS(view);
+    var rows = vc.querySelectorAll('tbody tr');
+    if (!TOTALS[view]) TOTALS[view] = rows.length;
+    var shown = 0;
+    rows.forEach(function(r) { var m = rowMatches(r, st); r.style.display = m ? '' : 'none'; if (m) shown++; });
+    var active = st.agent || st.category || st.usage || st.status || st.q;
+    var hc = vc.querySelector('.h-count');
+    if (hc) {
+      if (active) { if (!hc.dataset.total) hc.dataset.total = hc.textContent; hc.textContent = shown; }
+      else if (hc.dataset.total) hc.textContent = hc.dataset.total;
+    }
+    var pi = vc.querySelector('.page-info');
     if (pi) {
       if (!pi.dataset.orig) pi.dataset.orig = pi.textContent;
-      if (code) {
+      if (active) {
         var tail = pi.dataset.orig.split('·')[1] || ' items';
         var noun = tail.trim().replace(/^\d+\s*/, '');
         pi.textContent = 'Page 1 of 1 · ' + shown + ' ' + noun;
-      } else { pi.textContent = pi.dataset.orig; }
+      } else pi.textContent = pi.dataset.orig;
     }
+    var sc = vc.querySelector('.search-count');
+    if (sc) {
+      if (st.q) { sc.textContent = shown + ' of ' + TOTALS[view] + ' in ' + TAB_NAME[view]; sc.style.display = 'inline'; }
+      else { sc.style.display = 'none'; sc.textContent = ''; }
+    }
+    renderChips(view);
   }
 
   document.addEventListener('click', function(e) {
@@ -1538,6 +1665,7 @@
   // ===== FUNCTION DETAIL PANEL =====
   var FN_DATA = {
     get_salesforce_opportunity: { name: 'get_salesforce_opportunity', sub: 'Reads deal stage and contact details before call starts', category: 'Salesforce', categoryColor: '#00A1E0', timing: 'Pre-conversation', timingClass: 'timing-pre', agents: ['DR','IV','SC','KP','AM'], agentColors: ['#3d64d7','#7D52F4','#1FC16B','#E5484D','#FF9147'], lastEdited: '06/15/2026 14:22', description: 'Fetches the Salesforce opportunity linked to the caller\'s phone number and populates deal stage, account name, and last activity date into the agent\'s context before the call begins.', endpoint: 'GET /services/data/v58.0/query' },
+    log_salesforce_activity: { name: 'log_salesforce_activity', sub: 'Writes a call activity record to the Salesforce contact after the call', category: 'Salesforce', categoryColor: '#00A1E0', timing: 'Post-conversation', timingClass: 'timing-post', agents: [], agentColors: [], lastEdited: '06/18/2026 10:02', description: 'Creates a Salesforce activity record on the matched contact summarizing the call outcome and next steps. Not connected to any agent yet.', endpoint: 'POST /services/data/v58.0/sobjects/Task' },
     book_appointment: { name: 'book_appointment', sub: 'Creates an event on the customer\'s chosen slot', category: 'Cal.com', categoryColor: '#1FC16B', timing: 'During-conversation', timingClass: 'timing-mid', agents: ['DR','IV','SC','BK','MO'], agentColors: ['#3d64d7','#7D52F4','#1FC16B','#E5484D','#FF9147'], lastEdited: '06/15/2026 09:11', description: 'Books a Cal.com appointment for the customer\'s chosen time slot during the call. Confirms the booking and sends a calendar invite to the caller\'s email.', endpoint: 'POST /v1/bookings' },
     update_hubspot_deal: { name: 'update_hubspot_deal', sub: 'Updates deal stage and notes in HubSpot after call ends', category: 'HubSpot', categoryColor: '#FF7A59', timing: 'Post-conversation', timingClass: 'timing-post', agents: ['DR','LI','MO'], agentColors: ['#3d64d7','#E5484D','#FF9147'], lastEdited: '06/14/2026 11:05', description: 'Updates the HubSpot deal with the call outcome, next steps, and any notes captured during the conversation. Moves the deal to the appropriate pipeline stage.', endpoint: 'PATCH /crm/v3/objects/deals/{dealId}' },
     transfer_to_human: { name: 'transfer_to_human', sub: 'Warm transfer to a live support queue', category: 'Call transfer', categoryColor: '#FF9147', timing: 'During-conversation', timingClass: 'timing-mid', agents: ['DR','LI','IV','SC'], agentColors: ['#3d64d7','#E5484D','#7D52F4','#1FC16B'], lastEdited: '06/12/2026 09:43', description: 'Performs a warm transfer to the next available agent in the support queue. Passes a summary of the call context to the receiving agent before the handoff completes.', endpoint: 'POST /v1/calls/transfer' },

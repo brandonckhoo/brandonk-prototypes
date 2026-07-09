@@ -1304,7 +1304,7 @@
     });
   }
   function facetList(view) {
-    var arr = [ {f:'agent', icon:PERSON_ICON, label:'Used by agent'} ];
+    var arr = [ {f:'agent', icon:PERSON_ICON, label:'Connected agents'} ];
     arr.push({ f:'category', icon:CATEGORY_ICON, label:(FACET2_LABEL[view] || 'Integration') });
     if (view === 'custom') arr.push({ f:'status', icon:STATUS_ICON, label:'Status' });
     return arr;
@@ -1497,7 +1497,7 @@
       var avs = st.agents.map(function(c) {
         return '<span class="afp-av" style="background:' + (st.agentInfo[c] ? st.agentInfo[c].col : '#99A0AE') + ';margin-left:-5px;border:1.5px solid #EEF3FF">' + c + '</span>';
       }).join('');
-      var lab = st.agents.length === 1 ? 'Used by ' + st.agentInfo[st.agents[0]].n : 'Used by ' + st.agents.length + ' agents';
+      var lab = st.agents.length === 1 ? 'Connected to ' + st.agentInfo[st.agents[0]].n : 'Connected to ' + st.agents.length + ' agents';
       html += chipHTML(view, 'agent', '<span style="display:inline-flex;margin-left:5px;margin-right:3px">' + avs + '</span>' + lab);
     }
     if (st.category) html += chipHTML(view, 'category', '<span class="subnav-dot" style="width:9px;height:9px;background:' + st.catCol + '"></span>' + st.category);

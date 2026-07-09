@@ -113,6 +113,59 @@
   .filter-agent .agent-check svg { opacity: 0; }
   .filter-agent.sel .agent-check svg { opacity: 1; }
 
+  /* ============ CUSTOM FUNCTION MODAL (production match) ============ */
+  .cf-overlay { position: fixed; inset: 0; background: rgba(15,18,27,0.45); backdrop-filter: blur(2px); z-index: 500; display: none; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
+  .cf-overlay.open { display: flex; }
+  .cf-modal { width: 760px; max-width: 100%; background: #fff; border-radius: 14px; box-shadow: 0 24px 60px rgba(0,0,0,0.28); display: flex; flex-direction: column; max-height: calc(100vh - 80px); overflow: hidden; }
+  .cf-head { display: flex; align-items: center; gap: 10px; padding: 18px 22px; border-bottom: 1px solid #EDEFF2; flex-shrink: 0; }
+  .cf-head .cf-ic { display: flex; color: #0A0A0A; }
+  .cf-head .cf-title { font-size: 16px; font-weight: 600; color: #0A0A0A; flex: 1; }
+  .cf-head .cf-x { color: #9CA3AF; cursor: pointer; font-size: 22px; line-height: 1; }
+  .cf-body { padding: 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 22px; }
+  .cf-field { display: flex; flex-direction: column; gap: 8px; }
+  .cf-label { font-size: 15px; font-weight: 600; color: #0A0A0A; }
+  .cf-hint { font-size: 13.5px; color: #6B7280; line-height: 1.45; }
+  .cf-hint a { color: #3d64d7; text-decoration: underline; }
+  .cf-input { width: 100%; border: 1px solid #E5E7EB; border-radius: 10px; padding: 12px 14px; font-size: 14.5px; color: #0A0A0A; outline: none; background: #fff; font-family: inherit; }
+  .cf-input::placeholder { color: #9CA3AF; }
+  .cf-input:focus { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.1); }
+  textarea.cf-input { min-height: 92px; resize: vertical; line-height: 1.5; }
+  .cf-endpoint { display: flex; gap: 10px; align-items: stretch; }
+  .cf-select { display: inline-flex; align-items: center; justify-content: space-between; gap: 8px; width: 130px; border: 1px solid #E5E7EB; border-radius: 10px; padding: 12px 14px; font-size: 14.5px; color: #0A0A0A; cursor: pointer; background: #fff; flex-shrink: 0; }
+  .cf-select svg { color: #6B7280; }
+  .cf-timeout { display: flex; align-items: stretch; }
+  .cf-timeout .cf-input { border-radius: 10px 0 0 10px; border-right: none; }
+  .cf-suffix { display: flex; align-items: center; padding: 0 16px; border: 1px solid #E5E7EB; border-radius: 0 10px 10px 0; background: #F9FAFB; color: #6B7280; font-size: 14px; white-space: nowrap; }
+  .cf-kv { display: inline-flex; align-items: center; gap: 7px; border: 1px solid #E5E7EB; border-radius: 9px; padding: 9px 14px; font-size: 14px; color: #0A0A0A; cursor: pointer; background: #fff; align-self: flex-start; }
+  .cf-kv:hover { background: #F9FAFB; }
+  .cf-kv svg { color: #6B7280; }
+  .cf-subhead { font-size: 15px; font-weight: 600; color: #0A0A0A; }
+  .cf-paramtop { display: flex; align-items: center; justify-content: space-between; }
+  .cf-seg { display: inline-flex; background: #F0F1F3; border-radius: 8px; padding: 3px; }
+  .cf-seg span { padding: 6px 16px; font-size: 13.5px; font-weight: 500; color: #6B7280; border-radius: 6px; cursor: pointer; }
+  .cf-seg span.on { background: #fff; color: #0A0A0A; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+  .cf-payload { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #374151; }
+  .cf-payload .cf-i { width: 15px; height: 15px; border-radius: 50%; background: #C4C9D4; color: #fff; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  .cf-miniswitch { width: 34px; height: 20px; border-radius: 10px; background: #E5E7EB; position: relative; cursor: pointer; flex-shrink: 0; }
+  .cf-miniswitch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .cf-paramhead { display: grid; grid-template-columns: 2.2fr 2.2fr 1fr 1fr; padding: 10px 0; border-bottom: 1px solid #EDEFF2; font-size: 14px; color: #374151; margin-top: 12px; }
+  .cf-paramhead .r { text-align: right; }
+  .cf-card { background: #F6F7F9; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+  .cf-check { display: flex; gap: 12px; align-items: flex-start; }
+  .cf-box { width: 20px; height: 20px; border: 1.5px solid #CBD2DC; border-radius: 5px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #fff; }
+  .cf-box.on { background: #0E121B; border-color: #0E121B; }
+  .cf-box svg { opacity: 0; }
+  .cf-box.on svg { opacity: 1; }
+  .cf-clabel { font-size: 15px; font-weight: 600; color: #0A0A0A; }
+  .cf-chint { font-size: 13.5px; color: #6B7280; margin-top: 4px; line-height: 1.45; }
+  .cf-libcard { border: 1px solid #C9D6F5; background: #F5F8FF; border-radius: 12px; padding: 16px; }
+  .cf-foot { display: flex; align-items: center; padding: 16px 22px; border-top: 1px solid #EDEFF2; flex-shrink: 0; }
+  .cf-test { border: 1px solid #E5E7EB; background: #fff; border-radius: 9px; padding: 10px 20px; font-size: 14.5px; font-weight: 500; color: #9CA3AF; cursor: pointer; }
+  .cf-foot-right { margin-left: auto; display: flex; gap: 10px; }
+  .cf-cancel { border: 1px solid #E5E7EB; background: #fff; border-radius: 9px; padding: 10px 20px; font-size: 14.5px; font-weight: 500; color: #0A0A0A; cursor: pointer; }
+  .cf-save { border: none; background: #0E121B; color: #fff; border-radius: 9px; padding: 10px 24px; font-size: 14.5px; font-weight: 500; cursor: pointer; }
+  .cf-save:hover { background: #000; }
+
   /* scoped table search */
   .tbl-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; min-width: 320px; }
   .tbl-search:focus-within { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.1); }
@@ -1706,22 +1759,16 @@
     try { closeAllFilters(); } catch (e) {}
     var d = document.getElementById('newfnDropdown'); if (d) d.style.display = 'none';
     document.getElementById('cfOverlay').classList.add('open');
-    document.getElementById('cfPanel').classList.add('open');
   }
   function closeNewCfPanel() {
-    document.getElementById('cfPanel').classList.remove('open');
     document.getElementById('cfOverlay').classList.remove('open');
   }
-  function pickMethod(el) {
-    el.parentNode.querySelectorAll('.type-tab').forEach(function(t) { t.classList.remove('active'); });
-    el.classList.add('active');
+  function cfSeg(el) {
+    el.parentNode.querySelectorAll('span').forEach(function(s) { s.classList.remove('on'); });
+    el.classList.add('on');
   }
-  function addCfRow(el) {
-    var list = el.previousElementSibling;
-    var row = document.createElement('div');
-    row.className = 'choice-row';
-    row.innerHTML = '<input class="choice-input"><span class="choice-del" onclick="this.parentNode.remove()">×</span>';
-    list.appendChild(row);
+  function cfBox(el) {
+    el.classList.toggle('on');
   }
   function saveNewCf() {
     var acct = document.getElementById('cfAccountToggle').classList.contains('on');
@@ -1760,62 +1807,115 @@
   </div>
 </div>
 
-<!-- ===================== NEW CUSTOM FUNCTION PANEL ===================== -->
-<div class="panel-overlay" id="cfOverlay" onclick="closeNewCfPanel()"></div>
-<div class="fn-panel" id="cfPanel">
-  <div class="panel-header">
-    <span class="panel-title">New Custom Function</span>
-    <span class="panel-close" onclick="closeNewCfPanel()">×</span>
-  </div>
-  <div class="panel-body">
-    <div class="panel-field">
-      <label class="panel-label">Function name</label>
-      <input class="panel-input" placeholder="get_customer_details">
+<!-- ===================== CUSTOM FUNCTION MODAL ===================== -->
+<div class="cf-overlay" id="cfOverlay" onclick="closeNewCfPanel()">
+  <div class="cf-modal" onclick="event.stopPropagation()">
+    <div class="cf-head">
+      <span class="cf-ic"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 3.25v4M6 12.75v4M14 3.25v2.5M14 10.25v6.5" stroke="#0A0A0A" stroke-width="1.6" stroke-linecap="round"/><circle cx="6" cy="10" r="2.1" fill="#0A0A0A"/><circle cx="14" cy="8" r="2.1" fill="#0A0A0A"/></svg></span>
+      <span class="cf-title">Custom Function</span>
+      <span class="cf-x" onclick="closeNewCfPanel()">×</span>
     </div>
-    <div class="panel-field">
-      <label class="panel-label">Description</label>
-      <textarea class="panel-textarea" rows="2" placeholder="Explain what this function does and when the agent should call it"></textarea>
-    </div>
-    <div class="panel-field">
-      <label class="panel-label">Method</label>
-      <div class="type-tabs">
-        <div class="type-tab" onclick="pickMethod(this)">GET</div>
-        <div class="type-tab active" onclick="pickMethod(this)">POST</div>
-        <div class="type-tab" onclick="pickMethod(this)">PUT</div>
-        <div class="type-tab" onclick="pickMethod(this)">DELETE</div>
+    <div class="cf-body">
+      <div class="cf-field">
+        <label class="cf-label">Name</label>
+        <input class="cf-input" placeholder="Enter the name of the custom function">
+      </div>
+      <div class="cf-field">
+        <label class="cf-label">Description</label>
+        <textarea class="cf-input" placeholder="Enter the description of the custom function"></textarea>
+      </div>
+      <div class="cf-field">
+        <label class="cf-label">API Endpoint</label>
+        <div class="cf-hint">The API Endpoint is the address of the service you are connecting to</div>
+        <div class="cf-endpoint">
+          <div class="cf-select">POST <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <input class="cf-input" placeholder="Enter the URL of the custom function">
+        </div>
+      </div>
+      <div class="cf-field">
+        <label class="cf-label">Timeout (ms)</label>
+        <div class="cf-timeout">
+          <input class="cf-input" value="120000">
+          <span class="cf-suffix">milliseconds</span>
+        </div>
+      </div>
+      <div class="cf-field">
+        <label class="cf-label">Headers</label>
+        <div class="cf-hint">Specify the HTTP headers required for your API request.</div>
+        <div class="cf-kv"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> New key value pair</div>
+      </div>
+      <div class="cf-field">
+        <label class="cf-label">Query Parameters</label>
+        <div class="cf-hint">Query string parameters to append to the URL.</div>
+        <div class="cf-kv"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> New key value pair</div>
+      </div>
+      <div class="cf-field">
+        <div class="cf-subhead">Request Body</div>
+        <div class="cf-label" style="margin-top:8px">Parameters (Optional)</div>
+        <div class="cf-hint">JSON schema that defines the format in which the LLM will return. Please refer to the <a>docs</a>.</div>
+        <div class="cf-paramtop">
+          <div class="cf-seg"><span class="on" onclick="cfSeg(this)">Form</span><span onclick="cfSeg(this)">JSON</span></div>
+          <div class="cf-payload">Payload: args only <span class="cf-i">i</span><span class="cf-miniswitch"></span></div>
+        </div>
+        <div class="cf-paramhead">
+          <div>Parameter Name</div>
+          <div>Detail</div>
+          <div>Type</div>
+          <div class="r">Required</div>
+        </div>
+        <div class="cf-kv" style="margin-top:12px"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> Add</div>
+      </div>
+      <div class="cf-field">
+        <label class="cf-label">Store Fields as Variables</label>
+        <div class="cf-hint">Extract values from tool response and store as dynamic variables.</div>
+        <div class="cf-kv"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> New key value pair</div>
+      </div>
+      <div class="cf-field">
+        <label class="cf-label">During Execution Feedback</label>
+        <div class="cf-card">
+          <div class="cf-check">
+            <div class="cf-box" onclick="cfBox(this)"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2l2.2 2.3 4.8-5" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div>
+              <div class="cf-clabel">Talk While Waiting</div>
+              <div class="cf-chint">Enable to say a short phrase to fill the silence, like "let me look that up for you".</div>
+            </div>
+          </div>
+          <div class="cf-check">
+            <div class="cf-box" onclick="cfBox(this)"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2l2.2 2.3 4.8-5" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div>
+              <div class="cf-clabel">Play typing sound</div>
+              <div class="cf-chint">Play a subtle typing sound while the function is processing to indicate activity.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cf-check">
+        <div class="cf-box on" onclick="cfBox(this)"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2l2.2 2.3 4.8-5" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div>
+          <div class="cf-clabel">Talk After Action Completed</div>
+          <div class="cf-chint">Enable to speak after the action is completed. Disable to execute silently in the background.</div>
+        </div>
+      </div>
+      <div class="cf-field">
+        <label class="cf-label">Library</label>
+        <div class="cf-libcard">
+          <div class="cf-check">
+            <div class="cf-box" id="cfAccountToggle" onclick="cfBox(this)"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2l2.2 2.3 4.8-5" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div>
+              <div class="cf-clabel">Save as account function</div>
+              <div class="cf-chint">Save this function to the account library so it can be reused across agents. Once saved, edits made here will apply to every agent that uses this function.</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="panel-field">
-      <label class="panel-label">Endpoint URL</label>
-      <input class="panel-input" placeholder="https://api.example.com/v1/customers">
-    </div>
-    <div class="panel-field">
-      <label class="panel-label">Parameters</label>
-      <div class="panel-hint" style="margin-top:0;margin-bottom:6px">Values the agent pulls from the call and sends in the request.</div>
-      <div class="choices-list">
-        <div class="choice-row"><input class="choice-input" placeholder="customer_id"><span class="choice-del" onclick="this.parentNode.remove()">×</span></div>
+    <div class="cf-foot">
+      <button class="cf-test">Test</button>
+      <div class="cf-foot-right">
+        <button class="cf-cancel" onclick="closeNewCfPanel()">Cancel</button>
+        <button class="cf-save" onclick="saveNewCf()">Save</button>
       </div>
-      <div class="add-choice" onclick="addCfRow(this)">+ Add parameter</div>
     </div>
-    <div class="panel-field">
-      <label class="panel-label">Response variables</label>
-      <div class="panel-hint" style="margin-top:0;margin-bottom:6px">Fields from the response to store as dynamic variables.</div>
-      <div class="choices-list">
-        <div class="choice-row"><input class="choice-input" placeholder="account_status"><span class="choice-del" onclick="this.parentNode.remove()">×</span></div>
-      </div>
-      <div class="add-choice" onclick="addCfRow(this)">+ Add response variable</div>
-    </div>
-    <div class="optional-row">
-      <div>
-        <div class="optional-label">Account function</div>
-        <div class="optional-hint">Publish to the Functions library so any agent can reuse it. Leave off to keep it local to this agent.</div>
-      </div>
-      <div class="toggle on" id="cfAccountToggle" onclick="this.classList.toggle('on')"></div>
-    </div>
-  </div>
-  <div class="panel-footer">
-    <button class="panel-cancel" onclick="closeNewCfPanel()">Cancel</button>
-    <button class="panel-save" onclick="saveNewCf()">Save</button>
   </div>
 </div>
 

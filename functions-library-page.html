@@ -80,6 +80,34 @@
   .newfn-divider { height: 1px; background: #F0F1F3; margin: 4px 0; }
   .newfn-section { padding: 6px 14px 2px; font-size: 11px; color: #B0B8C1; font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase; }
 
+  /* ============ FILTER DROPDOWN (Connected agent sub-filter) ============ */
+  .filter-wrap { position: relative; display: inline-flex; align-items: center; gap: 8px; }
+  .filter-btn.on { background: #F0F1F3; }
+  .filter-dd { position: absolute; top: calc(100% + 6px); left: 0; background: #fff; border: 1px solid #E1E4EA; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.11); z-index: 120; min-width: 264px; padding: 6px; display: none; }
+  .filter-dd.open { display: block; }
+  .filter-sec { padding: 6px 10px 4px; font-size: 11px; color: #B0B8C1; font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase; }
+  .filter-facet { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 7px; font-size: 13.5px; color: #0A0A0A; cursor: pointer; }
+  .filter-facet svg { flex-shrink: 0; }
+  .filter-facet:hover { background: #F5F7FA; }
+  .filter-facet .fchev { margin-left: auto; color: #C0C4CC; font-size: 16px; line-height: 1; }
+  .filter-facet.disabled { color: #C0C4CC; cursor: default; }
+  .filter-facet.disabled:hover { background: none; }
+  .filter-facet .soon { margin-left: auto; font-size: 10.5px; color: #99A0AE; background: #F3F4F6; padding: 2px 7px; border-radius: 5px; font-weight: 500; }
+  .filter-back { display: flex; align-items: center; gap: 5px; padding: 6px 8px 8px; font-size: 12.5px; color: #6B7280; cursor: pointer; }
+  .filter-back:hover { color: #0A0A0A; }
+  .filter-fsearch { padding: 2px 6px 8px; }
+  .filter-fsearch input { width: 100%; border: 1px solid #E5E7EB; border-radius: 7px; padding: 7px 10px; font-size: 13px; outline: none; background: #FAFAFA; color: #0A0A0A; }
+  .filter-fsearch input:focus { border-color: #3d64d7; background: #fff; }
+  .filter-agent-list { max-height: 258px; overflow-y: auto; }
+  .filter-agent { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 7px; cursor: pointer; }
+  .filter-agent:hover { background: #F5F7FA; }
+  .filter-agent .fav { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: #fff; flex-shrink: 0; }
+  .filter-agent .fname { font-size: 13.5px; color: #0A0A0A; }
+  .active-filter-pill { display: none; align-items: center; gap: 8px; height: 36px; padding: 0 6px 0 10px; border: 1px solid #C9D6F5; background: #EEF3FF; border-radius: 8px; font-size: 13.5px; color: #2A44A8; white-space: nowrap; }
+  .active-filter-pill .afp-av { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; color: #fff; flex-shrink: 0; }
+  .active-filter-pill .afp-x { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; color: #5B6FB8; font-size: 15px; line-height: 1; }
+  .active-filter-pill .afp-x:hover { background: rgba(61,100,215,0.14); }
+
   /* ============ MAIN ============ */
   .main { flex: 1; overflow: auto; background: #fff; min-width: 0; }
   .main-header { display: flex; align-items: center; gap: 10px; padding: 22px 28px 0; }
@@ -404,10 +432,14 @@
   <p class="subtitle">Build a function once and reuse it across agents. One edit updates every agent that links to it.</p>
 
   <div class="actionbar">
-    <button class="pill-btn">
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 4a3 3 0 012.83 2H16v1.5h-3.17a3 3 0 01-5.66 0H4V6h3.17A3 3 0 0110 4zm0 1.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM4 12.5h3.17a3 3 0 015.66 0H16V14h-3.17a3 3 0 01-5.66 0H4v-1.5z" fill="currentColor"/></svg>
-      Filter by agent <span class="chev">▾</span>
-    </button>
+    <div class="filter-wrap" data-view="functions">
+      <button class="pill-btn filter-btn" onclick="toggleFilter(event, this)">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M6.5 10h7M9 14h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Filter <span class="chev">▾</span>
+      </button>
+      <div class="filter-dd"></div>
+      <span class="active-filter-pill"></span>
+    </div>
     <span class="spacer"></span>
     <div class="btn-primary-wrap">
       <button class="btn-primary" onclick="toggleNewFnDropdown(event)">
@@ -639,8 +671,14 @@
   <p class="subtitle">Define the information that you need to extract from the call</p>
 
   <div class="actionbar">
-    <button class="pill-btn">All Agents <span class="chev">▾</span></button>
-    <button class="pill-btn">All Types <span class="chev">▾</span></button>
+    <div class="filter-wrap" data-view="extractors">
+      <button class="pill-btn filter-btn" onclick="toggleFilter(event, this)">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M6.5 10h7M9 14h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Filter <span class="chev">▾</span>
+      </button>
+      <div class="filter-dd"></div>
+      <span class="active-filter-pill"></span>
+    </div>
     <span class="spacer"></span>
     <div class="btn-primary-wrap">
       <button class="btn-primary" onclick="togglePcaDropdown(event)">
@@ -753,7 +791,14 @@
   <p class="subtitle">Call any API endpoint during a conversation. One edit updates every agent that links to it.</p>
 
   <div class="actionbar">
-    <button class="pill-btn">All Agents <span class="chev">▾</span></button>
+    <div class="filter-wrap" data-view="custom">
+      <button class="pill-btn filter-btn" onclick="toggleFilter(event, this)">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M6.5 10h7M9 14h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Filter <span class="chev">▾</span>
+      </button>
+      <div class="filter-dd"></div>
+      <span class="active-filter-pill"></span>
+    </div>
     <span class="spacer"></span>
     <button class="btn-primary" style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;background:#0E121B;color:#fff;border:none;border-radius:7px;font-size:13.5px;font-weight:500;cursor:pointer;font-family:inherit">
       <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
@@ -1252,6 +1297,124 @@
     const d = document.getElementById('connectDrawer');
     d.style.display = d.style.display === 'block' ? 'none' : 'block';
   }
+
+  // ===== FILTER DROPDOWN (Connected agent sub-filter) =====
+  var FILTER_AGENTS = [
+    {c:'DR', n:'Dr. Rivera Agent', col:'#3d64d7'},
+    {c:'IV', n:'Ivan V. Agent',    col:'#7D52F4'},
+    {c:'SC', n:'Sara Chen Agent',  col:'#1FC16B'},
+    {c:'LI', n:'Linda Im Agent',   col:'#E5484D'},
+    {c:'BK', n:'Brandon K. Agent', col:'#FF9147'},
+    {c:'MO', n:'Mike O. Agent',    col:'#525866'},
+    {c:'KP', n:'Karen P. Agent',   col:'#CA8A04'},
+    {c:'AM', n:'Alex M. Agent',    col:'#0EA5E9'}
+  ];
+  var SECOND_FACET = { functions: 'Integration', custom: 'Authentication', extractors: 'Type' };
+  var PERSON_ICON = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 3.25a3 3 0 110 6 3 3 0 010-6zm0 7.5c3.04 0 5.75 1.4 5.75 3.4v1.6H4.25v-1.6c0-2 2.71-3.4 5.75-3.4z" fill="#525866"/></svg>';
+
+  function closeAllFilters() {
+    document.querySelectorAll('.filter-wrap').forEach(function(w) {
+      var dd = w.querySelector('.filter-dd'); if (dd) dd.classList.remove('open');
+      var b = w.querySelector('.filter-btn'); if (b) b.classList.remove('on');
+    });
+  }
+  function renderFacets(dd, view) {
+    var second = SECOND_FACET[view] || 'Integration';
+    dd.innerHTML =
+      '<div class="filter-sec">Filter by</div>' +
+      '<div class="filter-facet" onclick="showAgentPicker(event, this)">' + PERSON_ICON +
+        ' Connected agent <span class="fchev">›</span></div>' +
+      '<div class="filter-facet disabled">' +
+        '<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="4" y="4" width="12" height="12" rx="2" stroke="#C0C4CC" stroke-width="1.4"/></svg>' +
+        ' ' + second + ' <span class="soon">Soon</span></div>';
+  }
+  function toggleFilter(e, btn) {
+    e.stopPropagation();
+    var wrap = btn.closest('.filter-wrap');
+    var dd = wrap.querySelector('.filter-dd');
+    var isOpen = dd.classList.contains('open');
+    closeAllFilters();
+    if (!isOpen) {
+      renderFacets(dd, wrap.dataset.view);
+      dd.classList.add('open');
+      btn.classList.add('on');
+    }
+  }
+  function showAgentPicker(e, el) {
+    e.stopPropagation();
+    var dd = el.closest('.filter-dd');
+    var html =
+      '<div class="filter-back" onclick="backToFacets(event, this)">‹ Back</div>' +
+      '<div class="filter-fsearch"><input placeholder="Search agents" oninput="filterAgentList(this)" onclick="event.stopPropagation()"></div>' +
+      '<div class="filter-agent-list">';
+    FILTER_AGENTS.forEach(function(a) {
+      html += '<div class="filter-agent" data-name="' + a.n.toLowerCase() + '" ' +
+        'onclick="applyAgentFilter(event, this, \'' + a.c + '\', \'' + a.n + '\', \'' + a.col + '\')">' +
+        '<span class="fav" style="background:' + a.col + '">' + a.c + '</span>' +
+        '<span class="fname">' + a.n + '</span></div>';
+    });
+    html += '</div>';
+    dd.innerHTML = html;
+  }
+  function backToFacets(e, el) {
+    e.stopPropagation();
+    var dd = el.closest('.filter-dd');
+    var wrap = dd.closest('.filter-wrap');
+    renderFacets(dd, wrap.dataset.view);
+  }
+  function filterAgentList(input) {
+    var q = input.value.toLowerCase();
+    input.closest('.filter-dd').querySelectorAll('.filter-agent').forEach(function(r) {
+      r.style.display = r.dataset.name.indexOf(q) !== -1 ? '' : 'none';
+    });
+  }
+  function applyAgentFilter(e, el, code, name, col) {
+    e.stopPropagation();
+    var wrap = el.closest('.filter-wrap');
+    var pill = wrap.querySelector('.active-filter-pill');
+    pill.innerHTML = '<span class="afp-av" style="background:' + col + '">' + code + '</span>' +
+      'Connected to ' + name + '<span class="afp-x" onclick="clearAgentFilter(event, this)">×</span>';
+    pill.style.display = 'inline-flex';
+    closeAllFilters();
+    applyRowFilter(wrap, code);
+  }
+  function clearAgentFilter(e, x) {
+    e.stopPropagation();
+    var wrap = x.closest('.filter-wrap');
+    wrap.querySelector('.active-filter-pill').style.display = 'none';
+    applyRowFilter(wrap, null);
+  }
+  function applyRowFilter(wrap, code) {
+    var view = wrap.closest('div[id^="view-"]');
+    if (!view) return;
+    var rows = view.querySelectorAll('tbody tr');
+    var shown = 0;
+    rows.forEach(function(r) {
+      if (!code) { r.style.display = ''; shown++; return; }
+      var codes = [];
+      r.querySelectorAll('.av').forEach(function(a) {
+        if (!a.classList.contains('more')) codes.push(a.textContent.trim());
+      });
+      var match = codes.indexOf(code) !== -1;
+      r.style.display = match ? '' : 'none';
+      if (match) shown++;
+    });
+    var hc = view.querySelector('.h-count');
+    if (hc) {
+      if (code) { if (!hc.dataset.total) hc.dataset.total = hc.textContent; hc.textContent = shown; }
+      else if (hc.dataset.total) { hc.textContent = hc.dataset.total; }
+    }
+    var pi = view.querySelector('.page-info');
+    if (pi) {
+      if (!pi.dataset.orig) pi.dataset.orig = pi.textContent;
+      if (code) {
+        var tail = pi.dataset.orig.split('·')[1] || ' items';
+        var noun = tail.trim().replace(/^\d+\s*/, '');
+        pi.textContent = 'Page 1 of 1 · ' + shown + ' ' + noun;
+      } else { pi.textContent = pi.dataset.orig; }
+    }
+  }
+
   document.addEventListener('click', function(e) {
     const d = document.getElementById('connectDrawer');
     if (!d.contains(e.target)) d.style.display = 'none';
@@ -1259,6 +1422,12 @@
     if (!fn.contains(e.target)) fn.style.display = 'none';
     const pca = document.getElementById('pcaDropdown');
     if (pca && !pca.contains(e.target)) pca.style.display = 'none';
+    document.querySelectorAll('.filter-wrap').forEach(function(w) {
+      if (!w.contains(e.target)) {
+        var dd = w.querySelector('.filter-dd'); if (dd) dd.classList.remove('open');
+        var b = w.querySelector('.filter-btn'); if (b) b.classList.remove('on');
+      }
+    });
   });
 
   var _toastTimer = null;

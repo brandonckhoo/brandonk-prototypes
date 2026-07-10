@@ -150,6 +150,30 @@
   .locref.active { background:var(--blue); border-color:var(--blue); }
   .locref.active .jump, .locref.active .path, .locref.active .open { color:#fff; opacity:1; }
 
+  /* settings card — current values shown like settings, not code */
+  .setcard { border:1px solid var(--border); border-radius:11px; overflow:hidden; margin:8px 0 12px; }
+  .sref { display:flex; align-items:center; gap:9px; padding:11px 12px; cursor:pointer; border-top:1px solid #F1F3F5; background:#fff; transition:background .12s; }
+  .sref:first-child { border-top:none; }
+  .sref:hover { background:#F4F7FF; }
+  .sref .gear { color:var(--blue); display:inline-flex; flex-shrink:0; }
+  .sref .name { font-size:13px; font-weight:600; color:var(--text); }
+  .sref .val { margin-left:auto; font-size:12.5px; font-weight:600; color:var(--muted); }
+  .sref .val b { color:var(--strong); }
+  .sref .go { color:var(--soft); display:inline-flex; flex-shrink:0; }
+  .sref:hover .go { color:var(--blue); }
+  .sref.active { background:var(--blue-bg); }
+  .sref.active .name { color:var(--blue); } .sref.active .go { color:var(--blue); }
+
+  /* proposed change — value to value, not a code diff */
+  .prop { border:1px solid var(--border); border-radius:11px; overflow:hidden; margin:8px 0 10px; }
+  .prop-row { display:flex; align-items:center; gap:10px; padding:11px 12px; border-top:1px solid #F1F3F5; }
+  .prop-row:first-child { border-top:none; }
+  .prop-row .name { font-size:13px; font-weight:600; color:var(--text); }
+  .prop-row .change { margin-left:auto; display:flex; align-items:center; gap:8px; font-size:12.5px; }
+  .prop-row .from { color:var(--soft); text-decoration:line-through; }
+  .prop-row .arr { color:var(--soft); display:inline-flex; }
+  .prop-row .to { color:var(--add-text); font-weight:700; }
+
   /* code block */
   .codeblock { border:1px solid var(--border); border-radius:10px; overflow:hidden; margin:8px 0 12px; background:var(--code-bg); }
   .cb-head { display:flex; align-items:center; gap:8px; padding:7px 11px; background:var(--code-head); border-bottom:1px solid var(--border); }
@@ -277,6 +301,13 @@
           <div class="fld-help" style="margin-top:5px">How quickly the agent stops when user talks over it.</div>
           <div class="slider-row"><div class="slider"><div class="fill" style="width:90%"></div><div class="knob" style="left:90%"></div></div><span class="slider-num">0.9</span></div>
         </div>
+
+        <div class="st-sec" style="margin-top:8px"><span class="t">Webhook Settings</span><span class="chev"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div>
+        <div class="fld" id="row-webhook">
+          <div class="fld-top"><span class="fld-l">Inbound Webhook URL</span></div>
+          <div class="fld-help" style="margin-top:5px">Retell posts call events to this URL.</div>
+          <div style="display:flex;align-items:center;height:38px;margin-top:10px;padding:0 11px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;font-family:ui-monospace,'SF Mono',monospace;color:var(--text)">https://api.serenityspa.com/retell/events</div>
+        </div>
       </div>
 
       <!-- NODE -->
@@ -333,20 +364,18 @@
           <p>The agent jumps in the instant it thinks the caller stopped. In a flow, that's an agent-wide Speech setting: <span class="chip" data-kind="global" data-target="eagerness" onclick="jump(this)"><span class="gear"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.6" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5 5l1.4 1.4M13.6 13.6L15 15M5 15l1.4-1.4M13.6 6.4L15 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Response Eagerness</span> at its max of <b>1</b>, with <span class="chip" data-kind="global" data-target="adjust" onclick="jump(this)"><span class="gear"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.6" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5 5l1.4 1.4M13.6 13.6L15 15M5 15l1.4-1.4M13.6 6.4L15 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Dynamically adjust</span> off.</p>
 
           <div class="ans-head">What's set now</div>
-          <div class="locref" data-kind="global" data-target="eagerness" onclick="jump(this)"><span class="jump"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.6" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5 5l1.4 1.4M13.6 13.6L15 15M5 15l1.4-1.4M13.6 6.4L15 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="path">Global Settings · Response Eagerness</span><span class="open">Open<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-          <div class="codeblock">
-            <div class="cb-head"><span class="cb-lang">config</span><span class="sp"></span><span class="cb-copy" onclick="copyCode(this)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy</span></div>
-            <div class="cb-body"><span class="k">response_eagerness</span>: <span class="n">1</span>
-<span class="k">dynamically_adjust</span>: <span class="n">off</span></div>
+          <div class="setcard">
+            <div class="sref" data-kind="global" data-target="eagerness" onclick="jump(this)"><span class="gear"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.6" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5 5l1.4 1.4M13.6 13.6L15 15M5 15l1.4-1.4M13.6 6.4L15 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="name">Response Eagerness</span><span class="val"><b>1</b> · max</span><span class="go"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+            <div class="sref" data-kind="global" data-target="adjust" onclick="jump(this)"><span class="gear"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.6" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5 5l1.4 1.4M13.6 13.6L15 15M5 15l1.4-1.4M13.6 6.4L15 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="name">Dynamically adjust</span><span class="val"><b>Off</b></span><span class="go"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
           </div>
 
           <p>It's agent-wide, so it applies to every node — including <span class="chip node-chip" data-kind="node" data-target="welcome" onclick="jump(this)"><span class="gear"><svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="2"/></svg></span>Welcome</span> and <span class="chip node-chip" data-kind="node" data-target="book" onclick="jump(this)"><span class="gear"><svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="2"/></svg></span>Book Appointment</span>.</p>
 
           <div class="ans-head">What I'd change</div>
           <p>Ease off the eagerness so the agent waits out a pause, and let it adapt to the caller's pace.</p>
-          <div class="codeblock">
-            <div class="cb-head"><span class="cb-lang">diff</span><span class="sp"></span><span class="cb-copy" onclick="copyCode(this)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy</span></div>
-            <div class="cb-body"><span class="del">- response_eagerness: 1</span><span class="add">+ response_eagerness: 0.6</span><span class="del">- dynamically_adjust: off</span><span class="add">+ dynamically_adjust: on</span></div>
+          <div class="prop">
+            <div class="prop-row"><span class="name">Response Eagerness</span><span class="change"><span class="from">1</span><span class="arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span class="to">0.6</span></span></div>
+            <div class="prop-row"><span class="name">Dynamically adjust</span><span class="change"><span class="from">Off</span><span class="arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span class="to">On</span></span></div>
           </div>
 
           <div class="cta-row">
@@ -355,6 +384,27 @@
           </div>
 
           <div class="react"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11M2 12h5v9H2zM7 10l3.5-7A2 2 0 0 1 14 4v4h5a2 2 0 0 1 2 2.4l-1.5 8A2 2 0 0 1 17.5 20H7"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V3M22 12h-5V3h5zM17 14l-3.5 7A2 2 0 0 1 10 20v-4H5a2 2 0 0 1-2-2.4l1.5-8A2 2 0 0 1 6.5 4H17"/></svg></div>
+        </div>
+      </div>
+
+      <!-- follow-up: genuine code belongs in a code block -->
+      <div class="msg-user"><div class="bubble">And what does it post to my webhook when a call ends?</div></div>
+
+      <div class="msg-ai">
+        <span class="av"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l1.7 5.3L19 9l-5.3 1.7L12 16l-1.7-5.3L5 9l5.3-1.7L12 2z" fill="url(#cg)"/></svg></span>
+        <div class="c">
+          <p>Here's the exact payload Retell sends to <span class="chip" data-kind="global" data-target="webhook" onclick="jump(this)"><span class="gear"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.6" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5 5l1.4 1.4M13.6 13.6L15 15M5 15l1.4-1.4M13.6 6.4L15 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Webhook Settings</span> when a call ends:</p>
+          <div class="codeblock">
+            <div class="cb-head"><span class="cb-lang">json</span><span class="sp"></span><span class="cb-copy" onclick="copyCode(this)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy</span></div>
+            <div class="cb-body">{
+  <span class="k">"event"</span>: "call_ended",
+  <span class="k">"call_id"</span>: "call_8f2a90c1",
+  <span class="k">"from_number"</span>: "+1 415 555 0192",
+  <span class="k">"duration_sec"</span>: <span class="n">214</span>,
+  <span class="k">"disconnection_reason"</span>: "user_hangup"
+}</div>
+          </div>
+          <p>This is real code, so it lives in a block you can copy, not folded into the sentence.</p>
         </div>
       </div>
 
@@ -384,11 +434,11 @@
   }
   function clearHl(){
     document.querySelectorAll('.hl, .node.selected').forEach(e=>e.classList.remove('hl','selected'));
-    document.querySelectorAll('.chip.active, .locref.active').forEach(e=>e.classList.remove('active'));
+    document.querySelectorAll('.chip.active, .locref.active, .sref.active').forEach(e=>e.classList.remove('active'));
   }
   function setActive(kind,key){
     document.querySelectorAll('[data-kind="'+kind+'"][data-target="'+key+'"]').forEach(b=>{
-      if(b.classList.contains('chip')||b.classList.contains('locref')) b.classList.add('active');
+      if(b.classList.contains('chip')||b.classList.contains('locref')||b.classList.contains('sref')) b.classList.add('active');
     });
   }
 
@@ -405,7 +455,7 @@
     document.getElementById('node-'+which).classList.add('selected');
   }
 
-  const GLOBALF = { eagerness:'row-eagerness', adjust:'row-adjust', interrupt:'row-interrupt' };
+  const GLOBALF = { eagerness:'row-eagerness', adjust:'row-adjust', interrupt:'row-interrupt', webhook:'row-webhook' };
   function jumpGlobal(key){
     clearHl(); setActive('global',key);
     setTab('global');

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Conductor usage limit tooltip</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #FBFBFC; height: 100vh; overflow: hidden; display: flex; justify-content: flex-end; }
+
+/* faint agent-builder backdrop on the left */
+.backdrop { flex: 1; background:
+  linear-gradient(180deg, #FFFFFF 0 53px, transparent 53px),
+  repeating-linear-gradient(180deg, #F3F4F6 0 1px, transparent 1px 120px);
+  border-right: 1px solid #E1E4EA; position: relative; }
+.bd-topbar { height: 53px; border-bottom: 1px solid #E1E4EA; display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 0 16px; background: #fff; }
+.bd-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 13px; font-weight: 500; color: #0A0A0A; background: #fff; }
+.bd-btn.icon { width: 34px; padding: 0; justify-content: center; color: #525866; }
+.bd-btn.pub { background: #1F2430; color: #fff; border-color: #1F2430; }
+.bd-hint { position: absolute; top: 120px; left: 40px; color: #C9CDD6; font-size: 13px; }
+
+/* Conductor panel */
+.panel { width: 384px; min-width: 384px; height: 100vh; background: #fff; display: flex; flex-direction: column; box-shadow: -1px 0 0 #E1E4EA; }
+.p-head { display: flex; align-items: center; height: 52px; padding: 0 12px 0 16px; flex-shrink: 0; }
+.p-title { display: flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 600; color: #0A0A0A; }
+.p-spacer { flex: 1; }
+.p-ico { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6B7280; cursor: pointer; }
+.p-ico:hover { background: #F4F4F5; }
+
+/* empty state */
+.p-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 28px; text-align: center; }
+.wand { margin-bottom: 26px; }
+.es-title { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; color: #0A0A0A; }
+.es-sub { font-size: 14px; line-height: 1.5; color: #6B7280; margin-top: 10px; max-width: 300px; }
+.es-chips { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 30px; }
+.es-chip { padding: 9px 16px; background: #F4F4F6; border-radius: 18px; font-size: 13.5px; font-weight: 400; color: #1F2430; cursor: pointer; }
+.es-chip:hover { background: #ECEDEF; }
+
+/* composer */
+.p-foot { flex-shrink: 0; padding: 0 16px 16px; }
+.p-disclaimer { text-align: center; font-size: 12px; color: #9CA3AF; padding: 8px 0 12px; }
+.composer { border: 1px solid #E1E4EA; border-radius: 14px; padding: 14px 14px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.c-input { font-size: 15px; line-height: 1.45; color: #9CA3AF; min-height: 44px; }
+.c-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.c-ic { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6B7280; cursor: pointer; }
+.c-ic:hover { background: #F4F4F5; }
+.c-spacer { flex: 1; }
+.c-send { width: 32px; height: 32px; border-radius: 50%; background: #F0F1F3; display: flex; align-items: center; justify-content: center; color: #9CA3AF; }
+
+/* green usage badge = tooltip trigger */
+.usage-wrap { position: relative; display: inline-flex; }
+.usage-badge { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px 0 8px; background: #E7F7EE; border: 1px solid transparent; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: #12894C; cursor: pointer; font-variant-numeric: tabular-nums; }
+.usage-badge:hover { background: #DCF3E6; }
+.usage-badge.open { border-color: #9FE3BD; background: #DCF3E6; }
+.usage-badge svg { color: #16A34A; }
+
+/* popover */
+.usage-pop { position: absolute; bottom: calc(100% + 10px); left: -6px; width: 316px; background: #fff; border: 1px solid #E1E4EA; border-radius: 12px; box-shadow: 0 14px 38px rgba(0,0,0,0.16); padding: 16px 16px 14px; z-index: 60; display: none; text-align: left; cursor: default; }
+.usage-pop.show { display: block; }
+.usage-pop::after { content: ''; position: absolute; top: 100%; left: 18px; width: 12px; height: 12px; background: #fff; border-right: 1px solid #E1E4EA; border-bottom: 1px solid #E1E4EA; transform: translateY(-6px) rotate(45deg); }
+.up-title { display: flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 600; color: #0A0A0A; }
+.up-title svg { color: #12894C; }
+.up-lede { font-size: 12.5px; line-height: 1.5; color: #525866; margin-top: 7px; }
+.up-rows { margin-top: 14px; display: flex; flex-direction: column; gap: 13px; }
+.up-row-top { display: flex; align-items: baseline; justify-content: space-between; }
+.up-row-label { font-size: 12.5px; font-weight: 600; color: #0A0A0A; }
+.up-row-count { font-size: 12px; font-weight: 600; color: #12894C; font-variant-numeric: tabular-nums; }
+.up-bar { height: 6px; border-radius: 4px; background: #EEF0F3; margin-top: 7px; overflow: hidden; }
+.up-bar span { display: block; height: 100%; border-radius: 4px; background: #1FC16B; }
+.up-bar span.warn { background: #FF9147; }
+.up-sub { font-size: 11.5px; line-height: 1.45; color: #99A0AE; margin-top: 4px; }
+.up-foot { margin-top: 14px; padding-top: 12px; border-top: 1px solid #F0F2F5; font-size: 11.5px; line-height: 1.5; color: #99A0AE; }
+</style>
+</head>
+<body>
+
+<!-- faint agent-builder behind the panel -->
+<div class="backdrop">
+  <div class="bd-topbar">
+    <div class="bd-btn icon">•••</div>
+    <div class="bd-btn icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg></div>
+    <div class="bd-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#525866" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg>V0</div>
+    <div class="bd-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3l1.6 3.9 4.2.3-3.2 2.7 1 4.1L12 11.8 8.4 14l1-4.1L6.2 7.2l4.2-.3z" fill="#7C5CFF"/></svg>Conductor</div>
+    <div class="bd-btn pub">Publish</div>
+  </div>
+  <div class="bd-hint">Type in a universal prompt for your agent, such as its role, conversational style, objective, etc.</div>
+</div>
+
+<!-- Conductor panel -->
+<div class="panel">
+  <div class="p-head">
+    <div class="p-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="wg" x1="0" y1="0" x2="24" y2="24"><stop offset="0" stop-color="#8B5CF6"/><stop offset="0.5" stop-color="#6D6BF6"/><stop offset="1" stop-color="#C05CE0"/></linearGradient></defs><path d="M12 2.5l1.3 3.1 3.1 1.3-3.1 1.3L12 12.4l-1.3-3.2L7.6 7.9l3.1-1.3z" fill="url(#wg)"/><circle cx="18.5" cy="14" r="1.3" fill="url(#wg)"/><circle cx="6" cy="16" r="1" fill="url(#wg)"/></svg>
+      Conductor
+    </div>
+    <div class="p-spacer"></div>
+    <div class="p-ico" title="New chat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-11.8 7.8L3 21l1.7-6.2A8.5 8.5 0 1 1 21 11.5z"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="9.5" y1="10.5" x2="14.5" y2="10.5"/></svg></div>
+    <div class="p-ico" title="History"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/><path d="M12 8v4l3 2"/></svg></div>
+    <div class="p-ico" title="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+  </div>
+
+  <div class="p-body">
+    <div class="wand">
+      <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><defs><linearGradient id="wand" x1="16" y1="56" x2="52" y2="20" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#B84DE0"/><stop offset="0.5" stop-color="#7C5CFF"/><stop offset="1" stop-color="#6D8BF6"/></linearGradient></defs><rect x="20" y="40" width="30" height="7" rx="3.5" transform="rotate(-45 20 40)" fill="url(#wand)"/><path d="M46 20l1.7 4 4 1.7-4 1.7L46 31.4l-1.7-4-4-1.7 4-1.7z" fill="url(#wand)"/><path d="M31 24l1.1 2.6L34.7 28l-2.6 1.1L31 31.7l-1.1-2.6L27.3 28l2.6-1.1z" fill="url(#wand)"/><circle cx="40" cy="36" r="1.6" fill="#fff"/></svg>
+    </div>
+    <div class="es-title">Work on your flow with Conductor</div>
+    <div class="es-sub">Review logic, refine nodes, and make updates with natural language.</div>
+    <div class="es-chips">
+      <div class="es-chip">What can Conductor do?</div>
+      <div class="es-chip">Test edge cases and fix the agent</div>
+      <div class="es-chip">Review recent calls and update the agent</div>
+    </div>
+  </div>
+
+  <div class="p-foot">
+    <div class="p-disclaimer">Conductor is AI and may make mistakes.</div>
+    <div class="composer">
+      <div class="c-input">Ask Conductor to help you understand, build, debug, or improve anything in Retell.</div>
+      <div class="c-row">
+        <div class="c-ic" title="Add context"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div class="c-ic" title="Attach file"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5l-8.6 8.6a5 5 0 0 1-7-7l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/></svg></div>
+
+        <!-- green usage badge = tooltip trigger -->
+        <div class="usage-wrap">
+          <div class="usage-badge open" id="badge" onclick="toggleUsage(event)" onmouseenter="showUsage()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 3l1.6 3.9 4.2.3-3.2 2.7 1 4.1L12 11.8 8.4 14l1-4.1L6.2 7.2l4.2-.3z" fill="currentColor"/></svg>
+            30
+          </div>
+          <div class="usage-pop show" id="pop" onclick="event.stopPropagation()">
+            <div class="up-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              Free Conductor messages
+            </div>
+            <div class="up-lede">Conductor is free up to a daily limit. Each message you send counts toward both caps below.</div>
+            <div class="up-rows">
+              <div class="up-row">
+                <div class="up-row-top">
+                  <span class="up-row-label">You today</span>
+                  <span class="up-row-count">30 left</span>
+                </div>
+                <div class="up-bar"><span style="width:100%"></span></div>
+                <div class="up-sub">30 free messages per user, each day</div>
+              </div>
+              <div class="up-row">
+                <div class="up-row-top">
+                  <span class="up-row-label">Retell AI workspace today</span>
+                  <span class="up-row-count">184 left</span>
+                </div>
+                <div class="up-bar"><span style="width:92%"></span></div>
+                <div class="up-sub">200 free messages across your whole organization, each day</div>
+              </div>
+            </div>
+            <div class="up-foot">Both limits reset daily at 00:00 UTC. You share the workspace cap with your team, so it can run out before your own 30.</div>
+          </div>
+        </div>
+
+        <div class="c-spacer"></div>
+        <div class="c-send"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showUsage() {
+  document.getElementById('pop').classList.add('show');
+  document.getElementById('badge').classList.add('open');
+}
+function toggleUsage(e) {
+  e.stopPropagation();
+  document.getElementById('pop').classList.toggle('show');
+  document.getElementById('badge').classList.toggle('open');
+}
+document.addEventListener('click', function() {
+  document.getElementById('pop').classList.remove('show');
+  document.getElementById('badge').classList.remove('open');
+});
+</script>
+
+</body>
+</html>

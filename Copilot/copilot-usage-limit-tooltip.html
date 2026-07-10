@@ -69,7 +69,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
 .up-bar span { display: block; height: 100%; border-radius: 4px; background: #1FC16B; }
 .up-bar span.warn { background: #FF9147; }
 .up-sub { font-size: 11.5px; line-height: 1.45; color: #99A0AE; margin-top: 4px; }
-.up-foot { margin-top: 14px; padding-top: 12px; border-top: 1px solid #F0F2F5; font-size: 11.5px; line-height: 1.5; color: #99A0AE; }
+.up-over { margin-top: 14px; padding-top: 13px; border-top: 1px solid #F0F2F5; font-size: 12px; line-height: 1.5; color: #525866; }
+.up-over b { color: #0A0A0A; font-weight: 600; }
+.up-cta { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; height: 34px; margin-top: 12px; border: none; border-radius: 8px; background: #1F2430; font-size: 12.5px; font-weight: 600; color: #fff; cursor: pointer; font-family: inherit; }
+.up-cta:hover { background: #2c3242; }
+.up-admin { font-size: 11px; color: #99A0AE; text-align: center; margin-top: 8px; }
+.up-foot { margin-top: 12px; padding-top: 11px; border-top: 1px solid #F0F2F5; font-size: 11.5px; line-height: 1.5; color: #99A0AE; }
 </style>
 </head>
 <body>
@@ -131,7 +136,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
               Free Conductor messages
             </div>
-            <div class="up-lede">Conductor is free up to a daily limit. Each message you send counts toward both caps below.</div>
+            <div class="up-lede">Conductor is free each day up to the two caps below. Past them, extra messages cost <b>$0.20 each</b> with pay-as-you-go, or Conductor pauses until your free messages reset.</div>
             <div class="up-rows">
               <div class="up-row">
                 <div class="up-row-top">
@@ -147,10 +152,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
                   <span class="up-row-count">184 left</span>
                 </div>
                 <div class="up-bar"><span style="width:92%"></span></div>
-                <div class="up-sub">200 free messages across your whole organization, each day</div>
+                <div class="up-sub">200 free messages shared across your workspace, each day</div>
               </div>
             </div>
-            <div class="up-foot">Both limits reset daily at 00:00 UTC. You share the workspace cap with your team, so it can run out before your own 30.</div>
+            <div class="up-over">Once the workspace's 200 run out, extra usage bills at <b>$0.20 per message</b> — even if you still have free messages of your own left.</div>
+            <button class="up-cta">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 12.5H11l-1 9.5L19.5 11H13z"/></svg>
+              Enable pay-as-you-go
+            </button>
+            <div class="up-admin">Admins only · billed to your workspace</div>
+            <div class="up-foot">Free messages reset daily at midnight PT.</div>
           </div>
         </div>
 

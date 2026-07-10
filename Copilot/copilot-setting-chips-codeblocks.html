@@ -117,22 +117,21 @@
   .ans-head { font-size:13.5px; font-weight:700; color:var(--strong); margin:16px 0 7px; }
   .ans-head:first-child { margin-top:0; }
 
-  /* inline setting chip (in prose) */
-  .chip { display:inline-flex; align-items:center; gap:4px; padding:1px 7px 1px 5px; border:1px solid var(--border); border-radius:6px; background:#fff; font-size:12px; font-weight:500; color:var(--text); cursor:pointer; vertical-align:baseline; line-height:1.5; box-shadow:0 1px 1px rgba(0,0,0,0.03); white-space:nowrap; transition:background .12s,border-color .12s,box-shadow .12s; }
-  .chip:hover { background:#F0F4FF; border-color:var(--blue-border); }
-  .chip .gear { color:var(--soft); display:inline-flex; }
-  .chip:hover .gear { color:var(--blue); }
-  .chip.active { border-color:var(--blue); box-shadow:0 0 0 3px rgba(61,100,215,0.14); }
-  .chip.active .gear { color:var(--blue); }
+  /* inline setting chip (in prose) — link-styled so it clearly reads as clickable */
+  .chip { display:inline-flex; align-items:center; gap:4px; padding:1px 7px 1px 6px; border:1px solid var(--blue-border); border-radius:6px; background:var(--blue-bg); font-size:12px; font-weight:600; color:var(--blue); cursor:pointer; vertical-align:baseline; line-height:1.5; white-space:nowrap; transition:background .12s,border-color .12s,box-shadow .12s; }
+  .chip:hover { background:#dfe9ff; border-color:var(--blue); }
+  .chip .gear { color:var(--blue); display:inline-flex; opacity:.85; }
+  .chip.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+  .chip.active .gear { color:#fff; opacity:1; }
 
-  /* full-width location reference row (Cursor "file Lines x-y" style) */
-  .locref { display:flex; align-items:center; gap:8px; padding:7px 11px; border:1px solid var(--border); border-radius:9px; background:var(--bg-weak); cursor:pointer; margin:8px 0; transition:background .12s,border-color .12s; }
-  .locref:hover { background:#F0F4FF; border-color:var(--blue-border); }
-  .locref .jump { color:var(--soft); display:inline-flex; flex-shrink:0; }
-  .locref:hover .jump { color:var(--blue); }
-  .locref .path { font-size:12.5px; font-weight:600; color:var(--strong); }
-  .locref .loc { font-size:12px; color:var(--soft); margin-left:auto; font-family:ui-monospace,'SF Mono',monospace; }
-  .locref.active { border-color:var(--blue); box-shadow:0 0 0 3px rgba(61,100,215,0.14); }
+  /* full-width location reference row (Cursor "file Lines x-y" style) — reads as a button */
+  .locref { display:flex; align-items:center; gap:9px; padding:9px 11px; border:1px solid var(--blue-border); border-radius:9px; background:var(--blue-bg); cursor:pointer; margin:8px 0; transition:background .12s,border-color .12s; }
+  .locref:hover { background:#dfe9ff; border-color:var(--blue); }
+  .locref .jump { color:var(--blue); display:inline-flex; flex-shrink:0; }
+  .locref .path { font-size:12.5px; font-weight:600; color:var(--blue); }
+  .locref .open { margin-left:auto; display:inline-flex; align-items:center; gap:4px; font-size:11.5px; font-weight:600; color:var(--blue); opacity:.85; }
+  .locref.active { background:var(--blue); border-color:var(--blue); }
+  .locref.active .jump, .locref.active .path, .locref.active .open { color:#fff; opacity:1; }
 
   /* code block with copy (Cursor style, light) */
   .codeblock { border:1px solid var(--border); border-radius:10px; overflow:hidden; margin:8px 0 12px; background:var(--code-bg); }
@@ -322,7 +321,7 @@ If the caller asks for a person, is upset, or you cannot help, use <code>Transfe
           <p>The agent jumps in the instant it thinks the caller stopped. That's <span class="chip" data-target="eagerness" onclick="jump(this)"><span class="gear"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.6" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5 5l1.4 1.4M13.6 13.6L15 15M5 15l1.4-1.4M13.6 6.4L15 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Response Eagerness</span> at its max of <b>1</b>, so any short pause reads as "caller finished." <span class="chip" data-target="adjust" onclick="jump(this)"><span class="gear"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.6" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5 5l1.4 1.4M13.6 13.6L15 15M5 15l1.4-1.4M13.6 6.4L15 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Dynamically adjust</span> is also off, so it never eases up mid-thought.</p>
 
           <div class="ans-head">What's set now</div>
-          <div class="locref" data-target="eagerness" onclick="jump(this)"><span class="jump"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg></span><span class="path">Speech Settings · Response Eagerness</span></div>
+          <div class="locref" data-target="eagerness" onclick="jump(this)"><span class="jump"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.6" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5 5l1.4 1.4M13.6 13.6L15 15M5 15l1.4-1.4M13.6 6.4L15 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="path">Speech Settings · Response Eagerness</span><span class="open">Open<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
           <div class="codeblock">
             <div class="cb-head"><span class="cb-lang">config</span><span class="sp"></span><span class="cb-copy" onclick="copyCode(this)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy</span></div>
             <div class="cb-body"><span class="k">response_eagerness</span>: <span class="n">1</span>

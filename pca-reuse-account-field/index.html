@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Retell AI — Add Post Call Analysis (reuse & localize)</title>
+<style>
+  :root {
+    --canvas: #F4F4F6;
+    --dot: #E3E3E8;
+    --pop: #FFFFFF;
+    --pop-border: #EAEAEE;
+    --panel-border: #EBEBEF;
+    --search-bg: #F4F4F6;
+    --icon-box: #F5F5F7;
+    --icon-box-border: #ECECEF;
+    --input: #FFFFFF;
+    --input-border: #E2E2E8;
+    --readonly-bg: #FAFAFB;
+    --name: #18181B;
+    --value: #27272A;
+    --helper: #71717A;
+    --section: #9A9AA3;
+    --muted-icon: #71717A;
+    --accent: #635BFF;
+    --accent-2: #4F46E5;
+    --accent-soft: #EEF0FF;
+    --toggle-off: #D4D4D8;
+    --divider: #EEEEF1;
+    --hover: #F7F7F9;
+    --btn-border: #E2E2E8;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--canvas);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: var(--name);
+  }
+  .canvas {
+    min-height: 100vh;
+    padding: 52px 24px 140px;
+    display: flex; justify-content: center; align-items: flex-start;
+    background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+  .stage { width: 560px; max-width: 100%; }
+
+  /* ---------- Attached panel ---------- */
+  .panel {
+    background: var(--pop);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(24,24,27,0.04);
+    padding: 18px 18px 16px;
+  }
+  .panel-head { display: flex; align-items: center; gap: 10px; padding: 2px 4px 4px; }
+  .panel-head .t { font-size: 16px; font-weight: 600; flex: 1; }
+  .panel-head .chev { color: #B4B4BB; display: flex; }
+  .panel-desc { font-size: 13.5px; color: var(--helper); line-height: 1.45; padding: 4px 4px 0; }
+
+  .fn-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+  .fn-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px; border-radius: 11px;
+    border: 1px solid var(--panel-border); background: #fff;
+    cursor: pointer;
+  }
+  .fn-item:hover { border-color: #D9DBFF; background: #FCFCFF; }
+  .fn-item.pop { animation: pop .26s ease; }
+  @keyframes pop { 0% { transform: scale(.98); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .fn-item .fi-ico {
+    width: 38px; height: 38px; flex: none;
+    background: var(--icon-box); border: 1px solid var(--icon-box-border);
+    border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #6B6B73;
+  }
+  .fn-item .fi-main { flex: 1; min-width: 0; }
+  .fn-item .fi-title { display: flex; align-items: center; gap: 8px; }
+  .fn-item .fi-nm { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .fn-item .fi-edit { color: #C4C9D4; display: flex; flex: none; }
+  .fn-item:hover .fi-edit { color: #6B7280; }
+
+  .tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; letter-spacing: 0.02em; }
+  .tag.account { background: var(--accent-soft); color: var(--accent-2); }
+  .tag.local   { background: #F0F0F2; color: #71717A; }
+
+  .pill { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 5px; }
+  .pill.text { background: #EEF0FF; color: #4F46E5; }
+  .pill.sel  { background: #F3EBFF; color: #8B5CF6; }
+  .pill.bool { background: #E7F8EE; color: #16A34A; }
+  .pill.num  { background: #FFF1E6; color: #E27317; }
+
+  .add-trigger {
+    margin-top: 12px;
+    display: inline-flex; align-items: center; gap: 7px;
+    background: #fff; border: 1px solid var(--btn-border);
+    border-radius: 10px; padding: 9px 15px;
+    font: inherit; font-size: 14px; font-weight: 600; color: var(--value);
+    cursor: pointer; box-shadow: 0 1px 2px rgba(24,24,27,0.04);
+  }
+  .add-trigger:hover { background: var(--hover); }
+
+  /* ---------- Picker popover (inline) ---------- */
+  .popover {
+    margin-top: 10px;
+    background: var(--pop); border: 1px solid var(--pop-border);
+    border-radius: 16px;
+    box-shadow: 0 20px 48px rgba(24,24,27,0.12), 0 2px 8px rgba(24,24,27,0.05);
+    padding: 14px; display: none;
+  }
+  .popover.open { display: block; }
+  .search {
+    display: flex; align-items: center; gap: 9px;
+    background: var(--search-bg); border-radius: 11px;
+    padding: 11px 14px; margin-bottom: 4px;
+  }
+  .search input { border: none; background: none; outline: none; font: inherit; font-size: 15px; color: var(--name); width: 100%; }
+  .search input::placeholder { color: #A6A6AE; }
+
+  .section {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+    color: var(--section); text-transform: uppercase; padding: 14px 8px 8px;
+  }
+
+  .p-row { display: flex; align-items: center; gap: 13px; padding: 9px 8px; border-radius: 11px; border: 1px solid transparent; }
+  .p-row:hover { background: var(--hover); border-color: #ECECF1; }
+  .p-row.is-added { opacity: .55; }
+  .p-row.hidden-row { display: none; }
+  .p-ico {
+    width: 42px; height: 42px; flex: none;
+    background: var(--icon-box); border: 1px solid var(--icon-box-border);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #6B6B73;
+  }
+  .p-main { flex: 1; min-width: 0; }
+  .p-title { display: flex; align-items: center; gap: 9px; margin-bottom: 3px; }
+  .p-title .nm { font-size: 15.5px; font-weight: 600; color: var(--name); letter-spacing: -0.01em; }
+  .p-sub { font-size: 13px; color: var(--section); }
+  .row-add {
+    flex: none; background: #fff; border: 1px solid var(--btn-border);
+    border-radius: 10px; padding: 8px 15px; font: inherit; font-size: 14px; font-weight: 600;
+    color: var(--value); cursor: pointer;
+  }
+  .row-add:hover { background: var(--hover); border-color: #C9C9D0; }
+  .added-label { flex: none; font-size: 14px; font-weight: 600; color: #B4B4BB; padding-right: 6px; }
+
+  .show-all {
+    display: inline-flex; align-items: center; gap: 7px;
+    color: var(--accent-2); font-size: 15px; font-weight: 600;
+    background: none; border: none; cursor: pointer; padding: 12px 8px;
+  }
+  .show-all.gone { display: none; }
+  .no-results { padding: 18px 8px; font-size: 14px; color: var(--section); display: none; }
+
+  .divider { height: 1px; background: var(--divider); margin: 6px 4px; }
+
+  .type-row { display: flex; align-items: center; gap: 15px; padding: 11px 8px; border-radius: 11px; cursor: pointer; }
+  .type-row:hover { background: var(--hover); }
+  .type-row .ti { color: #52525B; display: flex; }
+  .type-row .tl { font-size: 16px; color: var(--name); font-weight: 500; }
+
+  .pop-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 6px 2px; margin-top: 4px; border-top: 1px solid var(--divider); }
+  .btn-ghost { background: #fff; border: 1px solid var(--btn-border); color: #3F3F46; border-radius: 10px; padding: 9px 16px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-ghost:hover { background: var(--hover); }
+  .btn-dark { background: #09090B; border: 1px solid #09090B; color: #fff; border-radius: 10px; padding: 9px 18px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-dark:hover { background: #000; }
+
+  /* ---------- Overlay + modals ---------- */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(24,24,27,0.38);
+    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center; padding: 44px 20px; z-index: 60;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    width: 500px; max-width: 100%; max-height: calc(100vh - 88px);
+    background: var(--pop); border: 1px solid var(--panel-border);
+    border-radius: 16px; box-shadow: 0 24px 64px rgba(24,24,27,0.22);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .m-head { display: flex; align-items: center; gap: 11px; padding: 22px 26px 4px; }
+  .m-head .m-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+  .m-head .close { margin-left: auto; color: var(--muted-icon); background: none; border: none; cursor: pointer; display: flex; padding: 4px; }
+  .m-body { padding: 20px 26px 4px; overflow-y: auto; }
+
+  .field { margin-bottom: 20px; }
+  .field > label { display: block; font-size: 14px; font-weight: 600; color: var(--name); margin-bottom: 9px; letter-spacing: -0.005em; }
+  .input, .textarea {
+    width: 100%; background: var(--input); border: 1px solid var(--input-border);
+    border-radius: 10px; color: var(--value); font: inherit; font-size: 14.5px;
+    padding: 11px 13px; line-height: 1.45;
+  }
+  .input:focus, .textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+  .textarea { resize: none; min-height: 76px; }
+
+  .example-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .example-row .input { flex: 1; }
+  .example-row .trash { color: var(--muted-icon); background: none; border: none; cursor: pointer; display: flex; padding: 4px; }
+  .example-row .trash:hover { color: #EF4444; }
+  .mini-add {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--input); border: 1px solid var(--input-border); color: var(--value);
+    border-radius: 10px; font: inherit; font-size: 14px; font-weight: 500; padding: 9px 15px; cursor: pointer; margin-top: 2px;
+  }
+  .mini-add:hover { background: var(--hover); }
+
+  .helper { font-size: 13px; line-height: 1.5; color: var(--helper); margin: 0 0 12px; max-width: 44ch; }
+
+  .toggle { position: relative; width: 38px; height: 22px; border-radius: 999px; background: var(--toggle-off); border: none; cursor: pointer; padding: 0; transition: background .16s; flex: none; }
+  .toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: transform .16s; }
+  .toggle[aria-checked="true"] { background: var(--accent); }
+  .toggle[aria-checked="true"]::after { transform: translateX(16px); }
+
+  .publish { margin-top: 4px; padding-top: 20px; border-top: 1px solid var(--divider); }
+  .publish-head { display: flex; align-items: center; gap: 14px; }
+  .publish-head label { font-size: 14px; font-weight: 600; color: var(--name); letter-spacing: -0.005em; }
+  .publish-head .toggle { margin-left: auto; }
+  .publish .helper { margin: 9px 0 0; }
+
+  .m-foot { display: flex; justify-content: flex-end; gap: 12px; padding: 20px 26px 24px; }
+  .btn { font: inherit; font-size: 14.5px; font-weight: 600; border-radius: 11px; padding: 10px 22px; cursor: pointer; }
+  .btn-cancel { background: #fff; border: 1px solid var(--input-border); color: #3F3F46; }
+  .btn-cancel:hover { background: var(--hover); }
+  .btn-update { background: #09090B; border: 1px solid #09090B; color: #fff; }
+  .btn-update:hover { background: #000; }
+
+  /* read-only shared view */
+  .banner { display: flex; gap: 11px; background: var(--accent-soft); border: 1px solid #DADCFF; border-radius: 11px; padding: 12px 14px; margin-bottom: 20px; }
+  .banner .bi { color: var(--accent); flex: none; margin-top: 1px; }
+  .banner .bt { font-size: 13px; line-height: 1.5; color: #3A3A45; }
+  .banner .bt b { color: #1E1E28; font-weight: 600; }
+  .ro { width: 100%; background: var(--readonly-bg); border: 1px solid var(--input-border); border-radius: 10px; color: #52525B; font-size: 14.5px; padding: 11px 13px; line-height: 1.45; cursor: not-allowed; display: flex; align-items: center; justify-content: space-between; }
+  .ro.area { min-height: 60px; align-items: flex-start; }
+  .lock { color: #B4B4BB; }
+  .ro-foot { display: flex; gap: 12px; }
+  .ro-foot .btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-lib { background: #fff; border: 1px solid var(--btn-border); color: var(--value); }
+  .btn-loc { background: var(--accent); border: 1px solid var(--accent); color: #fff; }
+  .btn-lib:hover { background: var(--hover); }
+  .btn-loc:hover { filter: brightness(0.96); }
+
+  /* toast */
+  .toast {
+    position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%) translateY(12px);
+    background: #18181B; color: #fff; font-size: 13.5px; font-weight: 500;
+    padding: 11px 18px; border-radius: 999px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 90;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .hint {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    font-size: 13px; color: var(--helper); background: #fff; border: 1px solid var(--pop-border);
+    border-radius: 999px; padding: 8px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .hint b { color: var(--value); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="stage">
+    <div class="panel">
+      <div class="panel-head">
+        <span class="fi-ico" style="width:34px;height:34px;border-radius:9px">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/><circle cx="19" cy="19" r="2.2"/></svg>
+        </span>
+        <span class="t">Post Call Analysis</span>
+        <span class="chev"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>
+      <p class="panel-desc">Extract structured fields from every call once it ends. Reuse a shared account field or create your own.</p>
+
+      <div class="fn-list" id="fnList"></div>
+
+      <button class="add-trigger" id="addBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add
+      </button>
+
+      <!-- picker -->
+      <div class="popover" id="picker">
+        <div class="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A6A6AE" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+          <input id="searchInput" placeholder="Search fields..." />
+        </div>
+
+        <div class="section" id="acctSection">
+          Account Post Call Analysis
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B4B4BB" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r="0.6" fill="#B4B4BB" stroke="none"/></svg>
+        </div>
+        <div id="rows"></div>
+        <div class="no-results" id="noResults">No account fields match your search.</div>
+        <button class="show-all" id="showAll"></button>
+
+        <div class="divider"></div>
+        <div class="section">Create Post Call Analysis field</div>
+        <div class="type-row" data-type="text"><span class="ti"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="16" y2="12"/><line x1="4" y1="17" x2="12" y2="17"/></svg></span><span class="tl">Text</span></div>
+        <div class="type-row" data-type="sel"><span class="ti"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="7" x2="20" y2="7"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="17" x2="20" y2="17"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg></span><span class="tl">Selector</span></div>
+        <div class="type-row" data-type="bool"><span class="ti"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span><span class="tl">Boolean</span></div>
+        <div class="type-row" data-type="num"><span class="ti"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg></span><span class="tl">Number</span></div>
+
+        <div class="pop-foot">
+          <button class="btn-ghost" id="pkCancel">Cancel</button>
+          <button class="btn-dark" id="pkSave">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Field editor (create / edit local / edit localized) ===== -->
+<div class="overlay" id="editOverlay">
+  <div class="modal">
+    <div class="m-head">
+      <span id="edIco" style="display:flex;color:#52525B"></span>
+      <span class="m-title" id="edTypeLabel">Text</span>
+      <button class="close" id="edClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+    </div>
+    <div class="m-body">
+      <div class="field">
+        <label for="edName">Name</label>
+        <input id="edName" class="input" placeholder="field_name" />
+      </div>
+      <div class="field">
+        <label for="edDesc">Description</label>
+        <textarea id="edDesc" class="textarea" placeholder="What should the model extract from the call?"></textarea>
+      </div>
+
+      <!-- Format Example (text / number) -->
+      <div class="field" id="edFormatBlock">
+        <label>Format Example (Optional)</label>
+        <div id="edExamples"></div>
+        <button class="mini-add" id="edAddExample">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add
+        </button>
+      </div>
+
+      <!-- Options (selector) -->
+      <div class="field" id="edOptionsBlock" style="display:none">
+        <label>Options</label>
+        <div id="edOptions"></div>
+        <button class="mini-add" id="edAddOption">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add option
+        </button>
+      </div>
+
+      <div class="field">
+        <label>Optional</label>
+        <p class="helper">Populate this field only when the call matches the conditions you define. Otherwise, it will be left empty.</p>
+        <button class="toggle" id="edOptionalToggle" role="switch" aria-checked="false"></button>
+      </div>
+
+      <div class="publish" id="edPublishBlock">
+        <div class="publish-head">
+          <label>Save as account Post Call Analysis field</label>
+          <button class="toggle" id="edPublishToggle" role="switch" aria-checked="true"></button>
+        </div>
+        <p class="helper">Publish to the account library so every agent can reuse it. Leave it off to keep the field local to this agent.</p>
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-cancel" id="edCancel">Cancel</button>
+      <button class="btn btn-update" id="edUpdate">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Read-only shared account field ===== -->
+<div class="overlay" id="sharedOverlay">
+  <div class="modal">
+    <div class="m-head">
+      <span id="shIco" style="display:flex;color:#52525B"></span>
+      <span class="m-title" id="shName">voicemail_left</span>
+      <span class="tag account">Account</span>
+      <button class="close" id="shClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+    </div>
+    <div class="m-body">
+      <div class="banner">
+        <svg class="bi" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r="0.7" fill="currentColor" stroke="none"/></svg>
+        <div class="bt"><b>Shared account field, synced from the library.</b> It is used by <b id="shCount">6 agents</b>. Edit in the library to update every agent, or localize to change just this one.</div>
+      </div>
+      <div class="field">
+        <label>Name</label>
+        <div class="ro"><span id="shNameRO">voicemail_left</span> <span class="lock">🔒</span></div>
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <div class="ro area" id="shDesc">Whether the call reached a voicemail rather than a live person.</div>
+      </div>
+    </div>
+    <div class="m-foot ro-foot">
+      <button class="btn btn-lib" id="shEditLib">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14L21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+        Edit in Library
+      </button>
+      <button class="btn btn-loc" id="shLocalize">Localize to this agent</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="hint">Add an account field → <b>Save</b> → click it → <b>Localize to this agent</b>, or create a new field</div>
+
+<script>
+/* ---------------- icons ---------------- */
+const ICON = {
+  text: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="16" y2="12"/><line x1="4" y1="17" x2="12" y2="17"/></svg>',
+  sel:  '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="7" x2="20" y2="7"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="17" x2="20" y2="17"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg>',
+  bool: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>',
+  num:  '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>'
+};
+const PILL_LABEL = { text: 'Text', sel: 'Selector', bool: 'Yes/No', num: 'Number' };
+const TYPE_LABEL = { text: 'Text', sel: 'Selector', bool: 'Boolean', num: 'Number' };
+const editIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+const trashIcon = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>';
+
+/* ---------------- account library ---------------- */
+const ACCOUNT_FIELDS = [
+  { name: 'caller_name',        type: 'text', agents: 8, desc: "The caller's full name as stated on the call." },
+  { name: 'call_disposition',   type: 'sel',  agents: 7, desc: 'The outcome category the call resolved to.' },
+  { name: 'voicemail_left',     type: 'bool', agents: 6, desc: 'Whether the call reached a voicemail rather than a live person.' },
+  { name: 'customer_intent',    type: 'text', agents: 5, desc: 'A short summary of what the caller wanted.' },
+  { name: 'lead_score',         type: 'num',  agents: 4, desc: 'A 0 to 100 score of how qualified the lead is.' },
+  { name: 'appointment_booked', type: 'bool', agents: 3, desc: 'Whether an appointment was booked on the call.' },
+  { name: 'sentiment',          type: 'sel',  agents: 3, desc: 'Overall caller sentiment across the call.' },
+  { name: 'callback_requested', type: 'bool', agents: 2, desc: 'Whether the caller asked to be called back.' },
+  { name: 'objection_raised',   type: 'text', agents: 2, desc: 'The main objection the caller raised, if any.' },
+  { name: 'payment_collected',  type: 'num',  agents: 1, desc: 'The dollar amount collected on the call.' }
+];
+
+/* attached to this agent — call_disposition pre-attached (shows "Added" in picker) */
+const attached = [
+  { name: 'call_disposition', type: 'sel', origin: 'account', agents: 7, desc: 'The outcome category the call resolved to.' }
+];
+
+let expanded = false;
+const staged = new Set();   // account field names staged this picker session
+
+const picker   = document.getElementById('picker');
+const rowsEl    = document.getElementById('rows');
+const showAll   = document.getElementById('showAll');
+const searchInput = document.getElementById('searchInput');
+const noResults = document.getElementById('noResults');
+const fnList    = document.getElementById('fnList');
+
+const isAttached = (n) => attached.some(a => a.name === n);
+
+/* ---------------- attached list ---------------- */
+function renderAttached(popName) {
+  fnList.innerHTML = '';
+  attached.forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'fn-item' + (a.name === popName ? ' pop' : '');
+    el.innerHTML = `
+      <span class="fi-ico">${ICON[a.type]}</span>
+      <div class="fi-main"><div class="fi-title">
+        <span class="fi-nm">${a.name}</span>
+        <span class="pill ${a.type}">${PILL_LABEL[a.type]}</span>
+        <span class="tag ${a.origin}">${a.origin === 'account' ? 'Account' : 'Local'}</span>
+      </div></div>
+      <span class="fi-edit">${editIcon}</span>`;
+    el.onclick = () => openAttached(a);
+    fnList.appendChild(el);
+  });
+}
+
+/* ---------------- picker ---------------- */
+function renderPicker() {
+  const q = searchInput.value.trim().toLowerCase();
+  rowsEl.innerHTML = '';
+  const matches = ACCOUNT_FIELDS.filter(f => f.name.toLowerCase().includes(q) || PILL_LABEL[f.type].toLowerCase().includes(q));
+
+  matches.forEach((f, i) => {
+    const added = staged.has(f.name) || isAttached(f.name);
+    const beyondTop5 = !q && !expanded && i >= 5;
+    const row = document.createElement('div');
+    row.className = 'p-row' + (added ? ' is-added' : '') + (beyondTop5 ? ' hidden-row' : '');
+    row.innerHTML = `
+      <div class="p-ico">${ICON[f.type]}</div>
+      <div class="p-main">
+        <div class="p-title"><span class="nm">${f.name}</span><span class="pill ${f.type}">${PILL_LABEL[f.type]}</span></div>
+        <div class="p-sub">Used by ${f.agents} agents</div>
+      </div>
+      ${added ? '<span class="added-label">Added</span>' : '<button class="row-add">+ Add</button>'}`;
+    if (!added) row.querySelector('.row-add').onclick = () => { staged.add(f.name); renderPicker(); };
+    rowsEl.appendChild(row);
+  });
+
+  noResults.style.display = matches.length ? 'none' : 'block';
+
+  if (!q && !expanded && ACCOUNT_FIELDS.length > 5) {
+    showAll.className = 'show-all';
+    const hidden = ACCOUNT_FIELDS.length - 5;
+    showAll.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Show all ${ACCOUNT_FIELDS.length} fields`;
+    showAll.onclick = () => { expanded = true; renderPicker(); };
+  } else {
+    showAll.className = 'show-all gone';
+  }
+}
+
+function openPicker() { picker.classList.add('open'); expanded = false; searchInput.value = ''; staged.clear(); renderPicker(); }
+function closePicker() { picker.classList.remove('open'); }
+
+document.getElementById('addBtn').onclick = () => picker.classList.contains('open') ? closePicker() : openPicker();
+searchInput.oninput = renderPicker;
+document.getElementById('pkCancel').onclick = closePicker;
+document.getElementById('pkSave').onclick = () => {
+  let last = null;
+  staged.forEach(name => {
+    if (isAttached(name)) return;
+    const f = ACCOUNT_FIELDS.find(x => x.name === name);
+    attached.push({ name: f.name, type: f.type, origin: 'account', agents: f.agents, desc: f.desc });
+    last = f.name;
+  });
+  closePicker();
+  renderAttached(last);
+};
+
+/* ---------------- toast ---------------- */
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ---------------- field editor ---------------- */
+const editOverlay = document.getElementById('editOverlay');
+let edCtx = null;  // { mode:'create'|'edit', type, target? }
+
+function exampleRow(v) {
+  const wrap = document.createElement('div');
+  wrap.className = 'example-row';
+  wrap.innerHTML = `<input class="input" value="${v || ''}" placeholder="e.g. Tomorrow at 7:00 AM" /><button class="trash">${trashIcon}</button>`;
+  wrap.querySelector('.trash').onclick = () => wrap.remove();
+  return wrap;
+}
+function optionRow(v) {
+  const wrap = document.createElement('div');
+  wrap.className = 'example-row';
+  wrap.innerHTML = `<input class="input" value="${v || ''}" placeholder="Option label" /><button class="trash">${trashIcon}</button>`;
+  wrap.querySelector('.trash').onclick = () => wrap.remove();
+  return wrap;
+}
+
+function setToggle(el, on) { el.setAttribute('aria-checked', on ? 'true' : 'false'); }
+function getToggle(el) { return el.getAttribute('aria-checked') === 'true'; }
+
+function openEditor(opts) {
+  edCtx = opts;
+  const type = opts.type;
+  document.getElementById('edIco').innerHTML = ICON[type];
+  document.getElementById('edTypeLabel').textContent = TYPE_LABEL[type];
+  document.getElementById('edName').value = opts.name || '';
+  document.getElementById('edDesc').value = opts.desc || '';
+  setToggle(document.getElementById('edOptionalToggle'), false);
+
+  // format / options blocks by type
+  const fmt = document.getElementById('edFormatBlock');
+  const optB = document.getElementById('edOptionsBlock');
+  fmt.style.display = (type === 'text' || type === 'num') ? 'block' : 'none';
+  optB.style.display = (type === 'sel') ? 'block' : 'none';
+
+  const ex = document.getElementById('edExamples'); ex.innerHTML = '';
+  if (type === 'text') { ex.appendChild(exampleRow('Tomorrow at 7:00 AM')); ex.appendChild(exampleRow('Saturday at 2:30 PM')); }
+  if (type === 'num')  { ex.appendChild(exampleRow('42')); }
+
+  const op = document.getElementById('edOptions'); op.innerHTML = '';
+  if (type === 'sel') { op.appendChild(optionRow('Resolved')); op.appendChild(optionRow('Follow up')); op.appendChild(optionRow('No answer')); }
+
+  // publish toggle: create-mode shows it (ON default). editing a local field: keep it as a re-publish control (OFF).
+  const pub = document.getElementById('edPublishBlock');
+  if (opts.mode === 'create') { pub.style.display = 'block'; setToggle(document.getElementById('edPublishToggle'), true); }
+  else { pub.style.display = 'block'; setToggle(document.getElementById('edPublishToggle'), false); }
+
+  document.getElementById('edUpdate').textContent = opts.mode === 'create' ? 'Save' : 'Update';
+  editOverlay.classList.add('open');
+}
+function closeEditor() { editOverlay.classList.remove('open'); }
+
+document.getElementById('edClose').onclick = closeEditor;
+document.getElementById('edCancel').onclick = closeEditor;
+editOverlay.onclick = (e) => { if (e.target === editOverlay) closeEditor(); };
+document.getElementById('edAddExample').onclick = () => document.getElementById('edExamples').appendChild(exampleRow(''));
+document.getElementById('edAddOption').onclick = () => document.getElementById('edOptions').appendChild(optionRow(''));
+[document.getElementById('edOptionalToggle'), document.getElementById('edPublishToggle')].forEach(t => {
+  t.onclick = () => setToggle(t, !getToggle(t));
+});
+
+document.querySelectorAll('.type-row').forEach(tr => {
+  tr.onclick = () => { closePicker(); openEditor({ mode: 'create', type: tr.dataset.type }); };
+});
+
+document.getElementById('edUpdate').onclick = () => {
+  const name = document.getElementById('edName').value.trim() || 'new_field';
+  const desc = document.getElementById('edDesc').value.trim();
+  const publish = getToggle(document.getElementById('edPublishToggle'));
+  const type = edCtx.type;
+
+  if (edCtx.mode === 'create') {
+    const origin = publish ? 'account' : 'local';
+    if (publish && !ACCOUNT_FIELDS.some(f => f.name === name)) {
+      ACCOUNT_FIELDS.push({ name, type, agents: 1, desc });
+    }
+    attached.push({ name, type, origin, agents: publish ? 1 : 0, desc });
+    renderAttached(name);
+    toast(publish ? 'Field created and published to the account library' : 'Local field created for this agent');
+  } else {
+    // editing an already-local field
+    edCtx.target.name = name; edCtx.target.desc = desc;
+    if (publish) edCtx.target.origin = 'account';
+    renderAttached(name);
+    toast('Field updated');
+  }
+  closeEditor();
+};
+
+/* ---------------- open an attached field ---------------- */
+const sharedOverlay = document.getElementById('sharedOverlay');
+let sharedTarget = null;
+
+function openAttached(a) {
+  if (a.origin === 'local') {
+    openEditor({ mode: 'edit', type: a.type, name: a.name, desc: a.desc, target: a });
+  } else {
+    sharedTarget = a;
+    document.getElementById('shIco').innerHTML = ICON[a.type];
+    document.getElementById('shName').textContent = a.name;
+    document.getElementById('shNameRO').textContent = a.name;
+    document.getElementById('shCount').textContent = a.agents + ' agents';
+    document.getElementById('shDesc').textContent = a.desc;
+    sharedOverlay.classList.add('open');
+  }
+}
+function closeShared() { sharedOverlay.classList.remove('open'); }
+document.getElementById('shClose').onclick = closeShared;
+sharedOverlay.onclick = (e) => { if (e.target === sharedOverlay) closeShared(); };
+document.getElementById('shEditLib').onclick = () => { closeShared(); toast('Opening ' + sharedTarget.name + ' in the Account Library…'); };
+document.getElementById('shLocalize').onclick = () => {
+  sharedTarget.origin = 'local';
+  closeShared();
+  renderAttached(sharedTarget.name);
+  toast(sharedTarget.name + ' localized. The shared field keeps syncing with other agents.');
+  // open the now-editable local copy
+  openEditor({ mode: 'edit', type: sharedTarget.type, name: sharedTarget.name, desc: sharedTarget.desc, target: sharedTarget });
+};
+
+/* init */
+renderAttached();
+</script>
+</body>
+</html>

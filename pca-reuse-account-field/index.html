@@ -246,7 +246,15 @@
   .warn-sub b { color: #18181B; font-weight: 600; }
   .warn-note { display: flex; gap: 10px; padding: 12px 14px; background: var(--accent-soft); border-radius: 11px; font-size: 13px; color: #3A3A45; line-height: 1.5; }
   .warn-note svg { flex: none; margin-top: 1px; }
-  .warn-editlib { margin-top: 14px; font-size: 13px; color: var(--helper); }
+  .warn-agents-lbl { font-size: 11.5px; font-weight: 700; color: var(--section); text-transform: uppercase; letter-spacing: 0.05em; margin: 4px 0 8px; }
+  .warn-agents { border: 1px solid var(--pop-border); border-radius: 11px; overflow: hidden; max-height: 188px; overflow-y: auto; }
+  .wa-row { display: flex; align-items: center; gap: 13px; padding: 11px 13px; border-bottom: 1px solid var(--divider); }
+  .wa-row:last-child { border-bottom: none; }
+  .wa-av { width: 30px; height: 30px; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
+  .wa-name { font-size: 14.5px; font-weight: 500; color: var(--name); flex: 1; min-width: 0; }
+  .wa-link { color: #C4C9D4; background: none; border: none; cursor: pointer; display: flex; padding: 4px; border-radius: 6px; flex: none; }
+  .wa-link:hover { color: var(--accent); background: var(--hover); }
+  .warn-editlib { margin-top: 16px; font-size: 13px; color: var(--helper); }
   .warn-editlib a { color: var(--accent); font-weight: 600; cursor: pointer; }
   .warn-editlib a:hover { text-decoration: underline; }
 
@@ -393,7 +401,9 @@
       </div>
     </div>
     <div class="m-body" style="padding-top:14px">
-      <div class="warn-note">
+      <div class="warn-agents-lbl">Agents on the shared version</div>
+      <div class="warn-agents" id="warnAgents"></div>
+      <div class="warn-note" style="margin-top:16px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r="0.7" fill="var(--accent)" stroke="none"/></svg>
         <span>The shared field stays in the library and every other agent keeps using it. This agent stops syncing with the library.</span>
       </div>
@@ -644,6 +654,7 @@ document.getElementById('edUpdate').onclick = () => {
     if (edDirty) {
       document.getElementById('warnName').textContent = edCtx.target.name;
       document.getElementById('warnCount').textContent = edCtx.target.agents + ' agents';
+      renderWarnAgents(edCtx.target.agents);
       warnOverlay.classList.add('open');
     } else {
       closeEditor();  // no changes, nothing to localize
@@ -664,6 +675,29 @@ function openAttached(a) {
 }
 
 /* ---------------- localize warning ---------------- */
+const AGENT_POOL = [
+  { n: 'Healthcare Check-In Agent', c: '#3B5BDB' },
+  { n: 'Sales Outreach Bot',        c: '#2F9E44' },
+  { n: 'Renewal Follow-up Agent',   c: '#C2701A' },
+  { n: 'Support Intake Agent',      c: '#7C3AED' },
+  { n: 'Billing Reminder Agent',    c: '#DB2777' },
+  { n: 'Appointment Scheduler',     c: '#2563EB' },
+  { n: 'Lead Qualifier Bot',        c: '#CA8A04' },
+  { n: 'Onboarding Assistant',      c: '#DC2626' }
+];
+const extLink = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14L21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>';
+function renderWarnAgents(count) {
+  const box = document.getElementById('warnAgents');
+  box.innerHTML = '';
+  AGENT_POOL.slice(0, Math.min(count, AGENT_POOL.length)).forEach(a => {
+    const r = document.createElement('div');
+    r.className = 'wa-row';
+    r.innerHTML = `<div class="wa-av" style="background:${a.c}">${a.n[0]}</div><span class="wa-name">${a.n}</span><button class="wa-link" title="Open agent">${extLink}</button>`;
+    r.querySelector('.wa-link').onclick = () => toast('Opening ' + a.n + '…');
+    box.appendChild(r);
+  });
+}
+
 const warnOverlay = document.getElementById('warnOverlay');
 document.getElementById('warnCancel').onclick = () => warnOverlay.classList.remove('open');
 warnOverlay.onclick = (e) => { if (e.target === warnOverlay) warnOverlay.classList.remove('open'); };

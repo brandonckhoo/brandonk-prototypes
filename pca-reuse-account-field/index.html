@@ -598,11 +598,11 @@ function openEditor(opts) {
   banner.style.display = opts.mode === 'shared' ? 'flex' : 'none';
   if (opts.mode === 'shared') document.getElementById('edBannerCount').textContent = opts.target.agents + ' agents';
 
-  // publish toggle: shown for create (ON) and local edit (OFF, re-publish). Hidden for shared (localize is the mechanism).
+  // publish toggle: scope is chosen once, at creation. A Local field cannot be promoted back to Account,
+  // so the toggle only appears when creating a new field. Hidden when editing local or shared fields.
   const pub = document.getElementById('edPublishBlock');
-  if (opts.mode === 'shared') { pub.style.display = 'none'; }
-  else if (opts.mode === 'create') { pub.style.display = 'block'; setToggle(document.getElementById('edPublishToggle'), true); }
-  else { pub.style.display = 'block'; setToggle(document.getElementById('edPublishToggle'), false); }
+  if (opts.mode === 'create') { pub.style.display = 'block'; setToggle(document.getElementById('edPublishToggle'), true); }
+  else { pub.style.display = 'none'; }
 
   document.getElementById('edUpdate').textContent = opts.mode === 'create' ? 'Save' : 'Save';
   editOverlay.classList.add('open');

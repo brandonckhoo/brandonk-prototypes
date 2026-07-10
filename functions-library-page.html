@@ -199,6 +199,39 @@
   .scope-title { font-size: 14.5px; font-weight: 600; color: #0A0A0A; }
   .scope-desc { font-size: 13px; color: #6B7280; margin-top: 3px; line-height: 1.45; }
 
+  /* ============ ROW "..." MENU ============ */
+  .row-menu-dd { position: fixed; display: none; background: #fff; border: 1px solid #E1E4EA; border-radius: 9px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); z-index: 520; min-width: 150px; padding: 4px; }
+  .row-menu-dd.open { display: block; }
+  .rm-item { padding: 8px 12px; font-size: 14px; color: #0A0A0A; border-radius: 6px; cursor: pointer; }
+  .rm-item:hover { background: #F5F7FA; }
+  .rm-item.danger { color: #E5484D; }
+  .rm-item.danger:hover { background: #FDECEC; }
+
+  /* ============ DELETE / EDIT CONFIRM MODALS ============ */
+  .del-overlay { position: fixed; inset: 0; background: rgba(15,18,27,0.45); backdrop-filter: blur(2px); z-index: 540; display: none; align-items: center; justify-content: center; padding: 24px; }
+  .del-overlay.open { display: flex; }
+  .del-modal { width: 500px; max-width: 100%; background: #fff; border-radius: 16px; box-shadow: 0 24px 60px rgba(0,0,0,0.28); padding: 24px; max-height: calc(100vh - 48px); overflow-y: auto; }
+  .del-head { display: flex; gap: 16px; align-items: flex-start; }
+  .del-ic { width: 48px; height: 48px; border-radius: 12px; background: #FDECEC; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .del-title { font-size: 18px; font-weight: 600; color: #0A0A0A; }
+  .del-sub { font-size: 14.5px; color: #525866; line-height: 1.5; margin-top: 5px; }
+  .del-x { margin-left: auto; color: #9CA3AF; cursor: pointer; font-size: 22px; line-height: 1; }
+  .del-label { font-size: 12px; font-weight: 600; color: #99A0AE; letter-spacing: 0.05em; text-transform: uppercase; margin: 22px 0 10px; }
+  .del-list { border: 1px solid #E5E7EB; border-radius: 12px; overflow: hidden; }
+  .del-agent { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border-bottom: 1px solid #F0F1F3; }
+  .del-agent:last-child { border-bottom: none; }
+  .del-av { width: 40px; height: 40px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 15px; font-weight: 600; flex-shrink: 0; }
+  .del-aname { font-size: 16px; color: #0A0A0A; flex: 1; }
+  .del-linkout { color: #9CA3AF; cursor: pointer; display: flex; }
+  .del-linkout:hover { color: #3d64d7; }
+  .del-warn { display: flex; align-items: center; gap: 10px; background: #FDECEC; border-radius: 10px; padding: 14px 16px; margin-top: 20px; font-size: 14.5px; color: #C0392B; font-weight: 500; }
+  .del-foot { display: flex; justify-content: flex-end; gap: 12px; margin-top: 22px; }
+  .del-cancel { border: 1px solid #E5E7EB; background: #fff; border-radius: 9px; padding: 11px 22px; font-size: 15px; font-weight: 500; color: #0A0A0A; cursor: pointer; }
+  .del-confirm { border: none; background: #DC2626; color: #fff; border-radius: 9px; padding: 11px 22px; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .del-confirm:hover { background: #C11F1F; }
+  .del-confirm.dark { background: #0E121B; }
+  .del-confirm.dark:hover { background: #000; }
+
   /* scoped table search */
   .tbl-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; min-width: 320px; }
   .tbl-search:focus-within { border-color: #3d64d7; box-shadow: 0 0 0 3px rgba(61,100,215,0.1); }
@@ -602,7 +635,7 @@
           </div>
         </td>
         <td class="edited">06/15/2026 14:22</td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- Row 2: Cal.com, Mid-call -->
       <tr onclick="openFnPanel('book_appointment')" style="cursor:pointer">
@@ -628,7 +661,7 @@
           </div>
         </td>
         <td class="edited">06/15/2026 09:11</td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- Row 3: HubSpot, Post-call -->
       <tr onclick="openFnPanel('update_hubspot_deal')" style="cursor:pointer">
@@ -651,7 +684,7 @@
           </div>
         </td>
         <td class="edited">06/14/2026 11:05</td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- Row 4: Slack, Post-call -->
       <tr onclick="openFnPanel('send_slack_notification')" style="cursor:pointer">
@@ -677,7 +710,7 @@
           </div>
         </td>
         <td class="edited">06/09/2026 16:57</td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- Row 5: Salesforce, unused (demonstrates Usage: Not used by any agent) -->
       <tr onclick="openFnPanel('log_salesforce_activity')" style="cursor:pointer">
@@ -693,7 +726,7 @@
         <td><span class="type-badge"><span class="tdot" style="background:#00A1E0"></span>Salesforce</span></td>
         <td><span class="used-none">—</span></td>
         <td class="edited">06/18/2026 10:02</td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
     </tbody>
   </table>
@@ -773,7 +806,7 @@
         <td><span class="type-badge">Selector</span></td>
         <td><div class="used-by"><div class="avatars"><div class="av" style="background:#3d64d7">DR</div><div class="av" style="background:#7D52F4">IV</div><div class="av" style="background:#1FC16B">SC</div><div class="av more">+2</div></div><span class="used-count">5 agents</span></div></td>
         <td><span class="scope-pill scope-account">Account</span></td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <tr class="extractor-row" onclick="openPcaEdit('disqualification_reason')">
         <td><div class="fn-title">disqualification_reason</div><div class="fn-sub">disqualification_reason</div></td>
@@ -781,7 +814,7 @@
         <td><span class="type-badge">Selector</span></td>
         <td><div class="used-by"><div class="avatars"><div class="av" style="background:#3d64d7">DR</div><div class="av" style="background:#E5484D">LI</div><div class="av more">+1</div></div><span class="used-count">3 agents</span></div></td>
         <td><span class="scope-pill scope-account">Account</span></td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <tr class="extractor-row" onclick="openPcaEdit('intake_submitted')">
         <td><div class="fn-title">intake_submitted</div><div class="fn-sub">intake_submitted</div></td>
@@ -789,7 +822,7 @@
         <td><span class="type-badge">Yes/No</span></td>
         <td><div class="used-by"><div class="avatars"><div class="av" style="background:#3d64d7">DR</div><div class="av" style="background:#7D52F4">IV</div></div><span class="used-count">2 agents</span></div></td>
         <td><span class="scope-pill scope-account">Account</span></td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <tr class="extractor-row" onclick="openPcaEdit('call_disposition')">
         <td><div class="fn-title">call_disposition</div><div class="fn-sub">call_disposition</div></td>
@@ -797,7 +830,7 @@
         <td><span class="type-badge">Selector</span></td>
         <td><div class="used-by"><div class="avatars"><div class="av" style="background:#3d64d7">DR</div><div class="av" style="background:#7D52F4">IV</div><div class="av" style="background:#1FC16B">SC</div><div class="av more">+3</div></div><span class="used-count">6 agents</span></div></td>
         <td><span class="scope-pill scope-account">Account</span></td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <tr class="extractor-row" onclick="openPcaEdit('call_summary')">
         <td><div class="fn-title">call_summary</div><div class="fn-sub">call_summary</div></td>
@@ -805,7 +838,7 @@
         <td><span class="type-badge">Text</span></td>
         <td><div class="used-by"><div class="avatars"><div class="av" style="background:#3d64d7">DR</div><div class="av" style="background:#7D52F4">IV</div><div class="av" style="background:#1FC16B">SC</div><div class="av more">+4</div></div><span class="used-count">7 agents</span></div></td>
         <td><span class="scope-pill scope-account">Account</span></td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <tr class="extractor-row" onclick="openPcaEdit('callback_requested')">
         <td><div class="fn-title">callback_requested</div><div class="fn-sub">callback_requested</div></td>
@@ -813,7 +846,7 @@
         <td><span class="type-badge">Yes/No</span></td>
         <td><div class="used-by"><div class="avatars"><div class="av" style="background:#E5484D">LI</div></div><span class="used-count">1 agent</span></div></td>
         <td><span class="scope-pill scope-local">Local</span></td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
     </tbody>
   </table>
@@ -898,7 +931,7 @@
           </div>
         </td>
         <td><span class="status-cell"><span class="status-dot" style="background:#1FC16B"></span>Active</span></td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- fetch_credit_score -->
       <tr style="cursor:pointer">
@@ -929,7 +962,7 @@
           </div>
         </td>
         <td><span class="status-cell"><span class="status-dot" style="background:#1FC16B"></span>Active</span></td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- send_sms_confirmation -->
       <tr style="cursor:pointer">
@@ -962,7 +995,7 @@
           </div>
         </td>
         <td><span class="status-cell"><span class="status-dot" style="background:#99A0AE"></span><span style="color:#99A0AE">Disabled</span></span></td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
       <!-- lookup_property_record -->
       <tr style="cursor:pointer">
@@ -992,7 +1025,7 @@
           </div>
         </td>
         <td><span class="status-cell"><span class="status-dot" style="background:#FB3748"></span><span style="color:#FB3748">Error</span></span></td>
-        <td><span class="row-menu" onclick="event.stopPropagation()"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
+        <td><span class="row-menu" onclick="openRowMenu(event, this)"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></td>
       </tr>
     </tbody>
   </table>
@@ -1615,6 +1648,8 @@
     if (!fn.contains(e.target)) fn.style.display = 'none';
     const pca = document.getElementById('pcaDropdown');
     if (pca && !pca.contains(e.target)) pca.style.display = 'none';
+    const rm = document.getElementById('rowMenu');
+    if (rm && !rm.contains(e.target)) rm.classList.remove('open');
     document.querySelectorAll('.filter-wrap').forEach(function(w) {
       if (!w.contains(e.target)) {
         var dd = w.querySelector('.filter-dd'); if (dd) dd.classList.remove('open');
@@ -1751,6 +1786,8 @@
   function openFnPanel(key) {
     var d = FN_DATA[key];
     if (!d) return;
+    window._curFnName = d.name;
+    window._curFnCount = d.agents.length;
     document.getElementById('fn-panel-title').textContent = d.name;
     document.getElementById('fn-panel-badge').innerHTML = '<span class="tdot" style="background:' + d.categoryColor + '"></span>' + d.category;
     document.getElementById('fn-panel-desc').textContent = d.description;
@@ -1918,6 +1955,90 @@
     closeNfConfig();
     showToast(nfScope === 'account' ? 'Function saved to the account library' : 'Function saved to this agent');
   }
+
+  // ===== ROW MENU + EDIT / DELETE FLOWS =====
+  var DEMO_AGENTS = [
+    { i:'H', n:'Healthcare Check-In Agent', c:'#3d64d7' },
+    { i:'S', n:'Sales Outreach Bot', c:'#1FC16B' },
+    { i:'R', n:'Renewal Follow-up Agent', c:'#B7791F' },
+    { i:'I', n:'Support Intake Agent', c:'#7D52F4' },
+    { i:'C', n:'Collections Agent', c:'#E5484D' },
+    { i:'B', n:'Booking Assistant', c:'#0EA5E9' },
+    { i:'O', n:'Onboarding Agent', c:'#CA8A04' }
+  ];
+  var delRow = null, delName = '';
+  var LINKOUT = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M7 5h8v8M15 5L6 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function agentListHtml(count, withLink) {
+    var n = Math.max(0, count || 0), html = '';
+    if (!n) return '<div class="del-agent"><div class="del-aname" style="color:#9CA3AF;font-size:14.5px">No agents linked yet</div></div>';
+    for (var i = 0; i < n; i++) {
+      var a = DEMO_AGENTS[i % DEMO_AGENTS.length];
+      html += '<div class="del-agent"><div class="del-av" style="background:' + a.c + '">' + a.i + '</div>' +
+        '<div class="del-aname">' + a.n + '</div>' +
+        (withLink ? '<span class="del-linkout" onclick="event.stopPropagation()">' + LINKOUT + '</span>' : '') + '</div>';
+    }
+    return html;
+  }
+  function openRowMenu(e, el) {
+    e.stopPropagation();
+    delRow = el.closest('tr');
+    var t = delRow.querySelector('.fn-title');
+    delName = t ? t.textContent.trim() : 'this function';
+    var m = document.getElementById('rowMenu');
+    var r = el.getBoundingClientRect();
+    m.style.top = (r.bottom + 4) + 'px';
+    m.style.left = (r.right - 150) + 'px';
+    m.classList.add('open');
+  }
+  function rmEdit() {
+    document.getElementById('rowMenu').classList.remove('open');
+    if (delRow) delRow.click();
+  }
+  function rmDelete() {
+    document.getElementById('rowMenu').classList.remove('open');
+    var count = rowCount(delRow);
+    document.getElementById('delName').textContent = delName;
+    document.getElementById('delCount').textContent = count;
+    document.getElementById('delList').innerHTML = agentListHtml(count, true);
+    document.getElementById('delOverlay').classList.add('open');
+  }
+  function closeDeleteModal() { document.getElementById('delOverlay').classList.remove('open'); }
+  function confirmDelete() {
+    var view = delRow ? delRow.closest('div[id^="view-"]') : null;
+    if (delRow) delRow.remove();
+    if (view) recountView(view);
+    closeDeleteModal();
+    showToast('Function deleted. Linked agents keep local copies.');
+  }
+  function recountView(view) {
+    var n = view.querySelectorAll('tbody tr').length;
+    var hc = view.querySelector('.h-count');
+    if (hc) { hc.textContent = n; delete hc.dataset.total; }
+    var pi = view.querySelector('.page-info');
+    if (pi) {
+      var base = pi.dataset.orig || pi.textContent;
+      var noun = (base.split('·')[1] || ' items').trim().replace(/^\d+\s*/, '');
+      pi.textContent = 'Page 1 of 1 · ' + n + ' ' + noun;
+      pi.dataset.orig = pi.textContent;
+    }
+    var map = { 'view-functions': 'cat-functions', 'view-custom': 'cat-custom', 'view-extractors': 'cat-extractors' };
+    var sn = document.getElementById(map[view.id]);
+    if (sn) { var c = sn.querySelector('.count'); if (c) c.textContent = n; }
+  }
+  function openEditConfirm() {
+    document.getElementById('ecName').textContent = window._curFnName || 'This function';
+    var c = window._curFnCount || 0;
+    document.getElementById('ecCount').textContent = c;
+    document.getElementById('ecList').innerHTML = agentListHtml(c, false);
+    document.getElementById('editOverlay').classList.add('open');
+  }
+  function closeEditConfirm() { document.getElementById('editOverlay').classList.remove('open'); }
+  function confirmEdit() {
+    closeEditConfirm();
+    closeFnPanel();
+    showToast('Changes applied to ' + (window._curFnCount || 0) + ' agents');
+  }
 </script>
 
 <!-- ===================== FUNCTION DETAIL PANEL ===================== -->
@@ -1946,7 +2067,7 @@
   </div>
   <div class="panel-footer">
     <button class="panel-cancel" onclick="closeFnPanel()">Close</button>
-    <button class="panel-save" onclick="closeFnPanel(); showToast('Function updated')">Update</button>
+    <button class="panel-save" onclick="openEditConfirm()">Save changes</button>
   </div>
 </div>
 
@@ -2118,6 +2239,53 @@
   <div class="panel-footer">
     <button class="panel-cancel" onclick="closeNfConfig()">Cancel</button>
     <button class="panel-save" onclick="saveNfFunction()">Save</button>
+  </div>
+</div>
+
+<!-- ===================== ROW "..." MENU ===================== -->
+<div class="row-menu-dd" id="rowMenu">
+  <div class="rm-item" onclick="rmEdit()">Edit</div>
+  <div class="rm-item danger" onclick="rmDelete()">Delete</div>
+</div>
+
+<!-- ===================== DELETE FUNCTION MODAL ===================== -->
+<div class="del-overlay" id="delOverlay" onclick="closeDeleteModal()">
+  <div class="del-modal" onclick="event.stopPropagation()">
+    <div class="del-head">
+      <div class="del-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v12a1 1 0 01-1 1H8a1 1 0 01-1-1V7" stroke="#DC2626" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11v6M14 11v6" stroke="#DC2626" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+      <div>
+        <div class="del-title">Delete function</div>
+        <div class="del-sub"><span id="delName">function</span> is used by <span id="delCount">0</span> agents.<br>Removing it will detach it from all linked agents.</div>
+      </div>
+      <span class="del-x" onclick="closeDeleteModal()">×</span>
+    </div>
+    <div class="del-label">Linked agents</div>
+    <div class="del-list" id="delList"></div>
+    <div class="del-warn"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.25" stroke="#DC2626" stroke-width="1.6"/><path d="M10 6.5v4" stroke="#DC2626" stroke-width="1.7" stroke-linecap="round"/><circle cx="10" cy="13.4" r="0.9" fill="#DC2626"/></svg> This action cannot be undone.</div>
+    <div class="del-foot">
+      <button class="del-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="del-confirm" onclick="confirmDelete()">Delete function</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== EDIT CONFIRM MODAL ===================== -->
+<div class="del-overlay" id="editOverlay" onclick="closeEditConfirm()">
+  <div class="del-modal" onclick="event.stopPropagation()">
+    <div class="del-head">
+      <div class="del-ic" style="background:#EEF3FF"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="#3d64d7" stroke-width="1.7"/><path d="M12 11v5" stroke="#3d64d7" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="8" r="1.1" fill="#3d64d7"/></svg></div>
+      <div>
+        <div class="del-title">Apply changes?</div>
+        <div class="del-sub"><span id="ecName">function</span> is linked to <span id="ecCount">0</span> agents. Your edits apply to every agent using it.</div>
+      </div>
+      <span class="del-x" onclick="closeEditConfirm()">×</span>
+    </div>
+    <div class="del-label">Linked agents</div>
+    <div class="del-list" id="ecList"></div>
+    <div class="del-foot">
+      <button class="del-cancel" onclick="closeEditConfirm()">Cancel</button>
+      <button class="del-confirm dark" onclick="confirmEdit()">Apply changes</button>
+    </div>
   </div>
 </div>
 

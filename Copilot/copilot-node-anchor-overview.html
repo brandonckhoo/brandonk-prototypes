@@ -89,7 +89,7 @@
 
   <span class="kicker"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="g" x1="0" y1="0" x2="24" y2="24"><stop offset="0" stop-color="#8B5CF6"/><stop offset="1" stop-color="#3d64d7"/></linearGradient></defs><path d="M12 2l1.7 5.3L19 9l-5.3 1.7L12 16l-1.7-5.3L5 9l5.3-1.7L12 2z" fill="url(#g)"/></svg>Conductor · Feature proposal</span>
   <h1>Node Anchoring</h1>
-  <p class="sub">Let Conductor attach actionable links to the exact nodes, fields, and settings that need the user's input, so they jump straight there instead of hunting the canvas. Especially for placeholder values like API keys, event IDs, and phone numbers.</p>
+  <p class="sub">Whenever Conductor builds or edits an agent, it knows the exact location of everything it touched. Node Anchoring lets it hand the user an actionable link to any of those spots — a node, a field, a setting, an integration — so they jump straight there instead of hunting through the product. Cal.com credentials, event IDs, and transfer numbers are just one example.</p>
 
   <!-- PROBLEM -->
   <div class="card">
@@ -164,7 +164,7 @@
   <!-- GENERALIZES -->
   <div class="card">
     <h2>This generalizes — not just Cal.com</h2>
-    <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:18px;max-width:760px">Cal.com is one worked example. Conductor can anchor to anything it builds or edits, and Retell keeps configuration in two places — so every anchor resolves to a Node Setting, a Global Setting, or a cross-surface destination.</p>
+    <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:18px;max-width:800px">Node Anchoring is a general primitive, not a Cal.com feature. Anything Conductor builds or edits, it can point to — and every anchor resolves to one of three destinations: an agent-wide <b>Global Setting</b>, a per-node <b>Node Setting</b>, or a <b>cross-surface</b> page like Integrations. The Cal.com example below just happens to touch all three.</p>
     <div class="gen-grid">
       <div class="gen-col">
         <div class="gen-hd"><span class="tag glob">Global Settings</span> agent-wide</div>

@@ -432,23 +432,21 @@ const TYPE_LABEL = { text: 'Text', sel: 'Selector', bool: 'Boolean', num: 'Numbe
 const editIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
 const trashIcon = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>';
 
-/* ---------------- account library ---------------- */
+/* ---------------- account library: the 7 seeded presets (PRD §2.1) ---------------- */
+/* six opt-in + language on by default; sorted by agent usage */
 const ACCOUNT_FIELDS = [
-  { name: 'caller_name',        type: 'text', agents: 8, desc: "The caller's full name as stated on the call." },
-  { name: 'call_disposition',   type: 'sel',  agents: 7, desc: 'The outcome category the call resolved to.' },
-  { name: 'voicemail_left',     type: 'bool', agents: 6, desc: 'Whether the call reached a voicemail rather than a live person.' },
-  { name: 'customer_intent',    type: 'text', agents: 5, desc: 'A short summary of what the caller wanted.' },
-  { name: 'lead_score',         type: 'num',  agents: 4, desc: 'A 0 to 100 score of how qualified the lead is.' },
-  { name: 'appointment_booked', type: 'bool', agents: 3, desc: 'Whether an appointment was booked on the call.' },
-  { name: 'sentiment',          type: 'sel',  agents: 3, desc: 'Overall caller sentiment across the call.' },
-  { name: 'callback_requested', type: 'bool', agents: 2, desc: 'Whether the caller asked to be called back.' },
-  { name: 'objection_raised',   type: 'text', agents: 2, desc: 'The main objection the caller raised, if any.' },
-  { name: 'payment_collected',  type: 'num',  agents: 1, desc: 'The dollar amount collected on the call.' }
+  { name: 'language',            type: 'sel',  agents: 12, desc: 'The primary language detected on the call.', options: ['English','Spanish','French','German','Other'] },
+  { name: 'lead_qualification',  type: 'sel',  agents: 8,  desc: 'Whether the lead is qualified based on their interest and responses.', options: ['Yes','No','Maybe'] },
+  { name: 'callback_requested',  type: 'bool', agents: 6,  desc: 'Whether the user requested a callback.' },
+  { name: 'follow_up_action',    type: 'text', agents: 5,  desc: 'The follow up action needed after the call, for example send the pricing sheet and book a follow up call.', examples: ['Send the pricing sheet', 'Book a follow up call'] },
+  { name: 'escalation_required', type: 'bool', agents: 4,  desc: 'Whether the call needed to be escalated to a human agent or supervisor.' },
+  { name: 'issue_description',   type: 'text', agents: 3,  desc: 'A short description of the issue the user is facing, for example a device that stopped charging after a software update.', examples: [] },
+  { name: 'dnd',                 type: 'bool', agents: 2,  desc: 'Whether the user asked not to be contacted or to be placed on the do not call list.' }
 ];
 
-/* attached to this agent — call_disposition pre-attached (shows "Added" in picker) */
+/* attached to this agent — language is on by default (shows "Added" in picker) */
 const attached = [
-  { name: 'call_disposition', type: 'sel', origin: 'account', agents: 7, desc: 'The outcome category the call resolved to.' }
+  { name: 'language', type: 'sel', origin: 'account', agents: 12, desc: 'The primary language detected on the call.', options: ['English','Spanish','French','German','Other'] }
 ];
 
 let expanded = false;
@@ -527,7 +525,7 @@ document.getElementById('pkSave').onclick = () => {
   staged.forEach(name => {
     if (isAttached(name)) return;
     const f = ACCOUNT_FIELDS.find(x => x.name === name);
-    attached.push({ name: f.name, type: f.type, origin: 'account', agents: f.agents, desc: f.desc });
+    attached.push({ ...f, origin: 'account' });
     last = f.name;
   });
   closePicker();
@@ -584,11 +582,16 @@ function openEditor(opts) {
   optB.style.display = (type === 'sel') ? 'block' : 'none';
 
   const ex = document.getElementById('edExamples'); ex.innerHTML = '';
-  if (type === 'text') { ex.appendChild(exampleRow('Tomorrow at 7:00 AM')); ex.appendChild(exampleRow('Saturday at 2:30 PM')); }
-  if (type === 'num')  { ex.appendChild(exampleRow('42')); }
+  if (type === 'text' || type === 'num') {
+    const list = opts.examples || (opts.mode === 'create' && type === 'num' ? ['42'] : []);
+    list.forEach(v => ex.appendChild(exampleRow(v)));
+  }
 
   const op = document.getElementById('edOptions'); op.innerHTML = '';
-  if (type === 'sel') { op.appendChild(optionRow('Resolved')); op.appendChild(optionRow('Follow up')); op.appendChild(optionRow('No answer')); }
+  if (type === 'sel') {
+    const list = opts.options || (opts.mode === 'create' ? ['Option 1', 'Option 2'] : []);
+    list.forEach(v => op.appendChild(optionRow(v)));
+  }
 
   // banner: only when editing a still-shared account field
   const banner = document.getElementById('edBanner');
@@ -670,8 +673,8 @@ document.getElementById('edUpdate').onclick = () => {
 
 /* ---------------- open an attached field ---------------- */
 function openAttached(a) {
-  if (a.origin === 'local') openEditor({ mode: 'edit', type: a.type, name: a.name, desc: a.desc, target: a });
-  else openEditor({ mode: 'shared', type: a.type, name: a.name, desc: a.desc, target: a });
+  const base = { type: a.type, name: a.name, desc: a.desc, options: a.options, examples: a.examples, target: a };
+  openEditor({ ...base, mode: a.origin === 'local' ? 'edit' : 'shared' });
 }
 
 /* ---------------- localize warning ---------------- */

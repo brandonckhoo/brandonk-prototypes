@@ -240,6 +240,16 @@
   .btn-lib:hover { background: var(--hover); }
   .btn-loc:hover { filter: brightness(0.96); }
 
+  /* localize warning */
+  .warn-ico { width: 38px; height: 38px; border-radius: 10px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; flex: none; margin-top: 2px; }
+  .warn-sub { font-size: 13.5px; color: #52525B; line-height: 1.5; margin-top: 4px; }
+  .warn-sub b { color: #18181B; font-weight: 600; }
+  .warn-note { display: flex; gap: 10px; padding: 12px 14px; background: var(--accent-soft); border-radius: 11px; font-size: 13px; color: #3A3A45; line-height: 1.5; }
+  .warn-note svg { flex: none; margin-top: 1px; }
+  .warn-editlib { margin-top: 14px; font-size: 13px; color: var(--helper); }
+  .warn-editlib a { color: var(--accent); font-weight: 600; cursor: pointer; }
+  .warn-editlib a:hover { text-decoration: underline; }
+
   /* toast */
   .toast {
     position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%) translateY(12px);
@@ -318,6 +328,10 @@
       <button class="close" id="edClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
     </div>
     <div class="m-body">
+      <div class="banner" id="edBanner" style="display:none">
+        <svg class="bi" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r="0.7" fill="currentColor" stroke="none"/></svg>
+        <div class="bt"><b>Shared account field, synced from the library.</b> It is used by <b id="edBannerCount">8 agents</b>. Editing here localizes it to this agent, or <a id="edBannerLib" style="color:var(--accent);font-weight:600;cursor:pointer">edit in the library</a> to update every agent.</div>
+      </div>
       <div class="field">
         <label for="edName">Name</label>
         <input id="edName" class="input" placeholder="field_name" />
@@ -368,41 +382,32 @@
   </div>
 </div>
 
-<!-- ===== Read-only shared account field ===== -->
-<div class="overlay" id="sharedOverlay">
-  <div class="modal">
-    <div class="m-head">
-      <span id="shIco" style="display:flex;color:#52525B"></span>
-      <span class="m-title" id="shName">voicemail_left</span>
-      <span class="tag account">Account</span>
-      <button class="close" id="shClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
-    </div>
-    <div class="m-body">
-      <div class="banner">
-        <svg class="bi" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r="0.7" fill="currentColor" stroke="none"/></svg>
-        <div class="bt"><b>Shared account field, synced from the library.</b> It is used by <b id="shCount">6 agents</b>. Edit in the library to update every agent, or localize to change just this one.</div>
-      </div>
-      <div class="field">
-        <label>Name</label>
-        <div class="ro"><span id="shNameRO">voicemail_left</span> <span class="lock">🔒</span></div>
-      </div>
-      <div class="field">
-        <label>Description</label>
-        <div class="ro area" id="shDesc">Whether the call reached a voicemail rather than a live person.</div>
+<!-- ===== Localize warning (on save of a shared field) ===== -->
+<div class="overlay" id="warnOverlay" style="z-index:70">
+  <div class="modal" style="width:460px">
+    <div class="m-head" style="align-items:flex-start;padding-top:24px">
+      <span class="warn-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></span>
+      <div>
+        <div class="m-title">Localize to this agent?</div>
+        <div class="warn-sub"><b id="warnName">caller_name</b> is a shared account field used by <b id="warnCount">8 agents</b>. Saving your changes here creates a copy for this agent only.</div>
       </div>
     </div>
-    <div class="m-foot ro-foot">
-      <button class="btn btn-lib" id="shEditLib">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14L21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
-        Edit in Library
-      </button>
-      <button class="btn btn-loc" id="shLocalize">Localize to this agent</button>
+    <div class="m-body" style="padding-top:14px">
+      <div class="warn-note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r="0.7" fill="var(--accent)" stroke="none"/></svg>
+        <span>The shared field stays in the library and every other agent keeps using it. This agent stops syncing with the library.</span>
+      </div>
+      <div class="warn-editlib">Want every agent to get this change? <a id="warnEditLib">Edit in the library instead</a></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-cancel" id="warnCancel">Cancel</button>
+      <button class="btn btn-update" id="warnConfirm" style="background:var(--accent);border-color:var(--accent)">Localize &amp; save</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="hint">Add an account field → <b>Save</b> → click it → <b>Localize to this agent</b>, or create a new field</div>
+<div class="hint">Add an account field → <b>Save</b> → click it → edit the description → <b>Save</b> → it prompts to localize</div>
 
 <script>
 /* ---------------- icons ---------------- */
@@ -550,11 +555,14 @@ function optionRow(v) {
 function setToggle(el, on) { el.setAttribute('aria-checked', on ? 'true' : 'false'); }
 function getToggle(el) { return el.getAttribute('aria-checked') === 'true'; }
 
+let edDirty = false;
+
 function openEditor(opts) {
   edCtx = opts;
+  edDirty = false;
   const type = opts.type;
   document.getElementById('edIco').innerHTML = ICON[type];
-  document.getElementById('edTypeLabel').textContent = TYPE_LABEL[type];
+  document.getElementById('edTypeLabel').textContent = opts.mode === 'create' ? TYPE_LABEL[type] : opts.name;
   document.getElementById('edName').value = opts.name || '';
   document.getElementById('edDesc').value = opts.desc || '';
   setToggle(document.getElementById('edOptionalToggle'), false);
@@ -572,12 +580,18 @@ function openEditor(opts) {
   const op = document.getElementById('edOptions'); op.innerHTML = '';
   if (type === 'sel') { op.appendChild(optionRow('Resolved')); op.appendChild(optionRow('Follow up')); op.appendChild(optionRow('No answer')); }
 
-  // publish toggle: create-mode shows it (ON default). editing a local field: keep it as a re-publish control (OFF).
+  // banner: only when editing a still-shared account field
+  const banner = document.getElementById('edBanner');
+  banner.style.display = opts.mode === 'shared' ? 'flex' : 'none';
+  if (opts.mode === 'shared') document.getElementById('edBannerCount').textContent = opts.target.agents + ' agents';
+
+  // publish toggle: shown for create (ON) and local edit (OFF, re-publish). Hidden for shared (localize is the mechanism).
   const pub = document.getElementById('edPublishBlock');
-  if (opts.mode === 'create') { pub.style.display = 'block'; setToggle(document.getElementById('edPublishToggle'), true); }
+  if (opts.mode === 'shared') { pub.style.display = 'none'; }
+  else if (opts.mode === 'create') { pub.style.display = 'block'; setToggle(document.getElementById('edPublishToggle'), true); }
   else { pub.style.display = 'block'; setToggle(document.getElementById('edPublishToggle'), false); }
 
-  document.getElementById('edUpdate').textContent = opts.mode === 'create' ? 'Save' : 'Update';
+  document.getElementById('edUpdate').textContent = opts.mode === 'create' ? 'Save' : 'Save';
   editOverlay.classList.add('open');
 }
 function closeEditor() { editOverlay.classList.remove('open'); }
@@ -588,65 +602,85 @@ editOverlay.onclick = (e) => { if (e.target === editOverlay) closeEditor(); };
 document.getElementById('edAddExample').onclick = () => document.getElementById('edExamples').appendChild(exampleRow(''));
 document.getElementById('edAddOption').onclick = () => document.getElementById('edOptions').appendChild(optionRow(''));
 [document.getElementById('edOptionalToggle'), document.getElementById('edPublishToggle')].forEach(t => {
-  t.onclick = () => setToggle(t, !getToggle(t));
+  t.onclick = () => { setToggle(t, !getToggle(t)); edDirty = true; };
 });
+
+// mark dirty on any edit inside the editor body
+const edBody = editOverlay.querySelector('.m-body');
+edBody.addEventListener('input', () => edDirty = true);
+edBody.addEventListener('click', (e) => { if (e.target.closest('.trash') || e.target.closest('.mini-add')) edDirty = true; });
+
+// banner link → edit in library
+document.getElementById('edBannerLib').onclick = () => {
+  const t = edCtx.target;
+  closeEditor();
+  toast('Opening ' + t.name + ' in the Account Library…');
+};
 
 document.querySelectorAll('.type-row').forEach(tr => {
   tr.onclick = () => { closePicker(); openEditor({ mode: 'create', type: tr.dataset.type }); };
 });
 
+function applyEditorValues(target) {
+  target.name = document.getElementById('edName').value.trim() || target.name;
+  target.desc = document.getElementById('edDesc').value.trim();
+}
+
 document.getElementById('edUpdate').onclick = () => {
   const name = document.getElementById('edName').value.trim() || 'new_field';
   const desc = document.getElementById('edDesc').value.trim();
-  const publish = getToggle(document.getElementById('edPublishToggle'));
   const type = edCtx.type;
 
   if (edCtx.mode === 'create') {
+    const publish = getToggle(document.getElementById('edPublishToggle'));
     const origin = publish ? 'account' : 'local';
-    if (publish && !ACCOUNT_FIELDS.some(f => f.name === name)) {
-      ACCOUNT_FIELDS.push({ name, type, agents: 1, desc });
-    }
+    if (publish && !ACCOUNT_FIELDS.some(f => f.name === name)) ACCOUNT_FIELDS.push({ name, type, agents: 1, desc });
     attached.push({ name, type, origin, agents: publish ? 1 : 0, desc });
     renderAttached(name);
     toast(publish ? 'Field created and published to the account library' : 'Local field created for this agent');
+    closeEditor();
+  } else if (edCtx.mode === 'shared') {
+    // editing a still-shared account field → saving localizes
+    if (edDirty) {
+      document.getElementById('warnName').textContent = edCtx.target.name;
+      document.getElementById('warnCount').textContent = edCtx.target.agents + ' agents';
+      warnOverlay.classList.add('open');
+    } else {
+      closeEditor();  // no changes, nothing to localize
+    }
   } else {
     // editing an already-local field
-    edCtx.target.name = name; edCtx.target.desc = desc;
-    if (publish) edCtx.target.origin = 'account';
-    renderAttached(name);
+    applyEditorValues(edCtx.target);
+    renderAttached(edCtx.target.name);
     toast('Field updated');
+    closeEditor();
   }
-  closeEditor();
 };
 
 /* ---------------- open an attached field ---------------- */
-const sharedOverlay = document.getElementById('sharedOverlay');
-let sharedTarget = null;
-
 function openAttached(a) {
-  if (a.origin === 'local') {
-    openEditor({ mode: 'edit', type: a.type, name: a.name, desc: a.desc, target: a });
-  } else {
-    sharedTarget = a;
-    document.getElementById('shIco').innerHTML = ICON[a.type];
-    document.getElementById('shName').textContent = a.name;
-    document.getElementById('shNameRO').textContent = a.name;
-    document.getElementById('shCount').textContent = a.agents + ' agents';
-    document.getElementById('shDesc').textContent = a.desc;
-    sharedOverlay.classList.add('open');
-  }
+  if (a.origin === 'local') openEditor({ mode: 'edit', type: a.type, name: a.name, desc: a.desc, target: a });
+  else openEditor({ mode: 'shared', type: a.type, name: a.name, desc: a.desc, target: a });
 }
-function closeShared() { sharedOverlay.classList.remove('open'); }
-document.getElementById('shClose').onclick = closeShared;
-sharedOverlay.onclick = (e) => { if (e.target === sharedOverlay) closeShared(); };
-document.getElementById('shEditLib').onclick = () => { closeShared(); toast('Opening ' + sharedTarget.name + ' in the Account Library…'); };
-document.getElementById('shLocalize').onclick = () => {
-  sharedTarget.origin = 'local';
-  closeShared();
-  renderAttached(sharedTarget.name);
-  toast(sharedTarget.name + ' localized. The shared field keeps syncing with other agents.');
-  // open the now-editable local copy
-  openEditor({ mode: 'edit', type: sharedTarget.type, name: sharedTarget.name, desc: sharedTarget.desc, target: sharedTarget });
+
+/* ---------------- localize warning ---------------- */
+const warnOverlay = document.getElementById('warnOverlay');
+document.getElementById('warnCancel').onclick = () => warnOverlay.classList.remove('open');
+warnOverlay.onclick = (e) => { if (e.target === warnOverlay) warnOverlay.classList.remove('open'); };
+document.getElementById('warnEditLib').onclick = () => {
+  const t = edCtx.target;
+  warnOverlay.classList.remove('open');
+  closeEditor();
+  toast('Opening ' + t.name + ' in the Account Library…');
+};
+document.getElementById('warnConfirm').onclick = () => {
+  const t = edCtx.target;
+  t.origin = 'local';
+  applyEditorValues(t);
+  warnOverlay.classList.remove('open');
+  closeEditor();
+  renderAttached(t.name);
+  toast(t.name + ' localized. The shared field keeps syncing with other agents.');
 };
 
 /* init */

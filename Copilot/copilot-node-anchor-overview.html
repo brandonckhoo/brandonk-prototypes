@@ -52,6 +52,17 @@
   .tag { display:inline-block; font-size:11px; font-weight:600; border-radius:6px; padding:2px 8px; }
   .tag.int { background:#EEF3FF; color:var(--blue); }
   .tag.node { background:#FFF6EC; color:var(--amber); }
+  .tag.glob { background:#F3EEFB; color:#7C3AED; }
+
+  /* generalization grid */
+  .gen-grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  .gen-col .gen-hd { font-size:13px; font-weight:600; color:var(--strong); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+  .gen-col ul { list-style:none; padding:0; margin:0; }
+  .gen-col li { position:relative; padding:8px 0 8px 18px; font-size:13.5px; color:var(--muted); line-height:1.5; border-top:1px solid #F1F3F5; }
+  .gen-col li:first-child { border-top:none; }
+  .gen-col li::before { content:''; position:absolute; left:2px; top:15px; width:5px; height:5px; border-radius:50%; background:var(--blue); }
+  .gen-col li .mono { color:var(--strong); }
+  .gen-cross { margin-top:18px; padding:12px 14px; background:var(--bg-weak); border:1px solid var(--border); border-radius:10px; font-size:13px; color:var(--muted); line-height:1.55; }
 
   /* design cards */
   .designs { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
@@ -148,6 +159,35 @@
         <tr><td>Transfer number</td><td><span class="tag node">In the agent</span> Transfer to Front Desk node / function</td><td>Select the node, open inspector, highlight the number field</td></tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- GENERALIZES -->
+  <div class="card">
+    <h2>This generalizes — not just Cal.com</h2>
+    <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:18px;max-width:760px">Cal.com is one worked example. Conductor can anchor to anything it builds or edits, and Retell keeps configuration in two places — so every anchor resolves to a Node Setting, a Global Setting, or a cross-surface destination.</p>
+    <div class="gen-grid">
+      <div class="gen-col">
+        <div class="gen-hd"><span class="tag node">Node Settings</span> per node</div>
+        <ul>
+          <li>Transfer numbers on Transfer &amp; Agent Transfer nodes</li>
+          <li>Function parameters — event IDs, query fields, headers</li>
+          <li>A node's prompt or its transition conditions</li>
+          <li>Webhook URL on a webhook node</li>
+          <li>Knowledge base attached to a node</li>
+        </ul>
+      </div>
+      <div class="gen-col">
+        <div class="gen-hd"><span class="tag glob">Global Settings</span> agent-wide</div>
+        <ul>
+          <li>Default dynamic variables in the Global Prompt — <span class="mono">{{customer_name}}</span>, <span class="mono">{{dob}}</span>, <span class="mono">{{customer_zip}}</span></li>
+          <li>Model and voice selection</li>
+          <li>Agent Handbook</li>
+          <li>Post-Call Data Extraction fields</li>
+          <li>Security &amp; Fallback settings</li>
+        </ul>
+      </div>
+    </div>
+    <div class="gen-cross"><span class="tag int">Cross-surface</span> &nbsp;Integrations connections — Cal.com, Salesforce, HubSpot, Zendesk — live on the Integrations page. Conductor navigates there, opens the connect modal, and follows you back to the agent.</div>
   </div>
 
   <!-- DESIGNS -->

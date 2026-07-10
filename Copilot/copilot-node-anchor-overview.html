@@ -116,7 +116,7 @@
         <div class="ba-body">
           <div class="chat">
             <div style="font-weight:600;color:var(--strong);margin-bottom:6px">I found 3 placeholders that need your input:</div>
-            <div class="setup-row"><span class="l">API Key</span><span class="go-pill">Go to variable →</span></div>
+            <div class="setup-row"><span class="l">API Key</span><span class="go-pill">Connect Cal.com ↗</span></div>
             <div class="setup-row"><span class="l">Event Type ID</span><span class="go-pill">Go to variable →</span></div>
             <div class="setup-row"><span class="l">Transfer Number</span><span class="go-pill">Go to node →</span></div>
           </div>
@@ -150,12 +150,12 @@
 
   <!-- SURFACES -->
   <div class="card">
-    <h2>Where each placeholder actually lives</h2>
+    <h2>Three placeholders, three surfaces, one primitive</h2>
     <table class="tbl">
       <thead><tr><th>Reference</th><th>Where it lives</th><th>Anchor action</th></tr></thead>
       <tbody>
-        <tr><td>cal_api_key</td><td><span class="tag glob">Dynamic variable</span> Global Prompt (Conversational Flow) · chip under the prompt (Single-Prompt)</td><td>Open Global Settings, highlight <span class="mono">{{cal_api_key}}</span></td></tr>
-        <tr><td>cal_event_type_id</td><td><span class="tag glob">Dynamic variable</span> same — Global Prompt / prompt chip</td><td>Open Global Settings, highlight <span class="mono">{{cal_event_type_id}}</span></td></tr>
+        <tr><td>cal_api_key</td><td><span class="tag int">Integrations</span> System → Integrations · Cal.com connection (workspace credential)</td><td>Navigate to Integrations, open the Cal.com connect modal, focus API Key</td></tr>
+        <tr><td>cal_event_type_id</td><td><span class="tag glob">Dynamic variable</span> Global Prompt (Conversational Flow) · chip under the prompt (Single-Prompt)</td><td>Open Global Settings, highlight <span class="mono">{{cal_event_type_id}}</span></td></tr>
         <tr><td>Transfer number</td><td><span class="tag node">Node Settings</span> Transfer to Front Desk node (CF) · transfer_call function (SP)</td><td>Select the node, highlight the "Transfer to" field</td></tr>
       </tbody>
     </table>

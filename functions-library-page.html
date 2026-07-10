@@ -2030,7 +2030,7 @@
     document.getElementById('ecName').textContent = window._curFnName || 'This function';
     var c = window._curFnCount || 0;
     document.getElementById('ecCount').textContent = c;
-    document.getElementById('ecList').innerHTML = agentListHtml(c, false);
+    document.getElementById('ecList').innerHTML = agentListHtml(c, true);
     document.getElementById('editOverlay').classList.add('open');
   }
   function closeEditConfirm() { document.getElementById('editOverlay').classList.remove('open'); }

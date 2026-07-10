@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Retell AI — Conductor usage limit tooltip</title>
+<title>Retell AI — Conductor simulation cost guidance</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #FBFBFC; height: 100vh; overflow: hidden; display: flex; justify-content: flex-end; }
@@ -21,60 +21,74 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
 
 /* Conductor panel */
 .panel { width: 384px; min-width: 384px; height: 100vh; background: #fff; display: flex; flex-direction: column; box-shadow: -1px 0 0 #E1E4EA; }
-.p-head { display: flex; align-items: center; height: 52px; padding: 0 12px 0 16px; flex-shrink: 0; }
+.p-head { display: flex; align-items: center; height: 52px; padding: 0 12px 0 16px; flex-shrink: 0; border-bottom: 1px solid #F0F2F5; }
 .p-title { display: flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 600; color: #0A0A0A; }
 .p-spacer { flex: 1; }
 .p-ico { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6B7280; cursor: pointer; }
 .p-ico:hover { background: #F4F4F5; }
 
-/* empty state */
-.p-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 28px; text-align: center; }
-.wand { margin-bottom: 26px; }
-.es-title { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; color: #0A0A0A; }
-.es-sub { font-size: 14px; line-height: 1.5; color: #6B7280; margin-top: 10px; max-width: 300px; }
-.es-chips { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 30px; }
-.es-chip { padding: 9px 16px; background: #F4F4F6; border-radius: 18px; font-size: 13.5px; font-weight: 400; color: #1F2430; cursor: pointer; }
-.es-chip:hover { background: #ECEDEF; }
+/* chat thread */
+.p-body { flex: 1; overflow-y: auto; padding: 20px 16px 8px; display: flex; flex-direction: column; gap: 18px; }
+.msg-user { align-self: flex-end; background: #1F2430; color: #fff; padding: 10px 14px; border-radius: 14px 14px 4px 14px; font-size: 13.5px; line-height: 1.5; max-width: 82%; }
+.msg-ai { display: flex; gap: 10px; align-items: flex-start; }
+.ai-av { width: 24px; height: 24px; flex-shrink: 0; margin-top: 1px; }
+.ai-col { flex: 1; min-width: 0; }
+.ai-text { font-size: 13.5px; line-height: 1.55; color: #0A0A0A; }
+
+/* simulation cost callout */
+.cost-card { margin-top: 12px; border: 1px solid #ECD9B0; background: #FFFCF5; border-radius: 12px; padding: 14px; }
+.cc-head { display: flex; align-items: center; gap: 9px; }
+.cc-ic { width: 26px; height: 26px; border-radius: 50%; background: #FDEBCB; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cc-title { font-size: 13.5px; font-weight: 600; color: #0A0A0A; }
+.cc-body { font-size: 12.5px; line-height: 1.5; color: #525866; margin-top: 9px; }
+.cc-body b { color: #0A0A0A; font-weight: 600; }
+.cc-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; }
+.cc-chip { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px; background: #fff; border: 1px solid #EBE3D2; border-radius: 7px; font-size: 11.5px; font-weight: 500; color: #7A6A45; }
+.cc-chip svg { color: #C08A2E; }
+.cc-actions { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.cc-check { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: #99A0AE; cursor: pointer; user-select: none; }
+.cc-box { width: 15px; height: 15px; border: 1.5px solid #D1D5DB; border-radius: 4px; flex-shrink: 0; }
+.cc-spacer { flex: 1; }
+.cc-btn { height: 32px; padding: 0 13px; border-radius: 8px; font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; }
+.cc-cancel { background: #fff; border: 1px solid #E1E4EA; color: #0A0A0A; }
+.cc-cancel:hover { background: #F9FAFB; }
+.cc-run { background: #1F2430; border: 1px solid #1F2430; color: #fff; }
+.cc-run:hover { background: #2c3242; }
 
 /* composer */
 .p-foot { flex-shrink: 0; padding: 0 16px 16px; }
 .p-disclaimer { text-align: center; font-size: 12px; color: #9CA3AF; padding: 8px 0 12px; }
 .composer { border: 1px solid #E1E4EA; border-radius: 14px; padding: 14px 14px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-.c-input { font-size: 15px; line-height: 1.45; color: #9CA3AF; min-height: 44px; }
+.c-input { font-size: 15px; line-height: 1.45; color: #9CA3AF; min-height: 26px; }
 .c-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
 .c-ic { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6B7280; cursor: pointer; }
 .c-ic:hover { background: #F4F4F5; }
 .c-spacer { flex: 1; }
 .c-send { width: 32px; height: 32px; border-radius: 50%; background: #F0F1F3; display: flex; align-items: center; justify-content: center; color: #9CA3AF; }
 
-/* green usage badge = tooltip trigger */
+/* green usage badge = trigger */
 .usage-wrap { position: relative; display: inline-flex; }
 .usage-badge { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px 0 8px; background: #E7F7EE; border: 1px solid transparent; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: #12894C; cursor: pointer; font-variant-numeric: tabular-nums; }
 .usage-badge:hover { background: #DCF3E6; }
 .usage-badge.open { border-color: #9FE3BD; background: #DCF3E6; }
 .usage-badge svg { color: #16A34A; }
 
-/* popover */
-.usage-pop { position: absolute; bottom: calc(100% + 10px); left: -88px; width: 320px; background: #fff; border: 1px solid #E1E4EA; border-radius: 12px; box-shadow: 0 14px 38px rgba(0,0,0,0.16); padding: 16px 16px 14px; z-index: 60; display: none; text-align: left; cursor: default; }
+/* usage popover (matches production) */
+.usage-pop { position: absolute; bottom: calc(100% + 12px); left: -88px; width: 300px; background: #fff; border: 1px solid #E7E8EC; border-radius: 16px; box-shadow: 0 16px 42px rgba(0,0,0,0.16); padding: 20px; z-index: 60; display: none; text-align: left; cursor: default; }
 .usage-pop.show { display: block; }
-.usage-pop::after { content: ''; position: absolute; top: 100%; left: 103px; width: 12px; height: 12px; background: #fff; border-right: 1px solid #E1E4EA; border-bottom: 1px solid #E1E4EA; transform: translateY(-6px) rotate(45deg); }
-.up-title { display: flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 600; color: #0A0A0A; }
-.up-title svg { color: #12894C; }
-.up-lede { font-size: 12.5px; line-height: 1.5; color: #525866; margin-top: 7px; }
-.up-rows { margin-top: 14px; display: flex; flex-direction: column; gap: 13px; }
-.up-row-top { display: flex; align-items: baseline; justify-content: space-between; }
-.up-row-label { font-size: 12.5px; font-weight: 600; color: #0A0A0A; }
-.up-row-count { font-size: 12px; font-weight: 600; color: #12894C; font-variant-numeric: tabular-nums; }
-.up-bar { height: 6px; border-radius: 4px; background: #EEF0F3; margin-top: 7px; overflow: hidden; }
-.up-bar span { display: block; height: 100%; border-radius: 4px; background: #1FC16B; }
-.up-bar span.warn { background: #FF9147; }
-.up-sub { font-size: 11.5px; line-height: 1.45; color: #99A0AE; margin-top: 4px; }
-.up-over { margin-top: 14px; padding-top: 13px; border-top: 1px solid #F0F2F5; font-size: 12px; line-height: 1.5; color: #525866; }
-.up-over b { color: #0A0A0A; font-weight: 600; }
-.up-cta { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; height: 34px; margin-top: 12px; border: none; border-radius: 8px; background: #1F2430; font-size: 12.5px; font-weight: 600; color: #fff; cursor: pointer; font-family: inherit; }
-.up-cta:hover { background: #2c3242; }
-.up-admin { font-size: 11px; color: #99A0AE; text-align: center; margin-top: 8px; }
-.up-foot { margin-top: 12px; padding-top: 11px; border-top: 1px solid #F0F2F5; font-size: 11.5px; line-height: 1.5; color: #99A0AE; }
+.up-pill { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 11px 0 9px; background: #E7F7EE; border-radius: 8px; font-size: 13px; font-weight: 600; color: #12894C; }
+.up-pill svg { color: #16A34A; }
+.up-big { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; color: #0A0A0A; margin-top: 14px; }
+.up-reset { font-size: 13px; color: #6B7280; margin-top: 5px; }
+.up-note { display: flex; gap: 8px; font-size: 12px; line-height: 1.5; color: #7A6A45; background: #FFFCF5; border: 1px solid #ECD9B0; border-radius: 9px; padding: 9px 10px; margin-top: 16px; }
+.up-note svg { color: #C08A2E; flex-shrink: 0; margin-top: 1px; }
+.up-div { height: 1px; background: #EDEEF1; margin: 16px 0; }
+.up-usage { display: flex; align-items: baseline; justify-content: space-between; }
+.up-usage-l { font-size: 14px; color: #0A0A0A; }
+.up-usage-r { font-size: 14px; font-weight: 600; color: #0A0A0A; }
+.up-usage-r span { color: #9CA3AF; font-weight: 400; }
+.up-adjust { width: 100%; height: 44px; margin-top: 16px; border: 1px solid #E1E4EA; border-radius: 10px; background: #fff; font-size: 14px; font-weight: 500; color: #0A0A0A; cursor: pointer; font-family: inherit; }
+.up-adjust:hover { background: #F9FAFB; }
 </style>
 </head>
 <body>
@@ -105,15 +119,32 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
   </div>
 
   <div class="p-body">
-    <div class="wand">
-      <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><defs><linearGradient id="wand" x1="16" y1="56" x2="52" y2="20" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#B84DE0"/><stop offset="0.5" stop-color="#7C5CFF"/><stop offset="1" stop-color="#6D8BF6"/></linearGradient></defs><rect x="20" y="40" width="30" height="7" rx="3.5" transform="rotate(-45 20 40)" fill="url(#wand)"/><path d="M46 20l1.7 4 4 1.7-4 1.7L46 31.4l-1.7-4-4-1.7 4-1.7z" fill="url(#wand)"/><path d="M31 24l1.1 2.6L34.7 28l-2.6 1.1L31 31.7l-1.1-2.6L27.3 28l2.6-1.1z" fill="url(#wand)"/><circle cx="40" cy="36" r="1.6" fill="#fff"/></svg>
-    </div>
-    <div class="es-title">Work on your flow with Conductor</div>
-    <div class="es-sub">Review logic, refine nodes, and make updates with natural language.</div>
-    <div class="es-chips">
-      <div class="es-chip">What can Conductor do?</div>
-      <div class="es-chip">Test edge cases and fix the agent</div>
-      <div class="es-chip">Review recent calls and update the agent</div>
+    <div class="msg-user">Test how this agent handles an angry caller who refuses a transfer.</div>
+
+    <div class="msg-ai">
+      <svg class="ai-av" viewBox="0 0 24 24" fill="none"><path d="M12 2.5l1.3 3.1 3.1 1.3-3.1 1.3L12 12.4l-1.3-3.2L7.6 7.9l3.1-1.3z" fill="url(#wg)"/><circle cx="18.5" cy="14" r="1.3" fill="url(#wg)"/><circle cx="6" cy="16" r="1" fill="url(#wg)"/></svg>
+      <div class="ai-col">
+        <div class="ai-text">Good test. I'll spin up a simulation with an angry caller persona that pushes back on the transfer, then walk you through where the agent breaks. One thing before I run it:</div>
+
+        <!-- simulation cost callout -->
+        <div class="cost-card">
+          <div class="cc-head">
+            <div class="cc-ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C08A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 6.5c0-1.9-2.2-3-5-3s-5 1.1-5 3 2.2 2.8 5 3.2 5 1.3 5 3.3-2.2 3-5 3-5-1.1-5-3"/></svg></div>
+            <div class="cc-title">This simulation uses call credits</div>
+          </div>
+          <div class="cc-body">Running it places real test calls that draw on your account balance at your <b>usual per-minute call rate</b>. Free Conductor messages don't cover call costs.</div>
+          <div class="cc-meta">
+            <span class="cc-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5a2 2 0 0 1 2-2h2l2 5-2 1a11 11 0 0 0 5 5l1-2 5 2v2a2 2 0 0 1-2 2A16 16 0 0 1 3 5z"/></svg>~5 test calls</span>
+            <span class="cc-chip">Billed to workspace balance</span>
+          </div>
+          <div class="cc-actions">
+            <label class="cc-check"><span class="cc-box"></span>Don't ask again</label>
+            <div class="cc-spacer"></div>
+            <button class="cc-btn cc-cancel">Cancel</button>
+            <button class="cc-btn cc-run">Run simulation</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -125,43 +156,26 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
         <div class="c-ic" title="Add context"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
         <div class="c-ic" title="Attach file"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5l-8.6 8.6a5 5 0 0 1-7-7l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/></svg></div>
 
-        <!-- green usage badge = tooltip trigger -->
+        <!-- green usage badge = trigger -->
         <div class="usage-wrap">
-          <div class="usage-badge open" id="badge" onclick="toggleUsage(event)" onmouseenter="showUsage()">
+          <div class="usage-badge" id="badge" onclick="toggleUsage(event)">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 3l1.6 3.9 4.2.3-3.2 2.7 1 4.1L12 11.8 8.4 14l1-4.1L6.2 7.2l4.2-.3z" fill="currentColor"/></svg>
             30
           </div>
-          <div class="usage-pop show" id="pop" onclick="event.stopPropagation()">
-            <div class="up-title">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-              Free Conductor messages
+          <div class="usage-pop" id="pop" onclick="event.stopPropagation()">
+            <div class="up-pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 3l1.6 3.9 4.2.3-3.2 2.7 1 4.1L12 11.8 8.4 14l1-4.1L6.2 7.2l4.2-.3z" fill="currentColor"/></svg>Free</div>
+            <div class="up-big">30 messages left</div>
+            <div class="up-reset">Free messages reset at midnight PT.</div>
+            <div class="up-note">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 6.5c0-1.9-2.2-3-5-3s-5 1.1-5 3 2.2 2.8 5 3.2 5 1.3 5 3.3-2.2 3-5 3-5-1.1-5-3"/></svg>
+              <span>Running a simulation uses call credits, not free messages.</span>
             </div>
-            <div class="up-lede">Conductor is free each day up to the two caps below. Past them, extra messages cost <b>$0.20 each</b> with pay-as-you-go, or Conductor pauses until your free messages reset.</div>
-            <div class="up-rows">
-              <div class="up-row">
-                <div class="up-row-top">
-                  <span class="up-row-label">You today</span>
-                  <span class="up-row-count">30 left</span>
-                </div>
-                <div class="up-bar"><span style="width:100%"></span></div>
-                <div class="up-sub">30 free messages per user, each day</div>
-              </div>
-              <div class="up-row">
-                <div class="up-row-top">
-                  <span class="up-row-label">Retell AI workspace today</span>
-                  <span class="up-row-count">184 left</span>
-                </div>
-                <div class="up-bar"><span style="width:92%"></span></div>
-                <div class="up-sub">200 free messages shared across your workspace, each day</div>
-              </div>
+            <div class="up-div"></div>
+            <div class="up-usage">
+              <span class="up-usage-l">Usage this month</span>
+              <span class="up-usage-r">$0.00 <span>/ $50.00</span></span>
             </div>
-            <div class="up-over">Once the workspace's 200 run out, extra usage bills at <b>$0.20 per message</b> — even if you still have free messages of your own left.</div>
-            <button class="up-cta">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 12.5H11l-1 9.5L19.5 11H13z"/></svg>
-              Enable pay-as-you-go
-            </button>
-            <div class="up-admin">Admins only · billed to your workspace</div>
-            <div class="up-foot">Free messages reset daily at midnight PT.</div>
+            <button class="up-adjust">Adjust limit</button>
           </div>
         </div>
 
@@ -173,10 +187,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
 </div>
 
 <script>
-function showUsage() {
-  document.getElementById('pop').classList.add('show');
-  document.getElementById('badge').classList.add('open');
-}
 function toggleUsage(e) {
   e.stopPropagation();
   document.getElementById('pop').classList.toggle('show');
@@ -185,6 +195,12 @@ function toggleUsage(e) {
 document.addEventListener('click', function() {
   document.getElementById('pop').classList.remove('show');
   document.getElementById('badge').classList.remove('open');
+});
+document.querySelector('.cc-check').addEventListener('click', function() {
+  const b = this.querySelector('.cc-box');
+  const on = b.style.background === 'rgb(31, 36, 48)';
+  b.style.background = on ? '#fff' : '#1F2430';
+  b.style.borderColor = on ? '#D1D5DB' : '#1F2430';
 });
 </script>
 

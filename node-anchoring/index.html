@@ -8,11 +8,11 @@
   * { box-sizing:border-box; margin:0; padding:0; }
   :root { --blue:#3d64d7; --blue-bg:#ecf3ff; --blue-border:#C9D6F5; --text:#0E121B; --strong:#0A0A0A; --muted:#525866; --soft:#99A0AE; --border:#E1E4EA; --bg-weak:#F5F7FA; --red:#D92D20; --green:#16A34A; --amber:#B45309; }
   body { font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif; color:var(--text); background:#F1F3F5; min-height:100vh; padding:44px 24px 60px; }
-  .wrap { max-width:980px; margin:0 auto; }
+  .wrap { max-width:840px; margin:0 auto; }
 
   .kicker { display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:var(--blue); background:var(--blue-bg); border:1px solid var(--blue-border); border-radius:999px; padding:5px 12px; }
   h1 { font-size:30px; font-weight:700; letter-spacing:-0.02em; color:var(--strong); margin:16px 0 10px; }
-  .sub { font-size:16px; line-height:1.6; color:var(--muted); max-width:720px; }
+  .sub { font-size:16px; line-height:1.6; color:var(--muted); max-width:680px; }
 
   .card { background:#fff; border:1px solid var(--border); border-radius:16px; padding:24px 26px; margin-top:20px; }
   .card h2 { font-size:13px; font-weight:600; color:var(--soft); text-transform:uppercase; letter-spacing:.05em; margin-bottom:16px; }
@@ -22,6 +22,16 @@
   .quote .mark { width:34px; height:34px; border-radius:9px; background:#FEF2F2; color:var(--red); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .quote .body { font-size:15px; line-height:1.6; color:var(--text); }
   .quote .body b { color:var(--strong); }
+
+  /* solution */
+  .sol-lead { font-size:15px; line-height:1.6; color:var(--text); max-width:760px; }
+  .sol-lead b { color:var(--strong); }
+  .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:20px; }
+  .step .n { width:26px; height:26px; border-radius:50%; background:var(--strong); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .step h3 { font-size:14.5px; font-weight:600; color:var(--strong); margin:11px 0 6px; }
+  .step p { font-size:13px; line-height:1.55; color:var(--muted); }
+  .sol-note { margin-top:20px; padding:12px 14px; background:var(--bg-weak); border:1px solid var(--border); border-radius:10px; font-size:13px; color:var(--muted); line-height:1.55; }
+  .sol-note b { color:var(--strong); }
 
   /* before / after */
   .ba { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
@@ -37,32 +47,6 @@
   .setup-row { display:flex; align-items:center; gap:9px; padding:8px 0; border-top:1px solid #EEF0F3; }
   .setup-row:first-child { border-top:none; }
   .setup-row .l { flex:1; font-size:13px; font-weight:600; color:var(--strong); }
-
-  /* how it works */
-  .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
-  .step .n { width:26px; height:26px; border-radius:50%; background:var(--strong); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
-  .step h3 { font-size:14.5px; font-weight:600; color:var(--strong); margin:11px 0 6px; }
-  .step p { font-size:13px; line-height:1.55; color:var(--muted); }
-
-  /* surfaces table */
-  .tbl { width:100%; border-collapse:collapse; }
-  .tbl th { text-align:left; font-size:11px; font-weight:600; color:var(--soft); text-transform:uppercase; letter-spacing:.04em; padding:0 0 10px; border-bottom:1px solid var(--border); }
-  .tbl td { font-size:13.5px; color:var(--text); padding:12px 0; border-bottom:1px solid #F1F3F5; vertical-align:top; }
-  .tbl td:first-child { font-weight:600; color:var(--strong); width:180px; }
-  .tag { display:inline-block; font-size:11px; font-weight:600; border-radius:6px; padding:2px 8px; }
-  .tag.int { background:#EEF3FF; color:var(--blue); }
-  .tag.node { background:#FFF6EC; color:var(--amber); }
-  .tag.glob { background:#F3EEFB; color:#7C3AED; }
-
-  /* generalization grid */
-  .gen-grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
-  .gen-col .gen-hd { font-size:13px; font-weight:600; color:var(--strong); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
-  .gen-col ul { list-style:none; padding:0; margin:0; }
-  .gen-col li { position:relative; padding:8px 0 8px 18px; font-size:13.5px; color:var(--muted); line-height:1.5; border-top:1px solid #F1F3F5; }
-  .gen-col li:first-child { border-top:none; }
-  .gen-col li::before { content:''; position:absolute; left:2px; top:15px; width:5px; height:5px; border-radius:50%; background:var(--blue); }
-  .gen-col li .mono { color:var(--strong); }
-  .gen-cross { margin-top:18px; padding:12px 14px; background:var(--bg-weak); border:1px solid var(--border); border-radius:10px; font-size:13px; color:var(--muted); line-height:1.55; }
 
   /* design cards */
   .designs { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
@@ -89,15 +73,39 @@
 
   <span class="kicker"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="g" x1="0" y1="0" x2="24" y2="24"><stop offset="0" stop-color="#8B5CF6"/><stop offset="1" stop-color="#3d64d7"/></linearGradient></defs><path d="M12 2l1.7 5.3L19 9l-5.3 1.7L12 16l-1.7-5.3L5 9l5.3-1.7L12 2z" fill="url(#g)"/></svg>Conductor · Feature proposal</span>
   <h1>Node Anchoring</h1>
-  <p class="sub">Whenever Conductor builds or edits an agent, it knows the exact location of everything it touched. Node Anchoring lets it hand the user an actionable link to any of those spots — a node, a field, a setting, an integration — so they jump straight there instead of hunting through the product. Cal.com credentials, event IDs, and transfer numbers are just one example.</p>
+  <p class="sub">Conductor tells the user what to configure. It doesn't take them there. This proposal closes that gap.</p>
 
   <!-- PROBLEM -->
   <div class="card">
     <h2>The problem</h2>
     <div class="quote">
       <span class="mark"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2l8 14H2L10 2z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><path d="M10 8v3.5M10 13.6v.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
-      <div class="body">Conductor tells the user <b>what</b> to fill in, but not <b>where</b>. It names <span class="mono">cal_api_key</span>, <span class="mono">cal_event_type_id</span>, and the transfer number as dead text, then leaves the user to hunt through the agent, and even a separate Integrations page, to find each one. The agent can't take a single live call until all three are set.</div>
+      <div class="body">Conductor names <b>what</b> to fill in, but not <b>where</b>. It writes <span class="mono">cal_api_key</span>, <span class="mono">cal_event_type_id</span>, and the transfer number as dead text, then leaves the user to hunt through the agent — and a separate Integrations page — to find each one. The agent can't take a single live call until all three are set.</div>
     </div>
+  </div>
+
+  <!-- SOLUTION -->
+  <div class="card">
+    <h2>The solution — Node Anchoring</h2>
+    <p class="sol-lead">Whenever Conductor builds or edits an agent, it knows the exact location of everything it touched. Node Anchoring turns each of those spots into an <b>actionable link</b> the user can click to jump straight there.</p>
+    <div class="steps">
+      <div class="step">
+        <span class="n">1</span>
+        <h3>Conductor emits anchors</h3>
+        <p>It attaches the exact ID of every node, field, and connection it touched to its message as a link.</p>
+      </div>
+      <div class="step">
+        <span class="n">2</span>
+        <h3>The user clicks a target</h3>
+        <p>The click pans the canvas to that node, highlights it, and opens the inspector with the field focused.</p>
+      </div>
+      <div class="step">
+        <span class="n">3</span>
+        <h3>Conductor follows across surfaces</h3>
+        <p>Targets can live in Global Settings, a node, or an integration on another page. Conductor switches surface and stays docked.</p>
+      </div>
+    </div>
+    <div class="sol-note"><b>Works for anything Conductor touches</b> — a node, a field, a global setting, or a cross-surface integration like Cal.com, Salesforce, or HubSpot. Cal.com credentials, event IDs, and transfer numbers are just one example that happens to hit all three.</div>
   </div>
 
   <!-- BEFORE / AFTER -->
@@ -124,70 +132,6 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- HOW IT WORKS -->
-  <div class="card">
-    <h2>How it works</h2>
-    <div class="steps">
-      <div class="step">
-        <span class="n">1</span>
-        <h3>Conductor emits anchors</h3>
-        <p>When Conductor builds or edits an agent, it knows the exact ID of every node, field, and connection it touched. It attaches those IDs to its message as actionable links.</p>
-      </div>
-      <div class="step">
-        <span class="n">2</span>
-        <h3>The user clicks a target</h3>
-        <p>Each placeholder becomes a "Go to node" button. Clicking pans the canvas to that node, highlights it, and opens its inspector with the field focused.</p>
-      </div>
-      <div class="step">
-        <span class="n">3</span>
-        <h3>Conductor follows across surfaces</h3>
-        <p>Targets can live in Global Settings, Node Settings, or an integration on another page. Conductor switches to the right surface and stays docked, so the user never loses context.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- SURFACES -->
-  <div class="card">
-    <h2>In this example — three placeholders, three surfaces, one primitive</h2>
-    <table class="tbl">
-      <thead><tr><th>Reference</th><th>Where it lives</th><th>Anchor action</th></tr></thead>
-      <tbody>
-        <tr><td>cal_api_key</td><td><span class="tag int">Integrations</span> System → Integrations · Cal.com connection (workspace credential)</td><td>Navigate to Integrations, open the Cal.com connect modal, focus API Key</td></tr>
-        <tr><td>cal_event_type_id</td><td><span class="tag glob">Dynamic variable</span> Global Prompt (Conversational Flow) · chip under the prompt (Single-Prompt)</td><td>Open Global Settings, highlight <span class="mono">{{cal_event_type_id}}</span></td></tr>
-        <tr><td>Transfer number</td><td><span class="tag node">Node Settings</span> Transfer to Front Desk node (CF) · transfer_call function (SP)</td><td>Select the node, highlight the "Transfer to" field</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- GENERALIZES -->
-  <div class="card">
-    <h2>This generalizes — not just Cal.com</h2>
-    <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:18px;max-width:800px">Node Anchoring is a general primitive, not a Cal.com feature. Anything Conductor builds or edits, it can point to — and every anchor resolves to one of three destinations: an agent-wide <b>Global Setting</b>, a per-node <b>Node Setting</b>, or a <b>cross-surface</b> page like Integrations. The Cal.com example below just happens to touch all three.</p>
-    <div class="gen-grid">
-      <div class="gen-col">
-        <div class="gen-hd"><span class="tag glob">Global Settings</span> agent-wide</div>
-        <ul>
-          <li>Default dynamic variables in the Global Prompt — <span class="mono">{{customer_name}}</span>, <span class="mono">{{dob}}</span>, <span class="mono">{{customer_zip}}</span></li>
-          <li>Model and voice selection</li>
-          <li>Agent Handbook</li>
-          <li>Post-Call Data Extraction fields</li>
-          <li>Security &amp; Fallback settings</li>
-        </ul>
-      </div>
-      <div class="gen-col">
-        <div class="gen-hd"><span class="tag node">Node Settings</span> per node</div>
-        <ul>
-          <li>Transfer numbers on Transfer &amp; Agent Transfer nodes</li>
-          <li>Function parameters — event IDs, query fields, headers</li>
-          <li>A node's prompt or its transition conditions</li>
-          <li>Webhook URL on a webhook node</li>
-          <li>Knowledge base attached to a node</li>
-        </ul>
-      </div>
-    </div>
-    <div class="gen-cross"><span class="tag int">Cross-surface</span> &nbsp;Integrations connections — Cal.com, Salesforce, HubSpot, Zendesk — live on the Integrations page. Conductor navigates there, opens the connect modal, and follows you back to the agent.</div>
   </div>
 
   <!-- DESIGNS -->

@@ -272,11 +272,9 @@
             <div class="gp-label">Global Prompt</div>
             <div class="gp-box">
               <span class="gp-h">## Serenity Spa · Ava</span><br>
-              Warm, calm booking assistant. Hours Mon–Sat 9–7 PT.<br><br>
-              <span class="gp-comment">// Cal.com event type — fill this in</span>
-              <div class="gp-var" id="var-eventtype"><span class="k">{{cal_event_type_id}}</span><span class="eq">=</span><span class="val">""</span><span class="badge">Not set</span><span class="jumped"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>From Conductor</span></div>
+              Warm, calm booking assistant. Hours Mon to Sat 9 to 7 PT.
             </div>
-            <div class="fld-help" style="margin-top:8px">The Cal.com API key itself is a workspace connection — set it in System → Integrations.</div>
+            <div class="fld-help" style="margin-top:8px">The Cal.com event type lives on the booking function, not here. The API key is a workspace connection, set in System → Integrations.</div>
           </div>
           <div class="st-pane" id="pane-node">
             <div class="ns-empty" id="ns-empty">
@@ -296,7 +294,7 @@
             <div class="ns-block" id="block-checkavail">
               <div class="ns-hd"><span class="ns-ic" style="background:#111;color:#fff">Cal</span><div><div class="ns-name">check_availability</div><div class="ns-sub">Cal.com · Function node</div></div></div>
               <div class="fld"><div class="fld-l">Connection</div><div class="use-note"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 2l8 14H2L10 2z" stroke="var(--amber)" stroke-width="1.5" fill="none" stroke-linejoin="round"/><path d="M10 8v3M10 13.5v.01" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round"/></svg>Cal.com not connected. <span class="go" onclick="jumpKey('apikey')">Connect on Integrations →</span></div></div>
-              <div class="fld"><div class="fld-l">Event Type ID</div><div class="fld-input"><span style="color:var(--purple)">{{cal_event_type_id}}</span></div><div class="use-note"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 2l8 14H2L10 2z" stroke="var(--amber)" stroke-width="1.5" fill="none" stroke-linejoin="round"/><path d="M10 8v3M10 13.5v.01" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round"/></svg>Set this variable in <span class="go" onclick="jumpKey('eventtype')">Global Settings →</span></div></div>
+              <div class="fld" id="row-eventtype"><div class="fld-l">Event Type ID <span class="badge-ph">Placeholder</span><span class="fld-jumped"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>From Conductor</span></div><div class="fld-input">Enter your Cal.com event type ID</div><div class="fld-help">Find it in your Cal.com event type URL.</div></div>
             </div>
           </div>
         </div>
@@ -378,9 +376,9 @@
             <button class="go-btn" id="btn-apikey" data-target="apikey" onclick="jumpKey('apikey')">Connect Cal.com<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></button>
           </div>
           <div class="setup-row">
-            <span class="setup-ic" style="background:#F3EEFB;color:#7C3AED"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 8h8M6 5l-2 3 2 3M10 5l2 3-2 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span class="setup-lbl">Event Type ID<small>Global Prompt · dynamic variable</small></span>
-            <button class="go-btn" data-target="eventtype" onclick="jumpKey('eventtype')">Go to variable<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+            <span class="setup-ic" style="background:#111;color:#fff"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 8h8M6 5l-2 3 2 3M10 5l2 3-2 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="setup-lbl">Event Type ID<small>Check Availability node · Cal.com function</small></span>
+            <button class="go-btn" data-target="eventtype" onclick="jumpKey('eventtype')">Go to node<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
           </div>
           <div class="setup-row">
             <span class="setup-ic" style="background:#FFE4E6;color:#E11D48"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -463,8 +461,9 @@
       const n=document.getElementById('node-transfer'); n.classList.add('hl'); n.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});
       const r=document.getElementById('row-transfer'); if(r){ r.classList.add('hl'); void r.offsetWidth; }
     } else {
-      setTab('global');
-      const el=document.getElementById('var-eventtype'); if(el){ el.classList.add('hl'); void el.offsetWidth; el.scrollIntoView({behavior:'smooth',block:'center'}); }
+      selectNode('checkavail');
+      const n=document.getElementById('node-checkavail'); n.classList.add('hl'); n.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});
+      const r=document.getElementById('row-eventtype'); if(r){ r.classList.add('hl'); void r.offsetWidth; }
     }
   }
   function openCalModal(){ setActive('apikey'); document.getElementById('calOverlay').classList.add('on'); const f=document.getElementById('m-apikey'); f.classList.add('hl'); void f.offsetWidth; setTimeout(()=>{ const i=f.querySelector('input'); if(i) i.focus(); },60); }

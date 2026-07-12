@@ -99,29 +99,31 @@
 
   <!-- WHAT IT DOES -->
   <div class="card">
-    <h2>Two changes</h2>
+    <h2>One mechanism, two views</h2>
+    <p class="say">Both views run the same engine underneath: find the exact spot, switch to the right surface, highlight it, focus the field. They differ only by what the user is doing. When Conductor is <b>explaining</b>, it drops a chip. When it needs you to <b>act</b>, it hands you a checklist.</p>
     <div class="two">
       <div class="two-item">
         <span class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><rect x="3" y="4" width="18" height="16" rx="3"/></svg></span>
         <div>
-          <div class="t">Settings become clickable chips</div>
-          <div class="d">Click one and Conductor opens the right panel, scrolls to the setting, and highlights it. No more hunting.</div>
+          <div class="t">Inline chip — for referencing</div>
+          <div class="d">Conductor names a setting, node, or variable in its answer. Click the chip and it jumps you there and highlights it. Woven into the sentence, so you read on or go look.</div>
         </div>
       </div>
       <div class="two-item">
-        <span class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 6 3 12 8 18"/><polyline points="16 6 21 12 16 18"/></svg></span>
+        <span class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
         <div>
-          <div class="t">Code sits in its own block</div>
-          <div class="d">Config and code get their own box with a copy button, set apart from the sentence so you can read and grab it fast.</div>
+          <div class="t">Action card — for setup tasks</div>
+          <div class="d">When something needs your input before the agent can run, Conductor lists it as a checklist with buttons like Connect Cal.com or Go to node. A task list, not a sentence.</div>
         </div>
       </div>
     </div>
+    <p class="ba-note" style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">Code and config keep their own copyable block, set apart from the prose. We dropped the earlier "What's set now" summary list, it only repeated the chips already in the sentence.</p>
   </div>
 
   <!-- DESIGNS -->
   <div class="card">
-    <h2>See it in both builders</h2>
-    <p class="say">Same idea, two agent types. Open either to try clicking the chips.</p>
+    <h2>See it live</h2>
+    <p class="say">The chip works in both agent types. Open either and click a chip to jump to the setting. The action card is the <a href="https://node-anchoring-retell-549e1a45.vercel.app/" style="color:var(--blue);font-weight:600;text-decoration:none">node anchoring demo</a>, same engine, setup view.</p>
     <div class="designs">
       <a class="design" href="copilot-setting-chips-codeblocks.html">
         <div class="thumb sp">

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conductor — Setting chips & code blocks (Conversational Flow)</title>
+<title>Conductor · Setting chips (Conversational Flow)</title>
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
   :root {
@@ -362,8 +362,6 @@
 
           <div class="ans-head">Direct answer</div>
           <p>The agent jumps in the instant it thinks the caller stopped. In a flow, that's an agent-wide Speech setting: <span class="chip" data-kind="global" data-target="eagerness" onclick="jump(this)"><span class="gear"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.6" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5 5l1.4 1.4M13.6 13.6L15 15M5 15l1.4-1.4M13.6 6.4L15 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Response Eagerness</span> at its max of <b>1</b>, with <span class="chip" data-kind="global" data-target="adjust" onclick="jump(this)"><span class="gear"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.6" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5 5l1.4 1.4M13.6 13.6L15 15M5 15l1.4-1.4M13.6 6.4L15 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Dynamically adjust</span> off.</p>
-
-          <p>It's agent-wide, so it applies to every node — including <span class="chip node-chip" data-kind="node" data-target="welcome" onclick="jump(this)"><span class="gear"><svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="2"/></svg></span>Welcome</span> and <span class="chip node-chip" data-kind="node" data-target="book" onclick="jump(this)"><span class="gear"><svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="2"/></svg></span>Book Appointment</span>.</p>
 
           <div class="ans-head">What I'd change</div>
           <p>Ease off the eagerness so the agent waits out a pause, and let it adapt to the caller's pace.</p>

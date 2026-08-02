@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copilot — Integration bar</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #3d64d7; --blue-bg: #ecf3ff; --blue-border: #C9D6F5;
+    --text: #0E121B; --strong: #0A0A0A; --muted: #525866; --soft: #99A0AE;
+    --border: #E1E4EA; --border-2: #E5E7EB; --hover: rgba(0,0,0,0.03); --sel: #F4F7FF;
+    --green: #1FC16B; --red: #FB3748; --amber: #FF9147; --bg-weak: #F5F7FA;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: var(--text); background: #fff; height: 100vh; overflow: hidden; display: flex; font-size: 14px; }
+
+  /* ===== Sidebar ===== */
+  .sidebar { width: 232px; min-width: 232px; background: var(--bg-weak); display: flex; flex-direction: column; height: 100vh; }
+  .sb-logo { padding: 16px 14px 10px 18px; }
+  .ws { display: flex; align-items: center; gap: 8px; margin: 0 12px; padding: 8px 10px; height: 38px; background: var(--bg-weak); border: 1px solid var(--border-2); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; }
+  .ws .av { width: 18px; height: 18px; background: var(--blue); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: 600; flex-shrink: 0; }
+  .ws .nm { font-size: 12.5px; font-weight: 500; color: var(--strong); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ws svg { color: var(--soft); }
+  .nav { padding: 6px 0 12px; flex: 1; overflow-y: auto; }
+  .grp { margin-top: 8px; } .grp:first-child { margin-top: 4px; }
+  .grp-l { padding: 4px; margin: 0 14px; font-size: 11px; font-weight: 500; color: var(--soft); text-transform: uppercase; height: 22px; letter-spacing: 0.02em; }
+  .items { padding: 0 12px; }
+  .nv { display: flex; align-items: center; gap: 9px; padding: 7px 8px; height: 33px; font-size: 13.5px; color: var(--muted); cursor: pointer; border-radius: 6px; margin-top: 2px; }
+  .nv:hover { background: var(--hover); }
+  .nv.cur { color: var(--strong); font-weight: 500; background: #fff; }
+  .nv svg { flex-shrink: 0; color: var(--muted); }
+  .nv.cur svg { color: var(--blue); }
+  .nv .nd { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); margin-left: 6px; }
+  .sb-foot { padding: 12px; }
+  .trial { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 8px; }
+  .trial .ti { color: var(--blue); display: inline-flex; } .trial .tn { font-size: 12.5px; font-weight: 600; color: var(--strong); flex: 1; } .trial svg.cv { color: var(--soft); }
+  .ucard { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 10px; }
+  .ucard .ua { width: 18px; height: 18px; border-radius: 50%; overflow: hidden; } .ucard .ua img { width: 100%; height: 100%; object-fit: cover; }
+  .ucard .ue { font-size: 13px; color: var(--muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ucard svg { color: var(--soft); }
+  .sb-links { display: flex; gap: 4px; }
+  .sb-link { display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; font-size: 13px; color: var(--muted); cursor: pointer; border-radius: 6px; } .sb-link:hover { background: var(--hover); }
+  .sb-div { width: 1px; height: 12px; background: #D1D5DB; align-self: center; }
+
+  /* ===== Work area ===== */
+  .work { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .wrow { flex: 1; display: flex; min-height: 0; }
+
+  /* ===== Main (context behind Copilot) ===== */
+  .main { flex: 1; min-width: 0; overflow: auto; }
+  .ph { display: flex; align-items: center; gap: 10px; padding: 18px 24px 0; }
+  .ph h1 { font-size: 16px; font-weight: 600; color: var(--strong); }
+  .ph .sp { flex: 1; }
+  .actions { display: flex; align-items: center; gap: 8px; padding: 14px 24px 12px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border: 1px solid var(--border-2); background: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; height: 32px; }
+  .pill:hover { background: var(--hover); } .pill svg { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { text-align: left; font-size: 12px; font-weight: 500; color: #6B7280; padding: 9px 24px; border-bottom: 1px solid var(--border); }
+  tbody td { font-size: 13px; color: var(--text); padding: 12px 24px; border-bottom: 1px solid #F1F3F5; white-space: nowrap; }
+  tbody tr { cursor: pointer; } tbody tr:hover { background: rgba(0,0,0,0.02); }
+  tbody tr.sel { background: var(--sel); box-shadow: inset 3px 0 0 var(--blue); }
+  .mono { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .er { display: inline-flex; align-items: center; gap: 6px; } .er .d { width: 6px; height: 6px; border-radius: 50%; }
+  .er.fail .d { background: var(--red); } .er.xfer .d { background: var(--amber); } .er.ok .d { background: var(--green); }
+
+  /* ===== Copilot panel ===== */
+  .rp { width: 420px; min-width: 420px; border-left: 1px solid var(--border); display: flex; flex-direction: column; height: 100%; background: #fff; }
+  .cp-head { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid #F1F3F5; }
+  .cp-head .ttl { font-size: 14px; font-weight: 600; color: var(--strong); display: inline-flex; align-items: center; gap: 7px; }
+  .cp-head .sp { flex: 1; }
+  .ic-btn { width: 30px; height: 30px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; color: var(--soft); cursor: pointer; }
+  .ic-btn:hover { background: var(--hover); color: var(--muted); }
+
+  .cp-body { flex: 1; overflow-y: auto; padding: 16px 16px 8px; }
+  .scope { display: flex; align-items: center; gap: 8px; padding: 9px 11px; background: var(--bg-weak); border: 1px solid var(--border); border-radius: 9px; font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+  .scope .ic { color: var(--blue); display: inline-flex; } .scope b { color: var(--text); font-weight: 600; }
+
+  /* messages */
+  .msg-user { display: flex; justify-content: flex-end; margin-bottom: 18px; }
+  .msg-user .bub { background: var(--blue-bg); border: 1px solid var(--blue-border); color: #21366e; font-size: 13.5px; line-height: 1.55; border-radius: 13px 13px 4px 13px; padding: 10px 13px; max-width: 86%; }
+  .ai { display: flex; gap: 10px; margin-bottom: 16px; }
+  .ai .av { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; background: radial-gradient(circle at 34% 30%, #c7d6ff 0%, #7d9bf6 26%, #4f73e6 52%, #2f4fc4 100%); }
+  .ai .c { font-size: 13.5px; line-height: 1.6; color: var(--text); min-width: 0; } .ai .c b { color: var(--strong); font-weight: 600; }
+
+  /* write-gated action card */
+  .act { margin-top: 12px; border: 1px solid var(--border); border-radius: 11px; overflow: hidden; }
+  .act + .act { margin-top: 10px; }
+  .act-h { display: flex; align-items: center; gap: 9px; padding: 10px 12px; border-bottom: 1px solid #F1F3F5; }
+  .act-h .lg { width: 24px; height: 24px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .act-h .nm { font-size: 12.5px; font-weight: 600; color: var(--strong); } .act-h .nm .sub { color: var(--soft); font-weight: 500; }
+  .act-h .wtag { margin-left: auto; font-size: 10px; font-weight: 700; letter-spacing: 0.03em; color: var(--amber); background: #FFF3E8; border: 1px solid #FBD9B8; border-radius: 5px; padding: 2px 7px; text-transform: uppercase; }
+  .act-b { padding: 11px 12px; font-family: ui-monospace, 'SF Mono', monospace; font-size: 11.5px; color: var(--muted); line-height: 1.75; }
+  .act-b .k { color: var(--soft); } .act-b .v { color: var(--text); }
+  .confirm { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-top: 1px solid #F1F3F5; background: #FCFCFD; }
+  .confirm .sp { flex: 1; }
+  .btn-confirm { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 13px; border: none; background: var(--strong); color: #fff; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; } .btn-confirm:hover { background: #000; }
+  .btn-edit { height: 32px; padding: 0 12px; border: 1px solid var(--border-2); background: #fff; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: var(--text); cursor: pointer; } .btn-edit:hover { background: var(--hover); }
+
+  .note { font-size: 11.5px; color: var(--soft); margin-top: 14px; display: flex; gap: 6px; line-height: 1.5; } .note svg { color: var(--soft); flex-shrink: 0; margin-top: 1px; }
+
+  /* ===== Composer (footer) ===== */
+  .cp-foot { border-top: 1px solid #F1F3F5; padding: 12px; }
+  .composer { border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); background: #fff; transition: border-color .12s; }
+  .composer:focus-within { border-color: var(--blue-border); }
+  .field { font-size: 13.5px; color: var(--soft); padding: 12px 14px 4px; min-height: 22px; }
+
+  /* integration bar */
+  .intbar { display: flex; align-items: center; gap: 7px; padding: 8px 12px 9px; border-top: 1px solid #F4F5F7; }
+  .intbar .lbl { font-size: 11px; font-weight: 600; color: var(--soft); display: inline-flex; align-items: center; gap: 5px; margin-right: 1px; flex-shrink: 0; }
+  .intbar .lbl svg { color: var(--soft); }
+  .chips { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+  .chip { position: relative; width: 26px; height: 26px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; box-shadow: 0 1px 1.5px rgba(16,24,40,0.10); }
+  .chip:hover { transform: translateY(-1px); }
+  .chip .conn { position: absolute; right: -2px; bottom: -2px; width: 8px; height: 8px; border-radius: 50%; background: var(--green); border: 1.5px solid #fff; }
+  .chip .tip { position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%); background: #0E121B; color: #fff; font-size: 11px; font-weight: 500; white-space: nowrap; padding: 4px 8px; border-radius: 6px; opacity: 0; pointer-events: none; transition: opacity .12s; }
+  .chip .tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: #0E121B; }
+  .chip:hover .tip { opacity: 1; }
+  .chip-add { width: 26px; height: 26px; border-radius: 7px; border: 1px dashed #CBD2DD; background: #fff; color: var(--soft); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .chip-add:hover { border-color: var(--blue-border); color: var(--blue); background: var(--blue-bg); }
+  .intbar .manage { font-size: 11.5px; font-weight: 600; color: var(--soft); cursor: pointer; flex-shrink: 0; margin-left: auto; }
+  .intbar .manage:hover { color: var(--blue); }
+
+  /* toolbar */
+  .toolbar { display: flex; align-items: center; gap: 6px; padding: 8px 10px 10px; border-top: 1px solid #F4F5F7; position: relative; }
+  .plus-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border-2); background: #fff; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+  .plus-btn:hover { background: var(--hover); }
+  .tbtn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 1px solid var(--border-2); background: #fff; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: var(--text); cursor: pointer; }
+  .tbtn:hover { background: var(--hover); } .tbtn svg { color: var(--muted); } .tbtn .chev { color: var(--soft); }
+  .tbtn .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
+  .tsp { flex: 1; }
+  .send-btn { width: 30px; height: 30px; border-radius: 8px; background: var(--strong); color: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: none; } .send-btn:hover { background: #000; }
+
+  /* + menu popover */
+  .pmenu { position: absolute; bottom: calc(100% + 8px); left: 0; width: 244px; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 32px rgba(16,24,40,0.16), 0 2px 6px rgba(16,24,40,0.08); padding: 6px; display: none; z-index: 30; }
+  .pmenu.open { display: block; }
+  .pm-l { font-size: 10.5px; font-weight: 600; color: var(--soft); text-transform: uppercase; letter-spacing: 0.04em; padding: 7px 9px 5px; }
+  .pm-i { display: flex; align-items: center; gap: 10px; padding: 8px 9px; border-radius: 8px; cursor: pointer; }
+  .pm-i:hover { background: var(--hover); }
+  .pm-i .pic { width: 26px; height: 26px; border-radius: 7px; background: var(--bg-weak); border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); flex-shrink: 0; }
+  .pm-i.on .pic { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue); }
+  .pm-i .pt { font-size: 13px; font-weight: 500; color: var(--text); } .pm-i .ps { font-size: 11.5px; color: var(--soft); margin-top: 1px; }
+  .pm-i .nd { margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- ===== Sidebar ===== -->
+<aside class="sidebar">
+  <div class="sb-logo"><svg width="66" height="18" viewBox="0 0 414 114" fill="none"><g clip-path="url(#l)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#0A0A0A"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73ZM205.22 49.69C202.9 52 199.43 52.58 195.38 52.58H176.28V26.54H193.64C198.85 26.54 201.74 27.12 204.64 28.86C208.11 30.59 209.85 34.64 209.85 39.27C209.85 43.9 208.11 47.38 205.22 49.69Z" fill="#0A0A0A"/><path d="M255.56 34.65C238.2 34.65 226.63 47.95 226.63 66.47C226.63 84.99 242.25 98.3 256.14 98.3C270.03 98.3 279.86 90.19 283.33 78.62H269.45C267.71 82.67 264.82 87.3 256.14 87.3C247.46 87.3 239.94 81.52 239.94 69.94H283.91C283.91 49.69 272.92 34.65 255.56 34.65ZM240.51 60.11C241.09 51.43 246.88 45.06 255.56 45.06C264.24 45.06 270.02 51.43 270.02 60.11H240.51Z" fill="#0A0A0A"/><path d="M344.09 34.65C326.73 34.65 315.16 47.95 315.16 66.47C315.16 85.15 330.78 98.3 344.67 98.3C358.56 98.3 368.39 90.19 371.87 78.62H357.98C356.24 82.67 353.35 87.3 344.67 87.3C335.99 87.3 328.47 81.52 328.47 69.94H372.44C372.44 49.69 361.45 34.65 344.09 34.65ZM329.05 60.11C329.62 51.43 335.41 45.06 344.09 45.06C352.77 45.06 358.56 51.43 358.56 60.11H329.05Z" fill="#0A0A0A"/><path d="M390.96 14.97H377.65V95.92H390.96V14.97Z" fill="#0A0A0A"/><path d="M413.53 14.97H400.22V95.92H413.53V14.97Z" fill="#0A0A0A"/><path d="M304.17 17.28L290.84 17.28L290.85 34.65H282.76V45H290.85V82.82C290.85 87.58 291.8 90.43 294.66 93.29C297.51 96.14 300.37 97.09 305.13 97.09H315.14V85.67H309.88C308.16 85.67 306.96 85.37 306.13 85.11C305.27 84.84 304.61 84.16 304.4 83.29C304.17 82.33 304.17 81.09 304.17 79.9V45H315.14V34.65H304.17V17.28Z" fill="#0A0A0A"/></g><defs><clipPath id="l"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg></div>
+
+  <div class="ws"><span class="av">B</span><span class="nm">Brandon K... Workspace</span><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.3 7.9L10 3.6 5.7 7.9l1 1L10 5.6l3.3 3.3 1-1zM5.7 12.1L10 16.4l4.3-4.3-1-1L10 14.4l-3.3-3.3-1 1z" fill="#99A0AE"/></svg></div>
+
+  <div class="nav">
+    <div class="grp"><div class="grp-l">Build</div><div class="items">
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M11.1 2.5c0 .33-.15.63-.38.84V4.75h3.78c1.24 0 2.25 1.01 2.25 2.25v7.5c0 1.24-1.01 2.25-2.25 2.25h-9c-1.24 0-2.25-1.01-2.25-2.25V7c0-1.24 1.01-2.25 2.25-2.25h3.75V3.34A1.12 1.12 0 0110 1.38c.62 0 1.12.5 1.12 1.12zM5.5 6.25c-.41 0-.75.34-.75.75v7.5c0 .41.34.75.75.75h9c.41 0 .75-.34.75-.75V7c0-.41-.34-.75-.75-.75h-9zM7.75 11.9a1.12 1.12 0 100-2.25 1.12 1.12 0 000 2.25zm4.5 0a1.12 1.12 0 100-2.25 1.12 1.12 0 000 2.25z" fill="currentColor"/></svg>Agents</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3.25 14.9V4.75c0-.6.24-1.17.66-1.59s.99-.66 1.59-.66H16c.2 0 .39.08.53.22s.22.33.22.53v13.5c0 .2-.08.39-.22.53s-.33.22-.53.22H5.88c-.7 0-1.37-.28-1.86-.77s-.77-1.16-.77-1.86zM15.25 16v-2.25H5.88c-.3 0-.59.12-.8.33s-.33.5-.33.8.12.59.33.8.5.33.8.33h9.37zM4.75 12.5c.35-.17.74-.25 1.12-.25h9.38V4H5.5c-.2 0-.39.08-.53.22s-.22.33-.22.53v7.75z" fill="currentColor"/></svg>Knowledge Base</div>
+    </div></div>
+    <div class="grp"><div class="grp-l">Deploy</div><div class="items">
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M6.25 2.5H14.5c.2 0 .39.08.53.22s.22.33.22.53v13.5c0 .2-.08.39-.22.53s-.33.22-.53.22h-9c-.2 0-.39-.08-.53-.22s-.22-.33-.22-.53V1h1.5v1.5zm0 5.25h7.5V4h-7.5v3.75zm0 1.5V16h7.5V9.25h-7.5z" fill="currentColor"/></svg>Phone Numbers</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M8 9c.7 1.24 1.73 2.27 2.96 2.97l.66-.93c.11-.15.27-.25.45-.29s.37-.01.53.07c1.06.58 2.23.93 3.44 1.02.19.01.36.1.49.24s.2.32.2.51v3.35c0 .19-.07.37-.19.5s-.29.22-.48.24c-.4.04-.8.06-1.2.06-6.42 0-11.63-5.21-11.63-11.63 0-.4.02-.8.06-1.2.02-.18.11-.35.24-.48s.31-.2.49-.2h3.35c.19 0 .37.07.51.2s.22.31.24.49c.09 1.21.44 2.38 1.02 3.44.09.16.11.34.07.53s-.14.34-.29.45L8 9z" fill="currentColor"/></svg>Batch Call</div>
+    </div></div>
+    <div class="grp"><div class="grp-l">Monitor</div><div class="items">
+      <div class="nv cur"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2.5c4.14 0 7.5 3.36 7.5 7.5s-3.36 7.5-7.5 7.5S2.5 14.14 2.5 10H4c0 3.31 2.69 6 6 6s6-2.69 6-6-2.69-6-6-6c-2.06 0-3.88 1.04-4.96 2.62H7v1.5H2.5v-4.5H4v1.88C5.37 3.68 7.55 2.5 10 2.5zM10.75 6.25v3.44l2.43 2.43-1.06 1.06L9.25 10.3V6.25h1.5z" fill="currentColor"/></svg>Call History</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2.5c4.14 0 7.5 3.36 7.5 7.5s-3.36 7.5-7.5 7.5c-1.28 0-2.48-.32-3.53-.88L2.5 17.5l.88-3.97A7.46 7.46 0 012.5 10c0-4.14 3.36-7.5 7.5-7.5zm0 1.5c-3.31 0-6 2.69-6 6 0 1 .24 1.96.7 2.82l.27.49-.49 2.21 2.21-.49.49.26c.86.46 1.82.71 2.82.71 3.31 0 6-2.69 6-6s-2.69-6-6-6z" fill="currentColor"/></svg>Chat History</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 17.5c-4.14 0-7.5-3.36-7.5-7.5 0-3.36 2.21-6.2 5.25-7.16v1.6A6 6 0 1015.56 12.25h1.59C16.2 15.29 13.36 17.5 10 17.5zM17.46 10.75H9.25V2.54c.25-.03.5-.04.75-.04 4.14 0 7.5 3.36 7.5 7.5 0 .25-.01.5-.04.75z" fill="currentColor"/></svg>Analytics</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M14.5 13.5l3.2 3.2-1.06 1.06-3.2-3.2A6.7 6.7 0 119.25 2.5a6.75 6.75 0 015.25 11zm-1.5-.6a5.25 5.25 0 10-3.75 1.6 5.23 5.23 0 003.64-1.49l.11-.11z" fill="currentColor"/></svg>AI Quality Assurance</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M4 16v-4.5a6 6 0 1112 0V16h.75v1.5H3.25V16H4zm1.5 0h9v-4.5a4.5 4.5 0 10-9 0V16zM9.25 2.5h1.5v2.25h-1.5V2.5z" fill="currentColor"/></svg>Alerting</div>
+    </div></div>
+    <div class="grp"><div class="grp-l">System</div><div class="items">
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M16 17.5H4c-.2 0-.39-.08-.53-.22s-.22-.33-.22-.53V3.25c0-.2.08-.39.22-.53s.33-.22.53-.22h12c.2 0 .39.08.53.22s.22.33.22.53v13.5c0 .2-.08.39-.22.53s-.33.22-.53.22zm-.75-1.5V4H4.75v12h10.5zM7 7.75h6v1.5H7v-1.5zm0 3h6v1.5H7v-1.5z" fill="currentColor"/></svg>Billing</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3.5" y="3.5" width="5.5" height="5.5" rx="1.3" stroke="currentColor" stroke-width="1.4"/><rect x="11" y="3.5" width="5.5" height="5.5" rx="1.3" stroke="currentColor" stroke-width="1.4"/><rect x="3.5" y="11" width="5.5" height="5.5" rx="1.3" stroke="currentColor" stroke-width="1.4"/><path d="M13.7 11v5.5M11 13.7h5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Integrations<span class="nd"></span></div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M8.2 2.5h3.6l.4 2.2a5.6 5.6 0 011.7 1l2.1-.8 1.8 3.1-1.7 1.4a5.7 5.7 0 010 2l1.7 1.4-1.8 3.1-2.1-.8a5.6 5.6 0 01-1.7 1l-.4 2.2H8.2l-.4-2.2a5.6 5.6 0 01-1.7-1l-2.1.8-1.8-3.1 1.7-1.4a5.7 5.7 0 010-2L1.9 8l1.8-3.1 2.1.8a5.6 5.6 0 011.7-1l.7-2.2z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><circle cx="10" cy="10" r="2.4" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>Settings</div>
+    </div></div>
+  </div>
+
+  <div class="sb-foot">
+    <div class="trial"><span class="ti"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 2l2.2 5.5L18 8l-4.4 3.6L15 17l-5-3-5 3 1.4-5.4L2 8l5.8-.5L10 2z" fill="currentColor"/></svg></span><span class="tn">Free Trial</span><svg class="cv" width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.3 7.9L10 3.6 5.7 7.9l1 1L10 5.6l3.3 3.3 1-1zM5.7 12.1L10 16.4l4.3-4.3-1-1L10 14.4l-3.3-3.3-1 1z" fill="#99A0AE"/></svg></div>
+    <div class="ucard"><span class="ua"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c" alt=""></span><span class="ue">brandon@retella...</span><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.3 7.9L10 3.6 5.7 7.9l1 1L10 5.6l3.3 3.3 1-1zM5.7 12.1L10 16.4l4.3-4.3-1-1L10 14.4l-3.3-3.3-1 1z" fill="#99A0AE"/></svg></div>
+    <div class="sb-links"><span class="sb-link"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M10 13.2v.01M8.3 8a1.7 1.7 0 113 .9c-.6.5-1.3.7-1.3 1.6" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>Help</span><span class="sb-div"></span><span class="sb-link"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M8 13s4 .5 6 2.2h.5c.3 0 .5-.2.5-.5V5.3c0-.3-.2-.5-.5-.5H14C12 6.5 8 7 8 7H6c-.7 0-1.2.6-1.2 1.2v3.5C4.8 12.4 5.3 13 6 13h.5L7 16h1v-3z" fill="currentColor"/></svg>Updates</span></div>
+  </div>
+</aside>
+
+<!-- ===== Work area ===== -->
+<div class="work">
+  <div class="wrow">
+    <!-- Main: call history (context) -->
+    <main class="main">
+      <div class="ph"><h1>Call History</h1><span class="sp"></span></div>
+      <div class="actions">
+        <span class="pill"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M3 8h14M7 2.5v3M13 2.5v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Date Range</span>
+        <span class="pill"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M6 10h8M9 15h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Filter</span>
+      </div>
+      <table>
+        <thead><tr><th>Time</th><th>Duration</th><th>Channel Type</th><th>Cost</th><th>Session ID</th><th>End Reason</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td>Jun 1, 2026 3:42:42 PM</td><td class="mono">0:51</td><td>web_call</td><td class="mono">$0.041</td><td class="mono">call_ab88c...8f1</td><td><span class="er fail"><span class="d"></span>user hangup</span></td></tr>
+          <tr><td>Jun 1, 2026 3:31:18 PM</td><td class="mono">1:12</td><td>phone_call</td><td class="mono">$0.058</td><td class="mono">call_ee1b3...3bd</td><td><span class="er xfer"><span class="d"></span>agent transfer</span></td></tr>
+          <tr><td>Jun 1, 2026 3:20:05 PM</td><td class="mono">1:03</td><td>phone_call</td><td class="mono">$0.049</td><td class="mono">call_77c24...9aa</td><td><span class="er ok"><span class="d"></span>agent hangup</span></td></tr>
+          <tr><td>Apr 29, 2026 1:25:46 PM</td><td class="mono">0:05</td><td>web_call</td><td class="mono">$0.033</td><td class="mono">call_ee1b3...69b</td><td><span class="er fail"><span class="d"></span>user hangup</span></td></tr>
+        </tbody>
+      </table>
+    </main>
+
+    <!-- Copilot panel -->
+    <aside class="rp">
+      <div class="cp-head">
+        <span class="ttl"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 1.5l1.7 4.8 4.8 1.7-4.8 1.7L10 14.5 8.3 9.7 3.5 8l4.8-1.7L10 1.5z" fill="#3d64d7"/></svg>Copilot</span>
+        <span class="sp"></span>
+        <span class="ic-btn" title="New chat"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M4 13.5V16h2.5l7.4-7.4-2.5-2.5L4 13.5zM13.1 5.4l1.5 1.5 1.2-1.2a1 1 0 000-1.5l0 0a1 1 0 00-1.5 0l-1.2 1.2z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg></span>
+        <span class="ic-btn" title="Close"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64 15.36 5.7 11.06 10l4.3 4.3-1.06 1.06L10 11.06l-4.3 4.3-1.06-1.06L8.94 10 4.64 5.7 5.7 4.64 10 8.94z" fill="currentColor"/></svg></span>
+      </div>
+
+      <div class="cp-body">
+        <div class="scope">
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="4" y="6" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M10 6V3.7M7.5 10.5h.01M12.5 10.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+          On <b>Inbound Scheduler</b> · call <b>call_ab88c…8f1</b>
+        </div>
+
+        <div class="msg-user"><div class="bub">This booking failed with a 500. Open a Salesforce case for the customer and post a heads-up in Slack #cx-escalations.</div></div>
+
+        <div class="ai">
+          <span class="av"></span>
+          <div class="c">
+            On it. I pulled the caller from the transcript and matched them to <b>Maria Delgado</b> in Salesforce. Here is exactly what I will write with your connected tools. Nothing sends until you confirm.
+
+            <div class="act">
+              <div class="act-h">
+                <span class="lg" style="background:#E8F6FD"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M10 7a3.2 3.2 0 016 .9 2.8 2.8 0 01-.5 5.6H7.5a3 3 0 01-.6-5.9A3.2 3.2 0 0110 7z" fill="#00A1E0"/></svg></span>
+                <span class="nm">Salesforce <span class="sub">· Create Case</span></span>
+                <span class="wtag">Write</span>
+              </div>
+              <div class="act-b">
+                <span class="k">Contact</span>  <span class="v">Maria Delgado (003Ax…91k)</span><br>
+                <span class="k">Subject</span>  <span class="v">Booking failed — agent could not confirm slot</span><br>
+                <span class="k">Priority</span> <span class="v">High</span><br>
+                <span class="k">Origin</span>   <span class="v">Voice · Inbound Scheduler</span>
+              </div>
+              <div class="confirm"><span class="sp"></span><button class="btn-edit">Edit</button><button class="btn-confirm"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M4.5 10.5l3.5 3.5 7.5-8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Confirm &amp; create</button></div>
+            </div>
+
+            <div class="act">
+              <div class="act-h">
+                <span class="lg" style="background:#F4EDFB"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 13a2 2 0 11-2-2h2v2zm1 0a2 2 0 014 0v5a2 2 0 11-4 0v-5z" fill="#E01E5A"/><path d="M11 6a2 2 0 112 2h-2V6zm0 1a2 2 0 010 4H6a2 2 0 010-4h5z" fill="#36C5F0"/><path d="M18 11a2 2 0 112 2h-2v-2zm-1 0a2 2 0 01-4 0V6a2 2 0 114 0v5z" fill="#2EB67D"/><path d="M13 18a2 2 0 11-2-2h2v2zm0-1a2 2 0 010-4h5a2 2 0 010 4h-5z" fill="#ECB22E"/></svg></span>
+                <span class="nm">Slack <span class="sub">· Message #cx-escalations</span></span>
+                <span class="wtag">Write</span>
+              </div>
+              <div class="act-b">
+                <span class="v">⚠️ Booking failure on Inbound Scheduler. Caller Maria Delgado, 3:42 PM. Tool returned 500 with no fallback. SF case created. <span class="k">cc @oncall</span></span>
+              </div>
+              <div class="confirm"><span class="sp"></span><button class="btn-edit">Edit</button><button class="btn-confirm"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M4.5 10.5l3.5 3.5 7.5-8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Confirm &amp; post</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 2.5L16 5v4.2c0 3.6-2.5 6.7-6 7.8-3.5-1.1-6-4.2-6-7.8V5l6-2.5z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><path d="M7.6 10l1.7 1.7L13 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Reads run automatically as context. Every write shows the full payload and waits for your confirm, one at a time.</div>
+      </div>
+
+      <!-- Composer -->
+      <div class="cp-foot">
+        <div class="composer">
+          <div class="field">Ask a follow-up, or tell Copilot what to do next…</div>
+
+          <!-- Integration bar -->
+          <div class="intbar">
+            <span class="lbl"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M8 4.5l-1 1a2.5 2.5 0 000 3.5l1 1M12 15.5l1-1a2.5 2.5 0 000-3.5l-1-1M7.5 12.5l5-5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>Tools</span>
+            <div class="chips">
+              <span class="chip" style="background:#E8F6FD"><span class="tip">Salesforce · Connected</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M10 7a3.2 3.2 0 016 .9 2.8 2.8 0 01-.5 5.6H7.5a3 3 0 01-.6-5.9A3.2 3.2 0 0110 7z" fill="#00A1E0"/></svg><span class="conn"></span></span>
+              <span class="chip" style="background:#FFEFE9"><span class="tip">HubSpot · Connected</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="16" cy="8" r="2.4" stroke="#FF7A59" stroke-width="1.6"/><path d="M11 12.5V9M11 12.5a2.5 2.5 0 102.4 1.8M11 12.5l3-2.7" stroke="#FF7A59" stroke-width="1.6" fill="none" stroke-linecap="round"/><circle cx="8.6" cy="15" r="2.6" stroke="#FF7A59" stroke-width="1.6"/></svg><span class="conn"></span></span>
+              <span class="chip" style="background:#fff;border:1px solid #ECECEC"><span class="tip">Google Workspace · Connected</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 10.2v3.7h5.2c-.23 1.2-.92 2.2-1.96 2.9l3.17 2.46C19.9 17.8 20.6 15.4 20.6 12.6c0-.6-.05-1.2-.15-1.7H12z" fill="#4285F4"/><path d="M12 21c2.7 0 4.96-.9 6.62-2.43l-3.17-2.46c-.88.6-2 .95-3.45.95-2.65 0-4.9-1.79-5.7-4.2l-3.27 2.52A9 9 0 0012 21z" fill="#34A853"/><path d="M6.3 12.86A5.4 5.4 0 016 11.1c0-.6.1-1.2.3-1.76L3.03 6.82A9 9 0 003 15.38l3.3-2.52z" fill="#FBBC05"/><path d="M12 5.5c1.47 0 2.8.5 3.84 1.5l2.87-2.87A9 9 0 003.03 6.82L6.3 9.34C7.1 6.93 9.35 5.5 12 5.5z" fill="#EA4335"/></svg><span class="conn"></span></span>
+              <span class="chip" style="background:#08363D"><span class="tip">Zendesk · Connected</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M11.4 8.5v8.5H4l7.4-8.5zM12.6 16.9c0-2 1.65-3.7 3.7-3.7s3.7 1.65 3.7 3.7h-7.4z" fill="#fff"/><path d="M12.6 7.1c0 2-1.65 3.7-3.7 3.7S5.2 9.1 5.2 7.1h7.4zM12.6 15.5V7l7.4 8.5h-7.4z" fill="#fff" opacity="0.55"/></svg><span class="conn"></span></span>
+              <span class="chip" style="background:#0A0A0A"><span class="tip">Cal.com · Connected</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="4" y="6" width="16" height="13" rx="2.4" stroke="#fff" stroke-width="1.5"/><path d="M4 9.5h16M8 4.5v3M16 4.5v3" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg><span class="conn"></span></span>
+              <span class="chip" style="background:#fff;border:1px solid #ECECEC"><span class="tip">Slack · Connected</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 13a2 2 0 11-2-2h2v2zm1 0a2 2 0 014 0v5a2 2 0 11-4 0v-5z" fill="#E01E5A"/><path d="M11 6a2 2 0 112 2h-2V6zm0 1a2 2 0 010 4H6a2 2 0 010-4h5z" fill="#36C5F0"/><path d="M18 11a2 2 0 112 2h-2v-2zm-1 0a2 2 0 01-4 0V6a2 2 0 114 0v5z" fill="#2EB67D"/><path d="M13 18a2 2 0 11-2-2h2v2zm0-1a2 2 0 010-4h5a2 2 0 010 4h-5z" fill="#ECB22E"/></svg><span class="conn"></span></span>
+              <span class="chip" style="background:#F22F46"><span class="tip">Twilio · Connected</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.2" stroke="#fff" stroke-width="1.6"/><circle cx="9.6" cy="9.6" r="1.5" fill="#fff"/><circle cx="14.4" cy="9.6" r="1.5" fill="#fff"/><circle cx="9.6" cy="14.4" r="1.5" fill="#fff"/><circle cx="14.4" cy="14.4" r="1.5" fill="#fff"/></svg><span class="conn"></span></span>
+              <span class="chip-add" id="chipAdd" title="Add an integration"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 4.5v11M4.5 10h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+            </div>
+            <span class="manage">Manage</span>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="toolbar">
+            <button class="plus-btn" id="plusBtn"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 4.5v11M4.5 10h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
+            <button class="tbtn"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M13 10v1a3 3 0 003 2.6A7 7 0 1010 17" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>Add context</button>
+            <span class="tsp"></span>
+            <button class="tbtn">Plan<svg class="chev" width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>
+            <button class="tbtn"><span class="dot"></span>Opus 4.8<svg class="chev" width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>
+            <button class="send-btn"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 16V5M10 5L5.5 9.5M10 5l4.5 4.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+
+            <!-- + menu -->
+            <div class="pmenu" id="pmenu">
+              <div class="pm-l">Add to this chat</div>
+              <div class="pm-i"><span class="pic"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M13 10v1a3 3 0 003 2.6A7 7 0 1010 17" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></span><div><div class="pt">Add context</div><div class="ps">Knowledge bases, calls, charts, skills</div></div></div>
+              <div class="pm-i on"><span class="pic"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="3.5" y="3.5" width="5.5" height="5.5" rx="1.3" stroke="currentColor" stroke-width="1.4"/><rect x="11" y="3.5" width="5.5" height="5.5" rx="1.3" stroke="currentColor" stroke-width="1.4"/><rect x="3.5" y="11" width="5.5" height="5.5" rx="1.3" stroke="currentColor" stroke-width="1.4"/><path d="M13.7 11v5.5M11 13.7h5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span><div><div class="pt">Integrations</div><div class="ps">Connect Salesforce, Slack, and more</div></div><span class="nd"></span></div>
+              <div class="pm-i"><span class="pic"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M5 3.5h7l3 3v10H5V3.5z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M12 3.5v3h3" stroke="currentColor" stroke-width="1.3" fill="none"/></svg></span><div><div class="pt">Upload a file</div><div class="ps">PDF, doc, or CSV as one-off context</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+  const plusBtn = document.getElementById('plusBtn');
+  const pmenu = document.getElementById('pmenu');
+  const chipAdd = document.getElementById('chipAdd');
+  function toggleMenu(e){ e.stopPropagation(); pmenu.classList.toggle('open'); }
+  plusBtn.addEventListener('click', toggleMenu);
+  chipAdd.addEventListener('click', (e)=>{ e.stopPropagation(); pmenu.classList.add('open'); });
+  document.addEventListener('click', (e)=>{ if(!pmenu.contains(e.target) && e.target!==plusBtn) pmenu.classList.remove('open'); });
+</script>
+
+</body>
+</html>

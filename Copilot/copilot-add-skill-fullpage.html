@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell Copilot — Add a skill</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #0A0A0A; background: #fff; display: flex; height: 100vh; overflow: hidden; font-size: 14px; }
+
+  /* ===== Left: chat history ===== */
+  .chats { width: 256px; min-width: 256px; background: #FAFBFC; border-right: 1px solid #ECEFF3; display: flex; flex-direction: column; }
+  .chats-top { padding: 16px 14px 10px; }
+  .chats-title { font-size: 13px; font-weight: 700; color: #0A0A0A; letter-spacing: -0.01em; display: flex; align-items: center; gap: 7px; margin-bottom: 12px; }
+  .chats-title svg { color: #3d64d7; }
+  .newchat { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 11px; border: 1px solid #E1E4EA; background: #fff; border-radius: 8px; font-size: 13px; font-weight: 600; color: #0E121B; cursor: pointer; }
+  .newchat:hover { background: rgba(0,0,0,0.02); }
+  .chats-list { flex: 1; overflow-y: auto; padding: 6px 8px 14px; }
+  .chat-item { padding: 8px 10px; border-radius: 7px; font-size: 13px; color: #525866; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+  .chat-item:hover { background: rgba(0,0,0,0.04); }
+  .chat-item.active { background: #EEF1F6; color: #0A0A0A; font-weight: 500; }
+  .chats-foot { padding: 10px 12px; border-top: 1px solid #ECEFF3; display: flex; align-items: center; gap: 8px; }
+  .chats-foot .av { width: 24px; height: 24px; border-radius: 50%; overflow: hidden; }
+  .chats-foot .av img { width: 100%; height: 100%; object-fit: cover; }
+  .chats-foot .em { font-size: 12.5px; color: #525866; }
+
+  /* ===== Center: conversation ===== */
+  .conv { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .conv-top { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-bottom: 1px solid #F1F3F5; }
+  .agent-dot { width: 8px; height: 8px; border-radius: 50%; background: #1FC16B; }
+  .agent-name { font-size: 13.5px; font-weight: 600; color: #0A0A0A; }
+  .agent-sub { font-size: 12px; color: #99A0AE; }
+  .conv-top .sp { flex: 1; }
+  .top-link { font-size: 12.5px; color: #525866; cursor: pointer; }
+  .conv-scroll { flex: 1; overflow-y: auto; padding: 22px 20px; }
+  .thread { max-width: 720px; margin: 0 auto; }
+  .m-user { display: flex; justify-content: flex-end; margin-bottom: 18px; }
+  .m-user .b { background: #EAF0FF; border: 1px solid #DCE6FF; border-radius: 12px 12px 4px 12px; padding: 10px 13px; font-size: 13.5px; color: #0E121B; line-height: 1.5; max-width: 80%; }
+  .m-ai { display: flex; gap: 11px; margin-bottom: 18px; }
+  .m-ai .av { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg,#5b7cf0,#3d64d7); display: flex; align-items: center; justify-content: center; }
+  .m-ai .c { font-size: 13.5px; color: #0E121B; line-height: 1.6; }
+  .m-ai .c p + p { margin-top: 9px; }
+  .m-ai .c .hl { font-weight: 600; color: #0A0A0A; }
+  .ctx-used { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 6px 10px; background: #F5F7FA; border: 1px solid #EEF0F3; border-radius: 8px; font-size: 12px; color: #525866; }
+  .ctx-used svg { color: #3d64d7; }
+  .ctx-used b { color: #0E121B; font-weight: 600; }
+
+  /* Composer */
+  .composer-wrap { padding: 10px 20px 18px; }
+  .composer { max-width: 720px; margin: 0 auto; border: 1px solid #E1E4EA; border-radius: 14px; box-shadow: 0 1px 3px rgba(16,24,40,0.05); padding: 12px 14px 10px; position: relative; }
+  .composer .ph { font-size: 13.5px; color: #99A0AE; min-height: 22px; }
+  .composer .ph .slash { color: #3d64d7; font-weight: 600; background: #ecf3ff; border-radius: 4px; padding: 0 4px; }
+  .composer-bar { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .cbtn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 1px solid #E1E4EA; background: #fff; border-radius: 8px; font-size: 12.5px; font-weight: 500; color: #525866; cursor: pointer; }
+  .cbtn:hover { background: rgba(0,0,0,0.03); }
+  .cbtn.icon { width: 30px; padding: 0; justify-content: center; }
+  .cbtn .k { color: #0E121B; font-weight: 600; }
+  .cbtn .mut { color: #99A0AE; }
+  .skipbox { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: #525866; margin-left: 2px; }
+  .skipbox .box { width: 15px; height: 15px; border: 1.5px solid #C9CED6; border-radius: 4px; }
+  .csp { flex: 1; }
+  .send { width: 30px; height: 30px; border-radius: 8px; background: #0E121B; color: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+
+  /* Slash-skills popover */
+  .slash-pop { position: absolute; left: 14px; bottom: 64px; width: 320px; background: #fff; border: 1px solid #E1E4EA; border-radius: 12px; box-shadow: 0 12px 32px rgba(16,24,40,0.16); overflow: hidden; }
+  .sp-head { font-size: 11px; font-weight: 600; color: #99A0AE; text-transform: uppercase; letter-spacing: 0.04em; padding: 10px 12px 6px; }
+  .sp-item { display: flex; align-items: center; gap: 9px; padding: 8px 12px; font-size: 13px; color: #0E121B; cursor: pointer; }
+  .sp-item:hover, .sp-item.hl { background: #F5F7FA; }
+  .sp-item svg { color: #525866; }
+  .sp-item .on { margin-left: auto; font-size: 10px; font-weight: 600; color: #3d64d7; background: #ecf3ff; border-radius: 5px; padding: 1px 6px; }
+  .sp-div { height: 1px; background: #F1F3F5; }
+  .sp-create { color: #3d64d7; font-weight: 600; }
+
+  /* ===== Right: Context panel ===== */
+  .ctx { width: 360px; min-width: 360px; border-left: 1px solid #E1E4EA; display: flex; flex-direction: column; background: #fff; }
+  .ctx-tabs { display: flex; gap: 14px; padding: 14px 18px 0; border-bottom: 1px solid #F1F3F5; }
+  .ctx-tab { font-size: 13px; font-weight: 500; color: #99A0AE; padding: 4px 2px 12px; cursor: pointer; border-bottom: 2px solid transparent; }
+  .ctx-tab.active { color: #0A0A0A; border-bottom-color: #0A0A0A; }
+  .ctx-body { flex: 1; overflow-y: auto; padding: 16px 16px 24px; }
+
+  .csec { margin-bottom: 22px; }
+  .csec-head { display: flex; align-items: center; margin-bottom: 10px; }
+  .csec-head h4 { font-size: 13px; font-weight: 600; color: #0A0A0A; }
+  .csec-head .add { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #3d64d7; cursor: pointer; }
+  .csec-sub { font-size: 11.5px; color: #99A0AE; margin: -4px 0 10px; line-height: 1.45; }
+
+  /* Skill rows */
+  .srow { display: flex; align-items: center; gap: 10px; padding: 10px 11px; border: 1px solid #E1E4EA; border-radius: 10px; }
+  .srow + .srow { margin-top: 8px; }
+  .s-ic { width: 26px; height: 26px; border-radius: 7px; background: #F5F7FA; border: 1px solid #EEF0F3; color: #525866; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .s-main { flex: 1; min-width: 0; }
+  .s-nm { font-size: 12.5px; font-weight: 600; color: #0A0A0A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .s-meta { font-size: 11px; color: #99A0AE; margin-top: 1px; }
+  .tg { width: 32px; height: 18px; border-radius: 9px; background: #E1E4EA; position: relative; cursor: pointer; flex-shrink: 0; }
+  .tg.on { background: #3d64d7; }
+  .tg .kb { width: 14px; height: 14px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .tg.on .kb { left: 16px; }
+
+  /* Files */
+  .file { display: flex; align-items: center; gap: 9px; padding: 9px 11px; border: 1px solid #E1E4EA; border-radius: 10px; font-size: 12.5px; color: #0E121B; }
+  .file svg { color: #99A0AE; }
+  .file .sz { margin-left: auto; font-size: 11px; color: #99A0AE; }
+  .file-empty { border: 1px dashed #D7DCE3; border-radius: 10px; padding: 16px; text-align: center; font-size: 11.5px; color: #99A0AE; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- LEFT: chat history -->
+<aside class="chats">
+  <div class="chats-top">
+    <div class="chats-title"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 1.5L11.7 6.3L16.5 8L11.7 9.7L10 14.5L8.3 9.7L3.5 8L8.3 6.3L10 1.5Z" fill="currentColor"/></svg>Retell Copilot</div>
+    <div class="newchat"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="#0E121B"/></svg>New chat</div>
+  </div>
+  <div class="chats-list">
+    <div class="chat-item active">Brand voice rewrite for Amy</div>
+    <div class="chat-item">Why is my agent cutting off callers</div>
+    <div class="chat-item">Add a CSAT survey before hang-up</div>
+    <div class="chat-item">Support Spanish callers</div>
+    <div class="chat-item">Reduce transfer rate on billing</div>
+    <div class="chat-item">New conversation</div>
+  </div>
+  <div class="chats-foot">
+    <span class="av"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c" alt=""></span>
+    <span class="em">brandon@retellai.com</span>
+  </div>
+</aside>
+
+<!-- CENTER: conversation -->
+<section class="conv">
+  <div class="conv-top">
+    <span class="agent-dot"></span>
+    <div><div class="agent-name">Amy — Inbound Receptionist</div></div>
+    <span class="agent-sub">· Asia Tigers Law Corp</span>
+    <span class="sp"></span>
+    <span class="top-link">Feedback</span>
+  </div>
+
+  <div class="conv-scroll">
+    <div class="thread">
+      <div class="m-user"><div class="b">Rewrite the greeting and objection handling in our OverTheTop brand voice, and follow our company context.</div></div>
+
+      <div class="m-ai">
+        <div class="av"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 2L11.6 6.4L16 8L11.6 9.6L10 14L8.4 9.6L4 8L8.4 6.4L10 2Z" fill="#fff"/></svg></div>
+        <div class="c">
+          <p>I've grounded this session in two skills so the rewrite matches how OverTheTop wants to sound and what your clinics need to know.</p>
+          <div class="ctx-used"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M4 4.75A1.75 1.75 0 015.75 3H12l4 4v8.25A1.75 1.75 0 0114.25 17H5.75A1.75 1.75 0 014 15.25V4.75z" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>Using <b>OverTheTop Company Context</b> and <b>Brand Voice Guide</b></div>
+          <p style="margin-top:12px;">I'll show the change for review before applying it. Here's the new greeting, warm and concise, no jargon:</p>
+          <p>"Hi, thanks for calling OverTheTop. I can book you in or answer a quick question, what can I help with?"</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Composer with inline skill entry -->
+  <div class="composer-wrap">
+    <div class="composer">
+      <!-- slash-skills popover (inline entry point) -->
+      <div class="slash-pop">
+        <div class="sp-head">Skills</div>
+        <div class="sp-item hl"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 4.75A1.75 1.75 0 015.75 3H12l4 4v8.25A1.75 1.75 0 0114.25 17H5.75A1.75 1.75 0 014 15.25V4.75z" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>OverTheTop Company Context <span class="on">On</span></div>
+        <div class="sp-item"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 4.75A1.75 1.75 0 015.75 3H12l4 4v8.25A1.75 1.75 0 0114.25 17H5.75A1.75 1.75 0 014 15.25V4.75z" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>Brand Voice Guide</div>
+        <div class="sp-item"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 4.75A1.75 1.75 0 015.75 3H12l4 4v8.25A1.75 1.75 0 0114.25 17H5.75A1.75 1.75 0 014 15.25V4.75z" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>Rightway Build Conventions <span class="on">On</span></div>
+        <div class="sp-div"></div>
+        <div class="sp-item sp-create"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="#3d64d7"/></svg>Create a skill</div>
+      </div>
+
+      <div class="ph"><span class="slash">/</span> &nbsp;skills to attach company context, or describe a change…</div>
+      <div class="composer-bar">
+        <span class="cbtn icon" title="Add context"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="#525866"/></svg></span>
+        <span class="cbtn"><span class="mut">Mode</span> <span class="k">Build</span><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="#99A0AE" stroke-width="1.5" fill="none"/></svg></span>
+        <span class="cbtn"><span class="mut">Model</span> <span class="k">claude-opus-4-8</span><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="#99A0AE" stroke-width="1.5" fill="none"/></svg></span>
+        <span class="skipbox"><span class="box"></span>Skip approvals</span>
+        <span class="csp"></span>
+        <button class="send"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M3 10L17 3L10 17L8.5 11.5L3 10Z" fill="#fff"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RIGHT: Context panel -->
+<aside class="ctx">
+  <div class="ctx-tabs">
+    <span class="ctx-tab">Plan</span>
+    <span class="ctx-tab active">Context</span>
+  </div>
+  <div class="ctx-body">
+
+    <!-- Skills -->
+    <div class="csec">
+      <div class="csec-head"><h4>Skills</h4><span class="add"><svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="#3d64d7"/></svg>Create</span></div>
+      <div class="csec-sub">Reusable packs of company knowledge and conventions. Toggle always-on, or attach with / in the composer.</div>
+
+      <div class="srow">
+        <span class="s-ic"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 4.75A1.75 1.75 0 015.75 3H12l4 4v8.25A1.75 1.75 0 0114.25 17H5.75A1.75 1.75 0 014 15.25V4.75z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/></svg></span>
+        <div class="s-main"><div class="s-nm">OverTheTop Company Context</div><div class="s-meta">Scott Brody · 2 files</div></div>
+        <div class="tg on"><div class="kb"></div></div>
+      </div>
+      <div class="srow">
+        <span class="s-ic"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 4.75A1.75 1.75 0 015.75 3H12l4 4v8.25A1.75 1.75 0 0114.25 17H5.75A1.75 1.75 0 014 15.25V4.75z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/></svg></span>
+        <div class="s-main"><div class="s-nm">Brand Voice Guide</div><div class="s-meta">1 file · attached this session</div></div>
+        <div class="tg"><div class="kb"></div></div>
+      </div>
+      <div class="srow">
+        <span class="s-ic"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 4.75A1.75 1.75 0 015.75 3H12l4 4v8.25A1.75 1.75 0 0114.25 17H5.75A1.75 1.75 0 014 15.25V4.75z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/></svg></span>
+        <div class="s-main"><div class="s-nm">Rightway Build Conventions</div><div class="s-meta">Joel · cloud upload</div></div>
+        <div class="tg on"><div class="kb"></div></div>
+      </div>
+    </div>
+
+    <!-- Files (one-off, session) -->
+    <div class="csec">
+      <div class="csec-head"><h4>Files</h4><span class="add"><svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="#3d64d7"/></svg>Add</span></div>
+      <div class="csec-sub">One-off PDFs, docs, or URLs for this conversation. For reusable context, make a skill.</div>
+      <div class="file"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 3h6l4 4v10H5V3z" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>2026-greeting-requirements.pdf<span class="sz">142 KB</span></div>
+    </div>
+
+  </div>
+</aside>
+
+</body>
+</html>

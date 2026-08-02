@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copilot — Add context picker (PostHog style)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ph-orange: #F54E00;
+    --ph-bg: #EEEFE9;
+    --ph-text: #151515;
+    --ph-muted: #6B6B63;
+    --ph-label: #8F8F86;
+    --ph-border: #E2E2DA;
+    --ph-border-strong: #D5D5CC;
+    --ph-hover: #F2F2EC;
+    --ph-sel: #F0F0EA;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: var(--ph-text); background: var(--ph-bg); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+
+  .wrap { position: relative; width: 820px; }
+
+  /* ===== Composer (base layer) ===== */
+  .composer { position: relative; z-index: 1; background: #fff; border: 1px solid var(--ph-border); border-radius: 14px; box-shadow: 0 1px 2px rgba(20,20,20,0.04); min-height: 408px; display: flex; flex-direction: column; padding: 18px 18px 14px; }
+  .composer-text { font-size: 15px; color: var(--ph-text); line-height: 1.5; }
+  .composer-text .ctx-tag { display: inline-flex; align-items: center; gap: 5px; background: #FCEDE6; color: var(--ph-orange); border: 1px solid #F6C7B2; border-radius: 6px; padding: 1px 7px 1px 5px; font-size: 13px; font-weight: 600; }
+  .composer-bar { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 14px; }
+  .cbtn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 1px solid var(--ph-border-strong); background: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--ph-text); cursor: pointer; }
+  .cbtn:hover { background: var(--ph-hover); }
+  .cbtn svg { color: var(--ph-muted); }
+  .cbtn .chev { color: #B0B0A6; }
+  /* the @ Add context trigger — filled light pill */
+  .addctx { background: #F1F1EB; border-color: transparent; font-weight: 600; }
+  .addctx.open { background: #E9E9E1; box-shadow: inset 0 0 0 1px var(--ph-border-strong); }
+  .csp { flex: 1; }
+  .send { width: 36px; height: 36px; border-radius: 9px; border: 1px solid var(--ph-orange); background: #fff; color: var(--ph-orange); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+  .send:hover { background: #FFF4EF; }
+
+  /* ===== Palette (popover) ===== */
+  .palette { position: absolute; z-index: 5; top: -16px; left: 30px; width: 760px; background: #fff; border: 1px solid var(--ph-border); border-radius: 12px; box-shadow: 0 16px 44px rgba(20,20,20,0.16), 0 2px 8px rgba(20,20,20,0.06); overflow: hidden; }
+
+  .pal-search { display: flex; align-items: center; gap: 9px; padding: 12px 14px; border-bottom: 1px solid var(--ph-border); }
+  .pal-search svg { color: #A6A69C; flex-shrink: 0; }
+  .pal-search input { border: none; outline: none; font-size: 14px; color: var(--ph-text); width: 100%; background: transparent; }
+  .pal-search input::placeholder { color: #A6A69C; }
+
+  .pal-body { display: flex; height: 332px; }
+
+  /* col 1 — categories */
+  .cats { width: 150px; border-right: 1px solid var(--ph-border); padding: 12px 10px; flex-shrink: 0; overflow-y: auto; }
+  .cats-label, .items-label { font-size: 11px; font-weight: 600; color: var(--ph-label); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 9px; padding: 0 2px; }
+  .cat { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 5px 9px; border: 1px solid var(--ph-border); border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--ph-text); background: #fff; cursor: pointer; margin-bottom: 6px; }
+  .cat:hover { background: var(--ph-hover); }
+  .cat .ct { color: var(--ph-muted); font-variant-numeric: tabular-nums; }
+  .cat.has .nm, .cat.has .ct { color: var(--ph-orange); }
+  .cat.sel { border-color: var(--ph-orange); }
+  .cat.sel .nm, .cat.sel .ct { color: var(--ph-orange); }
+  .cat.empty { color: #B6B6AC; cursor: default; }
+  .cat.empty .ct { color: #B6B6AC; }
+  .cat.empty:hover { background: #fff; }
+
+  /* col 2 — items */
+  .items { width: 230px; flex-shrink: 0; border-right: 1px solid var(--ph-border); padding: 12px 10px; overflow-y: auto; }
+  .item { display: flex; align-items: center; gap: 10px; padding: 8px 9px; border-radius: 8px; cursor: pointer; }
+  .item:hover { background: var(--ph-hover); }
+  .item.hl { background: var(--ph-sel); }
+  .item-ic { width: 24px; height: 24px; border-radius: 6px; background: #F4F4EE; border: 1px solid var(--ph-border); display: inline-flex; align-items: center; justify-content: center; color: var(--ph-muted); flex-shrink: 0; }
+  .item-main { min-width: 0; flex: 1; }
+  .item-nm { font-size: 13px; font-weight: 500; color: var(--ph-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-meta { font-size: 11px; color: var(--ph-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* col 3 — detail */
+  .detail { flex: 1; min-width: 0; padding: 16px 18px; overflow-y: auto; }
+  .d-top { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .d-pin { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border: 1px solid var(--ph-border-strong); background: #fff; border-radius: 7px; font-size: 12px; font-weight: 600; color: var(--ph-text); cursor: pointer; }
+  .d-pin:hover { background: var(--ph-hover); }
+  .d-sp { flex: 1; }
+  .d-link { font-size: 12.5px; font-weight: 600; color: var(--ph-orange); cursor: pointer; display: inline-flex; align-items: center; gap: 3px; }
+  .d-kicker { font-size: 11px; font-weight: 600; color: var(--ph-label); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+  .d-title { display: flex; align-items: center; gap: 9px; font-size: 17px; font-weight: 700; color: var(--ph-text); line-height: 1.25; }
+  .d-title .d-ic { width: 26px; height: 26px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--ph-text); }
+  .d-desc { font-size: 13.5px; color: var(--ph-text); line-height: 1.55; margin-top: 11px; }
+  .d-divider { height: 1px; background: var(--ph-border); margin: 16px 0; }
+  .d-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
+  .stat .s-l { font-size: 11px; font-weight: 600; color: var(--ph-label); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 4px; }
+  .stat .s-v { font-size: 13.5px; color: var(--ph-text); font-weight: 500; }
+
+  /* chart preview */
+  .mini { width: 100%; height: 92px; margin-top: 14px; display: block; }
+  .metric { display: flex; align-items: baseline; gap: 8px; margin-top: 6px; }
+  .metric .mv { font-size: 24px; font-weight: 700; color: var(--ph-text); }
+  .metric .md { font-size: 12.5px; font-weight: 600; color: var(--ph-orange); }
+
+  /* ===== Bottom tip + chips ===== */
+  .below { margin-top: 18px; text-align: center; }
+  .tip { font-size: 12.5px; font-weight: 600; color: var(--ph-text); }
+  .row-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+  .pchip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; border: 1px solid var(--ph-border-strong); background: #fff; border-radius: 8px; font-size: 12.5px; font-weight: 500; color: var(--ph-text); cursor: pointer; }
+  .pchip:hover { background: var(--ph-hover); }
+  .pchip svg { color: var(--ph-muted); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- Composer base -->
+  <div class="composer">
+    <div class="composer-text">
+      Does the agent&rsquo;s pricing match
+      <span class="ctx-tag">
+        <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 3.5h7l3 3v10H5V3.5z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><path d="M7.5 9h5M7.5 12h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        OverTheTop Pricing &amp; Plans
+      </span>
+      ?
+    </div>
+    <div class="composer-bar">
+      <span class="cbtn"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M3 5h3l8 10h3M3 15h3l2.2-2.75M14 5h3M14 5l-2 2M17 5l-2-2M17 5l-2 2M17 15l-2-2M17 15l-2 2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Auto<svg class="chev" width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></span>
+      <span class="cbtn addctx open" id="addCtxBtn"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M13 10v1a3 3 0 003 2.6A7 7 0 1010 17" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>Add context<svg class="chev" width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></span>
+      <span class="csp"></span>
+      <button class="send"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 10h11M11 6l4 4-4 4" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+  </div>
+
+  <!-- Add-context palette -->
+  <div class="palette">
+    <div class="pal-search">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="currentColor" stroke-width="1.6"/><path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input placeholder="Search knowledge bases, charts, agents, calls, skills…" />
+    </div>
+
+    <div class="pal-body">
+      <div class="cats" id="cats">
+        <div class="cats-label">Categories</div>
+        <button class="cat has" data-cat="recent"><span class="nm">Recent</span><span class="ct">3</span></button>
+        <button class="cat empty" data-cat="pinned"><span class="nm">Pinned</span><span class="ct">0</span></button>
+        <button class="cat sel has" data-cat="kb"><span class="nm">Knowledge bases</span><span class="ct">3</span></button>
+        <button class="cat has" data-cat="charts"><span class="nm">Charts</span><span class="ct">6</span></button>
+        <button class="cat has" data-cat="dashboards"><span class="nm">Dashboards</span><span class="ct">1</span></button>
+        <button class="cat has" data-cat="agents"><span class="nm">Agents</span><span class="ct">1</span></button>
+        <button class="cat has" data-cat="calls"><span class="nm">Calls</span><span class="ct">24</span></button>
+        <button class="cat has" data-cat="skills"><span class="nm">Skills</span><span class="ct">4</span></button>
+        <button class="cat empty" data-cat="files"><span class="nm">Files</span><span class="ct">0</span></button>
+      </div>
+
+      <div class="items" id="items"><!-- col 2, filled by JS --></div>
+      <div class="detail" id="detail"><!-- col 3, filled by JS --></div>
+    </div>
+  </div>
+
+  <!-- Below -->
+  <div class="below">
+    <div class="tip">Tip: Attach a knowledge base to ground answers in your live, published content</div>
+    <div class="row-chips">
+      <span class="pchip"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><rect x="4" y="5" width="12" height="11" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 5V3M7.5 11.5h.01M12.5 11.5h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Build an agent</span>
+      <span class="pchip"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M6 4.5L15 10L6 15.5V4.5Z" fill="currentColor"/></svg>Run a simulation</span>
+      <span class="pchip"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M3.5 14L8 9.5l3 2.5L16.5 6" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Analytics</span>
+      <span class="pchip"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 6.5V10l2.5 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Call History</span>
+      <span class="pchip"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>AI QA</span>
+      <span class="pchip"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M5 3.5h7l3 3v10H5V3.5z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/></svg>Docs</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const ICON = {
+    drive: '<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M7.5 3l-5 8.5L5 16h10l2.5-4.5L12.5 3h-5z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M2.5 11.5h15M7.5 3l5 8.5M12.5 3l-5 8.5" stroke="currentColor" stroke-width="1.3"/></svg>',
+    web: '<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M3.5 10h13M10 3.5c2 2 2 11 0 13M10 3.5c-2 2-2 11 0 13" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>',
+    pdf: '<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M5 3.5h7l3 3v10H5V3.5z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M12 3.5v3h3" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>',
+    chart: '<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M3.5 14L8 9.5l3 2.5L16.5 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 6h3.5v3.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    dash: '<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="3.5" y="3.5" width="5.5" height="5.5" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="11" y="3.5" width="5.5" height="5.5" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="3.5" y="11" width="5.5" height="5.5" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="11" y="11" width="5.5" height="5.5" rx="1.2" stroke="currentColor" stroke-width="1.3"/></svg>',
+    agent: '<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="4" y="6" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M10 6V3.5M7.5 10.5h.01M12.5 10.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    call: '<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 6.5V10l2.5 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+    skill: '<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 3l5 2.5v4c0 3.5-2.4 5.6-5 6.5-2.6-.9-5-3-5-6.5v-4L10 3z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg>',
+  };
+
+  // sample line chart, varied per series offset
+  function miniChart(seed) {
+    const pts = [22,28,24,34,30,44,40,52,48,62,58,72].map((v,i)=>{
+      const x = 6 + i*(228/11);
+      const y = 86 - (v + (seed||0)) * 0.78;
+      return [x, Math.max(8, Math.min(84, y))];
+    });
+    const line = pts.map((p,i)=> (i? 'L':'M') + p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+    const area = line + ` L${pts[pts.length-1][0].toFixed(1)} 86 L6 86 Z`;
+    return `<svg class="mini" viewBox="0 0 240 92" preserveAspectRatio="none" fill="none">
+      <line x1="6" y1="86" x2="234" y2="86" stroke="#E2E2DA" stroke-width="1"/>
+      <path d="${area}" fill="#FDE7DC"/>
+      <path d="${line}" stroke="#F54E00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+  }
+
+  const DATA = {
+    kb: { label: 'Knowledge bases', items: [
+      { ic:'drive', nm:'OverTheTop Pricing & Plans', meta:'Google Drive · 2 days ago',
+        d:{ kicker:'KNOWLEDGE BASE', desc:'Plan tiers, session pricing, and add-on fees for OverTheTop clinics.',
+            stats:[['Source','Google Drive'],['Documents','14'],['Last synced','Live'],['Used by','Amy']] } },
+      { ic:'web', nm:'Clinic Services FAQ', meta:'Website · 5 hours ago',
+        d:{ kicker:'KNOWLEDGE BASE', desc:'Public FAQ covering services, hours, and locations, crawled from the clinic site.',
+            stats:[['Source','Website'],['Pages','8'],['Last synced','Live'],['Used by','Amy']] } },
+      { ic:'pdf', nm:'Insurance & Billing Policy', meta:'PDF upload · Apr 3',
+        d:{ kicker:'KNOWLEDGE BASE', desc:'Insurance acceptance, billing terms, and refund policy uploaded by the billing team.',
+            stats:[['Source','PDF upload'],['Pages','22'],['Last synced','Snapshot'],['Used by','Amy']] } },
+    ]},
+    charts: { label: 'Charts', items: [
+      { ic:'chart', nm:'Failure rate · last 7 days', meta:'Insight · hourly', chart:0,
+        d:{ kicker:'INSIGHT', metric:'27%', delta:'▲ 4 pts vs prior week',
+            stats:[['Period','Last 7 days'],['Agent','Inbound Scheduler'],['Calls','142'],['Failed','38']] } },
+      { ic:'chart', nm:'Calls by outcome', meta:'Insight', chart:-6,
+        d:{ kicker:'INSIGHT', metric:'73%', delta:'success rate',
+            stats:[['Period','Last 7 days'],['Successful','104'],['Transferred','19'],['Failed','19']] } },
+      { ic:'chart', nm:'Avg duration trend', meta:'Insight', chart:8,
+        d:{ kicker:'INSIGHT', metric:'1:02', delta:'▼ 9s vs prior week',
+            stats:[['Period','Last 7 days'],['Median','0:54'],['P90','2:11']] } },
+      { ic:'chart', nm:'Transfer rate by agent', meta:'Insight', chart:-3,
+        d:{ kicker:'INSIGHT', metric:'13%', delta:'▲ 2 pts',
+            stats:[['Period','Last 7 days'],['Agents','3'],['Top','Inbound Scheduler']] } },
+      { ic:'chart', nm:'Sentiment breakdown', meta:'Insight', chart:4,
+        d:{ kicker:'INSIGHT', metric:'+0.31', delta:'avg sentiment',
+            stats:[['Period','Last 7 days'],['Positive','61%'],['Negative','14%']] } },
+      { ic:'chart', nm:'Conversion by version', meta:'Insight', chart:12,
+        d:{ kicker:'INSIGHT', metric:'41%', delta:'▲ 6 pts on v3',
+            stats:[['Period','Last 7 days'],['v2','35%'],['v3','41%']] } },
+    ]},
+    dashboards: { label: 'Dashboards', items: [
+      { ic:'dash', nm:'Weekly QA overview', meta:'6 charts · shared',
+        d:{ kicker:'DASHBOARD', desc:'Standing weekly view of failure rate, sentiment, transfer rate, and QA scores.',
+            stats:[['Charts','6'],['Owner','Brandon'],['Refresh','Hourly'],['Shared with','Team']] } },
+    ]},
+    agents: { label: 'Agents', items: [
+      { ic:'agent', nm:'Amy — Inbound Receptionist', meta:'OverTheTop · in context',
+        d:{ kicker:'AGENT', desc:'Inbound receptionist for OverTheTop clinics. Books visits and answers pricing questions.',
+            stats:[['Status','Live'],['Version','v3'],['KBs linked','3'],['Calls (7d)','142']] } },
+    ]},
+    calls: { label: 'Calls', items: [
+      { ic:'call', nm:'Apr 23, 2:32 PM', meta:'Inbound Scheduler · 1:12',
+        d:{ kicker:'CALL', desc:'Caller asked to reschedule, then requested a human for a billing dispute.',
+            stats:[['Outcome','Transferred'],['Duration','1:12'],['Disconnection','agent_transfer'],['Agent','Inbound Scheduler']] } },
+      { ic:'call', nm:'Apr 23, 2:28 PM', meta:'Inbound Scheduler · 0:42',
+        d:{ kicker:'CALL', desc:'Caller hung up during identity verification before booking.',
+            stats:[['Outcome','Unsuccessful'],['Duration','0:42'],['Disconnection','user_hangup'],['Agent','Inbound Scheduler']] } },
+      { ic:'call', nm:'Apr 23, 2:21 PM', meta:'Inbound Scheduler · 1:03',
+        d:{ kicker:'CALL', desc:'Booked a follow-up visit and confirmed pricing from the knowledge base.',
+            stats:[['Outcome','Successful'],['Duration','1:03'],['Disconnection','agent_hangup'],['Agent','Inbound Scheduler']] } },
+    ]},
+    skills: { label: 'Skills', items: [
+      { ic:'skill', nm:'OverTheTop Company Context', meta:'Scott Brody · 2 files',
+        d:{ kicker:'SKILL', desc:'Company background, locations, and policies that ground every session for OverTheTop.',
+            stats:[['Owner','Scott Brody'],['Files','2'],['State','Always on']] } },
+      { ic:'skill', nm:'Brand Voice Guide', meta:'1 file · session',
+        d:{ kicker:'SKILL', desc:'Tone and phrasing guidance so rewrites match the OverTheTop brand voice.',
+            stats:[['Files','1'],['State','This session']] } },
+      { ic:'skill', nm:'Build Conventions', meta:'Joel · always on',
+        d:{ kicker:'SKILL', desc:'Naming, node structure, and prompt conventions for building agents.',
+            stats:[['Owner','Joel'],['State','Always on']] } },
+    ]},
+    recent: { label: 'Recent', items: [
+      { ic:'drive', nm:'OverTheTop Pricing & Plans', meta:'Knowledge base · 2 min ago',
+        d:{ kicker:'KNOWLEDGE BASE', desc:'Plan tiers, session pricing, and add-on fees for OverTheTop clinics.',
+            stats:[['Source','Google Drive'],['Documents','14'],['Last synced','Live'],['Used by','Amy']] } },
+      { ic:'agent', nm:'Amy — Inbound Receptionist', meta:'Agent · in context',
+        d:{ kicker:'AGENT', desc:'Inbound receptionist for OverTheTop clinics.',
+            stats:[['Status','Live'],['Version','v3'],['KBs linked','3'],['Calls (7d)','142']] } },
+      { ic:'call', nm:'Apr 23, 2:28 PM', meta:'Call · user hangup',
+        d:{ kicker:'CALL', desc:'Caller hung up during identity verification before booking.',
+            stats:[['Outcome','Unsuccessful'],['Duration','0:42'],['Disconnection','user_hangup']] } },
+    ]},
+    pinned: { label: 'Pinned', items: [] },
+    files:  { label: 'Files', items: [], empty: 'No files attached.\nDrop a PDF, doc, or URL into the composer.' },
+  };
+
+  const itemsEl = document.getElementById('items');
+  const detailEl = document.getElementById('detail');
+
+  function renderDetail(it) {
+    const d = it.d || {};
+    let mid = '';
+    if (it.chart !== undefined) {
+      mid += miniChart(it.chart);
+      if (d.metric) mid += `<div class="metric"><span class="mv">${d.metric}</span><span class="md">${d.delta||''}</span></div>`;
+    }
+    if (d.desc) mid = `<p class="d-desc">${d.desc}</p>` + mid;
+    const stats = (d.stats||[]).map(s => `<div class="stat"><div class="s-l">${s[0]}</div><div class="s-v">${s[1]}</div></div>`).join('');
+    detailEl.innerHTML = `
+      <div class="d-top">
+        <button class="d-pin"><svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M7 3h6l-1 4 3 3v2H5v-2l3-3-1-4z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M10 12v5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Pin</button>
+        <span class="d-sp"></span>
+        <span class="d-link">Edit</span>
+        <span class="d-link">View <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M7 4h9v9M16 4l-9 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>
+      <div class="d-kicker">${d.kicker||''}</div>
+      <div class="d-title"><span class="d-ic">${ICON[it.ic]}</span>${it.nm}</div>
+      ${mid}
+      ${stats ? '<div class="d-divider"></div><div class="d-grid">'+stats+'</div>' : ''}
+    `;
+  }
+
+  function renderItems(cat) {
+    const data = DATA[cat];
+    if (!data.items.length) {
+      itemsEl.innerHTML = `<div class="items-label">${data.label}</div>`;
+      detailEl.innerHTML = `<div style="padding:48px 8px;text-align:center;color:#8F8F86;font-size:12.5px;line-height:1.6;">${(data.empty||'Nothing here yet.').replace(/\n/g,'<br>')}</div>`;
+      return;
+    }
+    itemsEl.innerHTML = `<div class="items-label">${data.label}</div>` + data.items.map((it,i) => `
+      <div class="item${i===0?' hl':''}" data-i="${i}">
+        <span class="item-ic">${ICON[it.ic]}</span>
+        <span class="item-main"><span class="item-nm">${it.nm}</span><span class="item-meta">${it.meta}</span></span>
+      </div>`).join('');
+    itemsEl.querySelectorAll('.item').forEach(el => {
+      el.addEventListener('click', () => {
+        itemsEl.querySelectorAll('.item').forEach(x => x.classList.remove('hl'));
+        el.classList.add('hl');
+        renderDetail(data.items[+el.dataset.i]);
+      });
+    });
+    renderDetail(data.items[0]);
+  }
+
+  document.querySelectorAll('.cat').forEach(c => {
+    c.addEventListener('click', () => {
+      if (c.classList.contains('empty') && c.dataset.cat !== 'files' && c.dataset.cat !== 'pinned') return;
+      document.querySelectorAll('.cat').forEach(x => x.classList.remove('sel'));
+      c.classList.add('sel');
+      renderItems(c.dataset.cat);
+    });
+  });
+
+  renderItems('kb');
+</script>
+
+</body>
+</html>

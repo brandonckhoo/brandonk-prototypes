@@ -385,6 +385,42 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
           </span>
         </span>
 
+        <!-- Active type tag -->
+        <span id="type-filter-tag" class="filter-tag" style="display:none;">
+          <span style="color:#5a7ae8;font-weight:400;">Channel:</span>
+          <span id="type-tag-label" style="font-weight:500;"></span>
+          <span class="filter-tag-x" onclick="clearTypeFilter()">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2l-8 8" stroke="#3d64d7" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </span>
+        </span>
+
+        <!-- Active batch call ID tag -->
+        <span id="batch-filter-tag" class="filter-tag" style="display:none;">
+          <span style="color:#5a7ae8;font-weight:400;">Batch ID:</span>
+          <span id="batch-tag-label" style="font-weight:500;"></span>
+          <span class="filter-tag-x" onclick="clearBatchFilter()">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2l-8 8" stroke="#3d64d7" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </span>
+        </span>
+
+        <!-- Active call status tag -->
+        <span id="status-filter-tag" class="filter-tag" style="display:none;">
+          <span style="color:#5a7ae8;font-weight:400;">Status:</span>
+          <span id="status-tag-label" style="font-weight:500;"></span>
+          <span class="filter-tag-x" onclick="clearStatusFilter()">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2l-8 8" stroke="#3d64d7" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </span>
+        </span>
+
+        <!-- Active duration tag -->
+        <span id="duration-filter-tag" class="filter-tag" style="display:none;">
+          <span style="color:#5a7ae8;font-weight:400;">Duration:</span>
+          <span id="duration-tag-label" style="font-weight:500;"></span>
+          <span class="filter-tag-x" onclick="clearDurationFilter()">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2l-8 8" stroke="#3d64d7" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </span>
+        </span>
+
         <!-- Filter button -->
         <div id="filter-wrap" style="position:relative;">
           <button class="filter-btn" onclick="toggleFilterPanel(event)">
@@ -402,6 +438,22 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
               <div class="filter-option" onclick="showProviderFilter()">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#525866" stroke-width="1.3"/><path d="M8 5v6M5 8h6" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg>
                 Cost Provider
+              </div>
+              <div class="filter-option" onclick="showTypeFilter()">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#525866" stroke-width="1.3"/><path d="M8 5v6M5 8h6" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg>
+                Channel
+              </div>
+              <div class="filter-option" onclick="showBatchFilter()">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#525866" stroke-width="1.3"/><path d="M8 5v6M5 8h6" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg>
+                Batch Call ID
+              </div>
+              <div class="filter-option" onclick="showStatusFilter()">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#525866" stroke-width="1.3"/><path d="M8 5v6M5 8h6" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg>
+                Call Status
+              </div>
+              <div class="filter-option" onclick="showDurationFilter()">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#525866" stroke-width="1.3"/><path d="M8 5v6M5 8h6" stroke="#525866" stroke-width="1.3" stroke-linecap="round"/></svg>
+                Duration
               </div>
             </div>
 
@@ -449,6 +501,84 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
                 <button class="panel-save" onclick="applyProviderFilter()">Save</button>
               </div>
             </div>
+
+            <!-- Type filter sub-view -->
+            <div id="filter-type-view" class="filter-agent-view">
+              <div class="filter-back" onclick="showMainFilter()">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#525866" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Filter by Channel
+              </div>
+              <div style="padding:4px 6px;">
+                <div style="padding:6px 8px 2px;font-size:11px;font-weight:500;color:#99A0AE;text-transform:uppercase;letter-spacing:0.04em;">Voice</div>
+                <div class="agent-item"><input type="checkbox" id="type-phone-in" name="type" value="Phone Inbound"><label for="type-phone-in">Inbound</label></div>
+                <div class="agent-item"><input type="checkbox" id="type-phone-out" name="type" value="Phone Outbound"><label for="type-phone-out">Outbound</label></div>
+                <div style="padding:8px 8px 2px;font-size:11px;font-weight:500;color:#99A0AE;text-transform:uppercase;letter-spacing:0.04em;">Chat</div>
+                <div class="agent-item"><input type="checkbox" id="type-web" name="type" value="Chat"><label for="type-web">Chat</label></div>
+              </div>
+              <div class="agent-panel-footer">
+                <button class="panel-cancel" onclick="closeFilterPanel()">Cancel</button>
+                <button class="panel-save" onclick="applyTypeFilter()">Save</button>
+              </div>
+            </div>
+
+            <!-- Batch Call ID filter sub-view -->
+            <div id="filter-batch-view" class="filter-agent-view">
+              <div class="filter-back" onclick="showMainFilter()">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#525866" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Filter by Batch Call ID
+              </div>
+              <div style="padding:10px 14px 12px;">
+                <div class="agent-search" style="margin:0;">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="#99A0AE" stroke-width="1.4"/><path d="M10.5 10.5l2.5 2.5" stroke="#99A0AE" stroke-width="1.4" stroke-linecap="round"/></svg>
+                  <input type="text" id="batch-id-input" placeholder="Enter batch call ID...">
+                </div>
+              </div>
+              <div class="agent-panel-footer">
+                <button class="panel-cancel" onclick="closeFilterPanel()">Cancel</button>
+                <button class="panel-save" onclick="applyBatchFilter()">Save</button>
+              </div>
+            </div>
+
+            <!-- Call Status filter sub-view -->
+            <div id="filter-status-view" class="filter-agent-view">
+              <div class="filter-back" onclick="showMainFilter()">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#525866" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Filter by Call Status
+              </div>
+              <div class="agent-list" style="padding:4px 6px 4px;">
+                <div class="agent-item"><input type="checkbox" id="s1" name="callstatus" value="Ended"><label for="s1">Ended</label></div>
+                <div class="agent-item"><input type="checkbox" id="s2" name="callstatus" value="Error"><label for="s2">Error</label></div>
+                <div class="agent-item"><input type="checkbox" id="s3" name="callstatus" value="Not Connected"><label for="s3">Not Connected</label></div>
+                <div class="agent-item"><input type="checkbox" id="s4" name="callstatus" value="Ongoing"><label for="s4">Ongoing</label></div>
+              </div>
+              <div class="agent-panel-footer">
+                <button class="panel-cancel" onclick="closeFilterPanel()">Cancel</button>
+                <button class="panel-save" onclick="applyStatusFilter()">Save</button>
+              </div>
+            </div>
+
+            <!-- Duration filter sub-view -->
+            <div id="filter-duration-view" class="filter-agent-view">
+              <div class="filter-back" onclick="showMainFilter()">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#525866" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Filter by Duration
+              </div>
+              <div style="padding:12px 14px;display:flex;flex-direction:column;gap:10px;">
+                <select id="duration-op" style="border:1px solid #E1E4EA;border-radius:6px;padding:7px 10px;font-size:13px;font-family:inherit;color:#0A0A0A;background:#fff;outline:none;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23525866' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;">
+                  <option value="gt">is greater than</option>
+                  <option value="lt">is less than</option>
+                </select>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <input id="duration-val" type="number" min="0" step="1" value="0" style="flex:1;border:1px solid #E1E4EA;border-radius:6px;padding:7px 10px;font-size:13px;font-family:inherit;outline:none;color:#0A0A0A;-moz-appearance:textfield;">
+                  <span style="font-size:13px;color:#525866;font-weight:500;white-space:nowrap;">mins</span>
+                </div>
+              </div>
+              <div class="agent-panel-footer">
+                <button class="panel-cancel" onclick="closeFilterPanel()">Cancel</button>
+                <button class="panel-save" onclick="applyDurationFilter()">Save</button>
+              </div>
+            </div>
+
           </div><!-- /filterPanel -->
         </div><!-- /filter-wrap -->
       </span><!-- /usage-filters -->
@@ -495,11 +625,7 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         <tr>
           <td><span class="row-chev"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
           <td style="font-size:14px;">Apr 1, 2026</td>
-          <td class="amt-apr">
-            <span class="amt-gross">$50,819.86</span>
-            <span class="amt-credit">− $2,000.00 credit applied</span>
-            <span class="amt-net">$48,819.86</span>
-          </td>
+          <td style="font-size:14px;">$48,819.86</td>
           <td></td>
           <td><span class="status-dot"><span class="dot dot-green"></span>Paid</span></td>
           <td><button class="invoice-btn">↗ Invoice</button></td>
@@ -509,11 +635,7 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         <tr>
           <td><span class="row-chev"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
           <td style="font-size:14px;">Mar 1, 2026</td>
-          <td class="amt-mar">
-            <span class="amt-gross">$38,306.98</span>
-            <span class="amt-refund">− $38,306.98 refunded</span>
-            <span class="amt-net">$0.00</span>
-          </td>
+          <td style="font-size:14px;">$0.00</td>
           <td></td>
           <td><span class="status-dot"><span class="dot dot-grey"></span>Refunded</span></td>
           <td><button class="invoice-btn">↗ Invoice</button></td>
@@ -543,11 +665,7 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         <tr>
           <td><span class="row-chev"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#99A0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
           <td style="font-size:14px;">Jan 1, 2026</td>
-          <td>
-            <span class="amt-gross">$14,740.30</span>
-            <span class="amt-refund">− $2,000.00 partial refund</span>
-            <span class="amt-net">$12,740.30</span>
-          </td>
+          <td style="font-size:14px;">$12,740.30</td>
           <td></td>
           <td><span class="status-dot"><span class="dot dot-orange"></span>Partial Refund</span></td>
           <td><button class="invoice-btn">↗ Invoice</button></td>
@@ -581,12 +699,16 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         <div class="kpi-value" id="kpi-call">$198,254</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Total Chat Charge</div>
-        <div class="kpi-value" id="kpi-chat">$12,112</div>
+        <div class="kpi-label">Call Minutes</div>
+        <div class="kpi-value" id="kpi-mins">88,731 <span class="kpi-sub">mins</span></div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Avg Call Cost / Min</div>
         <div class="kpi-value" id="kpi-avg">$2.37</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Total Chat Charge</div>
+        <div class="kpi-value" id="kpi-chat">$12,112</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Avg Chat Cost / Thread</div>
@@ -599,7 +721,7 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
       <!-- Row 1 left: Stacked bar chart -->
       <div class="chart-card chart-card-flex">
         <div class="chart-card-header">
-          <span class="chart-card-title">Call + Chat Cost</span>
+          <span class="chart-card-title">Cost Over Time</span>
           <div style="display:flex;align-items:center;gap:8px;">
             <!-- Group by dropdown -->
             <div style="position:relative;" id="groupby-wrap">
@@ -645,14 +767,10 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         </div>
       </div>
 
-      <!-- Row 2 left: Cost by Agent -->
+      <!-- Row 2 left: Minutes by Agent -->
       <div class="chart-card">
         <div class="chart-card-header">
-          <span class="chart-card-title">Cost by Agent</span>
-          <div class="chart-toggle">
-            <span class="chart-toggle-btn active" onclick="setAgentView('total',this)">Total</span>
-            <span class="chart-toggle-btn" onclick="setAgentView('permin',this)">Cost / min</span>
-          </div>
+          <span class="chart-card-title">Minutes by Agent</span>
         </div>
         <div class="provider-list" id="agent-list"></div>
       </div>
@@ -947,22 +1065,105 @@ function closeFilterPanel() {
   document.getElementById('filterPanel').classList.remove('open');
 }
 
+var ALL_SUB_VIEWS = ['filter-agent-view','filter-provider-view','filter-type-view','filter-batch-view','filter-status-view','filter-duration-view'];
+
 function showMainFilter() {
   document.getElementById('filter-main-view').style.display = '';
-  document.getElementById('filter-agent-view').style.display = 'none';
-  document.getElementById('filter-provider-view').style.display = 'none';
+  ALL_SUB_VIEWS.forEach(function(id){ document.getElementById(id).style.display = 'none'; });
 }
 
 function showAgentFilter() {
   document.getElementById('filter-main-view').style.display = 'none';
+  ALL_SUB_VIEWS.forEach(function(id){ document.getElementById(id).style.display = 'none'; });
   document.getElementById('filter-agent-view').style.display = 'block';
-  document.getElementById('filter-provider-view').style.display = 'none';
 }
 
 function showProviderFilter() {
   document.getElementById('filter-main-view').style.display = 'none';
-  document.getElementById('filter-agent-view').style.display = 'none';
+  ALL_SUB_VIEWS.forEach(function(id){ document.getElementById(id).style.display = 'none'; });
   document.getElementById('filter-provider-view').style.display = 'block';
+}
+
+function showTypeFilter() {
+  document.getElementById('filter-main-view').style.display = 'none';
+  ALL_SUB_VIEWS.forEach(function(id){ document.getElementById(id).style.display = 'none'; });
+  document.getElementById('filter-type-view').style.display = 'block';
+}
+
+function showBatchFilter() {
+  document.getElementById('filter-main-view').style.display = 'none';
+  ALL_SUB_VIEWS.forEach(function(id){ document.getElementById(id).style.display = 'none'; });
+  document.getElementById('filter-batch-view').style.display = 'block';
+}
+
+function showStatusFilter() {
+  document.getElementById('filter-main-view').style.display = 'none';
+  ALL_SUB_VIEWS.forEach(function(id){ document.getElementById(id).style.display = 'none'; });
+  document.getElementById('filter-status-view').style.display = 'block';
+}
+
+function showDurationFilter() {
+  document.getElementById('filter-main-view').style.display = 'none';
+  ALL_SUB_VIEWS.forEach(function(id){ document.getElementById(id).style.display = 'none'; });
+  document.getElementById('filter-duration-view').style.display = 'block';
+}
+
+function applyTypeFilter() {
+  var checked = Array.from(document.querySelectorAll('#filter-type-view input[type=checkbox]:checked'));
+  closeFilterPanel();
+  if (checked.length === 0) { clearTypeFilter(); return; }
+  var label = checked.map(function(cb){ return cb.value; }).join(', ');
+  document.getElementById('type-tag-label').textContent = label;
+  document.getElementById('type-filter-tag').style.display = 'inline-flex';
+}
+
+function clearTypeFilter() {
+  document.querySelectorAll('#filter-type-view input[type=checkbox]').forEach(function(cb){ cb.checked = false; });
+  document.getElementById('type-filter-tag').style.display = 'none';
+}
+
+function applyBatchFilter() {
+  var val = document.getElementById('batch-id-input').value.trim();
+  closeFilterPanel();
+  if (!val) { clearBatchFilter(); return; }
+  document.getElementById('batch-tag-label').textContent = val;
+  document.getElementById('batch-filter-tag').style.display = 'inline-flex';
+}
+
+function clearBatchFilter() {
+  document.getElementById('batch-id-input').value = '';
+  document.getElementById('batch-filter-tag').style.display = 'none';
+}
+
+function applyStatusFilter() {
+  var checked = Array.from(document.querySelectorAll('#filter-status-view input[type=checkbox]:checked'));
+  closeFilterPanel();
+  if (checked.length === 0) { clearStatusFilter(); return; }
+  var n = checked.length;
+  var label = n === 1 ? checked[0].value : n + ' statuses';
+  document.getElementById('status-tag-label').textContent = label;
+  document.getElementById('status-filter-tag').style.display = 'inline-flex';
+}
+
+function clearStatusFilter() {
+  document.querySelectorAll('#filter-status-view input[type=checkbox]').forEach(function(cb){ cb.checked = false; });
+  document.getElementById('status-filter-tag').style.display = 'none';
+}
+
+function applyDurationFilter() {
+  var op = document.getElementById('duration-op').value;
+  var val = document.getElementById('duration-val').value;
+  closeFilterPanel();
+  if (!val || val === '' || Number(val) < 0) { clearDurationFilter(); return; }
+  var opLabel = op === 'gt' ? '> ' : '< ';
+  document.getElementById('duration-tag-label').textContent = opLabel + val + ' min';
+  document.getElementById('duration-filter-tag').style.display = 'inline-flex';
+}
+
+function clearDurationFilter() {
+  document.getElementById('duration-val').value = '0';
+  document.getElementById('duration-op').value = 'gt';
+  document.getElementById('duration-filter-tag').style.display = 'none';
 }
 
 function rerenderAll(indices) {
@@ -978,20 +1179,19 @@ function rerenderAll(indices) {
   // KPIs
   var allMins = 88731;
   var filtMins = Math.round(allMins * ratio);
-  document.getElementById('kpi-spend').textContent = '$' + Math.round(filtTotal).toLocaleString('en-US');
-  document.getElementById('kpi-call').textContent  = '$' + Math.round(filtTotal * 0.943).toLocaleString('en-US');
-  document.getElementById('kpi-chat').textContent  = '$' + Math.round(filtTotal * 0.057).toLocaleString('en-US');
-  document.getElementById('kpi-avg').textContent = filtMins > 0 ? '$' + (filtTotal / filtMins).toFixed(2) : '$0.00';
+  var chatTotal = Math.round(filtTotal * 0.057);
+  document.getElementById('kpi-spend').textContent    = '$' + Math.round(filtTotal).toLocaleString('en-US');
+  document.getElementById('kpi-call').textContent     = '$' + Math.round(filtTotal * 0.943).toLocaleString('en-US');
+  document.getElementById('kpi-mins').innerHTML       = filtMins.toLocaleString('en-US') + ' <span class="kpi-sub">mins</span>';
+  document.getElementById('kpi-avg').textContent      = filtMins > 0 ? '$' + (filtTotal / filtMins).toFixed(2) : '$0.00';
+  document.getElementById('kpi-chat').textContent     = '$' + chatTotal.toLocaleString('en-US');
   document.getElementById('kpi-chat-avg').textContent = '$2.33';
 
   // Stacked bar chart
   requestAnimationFrame(function(){ renderStackedChart(); });
 
-  // Cost by Agent
-  var filtPerMin = activeAgentIndices
-    ? agentPerMin.filter(function(a){ return activeAgentIndices.indexOf(AGENT_NAMES.indexOf(a.name)) >= 0; })
-    : agentPerMin;
-  renderAgents(agentView === 'total' ? filtAgents : filtPerMin, agentView === 'permin');
+  // Minutes by Agent
+  renderAgents(activeAgentIndices);
 
   // Cost by Provider — scale proportionally
   renderProviders(heavyProviders.map(function(p){ return { name: p.name, amt: p.amt * ratio }; }));
@@ -1186,52 +1386,41 @@ function drillBack() {
   renderCostMix(costCategories);
 }
 
-// ── Cost by Agent ───────────────────────────────────────────
+// ── Minutes by Agent ────────────────────────────────────────
 var agentTotal = [
-  { name: 'Outbound Sales Agent',       amt: 85420, sub: '35,000 min' },
-  { name: 'Inbound Support Agent',      amt: 52310, sub: '22,000 min' },
-  { name: 'Customer Success Agent',     amt: 31204, sub: '12,500 min' },
-  { name: 'Accounts Receivable Agent',  amt: 24891, sub: '10,000 min' },
-  { name: 'Commissioning Agent',        amt: 16541, sub: '9,231 min'  },
+  { name: 'Outbound Sales Agent',       amt: 85420 },
+  { name: 'Inbound Support Agent',      amt: 52310 },
+  { name: 'Customer Success Agent',     amt: 31204 },
+  { name: 'Accounts Receivable Agent',  amt: 24891 },
+  { name: 'Commissioning Agent',        amt: 16541 },
 ];
 
-var agentPerMin = [
-  { name: 'Customer Success Agent',     amt: 2.50, sub: '12,500 min' },
-  { name: 'Accounts Receivable Agent',  amt: 2.49, sub: '10,000 min' },
-  { name: 'Outbound Sales Agent',       amt: 2.44, sub: '35,000 min' },
-  { name: 'Inbound Support Agent',      amt: 2.38, sub: '22,000 min' },
-  { name: 'Commissioning Agent',        amt: 1.79, sub: '9,231 min'  },
+var agentMinutes = [
+  { name: 'Outbound Sales Agent',       mins: 35000 },
+  { name: 'Inbound Support Agent',      mins: 22000 },
+  { name: 'Customer Success Agent',     mins: 12500 },
+  { name: 'Accounts Receivable Agent',  mins: 10000 },
+  { name: 'Commissioning Agent',        mins: 9231  },
 ];
 
-var agentView = 'total';
-
-function renderAgents(data, isPerMin) {
-  var maxAmt = data[0].amt;
-  var total = agentTotal.reduce(function(s,a){ return s + a.amt; }, 0);
+function renderAgents(filteredIndices) {
+  var data = filteredIndices
+    ? agentMinutes.filter(function(a){ return filteredIndices.indexOf(AGENT_NAMES.indexOf(a.name)) >= 0; })
+    : agentMinutes;
+  var totalMins = agentMinutes.reduce(function(s,a){ return s + a.mins; }, 0);
+  var maxMins = data[0].mins;
   document.getElementById('agent-list').innerHTML = data.map(function(a) {
-    var w = Math.round(a.amt / maxAmt * 100);
-    var pct = isPerMin ? '' : Math.round(a.amt / total * 100) + '%';
-    var amtStr = isPerMin ? '$' + a.amt.toFixed(2) + '/min' : '$' + a.amt.toLocaleString('en-US');
+    var w = Math.round(a.mins / maxMins * 100);
+    var pct = Math.round(a.mins / totalMins * 100) + '%';
     return '<div class="provider-row">' +
       '<div class="agent-name" title="' + a.name + '">' + a.name + '</div>' +
       '<div class="provider-bar-wrap"><div class="provider-bar" style="width:' + w + '%;"></div></div>' +
       '<div class="provider-meta">' +
-        '<span class="provider-amt">' + amtStr + '</span>' +
-        (pct ? '<span class="provider-pct">' + pct + '</span>' : '') +
+        '<span class="provider-amt">' + a.mins.toLocaleString('en-US') + '</span>' +
+        '<span class="provider-pct">' + pct + '</span>' +
       '</div>' +
       '</div>';
   }).join('');
-}
-
-function setAgentView(view, btn) {
-  agentView = view;
-  btn.parentElement.querySelectorAll('.chart-toggle-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  var base = view === 'total' ? agentTotal : agentPerMin;
-  var data = activeAgentIndices
-    ? base.filter(function(a){ return activeAgentIndices.indexOf(AGENT_NAMES.indexOf(a.name)) >= 0; })
-    : base;
-  renderAgents(data, view === 'permin');
 }
 
 // ── Stacked bar chart ───────────────────────────────────────
@@ -1440,7 +1629,7 @@ function setGroupBy(val, el) {
 
 // ── Init ───────────────────────────────────────────────────
 renderCostMix(costCategories);
-renderAgents(agentTotal, false);
+renderAgents(null);
 renderProviders(heavyProviders);
 requestAnimationFrame(function() { renderStackedChart(); });
 

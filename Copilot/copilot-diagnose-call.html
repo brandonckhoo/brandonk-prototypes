@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copilot — Diagnose a single call</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #3d64d7; --blue-bg: #ecf3ff; --blue-border: #C9D6F5;
+    --text: #0E121B; --strong: #0A0A0A; --muted: #525866; --soft: #99A0AE;
+    --border: #E1E4EA; --border-2: #E5E7EB; --hover: rgba(0,0,0,0.03); --sel: #F4F7FF;
+    --green: #1FC16B; --red: #FB3748; --amber: #FF9147; --bg-weak: #F5F7FA;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: var(--text); background: #fff; height: 100vh; overflow: hidden; display: flex; font-size: 14px; }
+
+  /* ===== Sidebar ===== */
+  .sidebar { width: 232px; min-width: 232px; background: var(--bg-weak); display: flex; flex-direction: column; height: 100vh; }
+  .sb-logo { padding: 16px 14px 10px 18px; }
+  .ws { display: flex; align-items: center; gap: 8px; margin: 0 12px; padding: 8px 10px; height: 38px; background: var(--bg-weak); border: 1px solid var(--border-2); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; }
+  .ws .av { width: 18px; height: 18px; background: var(--blue); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: 600; flex-shrink: 0; }
+  .ws .nm { font-size: 12.5px; font-weight: 500; color: var(--strong); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ws svg { color: var(--soft); }
+  .nav { padding: 6px 0 12px; flex: 1; overflow-y: auto; }
+  .grp { margin-top: 8px; } .grp:first-child { margin-top: 4px; }
+  .grp-l { padding: 4px; margin: 0 14px; font-size: 11px; font-weight: 500; color: var(--soft); text-transform: uppercase; height: 22px; letter-spacing: 0.02em; }
+  .items { padding: 0 12px; }
+  .nv { display: flex; align-items: center; gap: 9px; padding: 7px 8px; height: 33px; font-size: 13.5px; color: var(--muted); cursor: pointer; border-radius: 6px; margin-top: 2px; }
+  .nv:hover { background: var(--hover); }
+  .nv.cur { color: var(--strong); font-weight: 500; background: #fff; }
+  .nv svg { flex-shrink: 0; color: var(--muted); }
+  .nv.cur svg { color: var(--blue); }
+  .sb-foot { padding: 12px; }
+  .trial { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 8px; }
+  .trial .ti { color: var(--blue); display: inline-flex; } .trial .tn { font-size: 12.5px; font-weight: 600; color: var(--strong); flex: 1; } .trial svg.cv { color: var(--soft); }
+  .ucard { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 10px; }
+  .ucard .ua { width: 18px; height: 18px; border-radius: 50%; overflow: hidden; } .ucard .ua img { width: 100%; height: 100%; object-fit: cover; }
+  .ucard .ue { font-size: 13px; color: var(--muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ucard svg { color: var(--soft); }
+  .sb-links { display: flex; gap: 4px; }
+  .sb-link { display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; font-size: 13px; color: var(--muted); cursor: pointer; border-radius: 6px; } .sb-link:hover { background: var(--hover); }
+  .sb-div { width: 1px; height: 12px; background: #D1D5DB; align-self: center; }
+
+  /* ===== Work area ===== */
+  .work { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .kyc { display: flex; align-items: center; gap: 8px; padding: 9px 16px; background: #FFF6EC; border-bottom: 1px solid #FCE3C4; font-size: 12.5px; color: #8A5A12; }
+  .kyc svg { color: var(--amber); flex-shrink: 0; }
+  .kyc .cl { margin-left: auto; color: var(--soft); cursor: pointer; }
+  .wrow { flex: 1; display: flex; min-height: 0; }
+
+  /* ===== Main ===== */
+  .main { flex: 1; min-width: 0; overflow: auto; padding: 0 0 0 0; }
+  .ph { display: flex; align-items: center; gap: 10px; padding: 18px 24px 0; }
+  .ph h1 { font-size: 16px; font-weight: 600; color: var(--strong); }
+  .ph .sp { flex: 1; }
+  .actions { display: flex; align-items: center; gap: 8px; padding: 14px 24px 12px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border: 1px solid var(--border-2); background: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; height: 32px; }
+  .pill:hover { background: var(--hover); } .pill svg { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { text-align: left; font-size: 12px; font-weight: 500; color: #6B7280; padding: 9px 24px; border-bottom: 1px solid var(--border); }
+  tbody td { font-size: 13px; color: var(--text); padding: 12px 24px; border-bottom: 1px solid #F1F3F5; white-space: nowrap; }
+  tbody tr { cursor: pointer; } tbody tr:hover { background: rgba(0,0,0,0.02); }
+  tbody tr.sel { background: var(--sel); box-shadow: inset 3px 0 0 var(--blue); }
+  .mono { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .er { display: inline-flex; align-items: center; gap: 6px; }
+  .er .d { width: 6px; height: 6px; border-radius: 50%; }
+  .er.fail .d { background: var(--red); } .er.xfer .d { background: var(--amber); } .er.ok .d { background: var(--green); }
+
+  /* ===== Right panel ===== */
+  .rp { width: 384px; min-width: 384px; border-left: 1px solid var(--border); display: flex; flex-direction: column; height: 100%; background: #fff; }
+  .rp-top { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid #F1F3F5; }
+  .rp-top .hint { font-size: 11.5px; color: var(--soft); display: inline-flex; align-items: center; gap: 5px; }
+  .rp-top .hint kbd { font-family: inherit; border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; font-size: 10px; color: var(--muted); }
+  .rp-top .sp { flex: 1; }
+  .ic-btn { width: 30px; height: 30px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; color: var(--soft); cursor: pointer; }
+  .ic-btn:hover { background: var(--hover); color: var(--muted); }
+  .copilot-btn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; border: 1px solid var(--blue-border); background: var(--blue-bg); color: var(--blue); border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+  .copilot-btn:hover { background: #e3edff; }
+  .rp-body { flex: 1; overflow-y: auto; }
+
+  /* call detail */
+  .cd { padding: 16px; }
+  .cd-h { display: flex; align-items: center; gap: 8px; }
+  .cd-h .t { font-size: 14px; font-weight: 600; color: var(--strong); }
+  .cd-h .badge { font-size: 11px; color: var(--muted); background: var(--bg-weak); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; }
+  .cd-meta { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.7; }
+  .cd-meta .k { color: var(--soft); }
+  .player { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 9px; }
+  .player .pp { width: 26px; height: 26px; border-radius: 50%; background: var(--bg-weak); border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); flex-shrink: 0; }
+  .player .time { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .player .track { flex: 1; height: 4px; background: #EDEFF3; border-radius: 3px; position: relative; } .player .track::before { content:''; position:absolute; left:0; top:0; height:100%; width:0%; background: var(--blue); border-radius:3px; }
+  .player svg { color: var(--muted); }
+  .sec-h { display: flex; align-items: center; margin: 20px 0 0; }
+  .sec-h .t { font-size: 14px; font-weight: 600; color: var(--strong); }
+  .sec-h .rerun { margin-left: auto; font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+  .pa-l { font-size: 11px; color: var(--soft); margin: 10px 0 8px; }
+  .arow { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; }
+  .arow .lab { color: var(--muted); display: inline-flex; align-items: center; gap: 7px; } .arow .lab svg { color: var(--soft); }
+  .arow .val { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--text); }
+  .arow .val .d { width: 6px; height: 6px; border-radius: 50%; } .arow .val.fail .d { background: var(--red); } .arow .val.end .d { background: var(--soft); } .arow .val.neu .d { background: var(--soft); }
+  .summary { margin-top: 18px; } .summary .t { font-size: 14px; font-weight: 600; color: var(--strong); } .summary p { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.55; }
+  .tabs { display: flex; gap: 18px; border-bottom: 1px solid var(--border); margin-top: 18px; padding: 0 16px; }
+  .tab { font-size: 13px; color: var(--soft); padding: 8px 2px 11px; cursor: pointer; border-bottom: 2px solid transparent; } .tab.on { color: var(--strong); border-bottom-color: var(--strong); }
+  .tpg { margin: 14px 16px; }
+  .tpg-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; border: 1px solid var(--border-2); border-radius: 8px; font-size: 13px; color: var(--text); cursor: pointer; } .tpg-btn svg { color: var(--muted); }
+
+  /* ===== Copilot diagnosis ===== */
+  .copilot { display: none; flex-direction: column; height: 100%; }
+  .copilot.show { display: flex; }
+  .cp-head { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid #F1F3F5; }
+  .cp-head .back { width: 28px; height: 28px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); cursor: pointer; } .cp-head .back:hover { background: var(--hover); }
+  .cp-head .ttl { font-size: 14px; font-weight: 600; color: var(--strong); display: inline-flex; align-items: center; gap: 7px; }
+  .cp-head .sp { flex: 1; }
+  .cp-body { flex: 1; overflow-y: auto; padding: 14px 16px 16px; }
+  .scope { display: flex; align-items: center; gap: 8px; padding: 9px 11px; background: var(--bg-weak); border: 1px solid var(--border); border-radius: 9px; font-size: 12px; color: var(--muted); }
+  .scope .ic { color: var(--blue); display: inline-flex; } .scope b { color: var(--text); font-weight: 600; }
+  .scope .tag { margin-left: auto; font-size: 10.5px; font-weight: 600; color: var(--green); background: #E7F8EF; border: 1px solid #C5EED7; border-radius: 5px; padding: 2px 7px; }
+  .ai { display: flex; gap: 10px; margin-top: 16px; }
+  .ai .av { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; background: radial-gradient(circle at 34% 30%, #c7d6ff 0%, #7d9bf6 26%, #4f73e6 52%, #2f4fc4 100%); }
+  .ai .c { font-size: 13.5px; line-height: 1.6; color: var(--text); } .ai .c b { color: var(--strong); font-weight: 600; }
+  .ai .c .err { color: var(--red); font-weight: 600; }
+
+  .trace { margin-top: 14px; border: 1px solid var(--border); border-radius: 11px; overflow: hidden; }
+  .trace-h { font-size: 12px; font-weight: 600; color: var(--strong); padding: 11px 13px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 7px; }
+  .trace-h svg { color: var(--muted); }
+  .tr { display: flex; align-items: flex-start; gap: 11px; padding: 11px 13px; position: relative; }
+  .tr + .tr { border-top: 1px solid #F1F3F5; }
+  .tr .tm { font-size: 11px; color: var(--soft); font-variant-numeric: tabular-nums; width: 30px; flex-shrink: 0; padding-top: 1px; }
+  .tr .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); flex-shrink: 0; margin-top: 3px; }
+  .tr.bad { background: #FFF5F5; } .tr.bad .dot { background: var(--red); }
+  .tr .body { flex: 1; min-width: 0; }
+  .tr .node { font-size: 13px; font-weight: 600; color: var(--strong); }
+  .tr .desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .tr .lat { margin-left: auto; font-size: 11px; color: var(--soft); font-variant-numeric: tabular-nums; flex-shrink: 0; padding-top: 1px; }
+  .tr .lat.slow { color: var(--amber); font-weight: 600; }
+  .tr .errbadge { display: inline-flex; align-items: center; gap: 5px; margin-top: 7px; font-size: 11px; font-weight: 600; color: var(--red); background: #FFE8EA; border: 1px solid #FFCCD1; border-radius: 6px; padding: 2px 7px; }
+
+  .log { margin-top: 12px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .log-h { display: flex; align-items: center; gap: 7px; padding: 9px 12px; font-size: 12px; font-weight: 600; color: var(--strong); cursor: pointer; }
+  .log-h svg { color: var(--muted); } .log-h .meth { font-size: 10.5px; font-weight: 700; color: #fff; background: var(--red); border-radius: 4px; padding: 1px 6px; margin-left: auto; }
+  .log-b { padding: 0 12px 12px; font-family: ui-monospace, 'SF Mono', monospace; font-size: 11.5px; color: var(--muted); line-height: 1.7; }
+  .log-b .req { color: var(--text); } .log-b .k { color: var(--soft); } .log-b .v { color: var(--red); }
+
+  .insight { margin-top: 14px; display: flex; gap: 9px; padding: 11px 12px; background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: 10px; font-size: 12.5px; color: #2b3a6b; line-height: 1.55; }
+  .insight svg { color: var(--blue); flex-shrink: 0; margin-top: 1px; }
+
+  .cp-cta { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .btn-pri { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; background: var(--strong); color: #fff; border: none; border-radius: 10px; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+  .btn-pri:hover { background: #000; } .btn-pri svg { color: #fff; }
+  .btn-sec { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 38px; background: #fff; color: var(--text); border: 1px solid var(--border-2); border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-sec:hover { background: var(--hover); } .btn-sec svg { color: var(--muted); }
+  .note { font-size: 11.5px; color: var(--soft); margin-top: 12px; display: flex; gap: 6px; line-height: 1.5; } .note svg { color: var(--soft); flex-shrink: 0; margin-top: 1px; }
+  .cp-foot { border-top: 1px solid #F1F3F5; padding-top: 10px; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 10px; }
+  .chip { font-size: 12px; color: var(--muted); background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 6px 11px; cursor: pointer; white-space: nowrap; }
+  .chip:hover { background: var(--hover); }
+  .copilot-input { padding: 0 12px 14px; }
+  .input-box { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+  .input-text { font-size: 13px; color: var(--soft); min-height: 20px; }
+  .input-toolbar { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .tool-btn { display: inline-flex; align-items: center; justify-content: center; height: 28px; padding: 0 8px; border: 1px solid var(--border); background: #fff; border-radius: 7px; color: var(--muted); cursor: pointer; }
+  .tool-btn.icon-only { width: 28px; padding: 0; }
+  .tool-spacer { flex: 1; }
+  .model-sel, .mode-sel { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 9px; border: 1px solid var(--border); background: #fff; border-radius: 7px; font-size: 12px; font-weight: 600; color: var(--text); cursor: pointer; }
+  .model-sel .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
+  .send-btn { width: 28px; height: 28px; border-radius: 7px; background: var(--strong); color: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+  .send-btn:hover { background: #000; }
+</style>
+</head>
+<body>
+
+<!-- ===== Sidebar ===== -->
+<aside class="sidebar">
+  <div class="sb-logo"><svg width="66" height="18" viewBox="0 0 414 114" fill="none"><g clip-path="url(#l)"><path d="M40.37 92.69C34.69 92.69 30.14 97 30.14 102.92C30.14 108.85 34.69 113.16 40.37 113.16C46.06 113.16 50.61 108.85 50.61 102.92C50.61 97 46.06 92.69 40.37 92.69Z" fill="#0A0A0A"/><path d="M69.94 92.69C64.25 92.69 59.71 97 59.71 102.92C59.71 108.85 64.25 113.16 69.94 113.16C75.63 113.16 80.18 108.85 80.18 102.92C80.18 97 75.63 92.69 69.94 92.69Z" fill="#0A0A0A"/><path d="M40.37 0C34.69 0 30.14 4.31 30.14 10.24C30.14 16.16 34.69 20.47 40.37 20.47C46.06 20.47 50.61 16.16 50.61 10.24C50.61 4.31 46.06 0 40.37 0Z" fill="#0A0A0A"/><path d="M69.94 0C64.25 0 59.71 4.31 59.71 10.24C59.71 16.16 64.25 20.47 69.94 20.47C75.63 20.47 80.18 16.16 80.18 10.24C80.18 4.31 75.63 0 69.94 0Z" fill="#0A0A0A"/><path d="M10.24 31.28C4.55 31.28 0 35.58 0 41.51C0 47.44 4.55 51.75 10.24 51.75C15.92 51.75 20.47 47.44 20.47 41.51C20.47 35.58 15.92 31.28 10.24 31.28Z" fill="#0A0A0A"/><path d="M10.24 61.41C4.55 61.41 0 65.72 0 71.65C0 77.57 4.55 81.88 10.24 81.88C15.92 81.88 20.47 77.57 20.47 71.65C20.47 65.72 15.92 61.41 10.24 61.41Z" fill="#0A0A0A"/><path d="M100.08 31.28C94.39 31.28 89.84 35.58 89.84 41.51C89.84 47.44 94.39 51.75 100.08 51.75C105.76 51.75 110.31 47.44 110.31 41.51C110.31 35.58 105.76 31.28 100.08 31.28Z" fill="#0A0A0A"/><path d="M100.08 61.41C94.39 61.41 89.84 65.72 89.84 71.65C89.84 77.57 94.39 81.88 100.08 81.88C105.76 81.88 110.31 77.57 110.31 71.65C110.31 65.72 105.76 61.41 100.08 61.41Z" fill="#0A0A0A"/><path d="M222 75.73C221.42 63.58 216.21 58.95 209.27 57.21C217.37 54.9 224.31 50.27 224.31 36.96C224.31 23.65 215.05 14.97 196.54 14.97H162.98V95.98H176.29V63H190.75C205.22 63 208.69 68.21 208.69 83.25C208.69 89.57 209.85 93.09 211 95.98H224.89C222.58 93.09 222 84.58 222 78.62V75.73ZM205.22 49.69C202.9 52 199.43 52.58 195.38 52.58H176.28V26.54H193.64C198.85 26.54 201.74 27.12 204.64 28.86C208.11 30.59 209.85 34.64 209.85 39.27C209.85 43.9 208.11 47.38 205.22 49.69Z" fill="#0A0A0A"/><path d="M255.56 34.65C238.2 34.65 226.63 47.95 226.63 66.47C226.63 84.99 242.25 98.3 256.14 98.3C270.03 98.3 279.86 90.19 283.33 78.62H269.45C267.71 82.67 264.82 87.3 256.14 87.3C247.46 87.3 239.94 81.52 239.94 69.94H283.91C283.91 49.69 272.92 34.65 255.56 34.65ZM240.51 60.11C241.09 51.43 246.88 45.06 255.56 45.06C264.24 45.06 270.02 51.43 270.02 60.11H240.51Z" fill="#0A0A0A"/><path d="M344.09 34.65C326.73 34.65 315.16 47.95 315.16 66.47C315.16 85.15 330.78 98.3 344.67 98.3C358.56 98.3 368.39 90.19 371.87 78.62H357.98C356.24 82.67 353.35 87.3 344.67 87.3C335.99 87.3 328.47 81.52 328.47 69.94H372.44C372.44 49.69 361.45 34.65 344.09 34.65ZM329.05 60.11C329.62 51.43 335.41 45.06 344.09 45.06C352.77 45.06 358.56 51.43 358.56 60.11H329.05Z" fill="#0A0A0A"/><path d="M390.96 14.97H377.65V95.92H390.96V14.97Z" fill="#0A0A0A"/><path d="M413.53 14.97H400.22V95.92H413.53V14.97Z" fill="#0A0A0A"/><path d="M304.17 17.28L290.84 17.28L290.85 34.65H282.76V45H290.85V82.82C290.85 87.58 291.8 90.43 294.66 93.29C297.51 96.14 300.37 97.09 305.13 97.09H315.14V85.67H309.88C308.16 85.67 306.96 85.37 306.13 85.11C305.27 84.84 304.61 84.16 304.4 83.29C304.17 82.33 304.17 81.09 304.17 79.9V45H315.14V34.65H304.17V17.28Z" fill="#0A0A0A"/></g><defs><clipPath id="l"><rect width="413.53" height="113.16" fill="white"/></clipPath></defs></svg></div>
+
+  <div class="ws"><span class="av">B</span><span class="nm">Brandon K... Workspace</span><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.3 7.9L10 3.6 5.7 7.9l1 1L10 5.6l3.3 3.3 1-1zM5.7 12.1L10 16.4l4.3-4.3-1-1L10 14.4l-3.3-3.3-1 1z" fill="#99A0AE"/></svg></div>
+
+  <div class="nav">
+    <div class="grp"><div class="grp-l">Build</div><div class="items">
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M11.1 2.5c0 .33-.15.63-.38.84V4.75h3.78c1.24 0 2.25 1.01 2.25 2.25v7.5c0 1.24-1.01 2.25-2.25 2.25h-9c-1.24 0-2.25-1.01-2.25-2.25V7c0-1.24 1.01-2.25 2.25-2.25h3.75V3.34A1.12 1.12 0 0110 1.38c.62 0 1.12.5 1.12 1.12zM5.5 6.25c-.41 0-.75.34-.75.75v7.5c0 .41.34.75.75.75h9c.41 0 .75-.34.75-.75V7c0-.41-.34-.75-.75-.75h-9zM7.75 11.9a1.12 1.12 0 100-2.25 1.12 1.12 0 000 2.25zm4.5 0a1.12 1.12 0 100-2.25 1.12 1.12 0 000 2.25z" fill="currentColor"/></svg>Agents</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3.25 14.9V4.75c0-.6.24-1.17.66-1.59s.99-.66 1.59-.66H16c.2 0 .39.08.53.22s.22.33.22.53v13.5c0 .2-.08.39-.22.53s-.33.22-.53.22H5.88c-.7 0-1.37-.28-1.86-.77s-.77-1.16-.77-1.86zM15.25 16v-2.25H5.88c-.3 0-.59.12-.8.33s-.33.5-.33.8.12.59.33.8.5.33.8.33h9.37zM4.75 12.5c.35-.17.74-.25 1.12-.25h9.38V4H5.5c-.2 0-.39.08-.53.22s-.22.33-.22.53v7.75z" fill="currentColor"/></svg>Knowledge Base</div>
+    </div></div>
+    <div class="grp"><div class="grp-l">Deploy</div><div class="items">
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M6.25 2.5H14.5c.2 0 .39.08.53.22s.22.33.22.53v13.5c0 .2-.08.39-.22.53s-.33.22-.53.22h-9c-.2 0-.39-.08-.53-.22s-.22-.33-.22-.53V1h1.5v1.5zm0 5.25h7.5V4h-7.5v3.75zm0 1.5V16h7.5V9.25h-7.5z" fill="currentColor"/></svg>Phone Numbers</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M8 9c.7 1.24 1.73 2.27 2.96 2.97l.66-.93c.11-.15.27-.25.45-.29s.37-.01.53.07c1.06.58 2.23.93 3.44 1.02.19.01.36.1.49.24s.2.32.2.51v3.35c0 .19-.07.37-.19.5s-.29.22-.48.24c-.4.04-.8.06-1.2.06-6.42 0-11.63-5.21-11.63-11.63 0-.4.02-.8.06-1.2.02-.18.11-.35.24-.48s.31-.2.49-.2h3.35c.19 0 .37.07.51.2s.22.31.24.49c.09 1.21.44 2.38 1.02 3.44.09.16.11.34.07.53s-.14.34-.29.45L8 9z" fill="currentColor"/></svg>Batch Call</div>
+    </div></div>
+    <div class="grp"><div class="grp-l">Data</div><div class="items">
+      <div class="nv cur"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2.5c4.14 0 7.5 3.36 7.5 7.5s-3.36 7.5-7.5 7.5S2.5 14.14 2.5 10H4c0 3.31 2.69 6 6 6s6-2.69 6-6-2.69-6-6-6c-2.06 0-3.88 1.04-4.96 2.62H7v1.5H2.5v-4.5H4v1.88C5.37 3.68 7.55 2.5 10 2.5zM10.75 6.25v3.44l2.43 2.43-1.06 1.06L9.25 10.3V6.25h1.5z" fill="currentColor"/></svg>Call History</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2.5c4.14 0 7.5 3.36 7.5 7.5s-3.36 7.5-7.5 7.5c-1.28 0-2.48-.32-3.53-.88L2.5 17.5l.88-3.97A7.46 7.46 0 012.5 10c0-4.14 3.36-7.5 7.5-7.5zm0 1.5c-3.31 0-6 2.69-6 6 0 1 .24 1.96.7 2.82l.27.49-.49 2.21 2.21-.49.49.26c.86.46 1.82.71 2.82.71 3.31 0 6-2.69 6-6s-2.69-6-6-6z" fill="currentColor"/></svg>Chat History</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6.5" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 16c0-2.8 2.46-4.5 5.5-4.5s5.5 1.7 5.5 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>Contacts</div>
+    </div></div>
+    <div class="grp"><div class="grp-l">Monitor</div><div class="items">
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 17.5c-4.14 0-7.5-3.36-7.5-7.5 0-3.36 2.21-6.2 5.25-7.16v1.6A6 6 0 1015.56 12.25h1.59C16.2 15.29 13.36 17.5 10 17.5zM17.46 10.75H9.25V2.54c.25-.03.5-.04.75-.04 4.14 0 7.5 3.36 7.5 7.5 0 .25-.01.5-.04.75z" fill="currentColor"/></svg>Analytics</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="10" r="2.2" fill="currentColor"/></svg>Live Monitoring</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M14.5 13.5l3.2 3.2-1.06 1.06-3.2-3.2A6.7 6.7 0 119.25 2.5a6.75 6.75 0 015.25 11zm-1.5-.6a5.25 5.25 0 10-3.75 1.6 5.23 5.23 0 003.64-1.49l.11-.11z" fill="currentColor"/><path d="M6.6 9.2L8.2 9.26 9.1 7.6l1.5 3.3.9-1.64H13" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>AI Quality Assurance</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M4 16v-4.5a6 6 0 1112 0V16h.75v1.5H3.25V16H4zm1.5 0h9v-4.5a4.5 4.5 0 10-9 0V16zM9.25 2.5h1.5v2.25h-1.5V2.5z" fill="currentColor"/></svg>Alerting</div>
+    </div></div>
+    <div class="grp"><div class="grp-l">System</div><div class="items">
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3.5" y="3.5" width="5.5" height="5.5" rx="1.3" stroke="currentColor" stroke-width="1.4"/><rect x="11" y="3.5" width="5.5" height="5.5" rx="1.3" stroke="currentColor" stroke-width="1.4"/><rect x="3.5" y="11" width="5.5" height="5.5" rx="1.3" stroke="currentColor" stroke-width="1.4"/><path d="M13.7 11v5.5M11 13.7h5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Integrations</div>
+      <div class="nv"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M16 17.5H4c-.2 0-.39-.08-.53-.22s-.22-.33-.22-.53V3.25c0-.2.08-.39.22-.53s.33-.22.53-.22h12c.2 0 .39.08.53.22s.22.33.22.53v13.5c0 .2-.08.39-.22.53s-.33.22-.53.22zm-.75-1.5V4H4.75v12h10.5zM7 7.75h6v1.5H7v-1.5zm0 3h6v1.5H7v-1.5z" fill="currentColor"/></svg>Billing</div>
+    </div></div>
+  </div>
+
+  <div class="sb-foot">
+    <div class="trial"><span class="ti"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 2l2.2 5.5L18 8l-4.4 3.6L15 17l-5-3-5 3 1.4-5.4L2 8l5.8-.5L10 2z" fill="currentColor"/></svg></span><span class="tn">Free Trial</span><svg class="cv" width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.3 7.9L10 3.6 5.7 7.9l1 1L10 5.6l3.3 3.3 1-1zM5.7 12.1L10 16.4l4.3-4.3-1-1L10 14.4l-3.3-3.3-1 1z" fill="#99A0AE"/></svg></div>
+    <div class="ucard"><span class="ua"><img src="https://lh3.googleusercontent.com/a/ACg8ocJQatnwR_DPG54-_PEdcr_wNiJIL5R6eZBsgMIcPHE5dP1ozMBhpA=s96-c" alt=""></span><span class="ue">brandon@retella...</span><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M14.3 7.9L10 3.6 5.7 7.9l1 1L10 5.6l3.3 3.3 1-1zM5.7 12.1L10 16.4l4.3-4.3-1-1L10 14.4l-3.3-3.3-1 1z" fill="#99A0AE"/></svg></div>
+    <div class="sb-links"><span class="sb-link"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M10 13.2v.01M8.3 8a1.7 1.7 0 113 .9c-.6.5-1.3.7-1.3 1.6" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>Help</span><span class="sb-div"></span><span class="sb-link"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M8 13s4 .5 6 2.2h.5c.3 0 .5-.2.5-.5V5.3c0-.3-.2-.5-.5-.5H14C12 6.5 8 7 8 7H6c-.7 0-1.2.6-1.2 1.2v3.5C4.8 12.4 5.3 13 6 13h.5L7 16h1v-3z" fill="currentColor"/></svg>Updates</span></div>
+  </div>
+</aside>
+
+<!-- ===== Work area ===== -->
+<div class="work">
+  <div class="kyc">
+    <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 2l8 14H2L10 2z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><path d="M10 8v3.5M10 13.6v.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    KYC Verification Failed: Government ID verification failed. Please contact support@retellai.com for assistance.
+    <span class="cl"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64 15.36 5.7 11.06 10l4.3 4.3-1.06 1.06L10 11.06l-4.3 4.3-1.06-1.06L8.94 10 4.64 5.7 5.7 4.64 10 8.94z" fill="currentColor"/></svg></span>
+  </div>
+
+  <div class="wrow">
+    <!-- Main: call history -->
+    <main class="main">
+      <div class="ph"><h1>Call History</h1><span class="sp"></span></div>
+      <div class="actions">
+        <span class="pill"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M3 8h14M7 2.5v3M13 2.5v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Date Range</span>
+        <span class="pill"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M6 10h8M9 15h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Filter</span>
+      </div>
+      <table>
+        <thead><tr><th>Time</th><th>Duration</th><th>Channel Type</th><th>Cost</th><th>Session ID</th><th>End Reason</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td>Jun 1, 2026 3:42:42 PM</td><td class="mono">0:51</td><td>web_call</td><td class="mono">$0.041</td><td class="mono">call_ab88c...8f1</td><td><span class="er fail"><span class="d"></span>user hangup</span></td></tr>
+          <tr><td>Jun 1, 2026 3:31:18 PM</td><td class="mono">1:12</td><td>phone_call</td><td class="mono">$0.058</td><td class="mono">call_ee1b3...3bd</td><td><span class="er xfer"><span class="d"></span>agent transfer</span></td></tr>
+          <tr><td>Jun 1, 2026 3:20:05 PM</td><td class="mono">1:03</td><td>phone_call</td><td class="mono">$0.049</td><td class="mono">call_77c24...9aa</td><td><span class="er ok"><span class="d"></span>agent hangup</span></td></tr>
+          <tr><td>Apr 29, 2026 1:25:46 PM</td><td class="mono">0:05</td><td>web_call</td><td class="mono">$0.033</td><td class="mono">call_ee1b3...69b</td><td><span class="er fail"><span class="d"></span>user hangup</span></td></tr>
+        </tbody>
+      </table>
+    </main>
+
+    <!-- Right panel -->
+    <aside class="rp">
+      <!-- Detail view -->
+      <div class="rp-detail" id="rpDetail" style="display:flex;flex-direction:column;height:100%">
+        <div class="rp-top">
+          <span class="hint">Use <kbd>↑</kbd><kbd>↓</kbd> to navigate</span>
+          <span class="sp"></span>
+          <button class="copilot-btn" id="openCopilot"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 1.5l1.7 4.8 4.8 1.7-4.8 1.7L10 14.5 8.3 9.7 3.5 8l4.8-1.7L10 1.5z" fill="currentColor"/></svg>Diagnose</button>
+          <span class="ic-btn" title="Delete"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 6h10M8 6V4.5h4V6M6.5 6l.5 9h6l.5-9" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="ic-btn" title="Close"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64 15.36 5.7 11.06 10l4.3 4.3-1.06 1.06L10 11.06l-4.3 4.3-1.06-1.06L8.94 10 4.64 5.7 5.7 4.64 10 8.94z" fill="currentColor"/></svg></span>
+        </div>
+        <div class="rp-body">
+          <div class="cd">
+            <div class="cd-h"><span class="t">06/01/2026 15:42</span><span class="badge">web_call</span></div>
+            <div class="cd-meta">
+              <span class="k">Agent:</span> Inbound Scheduler &nbsp;·&nbsp; <span class="k">Version:</span> 6<br>
+              <span class="k">Call ID:</span> call_ab88c0a6f7e8f1981588 &nbsp;·&nbsp; <span class="k">Duration:</span> 0:51 &nbsp;·&nbsp; <span class="k">Cost:</span> $0.041
+            </div>
+            <div class="player">
+              <span class="pp"><svg width="11" height="11" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4.5L15 10L6 15.5V4.5Z"/></svg></span>
+              <span class="time">0:00</span>
+              <span class="track"></span>
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 8v4h2.5L10 15V5L6.5 8H4z" fill="currentColor"/><path d="M13 7.5a3.5 3.5 0 010 5" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 3v9M6.5 9L10 12.5 13.5 9M4 16h12" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+
+            <div class="sec-h"><span class="t">Conversation Analysis</span><span class="rerun"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M15.5 7A6 6 0 104 9" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M15.5 3v4h-4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Rerun</span></div>
+            <div class="pa-l">Preset Analysis</div>
+            <div class="arow"><span class="lab"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="4" y="4" width="12" height="12" rx="2.5" stroke="currentColor" stroke-width="1.4"/></svg>Call Successful</span><span class="val fail"><span class="d"></span>Unsuccessful</span></div>
+            <div class="arow"><span class="lab"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6" stroke="currentColor" stroke-width="1.4"/></svg>Call Status</span><span class="val end"><span class="d"></span>Ended</span></div>
+            <div class="arow"><span class="lab"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M8 12c.6-.6 3.4-.6 4 0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>User Sentiment</span><span class="val neu"><span class="d"></span>Negative</span></div>
+            <div class="arow"><span class="lab"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Disconnection Reason</span><span class="val neu"><span class="d"></span>User_hangup</span></div>
+
+            <div class="summary"><div class="t">Summary</div><p>Caller asked to book a follow-up visit. The booking step stalled, the caller waited, then hung up before a slot was confirmed.</p></div>
+          </div>
+
+          <div class="tabs"><span class="tab on">Transcription</span><span class="tab">Data</span><span class="tab">Detail Logs</span></div>
+          <div class="tpg"><span class="tpg-btn"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M7 4h9v9M16 4l-9 9" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>View in Test Playground</span></div>
+        </div>
+      </div>
+
+      <!-- Copilot diagnosis view -->
+      <div class="copilot" id="rpCopilot">
+        <div class="cp-head">
+          <span class="back" id="backDetail"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M12 5l-5 5 5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="ttl"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 1.5l1.7 4.8 4.8 1.7-4.8 1.7L10 14.5 8.3 9.7 3.5 8l4.8-1.7L10 1.5z" fill="#3d64d7"/></svg>Copilot</span>
+          <span class="sp"></span>
+          <span class="ic-btn"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64 15.36 5.7 11.06 10l4.3 4.3-1.06 1.06L10 11.06l-4.3 4.3-1.06-1.06L8.94 10 4.64 5.7 5.7 4.64 10 8.94z" fill="currentColor"/></svg></span>
+        </div>
+        <div class="cp-body">
+          <div class="scope">
+            <span class="ic"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 6.5V10l2.5 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+            Diagnosing <b>06/01/2026 15:42</b> · 0:51
+            <span class="tag">Request + response log attached</span>
+          </div>
+
+          <div class="ai">
+            <span class="av"></span>
+            <div class="c">I traced this failure. At <b>0:48</b> the <b>Book appointment</b> node called the booking tool, which returned a <span class="err">500</span> and the node has <b>no edge for the tool-failure case</b>, so the line went silent and the caller hung up at 0:51.</div>
+          </div>
+
+          <div class="trace">
+            <div class="trace-h"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10h3l2-5 2 10 2-5h3" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Turn-by-turn trace</div>
+            <div class="tr"><span class="tm">0:02</span><span class="dot"></span><div class="body"><div class="node">Welcome</div><div class="desc">Greeting played</div></div><span class="lat">0.4s</span></div>
+            <div class="tr"><span class="tm">0:18</span><span class="dot"></span><div class="body"><div class="node">Collect details</div><div class="desc">Captured name and preferred date</div></div><span class="lat">0.7s</span></div>
+            <div class="tr"><span class="tm">0:39</span><span class="dot"></span><div class="body"><div class="node">Confirm slot</div><div class="desc">Read the slot back to the caller</div></div><span class="lat">0.9s</span></div>
+            <div class="tr bad"><span class="tm">0:48</span><span class="dot"></span><div class="body"><div class="node">Book appointment</div><div class="desc">Called the booking tool</div><span class="errbadge"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M10 2l8 14H2L10 2z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><path d="M10 8v3M10 13.5v.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>HTTP 500 · no failure edge</span></div><span class="lat slow">2.4s</span></div>
+            <div class="tr bad"><span class="tm">0:51</span><span class="dot"></span><div class="body"><div class="node">Caller hung up</div><div class="desc">3s of dead air after the failed tool call</div></div></div>
+          </div>
+
+          <div class="log">
+            <div class="log-h"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 7l-3 3 3 3M15 7l3 3-3 3M11.5 4l-3 12" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Booking tool · request &amp; response<span class="meth">500</span></div>
+            <div class="log-b"><span class="req">POST https://api.clinic.com/v1/appointments</span><br><span class="k">→ status</span> <span class="v">500 Internal Server Error</span> · 2,412 ms<br><span class="k">→ response</span> { "error": <span class="v">"upstream_timeout"</span>, "request_id": "req_9f2a" }</div>
+          </div>
+
+          <div class="insight">
+            <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 2.5L16 5v4.2c0 3.6-2.5 6.7-6 7.8-3.5-1.1-6-4.2-6-7.8V5l6-2.5z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><path d="M7.6 10l1.7 1.7L13 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            The Book appointment node has no edge for the tool-failure case, so a 500 surfaces as dead air. The fix is a fallback edge with a transition condition for the failure, routing to a short apology and a callback offer, or a single retry on the tool. Copilot can draft it as a diff for you to approve.
+          </div>
+
+          <div class="cp-cta">
+            <button class="btn-pri"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="4" y="6" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M10 6V3.5M7.5 10.5h.01M12.5 10.5h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Review the agent</button>
+            <button class="btn-sec"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 2.2l1.6 4.5 4.5 1.6-4.5 1.6L10 14.4 8.4 9.9 3.9 8.3l4.5-1.6L10 2.2z" fill="currentColor"/></svg>Draft the fix · fallback edge</button>
+          </div>
+
+          <div class="note"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M10 9v4M10 6.5v.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Calls that transfer to a human are diagnosed up to the transfer point only.</div>
+        </div>
+        <div class="cp-foot">
+          <div class="chip-row">
+            <span class="chip">Find other calls like this</span>
+            <span class="chip">Show the full transcript</span>
+            <span class="chip">Draft the fix</span>
+          </div>
+          <div class="copilot-input">
+            <div class="input-box">
+              <div class="input-text">Ask a follow-up, or tell Copilot what to change…</div>
+              <div class="input-toolbar">
+                <button class="tool-btn icon-only" title="Add context"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M9.25 9.25V4.75H10.75V9.25H15.25V10.75H10.75V15.25H9.25V10.75H4.75V9.25H9.25Z" fill="#525866"/></svg></button>
+                <span class="tool-spacer"></span>
+                <button class="model-sel"><span class="dot"></span>Opus 4.8<svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="#99A0AE" stroke-width="1.5" fill="none"/></svg></button>
+                <button class="mode-sel">Ask<svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="#99A0AE" stroke-width="1.5" fill="none"/></svg></button>
+                <button class="send-btn"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M3 10L17 3L10 17L8.5 11.5L3 10Z" fill="#fff"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+  const detail = document.getElementById('rpDetail');
+  const copilot = document.getElementById('rpCopilot');
+  document.getElementById('openCopilot').addEventListener('click', () => { detail.style.display = 'none'; copilot.classList.add('show'); });
+  document.getElementById('backDetail').addEventListener('click', () => { copilot.classList.remove('show'); detail.style.display = 'flex'; });
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => { document.querySelectorAll('.tab').forEach(x => x.classList.remove('on')); t.classList.add('on'); }));
+</script>
+
+</body>
+</html>

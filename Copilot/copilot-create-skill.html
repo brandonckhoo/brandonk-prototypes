@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copilot — Create a skill</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #3d64d7; --blue-bg: #ecf3ff; --blue-border: #C9D6F5;
+    --page: #F5F7FA; --text: #0E121B; --strong: #0A0A0A; --muted: #525866; --soft: #99A0AE;
+    --border: #E1E4EA; --border-2: #E5E7EB; --hover: rgba(0,0,0,0.03); --sel: #F4F7FF; --green: #1FC16B;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: var(--text); background: var(--page); height: 100vh; overflow: hidden; }
+
+  .orb { border-radius: 50%; background: radial-gradient(circle at 34% 30%, #c7d6ff 0%, #7d9bf6 26%, #4f73e6 52%, #2f4fc4 100%); box-shadow: 0 8px 26px rgba(61,100,215,0.30), inset 0 -6px 14px rgba(20,40,110,0.45), inset 0 6px 12px rgba(255,255,255,0.55); }
+
+  /* ===== shared composer ===== */
+  .composer { background: #fff; border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 1px 3px rgba(16,24,40,0.05); padding: 14px 16px 12px; position: relative; z-index: 1; }
+
+  /* connect tools strip (tucks under composer) */
+  .connect-bar { display: flex; align-items: center; gap: 10px; margin: -10px 0 0; padding: 19px 16px 11px; background: #F1F3F7; border: 1px solid var(--border); border-top: none; border-radius: 0 0 16px 16px; position: relative; z-index: 0; cursor: pointer; transition: background .12s; }
+  .connect-bar:hover { background: #EAEDF2; }
+  .connect-bar .ct-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+  .connect-bar .ct-sp { flex: 1; }
+  .connect-bar .logos { display: flex; align-items: center; gap: 9px; }
+  .connect-bar .logos svg { display: block; }
+  .connect-bar .more { font-size: 12px; font-weight: 600; color: var(--soft); margin-left: 2px; }
+  .connect-bar .ct-chev { color: var(--soft); margin-left: 4px; display: inline-flex; }
+  .composer:focus-within { border-color: var(--blue-border); }
+  .field { font-size: 15px; color: var(--soft); min-height: 24px; padding: 2px 2px 0; }
+  .composer-bar { display: flex; align-items: center; gap: 8px; margin-top: 12px; position: relative; }
+  .plus { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-2); background: #fff; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+  .plus:hover { background: var(--hover); }
+  .plus.open { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue); }
+  .cbtn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 11px; border: 1px solid var(--border-2); background: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; }
+  .cbtn:hover { background: var(--hover); }
+  .cbtn .bdot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
+  .cbtn .chev { color: var(--soft); }
+  .modewrap { position: relative; display: inline-flex; }
+  .modebtn { min-width: 78px; }
+  .modemenu { position: absolute; bottom: 40px; left: 0; min-width: 230px; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 14px 40px rgba(16,24,40,0.16), 0 2px 8px rgba(16,24,40,0.06); padding: 5px; opacity: 0; transform: translateY(6px); pointer-events: none; transition: opacity .12s, transform .12s; z-index: 40; }
+  .modewrap.open .modemenu { opacity: 1; transform: none; pointer-events: auto; }
+  .modemenu .mm { display: flex; align-items: center; gap: 8px; padding: 8px 9px; border-radius: 8px; cursor: pointer; }
+  .modemenu .mm:hover { background: var(--hover); }
+  .modemenu .mm .mm-t { font-size: 13px; font-weight: 500; color: var(--text); }
+  .modemenu .mm .mm-d { font-size: 11.5px; color: var(--soft); }
+  .modemenu .mm .mm-ck { margin-left: auto; color: var(--blue); display: inline-flex; opacity: 0; }
+  .modemenu .mm.on .mm-ck { opacity: 1; }
+  .modelwrap { position: relative; display: inline-flex; }
+  .modelmenu { position: absolute; bottom: 40px; right: 0; width: 304px; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 14px 40px rgba(16,24,40,0.16), 0 2px 8px rgba(16,24,40,0.06); padding: 5px; opacity: 0; transform: translateY(6px); pointer-events: none; transition: opacity .12s, transform .12s; z-index: 40; }
+  .modelwrap.open .modelmenu { opacity: 1; transform: none; pointer-events: auto; }
+  .modelmenu .mdl { display: flex; align-items: flex-start; gap: 8px; padding: 9px 10px; border-radius: 8px; cursor: pointer; }
+  .modelmenu .mdl:hover { background: var(--hover); }
+  .modelmenu .mdl .mtxt2 { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .modelmenu .mdl .mn2 { font-size: 13px; font-weight: 600; color: var(--text); }
+  .modelmenu .mdl .mn2 .prov { color: var(--soft); font-weight: 500; }
+  .modelmenu .mdl .md2 { font-size: 11.5px; color: var(--soft); margin-top: 1px; line-height: 1.35; }
+  .modelmenu .mdl .ck2 { color: var(--blue); opacity: 0; margin-top: 2px; flex-shrink: 0; }
+  .modelmenu .mdl.on .ck2 { opacity: 1; }
+  .modelmenu .mdl.extra { display: none; }
+  .modelmenu.exp .mdl.extra { display: flex; }
+  .modelmenu .more { display: flex; align-items: center; justify-content: space-between; padding: 9px 10px; margin-top: 3px; border-top: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; }
+  .modelmenu .more:hover { color: var(--text); }
+  .modelmenu .more .mchev { transition: transform .12s; color: var(--soft); }
+  .modelmenu.exp .more .mchev { transform: rotate(180deg); }
+  .csp { flex: 1; }
+  .send { width: 34px; height: 34px; border-radius: 50%; background: var(--strong); color: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+  .send:hover { background: #000; }
+
+  /* ===== + menu ===== */
+  .menu { position: absolute; bottom: 42px; left: 0; width: 288px; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 14px 40px rgba(16,24,40,0.16), 0 2px 8px rgba(16,24,40,0.06); padding: 6px; z-index: 40; opacity: 0; transform: translateY(6px); pointer-events: none; transition: opacity .12s, transform .12s; }
+  .menu.open { opacity: 1; transform: none; pointer-events: auto; }
+  .mi { display: flex; align-items: center; gap: 11px; padding: 9px 10px; border-radius: 8px; font-size: 14px; color: var(--text); cursor: pointer; position: relative; }
+  .mi:hover { background: var(--hover); }
+  .mi svg { color: var(--muted); flex-shrink: 0; }
+  .mi .lbl { flex: 1; }
+  .mi .sc { font-size: 12px; color: var(--soft); }
+  .mi .arr { color: var(--soft); }
+  .mi .ck { color: var(--blue); }
+  .mdiv { height: 1px; background: var(--border); margin: 6px 8px; }
+  .submenu { position: absolute; left: 268px; top: -6px; width: 210px; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 14px 40px rgba(16,24,40,0.16); padding: 6px; opacity: 0; transform: translateX(-6px); pointer-events: none; transition: opacity .12s, transform .12s; }
+  .mi.has-sub:hover .submenu { opacity: 1; transform: none; pointer-events: auto; }
+  .submenu .mi .new { margin-left: auto; font-size: 10px; font-weight: 700; color: var(--blue); background: var(--blue-bg); border-radius: 5px; padding: 1px 6px; }
+  .submenu.ext { width: 256px; }
+  .submenu .brand-sm { width: 18px; height: 18px; border-radius: 5px; color: #fff; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mi.tall { align-items: flex-start; }
+  .mi.tall svg { margin-top: 1px; }
+  .mi .mtxt { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+  .mi .mtxt .lbl { flex: none; }
+  .mi .mtxt .msub { font-size: 11.5px; color: var(--soft); margin-top: 1px; line-height: 1.3; }
+
+  /* ===== view 0: hero ===== */
+  .hero { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; }
+  .hero-inner { width: 100%; max-width: 680px; margin-top: -30px; }
+  .hero .orb { width: 80px; height: 80px; margin: 0 auto 24px; }
+  .greeting { text-align: center; font-size: 23px; font-weight: 700; letter-spacing: -0.02em; color: var(--strong); margin-bottom: 24px; }
+  .below { margin-top: 18px; text-align: center; }
+  .tip { font-size: 12.5px; color: var(--soft); }
+  .row-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+  .pchip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border: 1px solid var(--border-2); background: #fff; border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; }
+  .pchip:hover { background: var(--hover); }
+  .pchip svg { color: var(--muted); }
+
+  /* ===== view 1: skill builder ===== */
+  .builder { height: 100vh; display: none; flex-direction: column; }
+  .builder.show { display: flex; }
+  .b-top { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: #fff; }
+  .b-top .orb { width: 22px; height: 22px; }
+  .b-top .ttl { font-size: 14px; font-weight: 600; color: var(--strong); }
+  .b-top .sp { flex: 1; }
+  .b-top .newchat { font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 6px 10px; border-radius: 7px; }
+  .b-top .newchat:hover { background: var(--hover); }
+  .thread-wrap { flex: 1; overflow-y: auto; padding: 28px 24px 16px; display: flex; flex-direction: column; align-items: center; }
+  .thread { width: 100%; max-width: 720px; margin-top: auto; }
+
+  .ai { display: flex; gap: 12px; margin-bottom: 20px; }
+  .ai .av { width: 26px; height: 26px; flex-shrink: 0; }
+  .ai .c { font-size: 14px; color: var(--text); line-height: 1.6; padding-top: 2px; }
+  .ai .c .hl { font-weight: 600; color: var(--strong); }
+
+  /* answered summary */
+  .summ { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+  .summ .card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 11px 14px; max-width: 78%; box-shadow: 0 1px 2px rgba(16,24,40,0.03); }
+  .summ .q { font-size: 11.5px; color: var(--soft); margin-bottom: 3px; }
+  .summ .a { font-size: 13.5px; font-weight: 600; color: var(--strong); display: flex; align-items: center; gap: 7px; }
+  .summ .a .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+
+  /* active question card */
+  .qcard { border: 1px solid var(--border); border-radius: 14px; background: #fff; box-shadow: 0 4px 16px rgba(16,24,40,0.06); overflow: hidden; margin-bottom: 22px; }
+  .qhead { display: flex; align-items: center; gap: 10px; padding: 15px 16px; border-bottom: 1px solid var(--border); }
+  .qhead .qic { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--blue); color: var(--blue); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .qhead .qtxt { flex: 1; font-size: 14.5px; font-weight: 600; color: var(--strong); }
+  .qhead .qpage { font-size: 12px; color: var(--soft); display: inline-flex; align-items: center; gap: 8px; }
+  .qhead .qpage .nav { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--border-2); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); cursor: pointer; }
+  .qhead .qpage .nav:hover { background: var(--hover); }
+  .opts { padding: 8px; }
+  .opt { display: flex; align-items: center; gap: 13px; padding: 12px 12px; border-radius: 10px; cursor: pointer; border: 1px solid transparent; }
+  .opt:hover, .opt.hot { background: var(--sel); border-color: var(--blue-border); }
+  .opt .num { width: 24px; height: 24px; border-radius: 7px; background: #F5F7FA; border: 1px solid var(--border); color: var(--muted); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .opt.hot .num { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .opt .ob { display: flex; flex-direction: column; min-width: 0; }
+  .opt .ot { font-size: 14px; font-weight: 500; color: var(--strong); }
+  .opt .os { font-size: 12.5px; color: var(--soft); margin-top: 2px; }
+  .qfoot { display: flex; align-items: center; padding: 11px 16px; border-top: 1px solid var(--border); }
+  .qfoot .back { font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; }
+  .qfoot .back:hover { color: var(--strong); }
+  .qfoot .back.off { opacity: .4; pointer-events: none; }
+  .qfoot .sp { flex: 1; }
+  .qfoot .kbd { font-size: 11.5px; color: var(--soft); display: inline-flex; align-items: center; gap: 6px; }
+  .qfoot kbd { font-family: inherit; font-size: 11px; color: var(--muted); background: #F5F7FA; border: 1px solid var(--border); border-radius: 5px; padding: 1px 5px; }
+
+  /* completion skill card */
+  .skill-card { border: 1px solid var(--blue-border); border-radius: 14px; background: linear-gradient(180deg,#FAFBFF,#F4F8FF); padding: 18px; margin-bottom: 22px; }
+  .sc-kicker { font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 9px; }
+  .sc-top { display: flex; align-items: center; gap: 11px; }
+  .sc-ic { width: 38px; height: 38px; border-radius: 10px; background: #fff; border: 1px solid var(--blue-border); color: var(--blue); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .sc-nm { font-size: 16px; font-weight: 700; color: var(--strong); }
+  .sc-sub { font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+  .sc-desc { font-size: 13.5px; color: var(--text); line-height: 1.6; margin-top: 13px; }
+  .sc-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .sc-tag { font-size: 12px; color: var(--muted); background: #fff; border: 1px solid var(--border); border-radius: 7px; padding: 4px 9px; display: inline-flex; align-items: center; gap: 6px; }
+  .sc-tag b { color: var(--strong); font-weight: 600; }
+  .sc-actions { display: flex; align-items: center; gap: 9px; margin-top: 16px; }
+  .btn-primary { height: 36px; padding: 0 15px; border: none; background: var(--strong); color: #fff; border-radius: 9px; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+  .btn-primary:hover { background: #000; }
+  .btn-ghost { height: 36px; padding: 0 14px; border: 1px solid var(--border-2); background: #fff; border-radius: 9px; font-size: 13.5px; font-weight: 600; color: var(--text); cursor: pointer; }
+  .btn-ghost:hover { background: var(--hover); }
+  .sc-toggle { margin-left: auto; display: inline-flex; align-items: center; gap: 9px; font-size: 12.5px; color: var(--muted); }
+  .tg { width: 34px; height: 20px; border-radius: 11px; background: var(--blue); position: relative; cursor: pointer; }
+  .tg .kb2 { width: 16px; height: 16px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+
+  .composer-wrap { padding: 8px 24px 22px; }
+  .composer-wrap .inner { max-width: 720px; margin: 0 auto; }
+
+  /* ===== Add-context: composer chips + button ===== */
+  .attached { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .attached:empty { display: none; }
+  .ctx-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); border-radius: 7px; padding: 4px 7px 4px 8px; font-size: 12.5px; font-weight: 600; }
+  .ctx-tag .x { cursor: pointer; color: #7d93d6; }
+  .ctx-tag .x:hover { color: var(--blue); }
+  .addctx { font-weight: 600; }
+  .addctx svg { color: var(--muted); }
+  .cbtn .chevd { color: var(--soft); }
+  .btn-primary:disabled { background: #C9CED6; cursor: default; }
+
+  /* ===== Add-context modal ===== */
+  .overlay { position: fixed; inset: 0; background: rgba(15,18,27,0.32); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity .14s ease; z-index: 60; }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+  .modal { width: 960px; max-width: 100%; background: #fff; border-radius: 18px; box-shadow: 0 24px 60px rgba(16,24,40,0.24), 0 4px 12px rgba(16,24,40,0.10); overflow: hidden; transform: translateY(8px) scale(0.99); transition: transform .16s ease; display: flex; flex-direction: column; max-height: calc(100vh - 48px); }
+  .overlay.open .modal { transform: none; }
+  .m-head { display: flex; align-items: flex-start; gap: 13px; padding: 22px 24px 18px; }
+  .m-head .ic { width: 38px; height: 38px; border-radius: 10px; background: var(--blue-bg); color: var(--blue); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .m-head .ht { flex: 1; min-width: 0; }
+  .m-head .h-title { font-size: 18px; font-weight: 700; color: var(--strong); }
+  .m-head .h-sub { font-size: 13px; color: var(--soft); margin-top: 3px; }
+  .modal.kbonly .cats { display: none; }
+  .m-x { width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: var(--soft); cursor: pointer; flex-shrink: 0; }
+  .m-x:hover { background: var(--hover); color: var(--muted); }
+  .m-search { display: flex; align-items: center; gap: 10px; margin: 0 24px 16px; padding: 12px 14px; border: 1px solid var(--border-2); border-radius: 11px; background: #fff; }
+  .m-search svg { color: var(--soft); flex-shrink: 0; }
+  .m-search input { border: none; outline: none; font-size: 14.5px; color: var(--text); width: 100%; background: transparent; }
+  .m-search input::placeholder { color: var(--soft); }
+  .m-body { display: flex; height: 400px; border-top: 1px solid var(--border); }
+  .cats { width: 256px; border-right: 1px solid var(--border); padding: 14px 12px; flex-shrink: 0; overflow-y: auto; }
+  .cats-label, .items-label { font-size: 11px; font-weight: 600; color: var(--soft); text-transform: uppercase; letter-spacing: 0.04em; margin: 2px 12px 11px; }
+  .cat { display: flex; align-items: center; gap: 11px; width: 100%; padding: 10px 12px; border: none; border-radius: 9px; font-size: 14px; font-weight: 500; color: var(--text); background: transparent; cursor: pointer; margin-bottom: 3px; text-align: left; }
+  .cat:hover { background: var(--hover); }
+  .cat svg { color: var(--muted); flex-shrink: 0; }
+  .cat .nm { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cat .ct { color: var(--soft); font-variant-numeric: tabular-nums; font-size: 12.5px; margin-left: 8px; min-width: 20px; text-align: right; }
+  .cat.has .ct { color: var(--blue); }
+  .cat.sel { background: var(--blue-bg); }
+  .cat.sel .nm { color: var(--blue); font-weight: 600; }
+  .cat.sel svg { color: var(--blue); }
+  .cat.sel .ct { color: var(--blue); }
+  .cat.empty { color: var(--soft); }
+  .cat.empty svg, .cat.empty .ct { color: var(--soft); }
+  .items { width: 318px; flex-shrink: 0; border-right: 1px solid var(--border); padding: 14px 12px; overflow-y: auto; }
+  .item { display: flex; align-items: center; gap: 12px; padding: 11px 11px; border-radius: 10px; cursor: pointer; }
+  .item:hover { background: var(--hover); }
+  .item.hl { background: var(--sel); box-shadow: inset 2px 0 0 var(--blue); }
+  .item-ic { width: 30px; height: 30px; border-radius: 8px; background: #F5F7FA; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); flex-shrink: 0; }
+  .item.hl .item-ic { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue); }
+  .item-main { min-width: 0; flex: 1; overflow: hidden; }
+  .item-nm { display: block; font-size: 14px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-meta { display: block; font-size: 12px; color: var(--soft); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-add { margin-left: auto; width: 24px; height: 24px; border-radius: 7px; border: 1px solid var(--border-2); background: #fff; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .item:hover .item-add { border-color: var(--blue-border); color: var(--blue); }
+  .item.added .item-add { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .detail { flex: 1; min-width: 0; padding: 20px 22px; overflow-y: auto; }
+  .d-top { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .d-pin { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border: 1px solid var(--border-2); background: #fff; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: var(--text); cursor: pointer; }
+  .d-pin:hover { background: var(--hover); }
+  .d-pin svg { color: var(--muted); }
+  .d-pin.on { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue); }
+  .d-pin.on svg { color: var(--blue); }
+  .d-sp { flex: 1; }
+  .d-link { font-size: 13px; font-weight: 600; color: var(--blue); cursor: pointer; display: inline-flex; align-items: center; gap: 3px; }
+  .d-kicker { font-size: 11px; font-weight: 600; color: var(--soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+  .d-title { display: flex; align-items: center; gap: 9px; font-size: 16px; font-weight: 700; color: var(--strong); line-height: 1.3; }
+  .d-title .d-ic { width: 24px; height: 24px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--blue); }
+  .d-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-top: 11px; }
+  .d-divider { height: 1px; background: var(--border); margin: 18px 0; }
+  .d-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; }
+  .stat .s-l { font-size: 10.5px; font-weight: 600; color: var(--soft); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 4px; }
+  .stat .s-v { font-size: 13px; color: var(--text); font-weight: 500; }
+  .mini { width: 100%; height: 100px; margin-top: 16px; display: block; }
+  .metric { display: flex; align-items: baseline; gap: 8px; margin-top: 8px; }
+  .metric .mv { font-size: 26px; font-weight: 700; color: var(--strong); }
+  .metric .md { font-size: 13px; font-weight: 600; color: var(--blue); }
+  .empty-pane { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 28px; }
+  .empty-ic { width: 52px; height: 52px; border-radius: 13px; background: #F5F7FA; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; color: var(--soft); margin-bottom: 16px; }
+  .empty-t { font-size: 15px; font-weight: 600; color: var(--text); }
+  .empty-s { font-size: 13px; color: var(--soft); margin-top: 6px; max-width: 280px; line-height: 1.55; }
+  .m-foot { display: flex; align-items: center; gap: 12px; padding: 15px 22px; border-top: 1px solid var(--border); }
+  .m-foot .hint { font-size: 12.5px; color: var(--soft); display: inline-flex; align-items: center; gap: 7px; }
+  .m-foot .hint svg { color: var(--soft); }
+  .m-foot .fsp { flex: 1; }
+</style>
+</head>
+<body>
+
+<!-- ===================== VIEW 0: HERO ===================== -->
+<div class="hero" id="hero">
+  <div class="hero-inner">
+    <div class="orb"></div>
+    <div class="greeting">Hey Brandon, what are we working on today?</div>
+
+    <div class="composer">
+      <div class="attached" id="attached"></div>
+      <div class="field">Ask Retell, attach context, or create a skill…</div>
+      <div class="composer-bar">
+        <span class="plus" id="plusBtn"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 4.5v11M4.5 10h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+
+        <!-- + menu -->
+        <div class="menu" id="plusMenu">
+          <div class="mi has-sub"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M6 3.5h7a1.5 1.5 0 011.5 1.5v10a1.5 1.5 0 01-1.5 1.5H6.5A1.5 1.5 0 015 15V5A1.5 1.5 0 016.5 3.5z" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg><span class="lbl">Skills</span><span class="arr"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div class="submenu">
+              <div class="mi" id="createSkill"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 4.5v11M4.5 10h11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span class="lbl">Create a skill</span><span class="new">New</span></div>
+              <div class="mi"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M4 10h12M4 14h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="lbl">Manage skills</span></div>
+            </div>
+          </div>
+          <div class="mi" data-addkb><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M5 4.7A1.7 1.7 0 016.7 3H15v13.6H6.7A1.7 1.7 0 005 18.3V4.7z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M5 15.6A1.7 1.7 0 016.7 14H15" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg><span class="lbl">Knowledge base</span></div>
+          <div class="mi has-sub"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><rect x="3.5" y="3.5" width="6" height="6" rx="1.3" stroke="currentColor" stroke-width="1.3"/><rect x="11" y="3.5" width="5.5" height="5.5" rx="1.3" stroke="currentColor" stroke-width="1.3"/><rect x="3.5" y="11" width="5.5" height="5.5" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M13.7 11v5.5M11 13.7h5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg><span class="lbl">Integrations</span><span class="arr"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div class="submenu">
+              <div class="mi"><span class="brand-sm" style="background:#00A1E0">S</span><span class="lbl">Salesforce</span></div>
+              <div class="mi"><span class="brand-sm" style="background:#4285F4">G</span><span class="lbl">Google Workspace</span></div>
+              <div class="mi"><span class="brand-sm" style="background:#4A154B">S</span><span class="lbl">Slack</span></div>
+              <div class="mi" onclick="location.href='copilot-settings-skills.html'"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.4" stroke="currentColor" stroke-width="1.4"/><path d="M10 4v2M10 14v2M4 10h2M14 10h2M5.8 5.8l1.4 1.4M12.8 12.8l1.4 1.4M14.2 5.8l-1.4 1.4M7.2 12.8l-1.4 1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg><span class="lbl">Manage integrations</span></div>
+            </div>
+          </div>
+          <div class="mi has-sub"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M11 3.5h5.5V9" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M16.5 3.5l-7 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M14 11.5V15a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 014 15V8a1.5 1.5 0 011.5-1.5H8.5" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="lbl">External</span><span class="arr"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div class="submenu ext">
+              <div class="mi tall" id="uploadFiles"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 13.5V5M10 5L6.5 8.5M10 5l3.5 3.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 14.5v1a1 1 0 001 1h9a1 1 0 001-1v-1" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span class="mtxt"><span class="lbl">Upload files</span><span class="msub">File size should be less than 100MB</span></span></div>
+              <div class="mi tall"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M4 10h12M4 14h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="mtxt"><span class="lbl">Add text</span><span class="msub">Paste reference text for this chat</span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <span class="csp"></span>
+        <span class="modewrap">
+          <span class="cbtn modebtn" data-modebtn>Plan<svg class="chev" width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></span>
+          <div class="modemenu">
+            <div class="mm on" data-mode="Plan"><span class="mm-t">Plan</span><span class="mm-d">Draft changes before building</span><span class="mm-ck"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="mm" data-mode="Build"><span class="mm-t">Build</span><span class="mm-d">Make changes to the agent</span><span class="mm-ck"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="mm" data-mode="Ask"><span class="mm-t">Ask</span><span class="mm-d">Answer questions, read only</span><span class="mm-ck"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+          </div>
+        </span>
+        <span class="modelwrap"><span class="cbtn modelbtn"><span class="bdot"></span><span class="mlabel">Opus 4.8</span><svg class="chev" width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></span><div class="modelmenu"><div class="mdl on" data-model="Opus 4.8"><span class="mtxt2"><span class="mn2">Opus 4.8</span><span class="md2">Most capable. Building from scratch and QA reasoning</span></span><span class="ck2"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="mdl" data-model="Sonnet 4.6"><span class="mtxt2"><span class="mn2">Sonnet 4.6</span><span class="md2">Strong all-rounder at ~1/5 the cost, the everyday pick</span></span><span class="ck2"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="mdl" data-model="Haiku 4.5"><span class="mtxt2"><span class="mn2">Haiku 4.5</span><span class="md2">Fastest and lowest cost, for quick lookups and short edits</span></span><span class="ck2"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="more" data-moretoggle>More models<svg class="mchev" width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></div><div class="mdl extra" data-model="Kimi"><span class="mtxt2"><span class="mn2">Kimi <span class="prov">by Moonshot</span></span><span class="md2">Low cost for high-volume sessions</span></span><span class="ck2"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="mdl extra" data-model="Gemini 3.1 Pro"><span class="mtxt2"><span class="mn2">Gemini 3.1 Pro <span class="prov">by Google</span></span><span class="md2">Long context for large knowledge bases or many transcripts</span></span><span class="ck2"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="mdl extra" data-model="GPT-5.2"><span class="mtxt2"><span class="mn2">GPT-5.2 <span class="prov">by OpenAI</span></span><span class="md2">A frontier alternative for OpenAI-standardized teams</span></span><span class="ck2"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></div></span>
+        <button class="send"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 16V5M10 5L5.5 9.5M10 5l4.5 4.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+    </div>
+
+    <!-- Connect tools strip -->
+    <div class="connect-bar">
+      <span class="ct-label">Connect your tools to Copilot</span>
+      <span class="ct-sp"></span>
+      <span class="logos">
+        <!-- Salesforce -->
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M10 6.2a3.7 3.7 0 013.45 2.35A3 3 0 0116.5 8a3 3 0 01.6 5.94c-.2.04-.4.06-.6.06H6.7A3.2 3.2 0 016.4 7.6 3.7 3.7 0 0110 6.2z" fill="#00A1E0"/></svg>
+        <!-- HubSpot -->
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="9.5" cy="14.5" r="4.3" stroke="#FF7A59" stroke-width="2"/><circle cx="16.5" cy="6.7" r="2.4" fill="#FF7A59"/><path d="M14.6 8.1L11.4 11.8M16.5 9.1V11" stroke="#FF7A59" stroke-width="2" stroke-linecap="round"/></svg>
+        <!-- Zendesk -->
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#03363D"><path d="M11 7.5V18L3.5 18z"/><path d="M13 16.5a3.75 3.75 0 017.5 0z"/></svg>
+        <!-- Slack -->
+        <svg width="18" height="18" viewBox="0 0 127 127" fill="none"><path d="M27.2 80c0 7.3-5.9 13.2-13.2 13.2C6.7 93.2.8 87.3.8 80c0-7.3 5.9-13.2 13.2-13.2h13.2V80z" fill="#E01E5A"/><path d="M33.8 80c0-7.3 5.9-13.2 13.2-13.2 7.3 0 13.2 5.9 13.2 13.2v33c0 7.3-5.9 13.2-13.2 13.2-7.3 0-13.2-5.9-13.2-13.2V80z" fill="#E01E5A"/><path d="M47 27.2c-7.3 0-13.2-5.9-13.2-13.2C33.8 6.7 39.7.8 47 .8c7.3 0 13.2 5.9 13.2 13.2v13.2H47z" fill="#36C5F0"/><path d="M47 33.8c7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2H14C6.7 60.2.8 54.3.8 47c0-7.3 5.9-13.2 13.2-13.2h33z" fill="#36C5F0"/><path d="M99.8 47c0-7.3 5.9-13.2 13.2-13.2 7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2H99.8V47z" fill="#2EB67D"/><path d="M93.2 47c0 7.3-5.9 13.2-13.2 13.2-7.3 0-13.2-5.9-13.2-13.2V14C66.8 6.7 72.7.8 80 .8c7.3 0 13.2 5.9 13.2 13.2v33z" fill="#2EB67D"/><path d="M80 99.8c7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2-7.3 0-13.2-5.9-13.2-13.2V99.8H80z" fill="#ECB22E"/><path d="M80 93.2c-7.3 0-13.2-5.9-13.2-13.2 0-7.3 5.9-13.2 13.2-13.2h33c7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2H80z" fill="#ECB22E"/></svg>
+      </span>
+      <span class="more">+6</span>
+      <span class="ct-chev"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </div>
+
+    <div class="below">
+      <div class="tip">Tip: Create a skill to teach Copilot your company context, brand voice, or conventions once</div>
+      <div class="row-chips">
+        <span class="pchip" onclick="startSkill()"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M6 3.5h7a1.3 1.3 0 011.3 1.3v9.4a1.3 1.3 0 01-1.3 1.3H6.5A1.3 1.3 0 015 14.2V4.8A1.3 1.3 0 016.5 3.5z" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>Create a skill</span>
+        <span class="pchip"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><rect x="4" y="5" width="12" height="11" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 5V3M7.5 11.5h.01M12.5 11.5h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Build an agent</span>
+        <span class="pchip"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M3.5 14L8 9.5l3 2.5L16.5 6" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Analytics</span>
+        <span class="pchip"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 6.5V10l2.5 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Call History</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== VIEW 1: SKILL BUILDER ===================== -->
+<div class="builder" id="builder">
+  <div class="b-top">
+    <span class="orb"></span>
+    <span class="ttl">Creating a new skill together</span>
+    <span class="sp"></span>
+    <span class="newchat" onclick="resetAll()">New chat</span>
+  </div>
+
+  <div class="thread-wrap">
+    <div class="thread" id="thread"></div>
+  </div>
+
+  <div class="composer-wrap">
+    <div class="inner">
+      <div class="composer">
+        <div class="attached" id="builderAttached"></div>
+        <div class="field">Add a follow-up, or pick an option above…</div>
+        <div class="composer-bar">
+          <span class="plus"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 4.5v11M4.5 10h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+          <span class="csp"></span>
+          <span class="modewrap">
+            <span class="cbtn modebtn" data-modebtn>Plan<svg class="chev" width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></span>
+            <div class="modemenu">
+              <div class="mm on" data-mode="Plan"><span class="mm-t">Plan</span><span class="mm-d">Draft changes before building</span><span class="mm-ck"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+              <div class="mm" data-mode="Build"><span class="mm-t">Build</span><span class="mm-d">Make changes to the agent</span><span class="mm-ck"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+              <div class="mm" data-mode="Ask"><span class="mm-t">Ask</span><span class="mm-d">Answer questions, read only</span><span class="mm-ck"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            </div>
+          </span>
+          <span class="modelwrap"><span class="cbtn modelbtn"><span class="bdot"></span><span class="mlabel">Opus 4.8</span><svg class="chev" width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></span><div class="modelmenu"><div class="mdl on" data-model="Opus 4.8"><span class="mtxt2"><span class="mn2">Opus 4.8</span><span class="md2">Most capable. Building from scratch and QA reasoning</span></span><span class="ck2"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="mdl" data-model="Sonnet 4.6"><span class="mtxt2"><span class="mn2">Sonnet 4.6</span><span class="md2">Strong all-rounder at ~1/5 the cost, the everyday pick</span></span><span class="ck2"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="mdl" data-model="Haiku 4.5"><span class="mtxt2"><span class="mn2">Haiku 4.5</span><span class="md2">Fastest and lowest cost, for quick lookups and short edits</span></span><span class="ck2"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="more" data-moretoggle>More models<svg class="mchev" width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></div><div class="mdl extra" data-model="Kimi"><span class="mtxt2"><span class="mn2">Kimi <span class="prov">by Moonshot</span></span><span class="md2">Low cost for high-volume sessions</span></span><span class="ck2"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="mdl extra" data-model="Gemini 3.1 Pro"><span class="mtxt2"><span class="mn2">Gemini 3.1 Pro <span class="prov">by Google</span></span><span class="md2">Long context for large knowledge bases or many transcripts</span></span><span class="ck2"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="mdl extra" data-model="GPT-5.2"><span class="mtxt2"><span class="mn2">GPT-5.2 <span class="prov">by OpenAI</span></span><span class="md2">A frontier alternative for OpenAI-standardized teams</span></span><span class="ck2"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3.2 3.2L15 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></div></span>
+          <button class="send"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 16V5M10 5L5.5 9.5M10 5l4.5 4.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ADD-CONTEXT MODAL ===================== -->
+<input type="file" id="extFile" multiple style="display:none">
+<div class="overlay" id="ctxOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="m-head">
+      <span class="ic"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M13 10v1a3 3 0 003 2.6A7 7 0 1010 17" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span>
+      <div class="ht">
+        <div class="h-title">Add context</div>
+        <div class="h-sub">Bring your knowledge bases, charts, agents, calls, and skills into this chat</div>
+      </div>
+      <span class="m-x" id="mClose"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span>
+    </div>
+
+    <div class="m-search">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="currentColor" stroke-width="1.6"/><path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input placeholder="Search knowledge bases, charts, agents, calls, skills…" />
+    </div>
+
+    <div class="m-body">
+      <div class="cats" id="cats"><div class="cats-label">Categories</div></div>
+      <div class="items" id="items"></div>
+      <div class="detail" id="detail"></div>
+    </div>
+
+    <div class="m-foot">
+      <span class="hint"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 2.5L16 5v4.2c0 3.6-2.5 6.7-6 7.8-3.5-1.1-6-4.2-6-7.8V5l6-2.5z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><path d="M7.6 10l1.7 1.7L13 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Reads the live, published source. Read-only.</span>
+      <span class="fsp"></span>
+      <button class="btn-ghost" id="mCancel">Cancel</button>
+      <button class="btn-primary" id="mAttach" disabled>Attach</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const ORB = '<span class="orb" style="display:block;width:100%;height:100%"></span>';
+  const norm = o => typeof o === 'string' ? { t: o } : o;
+
+  const ROUND1 = [
+    { q: 'What should this skill help Copilot with?', opts: [
+      { t: 'Company context', s: 'Facts about your business, products, and policies' },
+      { t: 'Brand voice', s: 'How your agents should sound on a call' },
+      { t: 'Build conventions', s: 'How to name, structure, and wire up agents' },
+      { t: 'Compliance rules', s: 'What the agent must always or never say' },
+      { t: 'QA rubric', s: 'How Copilot should grade and score calls' },
+      { t: 'Other' },
+    ]},
+    { q: 'When should Copilot use this skill?', opts: [
+      { t: 'Always on', s: 'Applied to every chat automatically' },
+      { t: 'Only when I attach it', s: 'Stays off until added with @ or the + menu' },
+      { t: 'On specific agents', s: 'Auto-applied when those agents are in context' },
+      { t: 'Other' },
+    ]},
+    { q: 'Where should the knowledge come from?', opts: [
+      { t: 'I’ll type it now', s: 'Write the guidance in the next step' },
+      { t: 'Upload files', s: 'PDFs, docs, or transcripts' },
+      { t: 'Pull from a knowledge base', s: 'Reuse a KB already linked to the agent' },
+      { t: 'A website URL', s: 'Crawl a public page' },
+      { t: 'Other' },
+    ]},
+  ];
+
+  const ROUND2 = {
+    'Brand voice': [
+      { q: 'What tone should agents use?', opts: ['Professional & polished','Warm & friendly','Concise & direct','Energetic & upbeat','Other'] },
+      { q: 'Anything the agent should never do?', opts: ['No slang or filler words','Never over-promise','No legal or medical advice','No pressure tactics','Other'] },
+      { q: 'Whose voice should it match?', opts: [
+        { t: 'Our top-performing agent', s: 'Learn the style of a high scorer' },
+        { t: 'A script or guide I’ll provide' }, { t: 'A sample call recording' }, { t: 'Other' }] },
+    ],
+    'Company context': [
+      { q: 'What should Copilot always know about your business?', opts: ['Products & pricing','Hours & locations','Policies & terms','Team & escalation paths','Other'] },
+      { q: 'How often does this change?', opts: ['Rarely','Monthly','Often — keep it synced','Other'] },
+      { q: 'Who keeps it accurate?', opts: ['Me','My team','Auto-sync from a source','Other'] },
+    ],
+    'Compliance rules': [
+      { q: 'What kind of rules?', opts: ['Required disclosures','Prohibited claims','Data handling & privacy','Identity verification','Other'] },
+      { q: 'How strict should enforcement be?', opts: [
+        { t: 'Block the response', s: 'Hard stop if violated' },
+        { t: 'Warn but allow' }, { t: 'Just flag for review' }, { t: 'Other' }] },
+      { q: 'Which standard applies?', opts: ['HIPAA','TCPA','PCI','None / internal only','Other'] },
+    ],
+    _default: [
+      { q: 'What’s most important for Copilot to get right?', opts: ['Consistency','Accuracy','Speed','Edge-case coverage','Other'] },
+      { q: 'How should Copilot apply it?', opts: ['Strictly, every time','As a strong default','As a gentle suggestion','Other'] },
+      { q: 'Want an example to anchor it?', opts: ['Yes — I’ll provide one','No — infer from context','Other'] },
+    ],
+  };
+
+  const SKILL_ICON = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 3.5h7a1.4 1.4 0 011.4 1.4v10.2a1.4 1.4 0 01-1.4 1.4H6.5A1.4 1.4 0 015 15.1V4.9A1.4 1.4 0 016.5 3.5z" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+
+  let st = { list: ROUND1, qi: 0, round: 1, answers: [], hot: 0, done: false };
+
+  const thread = document.getElementById('thread');
+
+  function render() {
+    let html = `<div class="ai"><span class="av">${ORB}</span><div class="c">Let’s build a skill together. I’ll ask a few quick questions, then write it up for you. <span class="hl">Pick an option</span> below.</div></div>`;
+
+    st.answers.forEach((a, i) => {
+      if (i === 3 && st.round >= 2) {
+        const pick = st.answers[0].a;
+        html += `<div class="ai"><span class="av">${ORB}</span><div class="c">Great, a <span class="hl">${pick}</span> skill. A couple more to nail down the details.</div></div>`;
+      }
+      html += summ(a.q, a.a);
+    });
+
+    if (st.done) {
+      html += skillCard();
+    } else {
+      html += qcard();
+    }
+    thread.innerHTML = html;
+    bindQ();
+    thread.parentElement.scrollTop = thread.parentElement.scrollHeight;
+  }
+
+  function summ(q, a) {
+    return `<div class="summ"><div class="card"><div class="q">${q}</div><div class="a"><span class="dot"></span>${a}</div></div></div>`;
+  }
+
+  function qcard() {
+    const cur = st.list[st.qi];
+    const opts = cur.opts.map(norm);
+    const rows = opts.map((o, i) => `
+      <div class="opt${i===st.hot?' hot':''}" data-i="${i}">
+        <span class="num">${i+1}</span>
+        <span class="ob"><span class="ot">${o.t}</span>${o.s?`<span class="os">${o.s}</span>`:''}</span>
+      </div>`).join('');
+    const total = st.list.length;
+    return `<div class="qcard">
+      <div class="qhead">
+        <span class="qic"><svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M5 10l3.5 3.5L15 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="qtxt">${cur.q}</span>
+        <span class="qpage"><span class="nav" data-nav="prev"><svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M12 5l-5 5 5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>${st.qi+1} of ${total}<span class="nav" data-nav="next"><svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+      </div>
+      <div class="opts">${rows}</div>
+      <div class="qfoot">
+        <span class="back${st.qi===0 && st.round===1 ? ' off':''}" data-back>← Back</span>
+        <span class="sp"></span>
+        <span class="kbd"><kbd>1–${opts.length}</kbd> or <kbd>↑</kbd><kbd>↓</kbd> to choose <kbd>↵</kbd> select</span>
+      </div>
+    </div>`;
+  }
+
+  function bindQ() {
+    thread.querySelectorAll('.opt').forEach(el => {
+      el.addEventListener('mouseenter', () => { st.hot = +el.dataset.i; });
+      el.addEventListener('click', () => choose(+el.dataset.i));
+    });
+    const back = thread.querySelector('[data-back]');
+    if (back) back.addEventListener('click', goBack);
+  }
+
+  function choose(i) {
+    const cur = st.list[st.qi];
+    const o = norm(cur.opts[i]);
+    st.answers.push({ q: cur.q, a: o.t });
+    st.qi++; st.hot = 0;
+    if (st.qi >= st.list.length) {
+      if (st.round === 1) {
+        const pick = st.answers[0].a;
+        st.list = ROUND2[pick] || ROUND2._default;
+        st.round = 2; st.qi = 0;
+      } else {
+        st.done = true;
+      }
+    }
+    render();
+  }
+
+  function goBack() {
+    if (st.answers.length === 0) return;
+    if (st.qi === 0 && st.round === 2) {
+      // step back into round 1
+      st.list = ROUND1; st.round = 1; st.qi = ROUND1.length - 1;
+      st.answers = st.answers.slice(0, ROUND1.length - 1);
+    } else if (st.qi > 0) {
+      st.qi--; st.answers.pop();
+    }
+    st.done = false; st.hot = 0;
+    render();
+  }
+
+  function skillCard() {
+    const a = st.answers;
+    const name = a[0].a;
+    const when = (a[1] && a[1].a) || 'When attached';
+    const source = (a[2] && a[2].a) || 'Typed';
+    const detail = a.slice(3).map(x => x.a).join(' · ');
+    return `<div class="skill-card">
+      <div class="sc-kicker">New skill</div>
+      <div class="sc-top">
+        <span class="sc-ic">${SKILL_ICON}</span>
+        <div><div class="sc-nm">${name}</div><div class="sc-sub">Reusable context Copilot will apply for you</div></div>
+        <label class="sc-toggle">Always on<span class="tg"><span class="kb2"></span></span></label>
+      </div>
+      <div class="sc-desc">Grounds Copilot in your <b>${name.toLowerCase()}</b>${detail?`: ${detail.toLowerCase()}`:''}. ${when==='Always on'?'Applied to every chat.':'Used '+when.toLowerCase()+'.'}</div>
+      <div class="sc-meta">
+        <span class="sc-tag">Use · <b>${when}</b></span>
+        <span class="sc-tag">Source · <b>${source}</b></span>
+        <span class="sc-tag">Owner · <b>Brandon</b></span>
+      </div>
+      <div class="sc-actions">
+        <button class="btn-primary" onclick="resetAll()">Save skill</button>
+        <button class="btn-ghost">Edit details</button>
+        <button class="btn-ghost" onclick="resetBuilder()">Start over</button>
+      </div>
+    </div>
+    <div class="ai"><span class="av">${ORB}</span><div class="c">Perfect, I have everything I need. Review the skill above and hit <span class="hl">Save</span>, or tell me what to change.</div></div>`;
+  }
+
+  // keyboard
+  document.addEventListener('keydown', e => {
+    const ov = document.getElementById('ctxOverlay');
+    if (ov && ov.classList.contains('open')) return;
+    if (!document.getElementById('builder').classList.contains('show') || st.done) return;
+    const cur = st.list[st.qi]; if (!cur) return;
+    const n = cur.opts.length;
+    if (e.key >= '1' && e.key <= String(Math.min(9, n))) { choose(+e.key - 1); e.preventDefault(); }
+    else if (e.key === 'ArrowDown') { st.hot = (st.hot + 1) % n; paint(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { st.hot = (st.hot - 1 + n) % n; paint(); e.preventDefault(); }
+    else if (e.key === 'Enter') { choose(st.hot); e.preventDefault(); }
+    else if (e.key === 'Backspace') { goBack(); e.preventDefault(); }
+  });
+  function paint() {
+    thread.querySelectorAll('.opt').forEach((el,i) => el.classList.toggle('hot', i===st.hot));
+  }
+
+  // ===== + menu =====
+  const plusBtn = document.getElementById('plusBtn');
+  const plusMenu = document.getElementById('plusMenu');
+  plusBtn.addEventListener('click', e => { e.stopPropagation(); plusBtn.classList.toggle('open'); plusMenu.classList.toggle('open'); });
+  document.addEventListener('click', e => { if (!plusMenu.contains(e.target) && e.target !== plusBtn) { plusMenu.classList.remove('open'); plusBtn.classList.remove('open'); } });
+  document.getElementById('createSkill').addEventListener('click', startSkill);
+
+  // ===== view switching =====
+  function startSkill() {
+    plusMenu.classList.remove('open'); plusBtn.classList.remove('open');
+    document.getElementById('hero').style.display = 'none';
+    document.getElementById('builder').classList.add('show');
+    resetBuilder();
+  }
+  function resetBuilder() {
+    st = { list: ROUND1, qi: 0, round: 1, answers: [], hot: 0, done: false };
+    render();
+  }
+  function resetAll() {
+    document.getElementById('builder').classList.remove('show');
+    document.getElementById('hero').style.display = 'flex';
+  }
+
+  /* ===================== ADD-CONTEXT MODAL ===================== */
+  const CICON = {
+    clock:'<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 6.5V10l2.5 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+    pin:'<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M7 3h6l-1 4 3 3v2H5v-2l3-3-1-4z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M10 12v5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+    kb:'<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 4.6A1.6 1.6 0 015.6 3H11l4 4v8.4A1.6 1.6 0 0113.4 17H5.6A1.6 1.6 0 014 15.4V4.6z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg>',
+    chart:'<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M3.5 14L8 9.5l3 2.5L16.5 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 6h3.5v3.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    dash:'<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="3.5" y="3.5" width="5.5" height="5.5" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="11" y="3.5" width="5.5" height="5.5" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="3.5" y="11" width="5.5" height="5.5" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="11" y="11" width="5.5" height="5.5" rx="1.2" stroke="currentColor" stroke-width="1.3"/></svg>',
+    agent:'<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="4" y="6" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M10 6V3.5M7.5 10.5h.01M12.5 10.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    call:'<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 6.5V10l2.5 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+    skill:'<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 3l5 2.5v4c0 3.5-2.4 5.6-5 6.5-2.6-.9-5-3-5-6.5v-4L10 3z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg>',
+    file:'<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M5 3.5h7l3 3v10H5V3.5z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M12 3.5v3h3" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>',
+    web:'<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M3.5 10h13M10 3.5c2 2 2 11 0 13M10 3.5c-2 2-2 11 0 13" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>',
+    pdf:'<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M5 3.5h7l3 3v10H5V3.5z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M12 3.5v3h3" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>',
+    drive:'<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M7.5 3l-5 8.5L5 16h10l2.5-4.5L12.5 3h-5z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M2.5 11.5h15M7.5 3l5 8.5M12.5 3l-5 8.5" stroke="currentColor" stroke-width="1.3"/></svg>',
+  };
+
+  const CCATS = [
+    { key:'recent', label:'Recent', icon:'clock', ct:3, has:true },
+    { key:'pinned', label:'Pinned', icon:'pin', ct:0, has:false },
+    { key:'kb', label:'Knowledge bases', icon:'kb', ct:3, has:true },
+    { key:'charts', label:'Charts', icon:'chart', ct:6, has:true },
+    { key:'dashboards', label:'Dashboards', icon:'dash', ct:1, has:true },
+    { key:'agents', label:'Agents', icon:'agent', ct:1, has:true },
+    { key:'calls', label:'Calls', icon:'call', ct:24, has:true },
+    { key:'skills', label:'Skills', icon:'skill', ct:4, has:true },
+    { key:'files', label:'Files', icon:'file', ct:0, has:false },
+  ];
+
+  function cMiniChart(seed) {
+    const pts = [22,28,24,34,30,44,40,52,48,62,58,72].map((v,i)=>{
+      const x = 6 + i*(228/11); const y = 86 - (v + (seed||0)) * 0.78;
+      return [x, Math.max(8, Math.min(84, y))];
+    });
+    const line = pts.map((p,i)=> (i?'L':'M') + p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+    const area = line + ` L${pts[pts.length-1][0].toFixed(1)} 86 L6 86 Z`;
+    return `<svg class="mini" viewBox="0 0 240 92" preserveAspectRatio="none" fill="none"><line x1="6" y1="86" x2="234" y2="86" stroke="#E1E4EA" stroke-width="1"/><path d="${area}" fill="#ECF3FF"/><path d="${line}" stroke="#3d64d7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+
+  const CDATA = {
+    kb: [
+      { id:'kb1', ic:'drive', nm:'OverTheTop Pricing & Plans', meta:'Google Drive · 2 days ago', d:{ kicker:'KNOWLEDGE BASE', desc:'Plan tiers, session pricing, and add-on fees for OverTheTop clinics.', stats:[['Source','Google Drive'],['Documents','14'],['Last synced','Live'],['Used by','Amy']] } },
+      { id:'kb2', ic:'web', nm:'Clinic Services FAQ', meta:'Website · 5 hours ago', d:{ kicker:'KNOWLEDGE BASE', desc:'Public FAQ covering services, hours, and locations, crawled from the clinic site.', stats:[['Source','Website'],['Pages','8'],['Last synced','Live'],['Used by','Amy']] } },
+      { id:'kb3', ic:'pdf', nm:'Insurance & Billing Policy', meta:'PDF upload · Apr 3', d:{ kicker:'KNOWLEDGE BASE', desc:'Insurance acceptance, billing terms, and refund policy uploaded by the billing team.', stats:[['Source','PDF upload'],['Pages','22'],['Last synced','Snapshot'],['Used by','Amy']] } },
+    ],
+    charts: [
+      { id:'c1', ic:'chart', nm:'Failure rate · last 7 days', meta:'Insight · hourly', chart:0, d:{ kicker:'INSIGHT', metric:'27%', delta:'▲ 4 pts vs prior week', stats:[['Period','Last 7 days'],['Agent','Inbound Scheduler'],['Calls','142'],['Failed','38']] } },
+      { id:'c2', ic:'chart', nm:'Calls by outcome', meta:'Insight', chart:-6, d:{ kicker:'INSIGHT', metric:'73%', delta:'success rate', stats:[['Period','Last 7 days'],['Successful','104'],['Transferred','19'],['Failed','19']] } },
+      { id:'c3', ic:'chart', nm:'Avg duration trend', meta:'Insight', chart:8, d:{ kicker:'INSIGHT', metric:'1:02', delta:'▼ 9s vs prior week', stats:[['Period','Last 7 days'],['Median','0:54'],['P90','2:11']] } },
+      { id:'c4', ic:'chart', nm:'Transfer rate by agent', meta:'Insight', chart:-3, d:{ kicker:'INSIGHT', metric:'13%', delta:'▲ 2 pts', stats:[['Period','Last 7 days'],['Agents','3'],['Top','Inbound Scheduler']] } },
+      { id:'c5', ic:'chart', nm:'Sentiment breakdown', meta:'Insight', chart:4, d:{ kicker:'INSIGHT', metric:'+0.31', delta:'avg sentiment', stats:[['Period','Last 7 days'],['Positive','61%'],['Negative','14%']] } },
+      { id:'c6', ic:'chart', nm:'Conversion by version', meta:'Insight', chart:12, d:{ kicker:'INSIGHT', metric:'41%', delta:'▲ 6 pts on v3', stats:[['Period','Last 7 days'],['v2','35%'],['v3','41%']] } },
+    ],
+    dashboards: [ { id:'d1', ic:'dash', nm:'Weekly QA overview', meta:'6 charts · shared', d:{ kicker:'DASHBOARD', desc:'Standing weekly view of failure rate, sentiment, transfer rate, and QA scores.', stats:[['Charts','6'],['Owner','Brandon'],['Refresh','Hourly'],['Shared with','Team']] } } ],
+    agents: [ { id:'a1', ic:'agent', nm:'Amy — Inbound Receptionist', meta:'OverTheTop · in context', d:{ kicker:'AGENT', desc:'Inbound receptionist for OverTheTop clinics. Books visits and answers pricing questions.', stats:[['Status','Live'],['Version','v3'],['KBs linked','3'],['Calls (7d)','142']] } } ],
+    calls: [
+      { id:'l1', ic:'call', nm:'Apr 23, 2:32 PM', meta:'Inbound Scheduler · 1:12', d:{ kicker:'CALL', desc:'Caller asked to reschedule, then requested a human for a billing dispute.', stats:[['Outcome','Transferred'],['Duration','1:12'],['Disconnection','agent_transfer'],['Agent','Inbound Scheduler']] } },
+      { id:'l2', ic:'call', nm:'Apr 23, 2:28 PM', meta:'Inbound Scheduler · 0:42', d:{ kicker:'CALL', desc:'Caller hung up during identity verification before booking.', stats:[['Outcome','Unsuccessful'],['Duration','0:42'],['Disconnection','user_hangup'],['Agent','Inbound Scheduler']] } },
+      { id:'l3', ic:'call', nm:'Apr 23, 2:21 PM', meta:'Inbound Scheduler · 1:03', d:{ kicker:'CALL', desc:'Booked a follow-up visit and confirmed pricing from the knowledge base.', stats:[['Outcome','Successful'],['Duration','1:03'],['Disconnection','agent_hangup'],['Agent','Inbound Scheduler']] } },
+    ],
+    skills: [
+      { id:'s1', ic:'skill', nm:'OverTheTop Company Context', meta:'Scott Brody · 2 files', d:{ kicker:'SKILL', desc:'Company background, locations, and policies that ground every session for OverTheTop.', stats:[['Owner','Scott Brody'],['Files','2'],['State','Always on']] } },
+      { id:'s2', ic:'skill', nm:'Brand Voice Guide', meta:'1 file · session', d:{ kicker:'SKILL', desc:'Tone and phrasing guidance so rewrites match the OverTheTop brand voice.', stats:[['Files','1'],['State','This session']] } },
+      { id:'s3', ic:'skill', nm:'Build Conventions', meta:'Joel · always on', d:{ kicker:'SKILL', desc:'Naming, node structure, and prompt conventions for building agents.', stats:[['Owner','Joel'],['State','Always on']] } },
+    ],
+    recent: [
+      { id:'kb1', ic:'drive', nm:'OverTheTop Pricing & Plans', meta:'Knowledge base · 2 min ago', d:{ kicker:'KNOWLEDGE BASE', desc:'Plan tiers, session pricing, and add-on fees for OverTheTop clinics.', stats:[['Source','Google Drive'],['Documents','14'],['Last synced','Live'],['Used by','Amy']] } },
+      { id:'a1', ic:'agent', nm:'Amy — Inbound Receptionist', meta:'Agent · in context', d:{ kicker:'AGENT', desc:'Inbound receptionist for OverTheTop clinics.', stats:[['Status','Live'],['Version','v3'],['KBs linked','3'],['Calls (7d)','142']] } },
+      { id:'l2', ic:'call', nm:'Apr 23, 2:28 PM', meta:'Call · user hangup', d:{ kicker:'CALL', desc:'Caller hung up during identity verification before booking.', stats:[['Outcome','Unsuccessful'],['Duration','0:42'],['Disconnection','user_hangup']] } },
+    ],
+    pinned: [],
+    files: [],
+  };
+
+  const CEMPTY = {
+    pinned: { ic:'pin', t:'No pinned context yet', s:'Pin a knowledge base or chart and it shows up here for quick attaching.' },
+    files:  { ic:'file', t:'No files attached', s:'Drop a PDF, doc, or URL into the chat to use it as one-off context.' },
+  };
+
+  const cCatsEl = document.getElementById('cats');
+  const cItemsEl = document.getElementById('items');
+  const cDetailEl = document.getElementById('detail');
+  const cAttachBtn = document.getElementById('mAttach');
+  const cSelected = new Map();
+  const cPinned = new Set();
+
+  const C_ALL = {};
+  Object.keys(CDATA).forEach(k => (CDATA[k]||[]).forEach(it => { if (it.id && !C_ALL[it.id]) C_ALL[it.id] = it; }));
+
+  function cPinInner(it) {
+    const on = cPinned.has(it.id);
+    return (on
+      ? '<svg width="12" height="12" viewBox="0 0 20 20" fill="#3d64d7"><path d="M7 3h6l-1 4 3 3v2H5v-2l3-3-1-4z"/><path d="M9.2 12h1.6v5H9.2z"/></svg>'
+      : '<svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M7 3h6l-1 4 3 3v2H5v-2l3-3-1-4z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M10 12v5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>') + (on ? 'Pinned' : 'Pin');
+  }
+  function cUpdatePinned() {
+    const cat = cCatsEl.querySelector('.cat[data-cat="pinned"]'); if (!cat) return;
+    const n = cPinned.size; cat.querySelector('.ct').textContent = n;
+    cat.classList.toggle('has', n > 0); cat.classList.toggle('empty', n === 0);
+  }
+  function cTogglePin(it) {
+    if (cPinned.has(it.id)) cPinned.delete(it.id); else cPinned.add(it.id);
+    cUpdatePinned();
+    const sel = cCatsEl.querySelector('.cat.sel');
+    if (sel && sel.dataset.cat === 'pinned') cRenderItems('pinned'); else cRenderDetail(it);
+  }
+
+  CCATS.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'cat' + (c.has ? ' has' : ' empty') + (c.key==='kb' ? ' sel' : '');
+    b.dataset.cat = c.key;
+    b.innerHTML = `${CICON[c.icon]}<span class="nm">${c.label}</span><span class="ct">${c.ct}</span>`;
+    b.addEventListener('click', () => { cCatsEl.querySelectorAll('.cat').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); cRenderItems(c.key); });
+    cCatsEl.appendChild(b);
+  });
+
+  function cRenderDetail(it) {
+    const d = it.d || {};
+    let mid = '';
+    if (it.chart !== undefined) { mid += cMiniChart(it.chart); if (d.metric) mid += `<div class="metric"><span class="mv">${d.metric}</span><span class="md">${d.delta||''}</span></div>`; }
+    if (d.desc) mid = `<p class="d-desc">${d.desc}</p>` + mid;
+    const stats = (d.stats||[]).map(s => `<div class="stat"><div class="s-l">${s[0]}</div><div class="s-v">${s[1]}</div></div>`).join('');
+    cDetailEl.style.display = ''; cDetailEl.style.flexDirection = '';
+    cDetailEl.innerHTML = `
+      <div class="d-top"><button class="d-pin ${cPinned.has(it.id)?'on':''}" id="cPin">${cPinInner(it)}</button><span class="d-sp"></span><span class="d-link">View <svg width="11" height="11" viewBox="0 0 20 20" fill="none"><path d="M7 4h9v9M16 4l-9 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+      <div class="d-kicker">${d.kicker||''}</div>
+      <div class="d-title"><span class="d-ic">${CICON[it.ic]}</span>${it.nm}</div>
+      ${mid}
+      ${stats ? '<div class="d-divider"></div><div class="d-grid">'+stats+'</div>' : ''}`;
+    const pb = cDetailEl.querySelector('#cPin'); if (pb) pb.addEventListener('click', () => cTogglePin(it));
+  }
+
+  function cRenderItems(cat) {
+    const list = cat === 'pinned' ? [...cPinned].map(id => C_ALL[id]).filter(Boolean) : (CDATA[cat] || []);
+    if (!list.length) {
+      const e = CEMPTY[cat] || { ic:'kb', t:'Nothing here yet', s:'' };
+      cItemsEl.style.display = 'none'; cDetailEl.style.display = 'flex'; cDetailEl.style.flexDirection = 'column';
+      cDetailEl.innerHTML = `<div class="empty-pane"><span class="empty-ic">${CICON[e.ic]}</span><div class="empty-t">${e.t}</div><div class="empty-s">${e.s}</div></div>`;
+      return;
+    }
+    cItemsEl.style.display = '';
+    const label = (CCATS.find(c=>c.key===cat)||{}).label || '';
+    cItemsEl.innerHTML = `<div class="items-label">${label}</div>` + list.map((it,i) => `
+      <div class="item${i===0?' hl':''}${cSelected.has(it.id)?' added':''}" data-i="${i}">
+        <span class="item-ic">${CICON[it.ic]}</span>
+        <span class="item-main"><span class="item-nm">${it.nm}</span><span class="item-meta">${it.meta}</span></span>
+        <span class="item-add">${cSelected.has(it.id) ? cCheck() : cPlus()}</span>
+      </div>`).join('');
+    cItemsEl.querySelectorAll('.item').forEach(el => {
+      const it = list[+el.dataset.i];
+      el.addEventListener('click', e => {
+        if (e.target.closest('.item-add')) { cToggle(it, el); return; }
+        cItemsEl.querySelectorAll('.item').forEach(x => x.classList.remove('hl')); el.classList.add('hl'); cRenderDetail(it);
+      });
+    });
+    cRenderDetail(list[0]);
+  }
+
+  function cPlus(){ return '<svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M10 4.5v11M4.5 10h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'; }
+  function cCheck(){ return '<svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M4.5 10.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
+  function cToggle(it, el) {
+    if (cSelected.has(it.id)) { cSelected.delete(it.id); el.classList.remove('added'); el.querySelector('.item-add').innerHTML = cPlus(); }
+    else { cSelected.set(it.id, { nm: it.nm, ic: it.ic }); el.classList.add('added'); el.querySelector('.item-add').innerHTML = cCheck(); }
+    cUpdateAttach();
+  }
+  function cUpdateAttach() {
+    const n = cSelected.size; cAttachBtn.disabled = n === 0;
+    cAttachBtn.textContent = n === 0 ? 'Attach' : (n === 1 ? 'Attach 1 source' : `Attach ${n} sources`);
+  }
+
+  const ctxOverlay = document.getElementById('ctxOverlay');
+  const cModalEl = ctxOverlay.querySelector('.modal');
+  const cTitleEl = cModalEl.querySelector('.h-title');
+  const cSubEl = cModalEl.querySelector('.h-sub');
+  const cSearchEl = cModalEl.querySelector('.m-search input');
+  function openCtx(kbOnly){
+    cModalEl.classList.toggle('kbonly', !!kbOnly);
+    if (kbOnly) {
+      cTitleEl.textContent = 'Add knowledge base';
+      cSubEl.textContent = 'Bring a knowledge base into this chat';
+      cSearchEl.placeholder = 'Search knowledge bases…';
+      cCatsEl.querySelectorAll('.cat').forEach(x => x.classList.remove('sel'));
+      const kb = cCatsEl.querySelector('.cat[data-cat="kb"]'); if (kb) kb.classList.add('sel');
+      cRenderItems('kb');
+    } else {
+      cTitleEl.textContent = 'Add context';
+      cSubEl.textContent = 'Bring your knowledge bases, charts, agents, calls, and skills into this chat';
+      cSearchEl.placeholder = 'Search knowledge bases, charts, agents, calls, skills…';
+    }
+    ctxOverlay.classList.add('open');
+  }
+  function closeCtx(){ ctxOverlay.classList.remove('open'); }
+  document.querySelectorAll('[data-addctx]').forEach(b => b.addEventListener('click', () => openCtx(false)));
+  document.querySelectorAll('[data-addkb]').forEach(b => b.addEventListener('click', () => openCtx(true)));
+  const cUploadBtn = document.getElementById('uploadFiles');
+  if (cUploadBtn) cUploadBtn.addEventListener('click', () => document.getElementById('extFile').click());
+  document.getElementById('mClose').addEventListener('click', closeCtx);
+  document.getElementById('mCancel').addEventListener('click', closeCtx);
+  ctxOverlay.addEventListener('click', e => { if (e.target === ctxOverlay) closeCtx(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && ctxOverlay.classList.contains('open')) closeCtx(); });
+
+  cAttachBtn.addEventListener('click', () => {
+    const inBuilder = document.getElementById('builder').classList.contains('show');
+    const target = document.getElementById(inBuilder ? 'builderAttached' : 'attached');
+    if (target) {
+      target.innerHTML = [...cSelected.values()].map(v => `<span class="ctx-tag">${CICON[v.ic]}${v.nm}<span class="x">✕</span></span>`).join('');
+      target.querySelectorAll('.x').forEach(x => x.addEventListener('click', ev => ev.target.closest('.ctx-tag').remove()));
+    }
+    closeCtx();
+  });
+
+  cRenderItems('kb');
+  cUpdateAttach();
+
+  document.querySelectorAll('.modewrap').forEach(wrap => {
+    const btn = wrap.querySelector('.modebtn');
+    const chev = btn.querySelector('.chev');
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      document.querySelectorAll('.modewrap.open, .modelwrap.open').forEach(w => w !== wrap && w.classList.remove('open'));
+      wrap.classList.toggle('open');
+    });
+    wrap.querySelectorAll('.mm').forEach(mm => mm.addEventListener('click', () => {
+      wrap.querySelectorAll('.mm').forEach(m => m.classList.remove('on'));
+      mm.classList.add('on');
+      btn.textContent = mm.dataset.mode;
+      btn.appendChild(chev);
+      wrap.classList.remove('open');
+    }));
+  });
+
+  document.querySelectorAll('.modelwrap').forEach(wrap => {
+    const btn = wrap.querySelector('.modelbtn');
+    const label = wrap.querySelector('.mlabel');
+    const menu = wrap.querySelector('.modelmenu');
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      document.querySelectorAll('.modewrap.open, .modelwrap.open').forEach(w => w !== wrap && w.classList.remove('open'));
+      wrap.classList.toggle('open');
+    });
+    wrap.querySelectorAll('.mdl').forEach(m => m.addEventListener('click', e => {
+      e.stopPropagation();
+      wrap.querySelectorAll('.mdl').forEach(x => x.classList.remove('on'));
+      m.classList.add('on');
+      label.textContent = m.dataset.model;
+      wrap.classList.remove('open');
+    }));
+    const more = wrap.querySelector('.more');
+    if (more) more.addEventListener('click', e => { e.stopPropagation(); menu.classList.toggle('exp'); });
+  });
+
+  document.addEventListener('click', () => document.querySelectorAll('.modewrap.open, .modelwrap.open').forEach(w => w.classList.remove('open')));
+</script>
+
+</body>
+</html>

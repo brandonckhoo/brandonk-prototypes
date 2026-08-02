@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retell AI — Settings, Copilot</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #3d64d7; --blue-bg: #ecf3ff; --blue-border: #C9D6F5;
+    --page: #F5F7FA; --text: #0E121B; --strong: #0A0A0A; --muted: #525866; --soft: #99A0AE;
+    --border: #E1E4EA; --border-2: #ECEFF3; --hover: rgba(0,0,0,0.03); --sel: #F0F1F4; --green: #1FC16B;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: var(--text); background: #fff; height: 100vh; overflow: hidden; }
+  .app { display: flex; height: 100vh; }
+
+  /* ===== Settings sidebar ===== */
+  .set-side { width: 248px; min-width: 248px; background: var(--page); border-right: 1px solid var(--border-2); display: flex; flex-direction: column; padding: 16px 0; }
+  .set-logo { display: flex; align-items: center; gap: 8px; padding: 4px 18px 14px; font-weight: 700; font-size: 15px; color: var(--strong); }
+  .set-logo .mark { width: 20px; height: 20px; border-radius: 6px; background: var(--strong); }
+  .set-ws { margin: 0 14px 12px; display: flex; align-items: center; gap: 9px; height: 40px; padding: 0 10px; background: #fff; border: 1px solid var(--border); border-radius: 9px; cursor: pointer; }
+  .set-ws .av { width: 22px; height: 22px; border-radius: 6px; background: var(--blue); color: #fff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  .set-ws .wn { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .set-ws .ch { color: var(--soft); }
+  .set-back { display: flex; align-items: center; gap: 7px; padding: 6px 18px; font-size: 12px; font-weight: 600; color: var(--soft); cursor: pointer; }
+  .set-label { font-size: 11px; font-weight: 600; color: var(--soft); text-transform: uppercase; letter-spacing: 0.04em; padding: 14px 18px 6px; }
+  .set-item { display: flex; align-items: center; gap: 10px; margin: 1px 12px; height: 34px; padding: 0 10px; border-radius: 7px; font-size: 13.5px; font-weight: 500; color: var(--muted); cursor: pointer; }
+  .set-item:hover { background: var(--hover); }
+  .set-item.act { background: #fff; color: var(--strong); font-weight: 600; box-shadow: 0 1px 2px rgba(16,24,40,0.06); }
+  .set-item svg { color: var(--soft); flex-shrink: 0; }
+  .set-item.act svg { color: var(--blue); }
+  .set-foot { margin-top: auto; padding: 12px 18px 0; }
+  .set-user { display: flex; align-items: center; gap: 9px; }
+  .set-user .av { width: 26px; height: 26px; border-radius: 50%; background: #DDE3EC; }
+  .set-user .un { font-size: 12.5px; color: var(--muted); }
+
+  /* ===== Copilot sub-nav ===== */
+  .skill-nav { width: 184px; min-width: 184px; border-right: 1px solid var(--border-2); padding: 20px 12px; }
+  .skill-nav .sn { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 11px; border-radius: 8px; font-size: 13.5px; font-weight: 500; color: var(--muted); cursor: pointer; }
+  .skill-nav .sn + .sn { margin-top: 2px; }
+  .skill-nav .sn:hover { background: var(--hover); }
+  .skill-nav .sn.active { background: var(--sel); color: var(--text); font-weight: 600; }
+  .skill-nav .sn svg { color: var(--soft); }
+  .skill-nav .sn.active svg { color: var(--muted); }
+
+  /* ===== List column ===== */
+  .list-col { width: 300px; min-width: 300px; border-right: 1px solid var(--border-2); display: flex; flex-direction: column; }
+  .lc-head { display: flex; align-items: center; padding: 20px 18px 12px; }
+  .lc-head h2 { font-size: 14px; font-weight: 600; color: var(--strong); }
+  .lc-head .count { font-size: 12.5px; color: var(--soft); margin-left: 7px; }
+  .lc-add { margin-left: auto; width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border); background: #fff; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+  .lc-add:hover { background: var(--hover); color: var(--text); }
+  .lc-search { margin: 0 14px 8px; display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; border: 1px solid var(--border); border-radius: 8px; color: var(--soft); }
+  .lc-search input { border: none; outline: none; font-size: 13px; color: var(--text); width: 100%; background: transparent; }
+  .lc-items { padding: 0 12px 12px; overflow-y: auto; flex: 1; }
+  .lc-group { font-size: 11px; font-weight: 600; color: var(--soft); text-transform: uppercase; letter-spacing: 0.04em; padding: 10px 8px 6px; }
+  .lc-item { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: 8px; cursor: pointer; }
+  .lc-item:hover { background: var(--hover); }
+  .lc-item.sel { background: var(--sel); }
+  .lc-name { font-size: 13.5px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
+  .lc-item.sel .lc-name { font-weight: 600; }
+  .lc-tag { font-size: 10.5px; font-weight: 600; color: var(--soft); flex-shrink: 0; }
+  .lc-tag.on { color: var(--green); }
+  .brand { width: 26px; height: 26px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .lc-foot { border-top: 1px solid var(--border-2); padding: 6px 12px 10px; }
+  .lc-action { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 11px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; }
+  .lc-action:hover { background: var(--hover); }
+  .lc-action.muted { color: var(--muted); font-weight: 500; }
+  .lc-action svg { color: var(--soft); }
+
+  /* ===== Detail column ===== */
+  .detail-col { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow-y: auto; }
+  .sd-top { display: flex; align-items: center; gap: 10px; padding: 20px 26px 0; }
+  .sd-top .sp { flex: 1; }
+  .vis-sel { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 11px; border: 1px solid var(--border); background: #fff; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: var(--text); cursor: pointer; }
+  .vis-sel svg { color: var(--soft); }
+  .sd-kebab { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: #fff; color: var(--soft); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+  .btn-connect { height: 34px; padding: 0 16px; background: var(--blue); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-connect:hover { background: #3559c4; }
+  .btn-connect.on { background: #fff; color: var(--green); border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 6px; }
+  .sd-body { padding: 16px 26px 32px; max-width: 760px; }
+  .sd-title { font-size: 24px; font-weight: 700; color: var(--strong); letter-spacing: -0.01em; }
+  .sd-desc { font-size: 14px; color: var(--muted); line-height: 1.5; margin-top: 6px; }
+  .sd-byline { display: flex; align-items: center; gap: 9px; margin-top: 14px; }
+  .sd-by { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--muted); }
+  .sd-by .av { width: 20px; height: 20px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  .sd-titlerow { display: flex; align-items: center; gap: 12px; }
+  .sd-titlerow .brand { width: 36px; height: 36px; border-radius: 9px; font-size: 15px; }
+
+  .sd-seclabel { font-size: 12px; font-weight: 600; color: var(--muted); margin: 24px 0 8px; }
+  .sd-instr { border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; background: #FCFCFD; font-size: 13.5px; color: var(--text); line-height: 1.6; }
+  .sd-instr p { margin: 0 0 10px; }
+  .sd-instr p:last-child { margin-bottom: 0; }
+  .sd-instr ul { margin: 4px 0 10px; padding-left: 20px; }
+  .sd-instr li { margin-bottom: 4px; }
+  .sd-instr .step { font-weight: 600; }
+
+  .sd-files { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .file { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); background: #fff; border: 1px solid var(--border); border-radius: 7px; padding: 6px 9px; }
+  .file svg { color: var(--soft); }
+  .sd-none { font-size: 12.5px; color: var(--soft); }
+  .sd-foot { font-size: 12px; color: var(--soft); margin-top: 26px; display: flex; align-items: center; gap: 7px; }
+
+  /* connector reads/writes */
+  .rw { margin-top: 18px; }
+  .rw-head { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; color: var(--text); }
+  .rw-head .dir { color: var(--soft); }
+  .rw-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 5px 0 9px; }
+  .rw-ex { display: flex; gap: 9px; align-items: flex-start; border: 1px solid var(--border); background: #FCFCFD; border-radius: 10px; padding: 11px 13px; font-size: 13px; color: var(--text); line-height: 1.5; }
+  .rw-ex .spark { color: var(--blue); flex-shrink: 0; margin-top: 1px; }
+
+  /* ===== Add custom MCP modal ===== */
+  .mcp-overlay { position: fixed; inset: 0; background: rgba(16,24,40,0.42); display: none; align-items: center; justify-content: center; z-index: 50; }
+  .mcp-overlay.open { display: flex; }
+  .mcp-modal { width: 480px; max-width: calc(100vw - 40px); background: #fff; border-radius: 14px; box-shadow: 0 24px 70px rgba(16,24,40,0.30); padding: 22px 24px 20px; }
+  .mcp-h { display: flex; align-items: flex-start; }
+  .mcp-h h3 { font-size: 18px; font-weight: 700; color: var(--strong); }
+  .mcp-h .mx { margin-left: auto; width: 28px; height: 28px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; color: var(--soft); cursor: pointer; }
+  .mcp-h .mx:hover { background: var(--hover); }
+  .mcp-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .mcp-label { font-size: 12px; font-weight: 600; color: var(--muted); margin: 18px 0 7px; }
+  .mcp-ta { width: 100%; height: 120px; resize: vertical; border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; color: var(--text); outline: none; }
+  .mcp-ta:focus { border-color: var(--blue-border); }
+  .mcp-note { font-size: 11.5px; color: var(--soft); margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+  .mcp-foot { display: flex; justify-content: flex-end; gap: 9px; margin-top: 18px; }
+  .btn-ghost { height: 34px; padding: 0 14px; background: #fff; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; }
+  .btn-ghost:hover { background: var(--hover); }
+  .btn-primary { height: 34px; padding: 0 16px; background: var(--blue); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-primary:disabled { background: #C7D0E0; cursor: default; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Settings sidebar -->
+  <div class="set-side">
+    <div class="set-logo"><span class="mark"></span>Retell</div>
+    <div class="set-ws"><span class="av">B</span><span class="wn">Brandon K… Workspace</span><span class="ch"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span></div>
+    <div class="set-back"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M12 5l-5 5 5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to app</div>
+
+    <div class="set-label">Workspace</div>
+    <div class="set-item"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M3.5 13l3.5-4 3 2.5L14 7l2.5 2.5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 16.5h13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Limits</div>
+    <div class="set-item"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 2.5L16 5v4.2c0 3.6-2.5 6.7-6 7.8-3.5-1.1-6-4.2-6-7.8V5l6-2.5z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/></svg>Reliability</div>
+    <div class="set-item"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="7" cy="10" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M9.5 9h6.5M14 9v2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>API Keys</div>
+    <div class="set-item"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 7l3.5 6 3-5 3.5 6" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Webhooks</div>
+    <div class="set-item act"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 2L11.6 6.4 16 8l-4.4 1.6L10 14 8.4 9.6 4 8l4.4-1.6L10 2z" fill="currentColor"/></svg>Copilot</div>
+
+    <div class="set-foot">
+      <div class="set-user"><span class="av"></span><span class="un">brandon@retell…</span></div>
+    </div>
+  </div>
+
+  <!-- Copilot sub-nav: Skills / Integrations -->
+  <div class="skill-nav">
+    <div class="sn active" data-tab="skills"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6 3.5h7a1.5 1.5 0 011.5 1.5v10a1.5 1.5 0 01-1.5 1.5H6.5A1.5 1.5 0 015 15V5A1.5 1.5 0 016.5 3.5z" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Skills</div>
+    <div class="sn" data-tab="integrations"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="3.5" y="3.5" width="6" height="6" rx="1.3" stroke="currentColor" stroke-width="1.4"/><rect x="11" y="3.5" width="5.5" height="5.5" rx="1.3" stroke="currentColor" stroke-width="1.4"/><rect x="3.5" y="11" width="5.5" height="5.5" rx="1.3" stroke="currentColor" stroke-width="1.4"/><path d="M13.7 11v5.5M11 13.7h5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Integrations</div>
+  </div>
+
+  <div class="list-col" id="listCol"></div>
+  <div class="detail-col" id="detailCol"></div>
+
+</div>
+
+<!-- Add custom MCP server modal -->
+<div class="mcp-overlay" id="mcpOverlay">
+  <div class="mcp-modal">
+    <div class="mcp-h"><h3>Add custom MCP server</h3><span class="mx" id="mcpClose"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 8.94L14.3 4.64L15.36 5.7L11.06 10L15.36 14.3L14.3 15.36L10 11.06L5.7 15.36L4.64 14.3L8.94 10L4.64 5.7L5.7 4.64L10 8.94Z" fill="currentColor"/></svg></span></div>
+    <div class="mcp-sub">Bring an MCP server into your workspace in seconds.</div>
+    <div class="mcp-label">Server config</div>
+    <textarea class="mcp-ta" id="mcpCfg" placeholder='{ "url": "https://mcp.example.com", "headers": { "Authorization": "Bearer …" } }'></textarea>
+    <div class="mcp-note"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><rect x="4.5" y="9" width="11" height="7.5" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 9V6.5a3 3 0 016 0V9" stroke="currentColor" stroke-width="1.3" fill="none"/></svg> Tokens stay private, they never appear in chat or model context.</div>
+    <div class="mcp-foot"><button class="btn-ghost" id="mcpCancel">Cancel</button><button class="btn-primary" id="mcpAdd" disabled>Add server</button></div>
+  </div>
+</div>
+
+<script>
+  /* ===== Skills data ===== */
+  const SKILLS = [
+    { id:'ott', name:'OverTheTop Company Context', owner:'Scott Brody', initial:'S', vis:'Private', scope:'Always on',
+      desc:"Company overview, services, and tone for OverTheTop's medspa clients, the context Scott loads into Claude today.",
+      files:['company-overview.pdf','services.md'],
+      body:`<p>OverTheTop is a network of medspa clinics offering aesthetic and wellness treatments. Use this context whenever Copilot writes or edits an agent for OverTheTop.</p>
+        <p class="step">Business</p>
+        <ul><li>Services: Botox, dermal fillers, laser hair removal, IV therapy, skin consultations.</li><li>6 clinics across California, open 9am to 7pm Monday to Saturday.</li></ul>
+        <p class="step">Conventions</p>
+        <ul><li>Tone: warm and professional, never pushy. Reassure first-time clients.</li><li>Never quote exact prices on a call, direct callers to a consultation.</li></ul>` },
+    { id:'brand', name:'Brand Voice Guide', owner:'Brandon', initial:'B', vis:'Private', scope:'Per session',
+      desc:'How our agents should sound: warm, concise, never pushy. Keeps generated prompts on-voice.',
+      files:['brand-voice.pdf'],
+      body:`<p>Apply this voice to any prompt or message Copilot writes.</p><ul><li>Warm and human, never robotic.</li><li>Short sentences. One idea per sentence.</li><li>Lead with the answer, then the detail.</li></ul>` },
+    { id:'rightway', name:'Rightway Build Conventions', owner:'Joel · cloud skills upload', initial:'J', vis:'Private', scope:'Always on',
+      desc:'Success milestones, A/B report format, and node naming, the skills file Joel maintains to keep reports consistent.',
+      files:['rightway-skills.md'],
+      body:`<p>Follow these conventions when building or reporting on Rightway agents.</p><ul><li>Node names: verb-first, lowercase, hyphenated (verify-identity, book-callback).</li><li>A/B reports compare published versions against named milestones.</li></ul>` }
+  ];
+
+  /* ===== Connectors data (Phase 1, from the Integration Library PRD) ===== */
+  const CONNECTORS = [
+    { id:'salesforce', name:'Salesforce', initial:'S', color:'#00A1E0', cat:'CRM', connected:true, desc:'Read accounts, cases, and contacts, and write follow-ups back.' },
+    { id:'hubspot', name:'HubSpot', initial:'H', color:'#FF7A59', cat:'CRM', connected:false, desc:'Read contacts, deals, and tickets, and log call outcomes back.' },
+    { id:'gworkspace', name:'Google Workspace', initial:'G', color:'#4285F4', cat:'Knowledge base', connected:true, desc:'Read Sheets, Docs, and Drive files as grounding context.' },
+    { id:'zendesk', name:'Zendesk', initial:'Z', color:'#03363D', cat:'CX platform', connected:false, desc:'Read tickets and macros for support-agent context.' },
+    { id:'calcom', name:'Cal.com', initial:'C', color:'#0A0A0A', cat:'Calendar', connected:false, desc:'Read availability and booked events for scheduling.' },
+    { id:'calendly', name:'Calendly', initial:'C', color:'#006BFF', cat:'Calendar', connected:false, desc:'Read invitee and event-type data for scheduling.' },
+    { id:'slack', name:'Slack', initial:'S', color:'#4A154B', cat:'Communication', connected:false, desc:'Read a channel for context, and post digests and alerts.' },
+    { id:'twilio', name:'Twilio', initial:'T', color:'#F22F46', cat:'Telephony', connected:true, desc:'Bring your own numbers and telephony for the agent.' },
+    { id:'telnyx', name:'Telnyx', initial:'T', color:'#00C08B', cat:'Telephony', connected:false, desc:'Bring your own numbers and telephony for the agent.' }
+  ];
+
+  const listCol = document.getElementById('listCol');
+  const detailCol = document.getElementById('detailCol');
+  const chev = '<svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>';
+  const lock = '<svg width="13" height="13" viewBox="0 0 20 20" fill="none"><rect x="4.5" y="9" width="11" height="7.5" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M7 9V6.5a3 3 0 016 0V9" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>';
+  const fileIco = '<svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 3.5h6l4 4v9H5v-13z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M11 3.5v4h4" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg>';
+  const spark = '<svg class="spark" width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2l1.5 4.5L16 8l-4.5 1.5L10 14 8.5 9.5 4 8l4.5-1.5L10 2z"/></svg>';
+  const check = '<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4.5 10.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  /* ===== Skills tab ===== */
+  function renderSkills(selId) {
+    const built = SKILLS.filter(s => s.builtin), mine = SKILLS.filter(s => !s.builtin);
+    const row = s => `<div class="lc-item ${s.id===selId?'sel':''}" data-id="${s.id}"><span class="lc-name">${s.name}</span>${s.builtin?'<span class="lc-tag">Built-in</span>':''}</div>`;
+    listCol.innerHTML = `
+      <div class="lc-head"><h2>My skills</h2><span class="count">${SKILLS.length}</span><button class="lc-add" title="Create skill"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 4.5v11M4.5 10h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div>
+      <div class="lc-items">${built.length?`<div class="lc-group">Built-in</div>${built.map(row).join('')}<div class="lc-group">Your skills</div>`:''}${mine.map(row).join('')}</div>`;
+    listCol.querySelectorAll('.lc-item').forEach(el => el.addEventListener('click', () => selectSkill(el.dataset.id)));
+  }
+  function selectSkill(id) {
+    const s = SKILLS.find(x => x.id === id);
+    renderSkills(id);
+    const files = s.files.length
+      ? '<div class="sd-seclabel">Files</div><div class="sd-files">' + s.files.map(f => `<span class="file">${fileIco}${f}</span>`).join('') + '</div>'
+      : '<div class="sd-seclabel">Files</div><div class="sd-none">No files. This skill is written inline.</div>';
+    detailCol.innerHTML = `
+      <div class="sd-top"><span class="sp"></span><span style="display:inline-flex;gap:10px;"><span class="vis-sel">${s.scope}${chev}</span><span class="vis-sel">${lock}${s.builtin?'Built-in':s.vis}${chev}</span></span><span class="sd-kebab"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></div>
+      <div class="sd-body">
+        <div class="sd-title">${s.name}</div>
+        <div class="sd-desc">${s.desc}</div>
+        <div class="sd-byline"><span class="sd-by"><span class="av">${s.initial}</span>${s.owner}</span></div>
+        <div class="sd-seclabel">Instructions</div>
+        <div class="sd-instr">${s.body}</div>
+        ${files}
+        <div class="sd-foot"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 9.2v4M10 6.6h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> Skills are read as context only. Copilot loads the body when a request matches it.</div>
+      </div>`;
+  }
+
+  /* ===== Integrations tab ===== */
+  function renderIntegrations(selId) {
+    const conn = CONNECTORS.filter(c => c.connected), avail = CONNECTORS.filter(c => !c.connected);
+    const row = c => `<div class="lc-item ${c.id===selId?'sel':''}" data-id="${c.id}"><span class="brand" style="background:${c.color}">${c.initial}</span><span class="lc-name">${c.name}</span>${c.connected?'<span class="lc-tag on">Connected</span>':''}</div>`;
+    let items = '';
+    if (conn.length) items += '<div class="lc-group">Connected</div>' + conn.map(row).join('');
+    items += '<div class="lc-group">Available</div>' + avail.map(row).join('');
+    listCol.innerHTML = `
+      <div class="lc-head"><h2>Integrations</h2></div>
+      <div class="lc-search"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="currentColor" stroke-width="1.6"/><path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input placeholder="Search integrations…"></div>
+      <div class="lc-items">${items}</div>
+      <div class="lc-foot">
+        <div class="lc-action" id="addMcp"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 4.5v11M4.5 10h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Add custom MCP server</div>
+        <div class="lc-action muted"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.4" stroke="currentColor" stroke-width="1.4"/><path d="M10 4v2M10 14v2M4 10h2M14 10h2M5.8 5.8l1.4 1.4M12.8 12.8l1.4 1.4M14.2 5.8l-1.4 1.4M7.2 12.8l-1.4 1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Manage connectors for the workspace</div>
+      </div>`;
+    listCol.querySelectorAll('.lc-item').forEach(el => el.addEventListener('click', () => selectConnector(el.dataset.id)));
+    document.getElementById('addMcp').addEventListener('click', openMcp);
+  }
+  function selectConnector(id) {
+    const c = CONNECTORS.find(x => x.id === id);
+    renderIntegrations(id);
+    const connectBtn = c.connected
+      ? `<button class="btn-connect on">${check}Connected</button>`
+      : `<button class="btn-connect" data-connect="${c.id}">Connect</button>`;
+    detailCol.innerHTML = `
+      <div class="sd-top"><span class="sp"></span>${connectBtn}<span class="sd-kebab"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15.5" r="1.5"/></svg></span></div>
+      <div class="sd-body">
+        <div class="sd-titlerow"><span class="brand" style="background:${c.color}">${c.initial}</span><div><div class="sd-title" style="font-size:20px">${c.name}</div><div class="sd-desc" style="margin-top:2px">${c.cat}</div></div></div>
+        <p style="font-size:14px;color:var(--muted);line-height:1.5;margin-top:16px">${c.desc}</p>
+        <div class="sd-foot"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 9.2v4M10 6.6h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> Reads run as context, writes need a confirm. Actions and scopes are defined in the Integration Library.</div>
+      </div>`;
+    const cb = detailCol.querySelector('[data-connect]');
+    if (cb) cb.addEventListener('click', () => { c.connected = true; selectConnector(c.id); });
+  }
+
+  /* ===== MCP modal ===== */
+  const mcpOverlay = document.getElementById('mcpOverlay'), mcpCfg = document.getElementById('mcpCfg'), mcpAdd = document.getElementById('mcpAdd');
+  function openMcp(){ mcpOverlay.classList.add('open'); mcpCfg.focus(); }
+  function closeMcp(){ mcpOverlay.classList.remove('open'); }
+  document.getElementById('mcpClose').addEventListener('click', closeMcp);
+  document.getElementById('mcpCancel').addEventListener('click', closeMcp);
+  mcpOverlay.addEventListener('click', e => { if (e.target === mcpOverlay) closeMcp(); });
+  mcpCfg.addEventListener('input', () => { mcpAdd.disabled = mcpCfg.value.trim() === ''; });
+  mcpAdd.addEventListener('click', closeMcp);
+
+  /* ===== Tabs ===== */
+  document.querySelectorAll('.skill-nav .sn').forEach(sn => sn.addEventListener('click', () => {
+    document.querySelectorAll('.skill-nav .sn').forEach(x => x.classList.remove('active'));
+    sn.classList.add('active');
+    if (sn.dataset.tab === 'integrations') { renderIntegrations('hubspot'); selectConnector('hubspot'); }
+    else { renderSkills('ott'); selectSkill('ott'); }
+  }));
+
+  renderSkills('ott'); selectSkill('ott');
+</script>
+</body>
+</html>

@@ -194,6 +194,10 @@ p{font-size:11.7px;line-height:1.5}
 .chartwrap .prismimg{width:100%;height:auto;display:block}
 .chartwrap .figsrc{margin-top:8px}
 
+.metricline{display:flex;gap:9px;align-items:baseline;margin-top:16px}
+.metricline b{font-size:11.2px;font-weight:500;color:var(--navy);flex:0 0 auto}
+.metricline span{font-size:11.2px;line-height:1.4;color:var(--muted)}
+
 /* new blocks */
 .scalestrip{display:flex;gap:14px;align-items:baseline;border-top:1px solid var(--rule);
   margin-top:18px;padding-top:11px}
@@ -373,8 +377,9 @@ p{font-size:11.7px;line-height:1.5}
   <h2 style="margin-top:9px">Retell AI was the most reliable of six voice platforms tested</h2>
   <div class="sub">Cekura Voice AI Benchmarks, benchmarks.cekura.ai</div>
 
+  <p style="margin-top:20px;font-size:12.3px;line-height:1.5">Cekura, an independent voice AI testing company, ran the same agent on six voice platforms and called each one over the phone. Retell AI passed more tests on all three runs than any other platform, and led by the widest margin on multi step workflows and error recovery, where it scored 95.2%. Those are the calls that cost you a human escalation when they fail.</p>
+
   <div class="studyhead"><span class="eyebrow">First study &nbsp;·&nbsp; Scheduling agent</span><span class="r">Cekura, 59 test scenarios</span></div>
-  <p style="margin-top:10px;font-size:12.3px;line-height:1.5">Cekura, an independent voice AI testing company, ran the same agent on six voice platforms and called each one over the phone. Retell AI passed more tests on all three runs than any other platform, and led by the widest margin on multi step workflows and error recovery, where it scored 95.2%. Those are the calls that cost you a human escalation when they fail.</p>
 
   <div class="charts">
     <div class="cbox">
@@ -435,14 +440,7 @@ p{font-size:11.7px;line-height:1.5}
     </div>
   </div>
 
-  <div class="metrics">
-    <div class="metric"><b>100.0%</b><div class="l">Calls ended correctly</div>
-      <div class="s">Every call closed cleanly. No dead air and no caller left hanging.</div></div>
-    <div class="metric"><b>4.74 / 5</b><div class="l">Repetition score</div>
-      <div class="s">Callers do not get stuck in loops, so fewer calls escalate to a human.</div></div>
-    <div class="metric"><b>1.96s</b><div class="l">Median response time</div>
-      <div class="s">Fast enough that callers do not talk over it or hang up.</div></div>
-  </div>
+  <div class="metricline"><b>Also first on call endings and repetition.</b><span>100% of calls closed cleanly. Repetition 4.74 out of 5. Median response time 1.96s, second fastest of the six.</span></div>
 
   
   <hr class="studydiv">
@@ -519,8 +517,7 @@ p{font-size:11.7px;line-height:1.5}
 
   <p style="margin-top:20px;font-size:12.3px;line-height:1.5">G2 ranks its Fastest-Growing Products on Momentum, a measure of year
     over year growth in customers, review volume, and market presence, earned on verified customer reviews. Out of
-    3,751 eligible products, Retell AI placed third. That answers the question a benchmark cannot: is this vendor
-    gaining ground or losing it?</p>
+    3,751 eligible products, Retell AI placed third.</p>
 
   <div class="g2hero">
     <div class="badge big">

@@ -145,7 +145,7 @@ p{font-size:11.7px;line-height:1.5}
 .study.blue .studyhead{margin:0 0 12px}
 .study.blue .charts{margin-top:14px}
 .study.blue .studyintro{font-size:11.5px;line-height:1.45;color:var(--body);margin-top:2px}
-.study.blue .metricline{margin-top:14px}
+.study.blue .metricrow{margin-top:18px}
 .study .hd{display:flex;justify-content:space-between;align-items:baseline}
 .study .hd .r{font-size:9.3px;color:var(--muted)}
 .study .t2{display:flex;justify-content:space-between;align-items:baseline;margin-top:4px}
@@ -203,9 +203,10 @@ p{font-size:11.7px;line-height:1.5}
 .chartwrap .prismimg{width:100%;height:auto;display:block}
 .chartwrap .figsrc{margin-top:8px}
 
-.metricline{display:flex;gap:9px;align-items:baseline;margin-top:16px}
-.metricline b{font-size:11.2px;font-weight:500;color:var(--navy);flex:0 0 auto}
-.metricline span{font-size:11.2px;line-height:1.4;color:var(--muted)}
+.metricrow{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+.metricrow>div{display:flex;gap:9px;align-items:baseline}
+.metricrow b{font-size:18px;font-weight:700;color:var(--navy);flex:0 0 auto}
+.metricrow span{font-size:11.2px;line-height:1.35;color:var(--muted)}
 
 /* new blocks */
 .scalestrip{display:flex;gap:14px;align-items:baseline;border-top:1px solid var(--rule);
@@ -449,7 +450,11 @@ p{font-size:11.7px;line-height:1.5}
     </div>
   </div>
 
-  <div class="metricline"><b>Also first on call endings and repetition.</b><span>100% of calls closed cleanly. Repetition 4.74 out of 5. Median response time 1.96s, second fastest of the six.</span></div>
+  <div class="metricrow">
+      <div><b>100%</b><span>of calls closed cleanly,<br>the only platform that did</span></div>
+      <div><b>4.74 / 5</b><span>repetition score,<br>highest of the six</span></div>
+      <div><b>1.96s</b><span>median response time,<br>second fastest of the six</span></div>
+    </div>
   </div>
   <div class="study">
     <div class="hd"><span class="eyebrow p">Second study &nbsp;·&nbsp; Regulated workflow</span>

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Why Retell AI Is Leading the Voice AI Industry</title>
+<style>
+:root{
+  --navy:#0B1E3F; --navy2:#16305C; --blue:#2563EB; --blueD:#1D4ED8; --blueL:#DBEAFE;
+  --blueXL:#EFF6FF; --purp:#6D28D9; --purpL:#EDE9FE; --purpXL:#F5F3FF; --ink:#0F172A;
+  --body:#3F4A5C; --muted:#6B7787; --faint:#94A3B8; --rule:#E2E8F0; --ruleD:#CBD5E1;
+  --soft:#F8FAFC; --grey:#C7D2DE; --red:#C4342B;
+  --amberBg:#FFFBEB; --amberBd:#FDE68A; --amberBar:#F59E0B; --amberTx:#78350F; --amberHd:#92400E;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:#525659}
+body{
+  font-family:"Helvetica Neue",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
+  color:var(--body); -webkit-font-smoothing:antialiased;
+}
+.page{
+  width:816px; height:1056px; background:#fff; margin:0 auto 24px; position:relative;
+  padding:0 66.7px; overflow:hidden;
+}
+.gradbar{position:absolute;top:0;left:0;right:0;height:9.3px;
+  background:linear-gradient(90deg,var(--navy) 0%,#2B4A8B 38%,var(--blue) 72%,var(--purp) 100%)}
+.gradbar.thin{height:6.7px}
+
+.brandwrap{position:absolute;top:88px;right:66.7px;line-height:0}
+.brandmark{width:176px;height:auto;display:block}
+
+/* header / footer */
+.phead{display:flex;justify-content:space-between;align-items:baseline;padding-top:34px;
+  border-bottom:1px solid var(--rule);padding-bottom:8px;margin-bottom:26px}
+.phead .l{font-size:10.1px;font-weight:500;color:var(--faint)}
+.phead .r{font-size:10.1px;font-weight:700;color:var(--blueD);letter-spacing:1.3px}
+.pfoot{position:absolute;left:66.7px;right:66.7px;bottom:34px;border-top:1px solid var(--rule);
+  padding-top:11px;display:flex;justify-content:space-between;font-size:9.3px;color:var(--faint)}
+.pfoot .r{font-weight:500}
+
+/* type */
+h1{font-size:36px;line-height:1.18;font-weight:700;color:var(--navy);letter-spacing:-.3px}
+h2{font-size:21.3px;font-weight:700;color:var(--navy);line-height:1.2}
+h3{font-size:14.1px;font-weight:700;color:var(--navy)}
+h4{font-size:13px;font-weight:700;color:var(--navy)}
+p{font-size:11.7px;line-height:1.5}
+.eyebrow{font-size:9.6px;font-weight:700;letter-spacing:1.9px;color:var(--blueD);text-transform:uppercase}
+.eyebrow.p{color:var(--purp)} .eyebrow.r{color:var(--red)} .eyebrow.n{color:var(--navy2)}
+.sub{font-size:10.6px;color:var(--faint);margin-top:4px}
+.lede{font-size:16px;font-weight:300;color:#475569;line-height:1.38;margin-top:10px}
+.q{font-size:15.2px;font-weight:500;color:var(--navy2);line-height:1.45}
+.accent{width:98px;height:2.9px;background:var(--blue);margin:20px 0 22px}
+
+/* chips */
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 16px}
+.chip{font-size:10.1px;font-weight:500;color:var(--blueD);background:var(--blueXL);
+  border:1px solid #C7DAFB;border-radius:5px;padding:4px 10px}
+.chip.p{color:var(--purp);background:var(--purpXL);border-color:#DDD6FE}
+
+/* pillar cards */
+.pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:17px;margin-top:26px}
+.card{border:1px solid var(--rule);border-radius:9px;overflow:hidden;background:#fff;
+  display:flex;flex-direction:column;padding:0 17px 17px}
+.card .top{height:4.3px;margin:0 -17px 15px}
+.card .kick{font-size:9.2px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase}
+.card .src{font-size:11.5px;font-weight:500;color:var(--ink);margin-top:5px}
+.card .big{font-size:44px;font-weight:700;color:var(--navy);line-height:1;margin-top:22px}
+.card .big.sm{font-size:36px}
+.card .biglab{font-size:11.2px;font-weight:500;margin-top:6px}
+.card hr{border:0;border-top:1px solid var(--rule);margin:11px 0}
+.card .desc{font-size:10.7px;line-height:1.45;color:var(--body)}
+.card .foot{margin-top:auto}
+.minibox{background:var(--blueXL);border-radius:5px;padding:8px 11px;margin-top:14px}
+.minibox b{display:block;font-size:10.4px;font-weight:500;color:var(--blueD)}
+.minibox span{font-size:10.1px;color:var(--muted)}
+
+/* tier strip */
+.tierwrap{margin-top:16px;position:relative}
+.tiermark{font-size:8.8px;font-weight:700;color:var(--navy);letter-spacing:.8px;text-align:center;
+  position:absolute;bottom:22px;left:0;right:0;transform:translateX(20%)}
+.tiermark:after{content:"";display:block;margin:2px auto 0;width:0;height:0;
+  border-left:4.5px solid transparent;border-right:4.5px solid transparent;border-top:6px solid var(--navy)}
+.tierbar{height:9.3px;border-radius:5px;
+  background:linear-gradient(90deg,#E2574C 0%,#F2B134 25%,#5FBB68 50%,#2F9CD6 75%,#7B4FD0 100%)}
+.tierlab{display:flex;justify-content:space-between;font-size:8.3px;color:var(--faint);margin-top:5px}
+
+/* badge */
+.badge{width:83px;flex:0 0 83px;border:1px solid #D8DEE7;border-radius:6px;overflow:hidden;text-align:center;background:#fff}
+.badge .bt{background:var(--red);color:#fff;font-size:7.3px;font-weight:700;letter-spacing:.5px;padding:3px 0}
+.badge .by{font-size:10.6px;font-weight:500;color:var(--muted);margin-top:6px}
+.badge .b3{font-size:24px;font-weight:700;color:var(--navy);margin:5px 0 3px}
+.badge .bf{font-size:7.8px;font-weight:700;color:var(--red);letter-spacing:.5px;line-height:1.25;padding-bottom:8px}
+.badgerow{display:flex;gap:15px;align-items:flex-start;margin-top:20px}
+.badgerow .n3{font-size:41px;font-weight:700;color:var(--navy);line-height:.95}
+.badgerow .lb{font-size:10.7px;font-weight:500;color:var(--red);line-height:1.3;margin-top:7px}
+.badgerow .mm{font-size:9.6px;color:var(--muted);margin-top:5px}
+
+/* closing panel p1 */
+.panel{background:var(--soft);border:1px solid var(--rule);border-radius:9px;padding:24px;margin-top:30px}
+.panel p{font-size:11.7px;line-height:1.5;margin-top:14px}
+.panel p:first-of-type{margin-top:12px}
+.srcstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;border-top:1px solid var(--rule);
+  margin-top:20px;padding-top:14px;position:relative}
+.srcstrip b{display:block;font-size:9.1px;font-weight:700;color:var(--navy2);letter-spacing:1.2px}
+.srcstrip span{font-size:9.3px;color:var(--muted)}
+.srcstrip .acc{position:absolute;right:0;top:14px;font-size:9.3px;color:var(--faint)}
+
+/* charts */
+.charts{display:grid;grid-template-columns:1.32fr 1fr;gap:19px;margin-top:19px}
+.cbox{border:1px solid var(--rule);border-radius:8px;padding:15px 17px 13px;background:#fff}
+.cbox h4{font-size:12.8px}
+.cbox .ch{font-size:9.6px;color:var(--muted);margin-top:2px}
+.bars{margin-top:14px}
+.brow{display:grid;grid-template-columns:70px 1fr 46px;align-items:center;gap:9px;margin-bottom:8.5px}
+.brow .nm{font-size:10.7px;text-align:right;color:var(--body)}
+.brow .vl{font-size:10.9px;font-weight:500;text-align:right;color:var(--muted)}
+.brow.hi .nm{font-weight:700;color:var(--navy)} .brow.hi .vl{font-weight:700;color:var(--navy)}
+.track{display:block;height:14px;background:#EDF1F6;border-radius:3.2px;overflow:hidden}
+.fill{display:block;height:100%;background:var(--grey);border-radius:3.2px}
+.brow.hi .fill{background:linear-gradient(90deg,var(--blueD),var(--purp))}
+.cnote{font-size:8.8px;color:var(--faint);margin-top:9px}
+
+/* metric strip */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.metric{background:var(--blueXL);border:1px solid #C7DAFB;border-radius:6px;padding:14px 17px;min-height:82px}
+.metric b{display:block;font-size:19.3px;font-weight:700;color:var(--navy);line-height:1.1}
+.metric .l{font-size:10.1px;font-weight:500;color:var(--blueD);margin-top:3px}
+.metric .s{font-size:9.6px;line-height:1.35;color:var(--muted);margin-top:4px}
+
+/* bullets */
+.bl{margin-top:12px}
+.bl li{list-style:none;position:relative;padding-left:13px;font-size:11.1px;line-height:1.42;margin-bottom:9px}
+.bl li:before{content:"";position:absolute;left:0;top:3px;width:3.2px;height:11px;background:var(--blue)}
+.bl.p li:before{background:var(--purp)} .bl.r li:before{background:var(--red)}
+.tri li{font-size:12.3px;line-height:1.42}
+.bl b{color:var(--ink)}
+
+/* purple study box */
+.study{background:var(--purpXL);border:1px solid #DDD6FE;border-radius:8px;padding:13px 16px 16px;margin-top:14px}
+.study .hd{display:flex;justify-content:space-between;align-items:baseline}
+.study .hd .r{font-size:9.3px;color:var(--muted)}
+.study .t2{display:flex;justify-content:space-between;align-items:baseline;margin-top:4px}
+.study .t2 h4{font-size:12.8px}
+.study .t2 .cap{font-size:9.3px;color:var(--purp)}
+.study p{font-size:10.7px;line-height:1.45;margin-top:5px}
+.study .spread{font-size:10.9px;color:#4A3F73;margin-top:6px}
+.medtbl{margin-top:15px}
+.mhead,.mrow{display:flex;align-items:center;padding:0 9px}
+.mhead .rk,.mrow .rk{flex:0 0 20px}
+.mhead .nm,.mrow .nm{flex:0 0 118px}
+.mhead .h1,.mhead .h2{flex:1 1 0}
+.mhead{padding-bottom:7px;border-bottom:1px solid #D8CFF0;margin-bottom:5px}
+.mhead span{font-size:8.8px;font-weight:700;color:var(--purp);letter-spacing:1.1px}
+.mrow{height:28px;border-radius:4px}
+.mrow.hi{background:#fff}
+.mrow .rk{font-size:9.1px;color:#A99CC9}
+.mrow .nm{font-size:11.2px;color:var(--body)}
+.mrow.hi .nm{font-weight:700;color:var(--navy)}
+.mrow>.bar{display:inline-block;width:112px;height:8px;background:#E9E4F6;border-radius:3px;
+  overflow:hidden;vertical-align:middle}
+.mrow>.bar .fl{display:block;height:100%;background:#C3B9DF;border-radius:3px}
+.mrow.hi>.bar .fl{background:linear-gradient(90deg,var(--purp),var(--blueD))}
+.mrow>.pc{font-size:10.9px;font-weight:500;color:#6E7788;margin-left:12px;width:52px;display:inline-block}
+.mrow.hi>.pc{font-weight:700;color:var(--navy)}
+.mrow>.ct{font-size:9.6px;color:var(--muted)}
+.mrow>.bar{flex:0 0 112px}
+.mrow>.ct{flex:1 1 0}
+.mini{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:12px}
+.mini .nm{font-size:9.2px;color:var(--muted)}
+.mini .vl{font-size:11.2px;font-weight:500;color:#7C8595;margin:1px 0 4px}
+.mini .hi .nm{font-weight:700;color:var(--navy)} .mini .hi .vl{font-weight:700;color:var(--navy)}
+.mini .tk{height:7px;background:#E7E2F5;border-radius:2.8px;overflow:hidden}
+.mini .fl{height:100%;background:#D5D0EA;border-radius:2.8px}
+.mini .hi .fl{background:linear-gradient(90deg,var(--purp),var(--blueD))}
+
+/* amber note */
+.note{background:var(--amberBg);border:1px solid var(--amberBd);border-left:3.5px solid var(--amberBar);
+  border-radius:6px;padding:13px 15px;margin-top:16px}
+.note .hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.note .hd b{font-size:10.1px;font-weight:700;color:var(--amberHd);letter-spacing:.8px}
+.note .hd span{font-size:9.3px;color:#A16207}
+.note p{font-size:10.7px;line-height:1.5;color:var(--amberTx)}
+
+.badge.big{width:116px;flex:0 0 116px}
+.badge.big .bt{font-size:9.9px;padding:5px 0}
+.badge.big .by{font-size:14.7px;margin-top:9px}
+.badge.big .b3{font-size:33.3px;margin:8px 0 5px}
+.badge.big .bf{font-size:10.7px;padding-bottom:12px}
+
+/* new blocks */
+.scalestrip{display:flex;gap:14px;align-items:baseline;border-top:1px solid var(--rule);
+  margin-top:18px;padding-top:11px}
+.scalestrip b{font-size:9.9px;font-weight:700;color:var(--navy)}
+.scalestrip span{font-size:9.9px;color:var(--muted)}
+.scalestrip em{margin-left:auto;font-style:normal;font-size:9.9px;color:var(--faint)}
+.mktband{background:var(--purpXL);border:1px solid #DDD6FE;border-radius:7px;padding:15px 20px;margin-top:18px}
+.mktband .hd{display:block;font-size:10.1px;font-weight:700;color:var(--purp);letter-spacing:1.2px;margin-bottom:11px}
+.mktband .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.mktband .cols>div{display:flex;gap:11px;align-items:baseline}
+.mktband .n{flex:0 0 46px;font-size:22.7px;font-weight:700;color:var(--navy)}
+.mktband .d{font-size:10.7px;line-height:1.4;color:var(--body)}
+.mktband .src{font-size:9.3px;color:var(--muted);text-align:right;margin-top:7px}
+.awards{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:16px}
+.aw{background:#FEF6F5;border:1px solid #F3D3D0;border-radius:6px;padding:16px 18px;
+  display:flex;flex-direction:column;justify-content:space-between;min-height:98px}
+.aw b{font-size:12.3px;font-weight:500;color:var(--navy);line-height:1.28}
+.aw span{font-size:10.7px;color:var(--muted);margin-top:12px}
+.aw i{font-style:normal;font-weight:700;color:var(--red)}
+.awsrc{font-size:10.7px;color:var(--faint);margin-top:12px}
+
+/* claim bar */
+.claim{background:var(--navy);border-radius:7px;padding:13px 19px;margin:18px 0 16px}
+.claim b{font-size:16.5px;font-weight:700;color:#fff}
+
+/* p3 split */
+.split{display:grid;grid-template-columns:330fr 162fr;gap:27px}
+.split .prismsvg{width:100%;height:auto;display:block}
+.figcap{font-size:9.6px;font-weight:500;color:var(--muted);margin-top:7px}
+.figsrc{font-size:9.3px;color:var(--faint);margin-top:2px}
+
+/* two-source band */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+.dcard{border-radius:6px;padding:12px 16px;border:1px solid}
+.dcard.b{background:var(--blueXL);border-color:#C7DAFB;border-left:3.2px solid var(--blue)}
+.dcard.p{background:var(--purpXL);border-color:#DDD6FE;border-left:3.2px solid var(--purp)}
+.dcard .h{display:flex;gap:9px;align-items:baseline}
+.dcard .h b{font-size:12.5px;font-weight:700;color:var(--navy)}
+.dcard .h span{font-size:9.9px;font-weight:500}
+.dcard.b .h span{color:var(--blue)} .dcard.p .h span{color:var(--purp)}
+.dcard p{font-size:10.7px;line-height:1.4;margin-top:6px}
+.dcard .sc{font-size:9.3px;color:var(--muted);margin-top:7px}
+
+/* p4 */
+.g2hero{background:var(--soft);border:1px solid var(--rule);border-radius:8px;padding:22px 26px;
+  display:flex;gap:26px;align-items:flex-start;margin-top:28px}
+.g2hero .tx b{display:block;font-size:23.3px;font-weight:700;color:var(--navy);line-height:1.28}
+.g2hero .tx p{font-size:12.3px;color:var(--muted);margin-top:13px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:26px}
+.stat{border:1px solid var(--rule);border-left:4px solid var(--red);border-radius:6px;padding:15px 18px;min-height:80px}
+.stat b{display:block;font-size:26.7px;font-weight:700;color:var(--navy);line-height:1.15}
+.stat span{font-size:10.9px;color:var(--muted);display:block;margin-top:5px}
+.tri{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+.tri li{margin-bottom:0}
+.concl{background:var(--navy);border-radius:9px;padding:22px 24px;margin-top:22px}
+.concl h3{font-size:16.8px;color:#fff;margin-bottom:16px}
+.crow{display:grid;grid-template-columns:104px 1fr;gap:8px;margin-bottom:11px}
+.crow .s{font-size:11.5px;font-weight:700;color:#7DA7F0}
+.crow .q{font-size:11.5px;font-weight:500;color:#fff}
+.crow .a{font-size:10.9px;color:#B9C7DC;line-height:1.4;margin-top:2px}
+.concl .cut{border-top:1px solid #2C4470;margin:14px 0 12px}
+.concl .fin{font-size:11.7px;font-weight:500;color:#fff;line-height:1.42}
+.next{background:var(--blueXL);border:1px solid #C7DAFB;border-left:3.2px solid var(--blue);
+  border-radius:6px;padding:11px 15px;margin-top:17px;display:flex;gap:16px}
+.next b{font-size:9.9px;font-weight:700;color:var(--blueD);letter-spacing:1.1px;flex:0 0 76px}
+.next p{font-size:10.4px;line-height:1.42}
+.srcs{display:flex;gap:12px;margin-top:15px}
+.srcs b{font-size:8.8px;font-weight:700;color:var(--navy);letter-spacing:1.1px;flex:0 0 56px;padding-top:1px}
+.srcs p{font-size:8.8px;line-height:1.4;color:var(--muted)}
+
+@media print{
+  @page{size:Letter;margin:0}
+  html{background:#fff}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .page{margin:0;box-shadow:none;page-break-after:always;break-after:page}
+  .page:last-child{page-break-after:auto;break-after:auto}
+}
+@media screen{ .page{box-shadow:0 3px 18px rgba(0,0,0,.35)} body{padding:24px 0} }
+</style>
+</head>
+<body>
+
+<!-- ==================== PAGE 1 ==================== -->
+<section class="page">
+  <div class="gradbar"></div>
+  <div class="brandwrap"><svg class="brandmark" width="72" height="20" viewBox="0 0 72 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.127 16.262C8.13 16.262 8.943 17.099 8.943 18.131C8.943 19.163 8.13 20 7.127 20C6.124 20 5.31 19.163 5.31 18.131C5.31 17.099 6.123 16.262 7.127 16.262ZM12.319 16.262C13.323 16.262 14.137 17.098 14.137 18.131C14.137 19.163 13.323 20 12.319 20C11.316 20 10.503 19.163 10.503 18.131C10.503 17.099 11.316 16.262 12.319 16.262ZM44.642 5.829C47.97 5.829 49.556 8.451 49.556 11.92H41.979C42.076 13.876 43.271 14.885 44.759 14.885C46.09 14.885 46.776 14.099 47.069 13.413H49.458C48.812 15.45 47.147 16.781 44.739 16.781C41.548 16.781 39.61 14.522 39.609 11.295C39.61 8.149 41.587 5.829 44.642 5.829ZM44.622 7.604C43.095 7.604 42.096 8.754 41.979 10.246H47.167C47.128 8.754 46.169 7.605 44.622 7.604ZM59.988 5.829C63.316 5.829 64.902 8.451 64.902 11.92H57.325C57.423 13.876 58.618 14.885 60.105 14.885C61.437 14.885 62.122 14.099 62.416 13.413H64.805C64.159 15.45 62.494 16.781 60.086 16.781C56.895 16.781 54.956 14.522 54.956 11.295C54.956 8.149 56.934 5.829 59.988 5.829ZM59.969 7.604C58.442 7.604 57.443 8.754 57.325 10.246H62.514C62.474 8.754 61.515 7.605 59.969 7.604ZM34.477 2.403C37.648 2.403 39.233 3.856 39.233 6.235C39.233 8.353 38.079 9.381 36.63 9.765V9.806C37.863 10.028 38.706 10.834 38.862 12.932L38.901 13.456C38.98 14.505 38.999 15.936 39.332 16.461V16.521H36.904C36.669 16.017 36.571 15.17 36.552 14.303C36.493 11.701 35.944 10.794 33.478 10.794H31.089V16.521H28.661V2.403H34.477ZM31.089 8.857H34.319C35.004 8.857 35.611 8.716 36.042 8.394C36.551 8.031 36.846 7.425 36.846 6.578C36.846 5.711 36.571 5.107 35.983 4.764C35.533 4.502 34.966 4.4 34.085 4.4H31.089V8.857ZM53.078 6.133H54.958V7.847H53.078V13.413C53.078 14.522 53.353 14.725 54.331 14.725C54.546 14.725 54.743 14.724 54.938 14.704V16.479C54.527 16.499 54.155 16.52 53.744 16.52C52.726 16.52 51.923 16.459 51.453 16.116C50.983 15.773 50.769 15.208 50.769 14.2V7.847H49.397V6.133H50.769V2.926H53.078V6.133ZM68.095 16.519H65.784V2.4H68.095V16.519ZM71.975 16.519H69.664V2.4H71.975V16.519ZM1.817 10.804C2.821 10.804 3.634 11.641 3.634 12.673C3.634 13.705 2.821 14.542 1.817 14.542C0.814 14.542 0 13.705 0 12.673C0 11.641 0.814 10.804 1.817 10.804ZM17.625 10.804C18.628 10.804 19.442 11.641 19.442 12.673C19.442 13.705 18.628 14.542 17.625 14.542C16.622 14.542 15.809 13.705 15.809 12.673C15.809 11.641 16.622 10.804 17.625 10.804ZM1.817 5.457C2.821 5.457 3.634 6.294 3.634 7.326C3.634 8.358 2.821 9.195 1.817 9.195C0.814 9.195 0 8.358 0 7.326C0 6.294 0.814 5.457 1.817 5.457ZM17.625 5.457C18.628 5.457 19.442 6.294 19.442 7.326C19.442 8.358 18.628 9.195 17.625 9.195C16.622 9.195 15.809 8.358 15.809 7.326C15.809 6.294 16.622 5.457 17.625 5.457ZM7.127 0C8.13 0 8.943 0.837 8.943 1.869C8.943 2.901 8.13 3.738 7.127 3.738C6.123 3.738 5.31 2.901 5.31 1.869C5.31 0.837 6.123 0 7.127 0ZM12.319 0C13.323 0 14.137 0.837 14.137 1.869C14.137 2.901 13.323 3.738 12.319 3.738C11.316 3.738 10.503 2.901 10.503 1.869C10.503 0.837 11.316 0 12.319 0Z" fill="#1A1B45"/></svg></div>
+  <div style="padding-top:76px">
+    <div class="eyebrow">For enterprise buyers &nbsp;·&nbsp; August 2026</div>
+    <h1 style="margin-top:20px">Why Retell AI Is Leading<br>the Voice AI Industry</h1>
+    <p class="lede">The evidence an enterprise team needs before putting voice AI in front of customers.</p>
+    <div class="accent"></div>
+
+    <p class="q">Can the platform perform reliably? Is it recognised by the market?<br>
+       Are customers adopting it at scale?</p>
+    <p style="margin-top:14px;font-size:13.9px;line-height:1.48">Retell AI answers all three. Independent testing,
+       industry analysts, and verified customer reviews all point the same way.</p>
+
+    <div class="pillars">
+      <div class="card">
+        <div class="top" style="background:var(--blue)"></div>
+        <div class="kick" style="color:var(--blue)">Technical proof</div>
+        <div class="src">Cekura benchmark</div>
+        <div class="big">96.6%</div>
+        <div class="biglab" style="color:var(--blueD)">reliability across three runs</div>
+        <hr>
+        <div class="desc">Highest of six platforms tested. Repeat runs catch the inconsistency a single demo hides.</div>
+        <div class="foot"><div class="minibox">
+          <b>100% of calls ended correctly</b><span>Fewer stuck calls and escalations</span>
+        </div></div>
+      </div>
+
+      <div class="card">
+        <div class="top" style="background:var(--purp)"></div>
+        <div class="kick" style="color:var(--purp)">Market recognition</div>
+        <div class="src">CMP Research Prism</div>
+        <div class="big sm">Leading</div>
+        <div class="biglab" style="color:var(--purp)">tier placement</div>
+        <hr>
+        <div class="desc">Evaluated alongside the incumbents your procurement team already knows.</div>
+        <div class="foot"><div class="tierwrap">
+          <div class="tiermark">RETELL AI</div>
+          <div class="tierbar"></div>
+          <div class="tierlab"><span>Emerging</span><span>Pioneering</span></div>
+        </div></div>
+      </div>
+
+      <div class="card">
+        <div class="top" style="background:var(--red)"></div>
+        <div class="kick" style="color:var(--red)">Customer momentum</div>
+        <div class="src">G2 Best Software 2026</div>
+        <div class="badgerow">
+          <div class="badge">
+            <div class="bt">BEST SOFTWARE</div>
+            <div class="by">2026</div>
+            <div class="b3">Top 3</div>
+            <div class="bf">FASTEST<br>GROWING</div>
+          </div>
+          <div>
+            <div class="n3">#3</div>
+            <div class="lb">Fastest-Growing<br>Products 2026</div>
+            <div class="mm">G2 Momentum</div>
+          </div>
+        </div>
+        <hr style="margin-top:14px">
+        <div class="desc">Out of 3,751 eligible products, on verified customer reviews. A vendor gaining customers, not losing them.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="eyebrow n">Why this matters now</div>
+      <p>Voice AI is moving out of controlled pilots and into customer facing service and revenue workflows.
+        A demo that sounds natural no longer settles the decision. Enterprise teams need two things a demo
+        cannot show. The first is consistent performance across repeated runs, edge cases, and failure paths.
+        The second is confidence that the vendor will still be relevant, supported, and commercially viable
+        through a multi year deployment.</p>
+      <p>Retell AI is the platform that clears both bars. The pages that follow set out what an independent benchmark,
+        an analyst evaluation, and thousands of verified customer reviews each found.</p>
+      
+      <div class="srcstrip">
+        <div><b>CEKURA</b><span>Voice Orchestration Benchmarks</span></div>
+        <div><b>CMP RESEARCH</b><span>Prism for Conversational IVR/Voicebot, Oct 2025</span></div>
+        <div><b>G2</b><span>Best Software Awards 2026</span></div>
+              </div>
+    </div>
+  </div>
+  <div class="pfoot"><span>Retell AI &nbsp;·&nbsp; August 2026</span>
+    <span class="r">Page 1 of 4</span></div>
+</section>
+
+<!-- ==================== PAGE 2 ==================== -->
+<section class="page">
+  <div class="gradbar thin"></div>
+  <div class="phead"><span class="l">Why Retell AI Is Leading the Voice AI Industry</span>
+    <span class="r">01&nbsp;&nbsp;HOW IT PERFORMS</span></div>
+
+  <div class="eyebrow">Cekura &nbsp;·&nbsp; Voice Orchestration Benchmarks</div>
+  <h2 style="margin-top:9px">Retell AI was the most reliable of six voice platforms tested</h2>
+  <div class="sub">Cekura Voice AI Benchmarks, benchmarks.cekura.ai</div>
+
+  <div class="chips">
+    <span class="chip">6 platforms</span><span class="chip">59 test scenarios</span>
+    <span class="chip">3 runs each</span><span class="chip">Same agent on every platform</span>
+  </div>
+
+  <p style="font-size:12.3px;line-height:1.5">Cekura, an independent voice AI testing company, ran the same agent on six voice platforms and called each one over the phone. Retell AI passed more tests on all three runs than any other platform, and led by the widest margin on the hardest set, multi step workflows and error recovery, where it scored 95.2%. Those are the calls that cost you a human escalation when they fail.</p>
+
+  <div class="charts">
+    <div class="cbox">
+      <h4>Reliability</h4>
+      <div class="ch">tests passed on all three runs</div>
+      <div class="bars">
+        <div class="brow hi"><span class="nm">Retell AI</span><span class="track"><span class="fill" style="width:82.8%"></span></span><span class="vl">96.6%</span></div>
+        <div class="brow"><span class="nm">Vapi</span><span class="track"><span class="fill" style="width:77.8%"></span></span><span class="vl">94.9%</span></div>
+        <div class="brow"><span class="nm">Pipecat</span><span class="track"><span class="fill" style="width:61.9%"></span></span><span class="vl">89.8%</span></div>
+        <div class="brow"><span class="nm">LiveKit</span><span class="track"><span class="fill" style="width:45.9%"></span></span><span class="vl">84.7%</span></div>
+        <div class="brow"><span class="nm">Synthflow</span><span class="track"><span class="fill" style="width:35.6%"></span></span><span class="vl">81.4%</span></div>
+        <div class="brow"><span class="nm">ElevenLabs</span><span class="track"><span class="fill" style="width:19.7%"></span></span><span class="vl">76.3%</span></div>
+      </div>
+      <div class="cnote">A test counts only when all three runs pass. Scale starts at 70%.</div>
+    </div>
+
+    <div class="cbox">
+      <h4>Speed and reliability</h4>
+      <div class="ch">upper left is best</div>
+      <svg viewBox="0 0 300 150" style="width:100%;height:auto;margin-top:8px" role="img"
+           aria-label="pass cubed versus P50 latency">
+        <g stroke="#EEF1F4" stroke-width="1">
+          <line x1="34" x2="288" y1="123.6" y2="123.6"/><line x1="34" x2="288" y1="101.7" y2="101.7"/>
+          <line x1="34" x2="288" y1="79.8" y2="79.8"/><line x1="34" x2="288" y1="57.8" y2="57.8"/>
+          <line x1="34" x2="288" y1="35.9" y2="35.9"/><line x1="34" x2="288" y1="14" y2="14"/>
+          <line x1="93.8" x2="93.8" y1="14" y2="128"/><line x1="168.5" x2="168.5" y1="14" y2="128"/>
+          <line x1="243.2" x2="243.2" y1="14" y2="128"/>
+        </g>
+        <g stroke="#CBD5E1" stroke-width="1">
+          <line x1="34" x2="288" y1="128" y2="128"/><line x1="34" x2="34" y1="14" y2="128"/>
+        </g>
+        <g fill="#94A3B8" font-size="7" font-family="Helvetica Neue,Helvetica,Arial" text-anchor="end">
+          <text x="30" y="126">75%</text><text x="30" y="104.2">80%</text><text x="30" y="82.3">85%</text>
+          <text x="30" y="60.3">90%</text><text x="30" y="38.4">95%</text><text x="30" y="16.5">100%</text>
+        </g>
+        <g fill="#94A3B8" font-size="7" font-family="Helvetica Neue,Helvetica,Arial" text-anchor="middle">
+          <text x="93.8" y="138">2.0s</text><text x="168.5" y="138">2.5s</text><text x="243.2" y="138">3.0s</text>
+        </g>
+        <circle cx="87.8" cy="28.9" r="9.4" fill="#C7DAFB"/><circle cx="87.8" cy="28.9" r="5.2" fill="#1D4ED8"/>
+        <text x="99" y="31.6" font-size="9" font-weight="700" fill="#0B1E3F"
+              font-family="Helvetica Neue,Helvetica,Arial">Retell AI</text>
+        <circle cx="144.6" cy="36.4" r="3.6" fill="#AFBCCB"/>
+        <text x="151" y="38.8" font-size="7.4" fill="#6B7787" font-family="Helvetica Neue,Helvetica,Arial">Vapi</text>
+        <circle cx="265.6" cy="58.7" r="3.6" fill="#AFBCCB"/>
+        <text x="259" y="61.1" font-size="7.4" fill="#6B7787" text-anchor="end"
+              font-family="Helvetica Neue,Helvetica,Arial">Pipecat</text>
+        <circle cx="162.5" cy="81.1" r="3.6" fill="#AFBCCB"/>
+        <text x="169" y="83.5" font-size="7.4" fill="#6B7787" font-family="Helvetica Neue,Helvetica,Arial">LiveKit</text>
+        <circle cx="267.1" cy="95.6" r="3.6" fill="#AFBCCB"/>
+        <text x="260.5" y="98" font-size="7.4" fill="#6B7787" text-anchor="end"
+              font-family="Helvetica Neue,Helvetica,Arial">Synthflow</text>
+        <circle cx="53.4" cy="117.9" r="3.6" fill="#AFBCCB"/>
+        <text x="60" y="120.3" font-size="7.4" fill="#6B7787" font-family="Helvetica Neue,Helvetica,Arial">ElevenLabs</text>
+        <text x="34" y="149" font-size="7" fill="#94A3B8" font-family="Helvetica Neue,Helvetica,Arial">response time · faster is left</text>
+        <text x="288" y="149" font-size="7" fill="#94A3B8" text-anchor="end"
+              font-family="Helvetica Neue,Helvetica,Arial">reliability · higher is better</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><b>100.0%</b><div class="l">Calls ended correctly</div>
+      <div class="s">Every call closed cleanly. No dead air and no caller left hanging.</div></div>
+    <div class="metric"><b>4.74 / 5</b><div class="l">Repetition score</div>
+      <div class="s">Callers do not get stuck in loops, so fewer calls escalate to a human.</div></div>
+    <div class="metric"><b>1.96s</b><div class="l">Median response time</div>
+      <div class="s">Fast enough that callers do not talk over it or hang up.</div></div>
+  </div>
+
+  
+  <div class="study">
+    <div class="hd"><span class="eyebrow p">Second study &nbsp;·&nbsp; Regulated workflow</span>
+      <span class="r">Cekura, July 2026</span></div>
+    <div class="t2"><h4>Enterprise workflow adherence, Medicare insurance</h4>
+      <span class="cap">Same agent &nbsp;·&nbsp; 23 test scenarios &nbsp;·&nbsp; 3 runs each &nbsp;·&nbsp; 414 calls</span></div>
+    <p class="spread">Running the same agent, the six platforms spread 30 points apart. In a regulated workflow that gap decides whether you can go live.</p>
+    <div class="medtbl">
+      <div class="mhead"><span class="rk"></span><span class="nm">PLATFORM</span>
+        <span class="h1">WORKFLOW ACCURACY</span><span class="h2">END TO END COMPLETION</span></div>
+      <div class="mrow hi"><span class="rk">1</span><span class="nm">Retell AI</span><span class="bar"><span class="fl" style="width:95.7%"></span></span><span class="pc">95.7%</span><span class="ct">(22/23)</span><span class="bar"><span class="fl" style="width:95.7%"></span></span><span class="pc">95.7%</span><span class="ct">(22/23)</span></div>
+      <div class="mrow"><span class="rk">2</span><span class="nm">ElevenLabs</span><span class="bar"><span class="fl" style="width:91.3%"></span></span><span class="pc">91.3%</span><span class="ct">(21/23)</span><span class="bar"><span class="fl" style="width:91.3%"></span></span><span class="pc">91.3%</span><span class="ct">(21/23)</span></div>
+      <div class="mrow"><span class="rk">3</span><span class="nm">Pipecat</span><span class="bar"><span class="fl" style="width:82.6%"></span></span><span class="pc">82.6%</span><span class="ct">(19/23)</span><span class="bar"><span class="fl" style="width:73.9%"></span></span><span class="pc">73.9%</span><span class="ct">(17/23)</span></div>
+      <div class="mrow"><span class="rk">4</span><span class="nm">LiveKit</span><span class="bar"><span class="fl" style="width:73.9%"></span></span><span class="pc">73.9%</span><span class="ct">(17/23)</span><span class="bar"><span class="fl" style="width:73.9%"></span></span><span class="pc">73.9%</span><span class="ct">(17/23)</span></div>
+      <div class="mrow"><span class="rk">5</span><span class="nm">Synthflow</span><span class="bar"><span class="fl" style="width:69.6%"></span></span><span class="pc">69.6%</span><span class="ct">(16/23)</span><span class="bar"><span class="fl" style="width:8.7%"></span></span><span class="pc">8.7%</span><span class="ct">(2/23)</span></div>
+      <div class="mrow"><span class="rk">6</span><span class="nm">Vapi</span><span class="bar"><span class="fl" style="width:65.2%"></span></span><span class="pc">65.2%</span><span class="ct">(15/23)</span><span class="bar"><span class="fl" style="width:65.2%"></span></span><span class="pc">65.2%</span><span class="ct">(15/23)</span></div>
+    </div>
+  </div>
+
+  <div class="scalestrip">
+    <b>About Cekura</b>
+    <span>5M+ voice agent minutes tested in production &nbsp;·&nbsp; 60K+ voice AI calls evaluated daily</span>
+  </div>
+
+  <div class="pfoot"><span>Retell AI &nbsp;·&nbsp; August 2026</span>
+    <span class="r">Page 2 of 4</span></div>
+</section>
+
+<!-- ==================== PAGE 3 ==================== -->
+<section class="page">
+  <div class="gradbar thin"></div>
+  <div class="phead"><span class="l">Why Retell AI Is Leading the Voice AI Industry</span>
+    <span class="r">02&nbsp;&nbsp;HOW THE MARKET RATES IT</span></div>
+
+  <div class="eyebrow p">CMP Research &nbsp;·&nbsp; Prism for Conversational IVR/Voicebot</div>
+  <h2 style="margin-top:9px;font-size:20.5px">Retell AI named a Leading provider in the CMP Research Prism</h2>
+  <div class="sub">CMP Research Prism for Conversational IVR/Voicebot, October 2025</div>
+
+  <div class="chips">
+    <span class="chip p">20 providers evaluated</span><span class="chip p">5 performance tiers</span>
+    <span class="chip p">Analyst, customer, and market data</span>
+  </div>
+
+  <p style="font-size:12.3px;line-height:1.5">CMP Research evaluated 20 voice providers serving customer contact, CX, and sales teams. Analysts combined their own review of each product with customer feedback and market data, then placed every provider into one of five tiers. For a shortlist, that means Retell AI is not an unknown quantity next to the incumbents.</p>
+
+  <div class="claim"><b style="font-size:15.5px">Retell AI placed in the Leading tier, alongside Rasa, Observe.AI, NiCE Cognigy, and PolyAI.</b></div>
+
+  <div class="split">
+    <div>
+      <svg class="prismsvg" viewBox="0 0 456 439" role="img" aria-label="CMP Research Prism, Retell AI in the Leading tier">
+      <defs><linearGradient id="pf" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#FDF7FB"/><stop offset="0.34" stop-color="#E7E3F8"/><stop offset="0.72" stop-color="#A99BEB"/><stop offset="1" stop-color="#6D4FD6"/></linearGradient><linearGradient id="lg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#F3EDF9"/><stop offset="0.36" stop-color="#CFC3F0"/><stop offset="0.7" stop-color="#9B85E4"/><stop offset="1" stop-color="#6D4FD6"/></linearGradient></defs>
+      <rect x="64.0" y="10.0" width="386.0" height="347.4" rx="8" fill="url(#pf)"/>
+      <text x="55.0" y="19.0" text-anchor="end" font-size="8.4" fill="#6B7787" style="font-family:Helvetica Neue,Helvetica,Arial">Higher</text>
+      <text x="55.0" y="29.0" text-anchor="end" font-size="8.4" fill="#6B7787" style="font-family:Helvetica Neue,Helvetica,Arial">Confidence</text>
+      <text x="55.0" y="346.4" text-anchor="end" font-size="8.4" fill="#6B7787" style="font-family:Helvetica Neue,Helvetica,Arial">Lower</text>
+      <text x="55.0" y="356.4" text-anchor="end" font-size="8.4" fill="#6B7787" style="font-family:Helvetica Neue,Helvetica,Arial">Confidence</text>
+      <text transform="translate(13,183.7) rotate(-90)" text-anchor="middle" font-size="8.6" font-weight="700" fill="#16305C" letter-spacing="0.9" style="font-family:Helvetica Neue,Helvetica,Arial">MARKETPLACE PERCEPTION</text>
+      <circle cx="266.3" cy="33.1" r="5.2" fill="#1A1B45"/>
+      <text x="257.5" y="36.1" text-anchor="end" font-size="8.8" font-weight="700" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Genesys</text>
+      <circle cx="311.0" cy="33.1" r="5.2" fill="#1A1B45"/>
+      <text x="319.8" y="36.1" font-size="8.8" font-weight="700" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Google</text>
+      <circle cx="260.7" cy="125.6" r="5.2" fill="#FFFFFF"/>
+      <text x="251.9" y="128.6" text-anchor="end" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Leaping AI</text>
+      <circle cx="286.6" cy="125.6" r="5.2" fill="#FFFFFF"/>
+      <text x="286.6" y="116.8" text-anchor="middle" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Rasa</text>
+      <circle cx="301.7" cy="125.7" r="5.2" fill="#FFFFFF"/>
+      <text x="310.5" y="128.7" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Observe.AI</text>
+      <circle cx="337.0" cy="145.1" r="5.2" fill="#FFFFFF"/>
+      <text x="328.2" y="148.1" text-anchor="end" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Cognigy</text>
+      <rect x="340.3" y="133.4" width="24" height="24" rx="5" fill="#fff" stroke="#D9D2F2"/>
+      <g transform="translate(343.9,137.0) scale(0.84)"><circle cx="10" cy="3.1" r="1.9" fill="#1A1B45"/><circle cx="16.9" cy="10" r="1.9" fill="#1A1B45"/><circle cx="10" cy="16.9" r="1.9" fill="#1A1B45"/><circle cx="3.1" cy="10" r="1.9" fill="#1A1B45"/><circle cx="14.9" cy="5.1" r="1.9" fill="#1A1B45"/><circle cx="14.9" cy="14.9" r="1.9" fill="#1A1B45"/><circle cx="5.1" cy="14.9" r="1.9" fill="#1A1B45"/><circle cx="5.1" cy="5.1" r="1.9" fill="#1A1B45"/></g>
+      <text x="352.3" y="170.4" text-anchor="middle" font-size="9.6" font-weight="700" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Retell AI</text>
+      <circle cx="368.1" cy="145.1" r="5.2" fill="#FFFFFF"/>
+      <text x="376.9" y="148.1" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">PolyAI</text>
+      <circle cx="293.8" cy="183.0" r="5.2" fill="#FFFFFF"/>
+      <text x="285.0" y="186.0" text-anchor="end" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">CallMiner</text>
+      <circle cx="309.8" cy="183.0" r="5.2" fill="#FFFFFF"/>
+      <text x="318.6" y="186.0" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Nurix AI</text>
+      <circle cx="255.6" cy="202.4" r="5.2" fill="#FFFFFF"/>
+      <text x="246.8" y="205.4" text-anchor="end" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Zingly</text>
+      <circle cx="329.5" cy="221.3" r="5.2" fill="#FFFFFF"/>
+      <text x="338.3" y="224.3" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Floatbot</text>
+      <circle cx="258.1" cy="240.5" r="5.2" fill="#FFFFFF"/>
+      <text x="249.3" y="243.5" text-anchor="end" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Assembled</text>
+      <circle cx="293.8" cy="259.4" r="5.2" fill="#FFFFFF"/>
+      <text x="285.0" y="262.4" text-anchor="end" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Alorica</text>
+      <circle cx="329.2" cy="259.2" r="5.2" fill="#FFFFFF"/>
+      <text x="329.2" y="250.4" text-anchor="middle" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Goodcall</text>
+      <circle cx="400.4" cy="259.2" r="5.2" fill="#FFFFFF"/>
+      <text x="400.4" y="250.4" text-anchor="middle" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Replicant</text>
+      <circle cx="291.9" cy="278.3" r="5.2" fill="#FFFFFF"/>
+      <text x="300.7" y="281.3" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">SESTEK</text>
+      <circle cx="253.3" cy="297.4" r="5.2" fill="#FFFFFF"/>
+      <text x="244.5" y="300.4" text-anchor="end" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Gladly</text>
+      <circle cx="317.1" cy="297.4" r="5.2" fill="#FFFFFF"/>
+      <text x="325.9" y="300.4" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">Capacity</text>
+      <circle cx="248.7" cy="333.9" r="5.2" fill="#FFFFFF"/>
+      <text x="257.5" y="336.9" font-size="8.8" font-weight="500" fill="#0B1E3F" style="font-family:Helvetica Neue,Helvetica,Arial">FreeClimb</text>
+      <text x="64.0" y="371.4" font-size="8.4" fill="#6B7787" style="font-family:Helvetica Neue,Helvetica,Arial">Less</text>
+      <text x="64.0" y="381.4" font-size="8.4" fill="#6B7787" style="font-family:Helvetica Neue,Helvetica,Arial">Progressive</text>
+      <text x="450.0" y="371.4" text-anchor="end" font-size="8.4" fill="#6B7787" style="font-family:Helvetica Neue,Helvetica,Arial">More</text>
+      <text x="450.0" y="381.4" text-anchor="end" font-size="8.4" fill="#6B7787" style="font-family:Helvetica Neue,Helvetica,Arial">Progressive</text>
+      <text x="257.0" y="377.4" text-anchor="middle" font-size="9.2" font-weight="700" fill="#16305C" letter-spacing="0.9" style="font-family:Helvetica Neue,Helvetica,Arial">ANALYST &amp; USER PERSPECTIVE</text>
+      <rect x="64.0" y="395.4" width="386.0" height="10" rx="5" fill="url(#lg)"/>
+      <path d="M102.6 410.4 l-4 5.5 l8 0 z" fill="#16305C"/>
+      <text x="102.6" y="426.4" text-anchor="middle" font-size="7.8" font-weight="700" fill="#16305C" letter-spacing="0.5" style="font-family:Helvetica Neue,Helvetica,Arial">EMERGING</text>
+      <path d="M179.8 410.4 l-4 5.5 l8 0 z" fill="#16305C"/>
+      <text x="179.8" y="426.4" text-anchor="middle" font-size="7.8" font-weight="700" fill="#16305C" letter-spacing="0.5" style="font-family:Helvetica Neue,Helvetica,Arial">UP & COMING</text>
+      <path d="M257.0 410.4 l-4 5.5 l8 0 z" fill="#16305C"/>
+      <text x="257.0" y="426.4" text-anchor="middle" font-size="7.8" font-weight="700" fill="#16305C" letter-spacing="0.5" style="font-family:Helvetica Neue,Helvetica,Arial">CORE PERFORMING</text>
+      <path d="M334.2 410.4 l-4 5.5 l8 0 z" fill="#16305C"/>
+      <text x="334.2" y="426.4" text-anchor="middle" font-size="7.8" font-weight="700" fill="#6D28D9" letter-spacing="0.5" style="font-family:Helvetica Neue,Helvetica,Arial">LEADING</text>
+      <path d="M411.4 410.4 l-4 5.5 l8 0 z" fill="#16305C"/>
+      <text x="411.4" y="426.4" text-anchor="middle" font-size="7.8" font-weight="700" fill="#16305C" letter-spacing="0.5" style="font-family:Helvetica Neue,Helvetica,Arial">PIONEERING</text>
+      </svg>
+      <div class="figsrc">CMP Research Prism for Conversational IVR/Voicebot, October 2025</div>
+    </div>
+    <div>
+      <h4>What this adds</h4>
+      <ul class="bl p">
+        <li><b>Shortlist ready:</b> Retell AI is judged in the same field as PolyAI, NiCE Cognigy, Genesys, and Google,
+          which clears the who are they question early.</li>
+        <li><b>Procurement cover:</b> Independent recognition gives your team a defensible reason to put
+          Retell AI on the list.</li>
+        <li><b>Not an unproven bet:</b> The field mixes contact centre incumbents with AI native providers.
+          Retell AI competes in an established category.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="mktband">
+    <b class="hd">THE MARKET CMP MEASURED</b>
+    <div class="cols">
+      <div><span class="n">87%</span><span class="d">of customer contact and CX executives are increasing
+        investment in self service by the end of 2025</span></div>
+      <div><span class="n">41%</span><span class="d">of CX function heads say conversational IVR and voicebot
+        is a top technology priority in the next two years</span></div>
+      <div><span class="n">2nd</span><span class="d">most urgent priority for CX leaders in 2025 and 2026 is
+        increasing customer adoption of self service</span></div>
+    </div>
+      </div>
+
+  <div class="pfoot"><span>Retell AI &nbsp;·&nbsp; August 2026</span>
+    <span class="r">Page 3 of 4</span></div>
+</section>
+
+<!-- ==================== PAGE 4 ==================== -->
+<section class="page">
+  <div class="gradbar thin"></div>
+  <div class="phead"><span class="l">Why Retell AI Is Leading the Voice AI Industry</span>
+    <span class="r">03&nbsp;&nbsp;HOW FAST IT IS GROWING</span></div>
+
+  <div class="eyebrow r">G2 &nbsp;·&nbsp; Best Software Awards 2026</div>
+  <h2 style="margin-top:9px">Adoption, satisfaction, and market attention</h2>
+  <div class="sub">G2 Fastest-Growing Products 2026, announced 18 February 2026</div>
+
+  <div class="g2hero">
+    <div class="badge big">
+      <div class="bt">BEST SOFTWARE</div><div class="by">2026</div>
+      <div class="b3">Top 3</div><div class="bf">FASTEST<br>GROWING</div>
+    </div>
+    <div class="tx">
+      <b>G2 ranked Retell AI #3 on its 2026<br>Fastest-Growing Products list.</b>
+      <p>Ranked on Momentum scores. The top five were TradeInt, n8n, Retell AI, Synthflow, and Handoff.</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>151,264</b><span>products in the category</span></div>
+    <div class="stat"><b>3,751</b><span>eligible for the 2026 awards</span></div>
+    <div class="stat"><b>100</b><span>products on the final list</span></div>
+    <div class="stat"><b>86</b><span>of the 100 are new for 2026</span></div>
+  </div>
+
+  <p style="margin-top:26px;font-size:12.8px;line-height:1.56">G2 ranks its Fastest-Growing Products on Momentum, which measures year over year growth in customers, review volume, and market presence. Every placement is earned on verified customer reviews. It is the closest public read on whether a vendor is winning customers or losing them.</p>
+
+  <h4 style="margin-top:26px;font-size:16px">Why momentum matters to an enterprise buyer</h4>
+  <p style="margin-top:8px;font-size:12.8px;line-height:1.5">Enterprise buyers worry about vendor churn because switching platforms
+    is expensive. It means new integrations, retraining, compliance review, a fresh security assessment, and
+    migration of live customer workflows already carrying traffic.</p>
+  <ul class="bl r tri">
+    <li><b>Adoption:</b> A growing customer base, not a handful of reference logos.</li>
+    <li><b>Hardening:</b> More customers means more real edge cases found and fixed before you hit them.</li>
+    <li><b>Still here in three years:</b> 86 of the 100 listed products are new this year. Retell AI is holding
+      market attention, not fading from it.</li>
+  </ul>
+
+  <h4 style="margin-top:26px;font-size:16px">Four placements in G2&#39;s 2026 Best Software Awards</h4>
+  <div class="awards">
+    <div class="aw"><b>Fastest Growing Products</b><span><i>#3</i> · 2026 winner</span></div>
+    <div class="aw"><b>Agentic AI Software Products</b><span>2026 winner</span></div>
+    <div class="aw"><b>AI Software Products</b><span>2026 winner</span></div>
+    <div class="aw"><b>Highest Satisfaction Products</b><span>2026 winner</span></div>
+  </div>
+  <div class="awsrc">Awarded on verified customer reviews.</div>
+
+  
+
+
+  <div class="pfoot"><span>Retell AI &nbsp;·&nbsp; August 2026</span>
+    <span class="r">Page 4 of 4</span></div>
+</section>
+
+</body>
+</html>

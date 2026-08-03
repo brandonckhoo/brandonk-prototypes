@@ -136,7 +136,12 @@ p{font-size:11.7px;line-height:1.5}
 .bl b{color:var(--ink)}
 
 /* purple study box */
-.study{background:var(--purpXL);border:1px solid #DDD6FE;border-radius:8px;padding:13px 16px 16px;margin-top:14px}
+.study{background:var(--purpXL);border:1px solid #DDD6FE;border-radius:8px;padding:15px 18px 18px;margin-top:18px}
+.study.blue{background:var(--blueXL);border-color:#C7DAFB}
+.study.blue .cbox{border-color:#D7E3F7}
+.study.blue .studyhead{margin:0 0 12px}
+.study.blue .charts{margin-top:0}
+.study.blue .metricline{margin-top:14px}
 .study .hd{display:flex;justify-content:space-between;align-items:baseline}
 .study .hd .r{font-size:9.3px;color:var(--muted)}
 .study .t2{display:flex;justify-content:space-between;align-items:baseline;margin-top:4px}
@@ -379,6 +384,7 @@ p{font-size:11.7px;line-height:1.5}
 
   <p style="margin-top:20px;font-size:12.3px;line-height:1.5">Cekura, an independent voice AI testing company, ran the same agent on six voice platforms and called each one over the phone. Retell AI passed more tests on all three runs than any other platform, and led by the widest margin on multi step workflows and error recovery, where it scored 95.2%. Those are the calls that cost you a human escalation when they fail.</p>
 
+  <div class="study blue">
   <div class="studyhead"><span class="eyebrow">First study &nbsp;·&nbsp; Scheduling agent</span><span class="r">Cekura, 59 test scenarios</span></div>
 
   <div class="charts">
@@ -441,15 +447,13 @@ p{font-size:11.7px;line-height:1.5}
   </div>
 
   <div class="metricline"><b>Also first on call endings and repetition.</b><span>100% of calls closed cleanly. Repetition 4.74 out of 5. Median response time 1.96s, second fastest of the six.</span></div>
-
-  
-  <hr class="studydiv">
+  </div>
   <div class="study">
     <div class="hd"><span class="eyebrow p">Second study &nbsp;·&nbsp; Regulated workflow</span>
       <span class="r">Cekura, July 2026</span></div>
     <div class="t2"><h4>Enterprise workflow adherence, Medicare insurance</h4>
       <span class="cap">Same agent &nbsp;·&nbsp; 23 test scenarios &nbsp;·&nbsp; 3 runs each &nbsp;·&nbsp; 414 calls</span></div>
-    <p class="spread">This was not a demo scenario but a Medicare insurance workflow with real compliance requirements. Cekura ran 23 evaluation scenarios three times each, 414 calls in total, and a scenario only passed if the agent got it right all three times in a row. The same agent and the same tools, but a 30 point reliability gap dictated entirely by the platform underneath. For regulated industries, that gap is the difference between an agent you can put in production and one you cannot.</p>
+    <p class="spread">This benchmark used a real Medicare insurance workflow with live compliance requirements. Cekura ran 23 evaluation scenarios three times each, 414 calls in total, and a scenario only passed if the agent got it right all three times in a row. Every platform ran the same agent with the same tools, yet the results spread 30 points apart. For regulated industries, that gap is the difference between an agent you can put in production and one you cannot.</p>
     <div class="medtbl">
       <div class="mhead"><span class="rk"></span><span class="nm">PLATFORM</span>
         <span class="h1">WORKFLOW ACCURACY</span><span class="h2">END TO END COMPLETION</span></div>

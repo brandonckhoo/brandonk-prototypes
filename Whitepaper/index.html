@@ -74,6 +74,16 @@ p{font-size:11.7px;line-height:1.5}
 .minibox b{display:block;font-size:10.4px;font-weight:500;color:var(--blueD)}
 .minibox span{font-size:10.1px;color:var(--muted)}
 
+.tierladder{margin-top:16px;position:relative}
+.tierladder .lab{font-size:8.6px;font-weight:700;color:var(--purp);letter-spacing:.6px;text-align:right;
+  margin-bottom:3px;padding-right:17%}
+.tierladder .segs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.tierladder i{display:block;height:12px;border-radius:3px;background:#E6E1F4}
+.tierladder i.on{background:var(--purp)}
+.tierladder .ends{display:flex;justify-content:space-between;font-size:8.6px;color:var(--faint);margin-top:6px}
+.minibox.red{background:#FEF6F5}
+.minibox.red b{color:var(--red)}
+
 /* tier strip */
 .tierwrap{margin-top:16px;position:relative}
 .tiermark{font-size:8.8px;font-weight:700;color:var(--navy);letter-spacing:.8px;text-align:center;
@@ -300,10 +310,8 @@ p{font-size:11.7px;line-height:1.5}
     <p class="lede">The evidence an enterprise team needs before putting voice AI in front of customers.</p>
     <div class="accent"></div>
 
-    <p class="q">Can the platform perform reliably? Is it recognised by the market?<br>
-       Are customers adopting it at scale?</p>
-    <p style="margin-top:14px;font-size:13.9px;line-height:1.48">Retell AI answers all three. Independent testing,
-       industry analysts, and verified customer reviews all point the same way.</p>
+    <p class="q">Choosing a voice platform is a bet on two things. That it holds up in<br>production, and that the vendor is still there when the contract renews.</p>
+    <p style="margin-top:16px;font-size:13.3px;line-height:1.48">A demo answers neither. Three independent parties did. A testing company that ran six platforms head to head, an analyst firm that evaluated 20 providers, and a review platform with verified customer data.</p>
 
     <div class="pillars">
       <div class="card">
@@ -326,11 +334,11 @@ p{font-size:11.7px;line-height:1.5}
         <div class="big sm">Leading</div>
         <div class="biglab" style="color:var(--purp)">tier placement</div>
         <hr>
-        <div class="desc">Evaluated alongside the incumbents your procurement team already knows.</div>
-        <div class="foot"><div class="tierwrap">
-          <div class="tiermark">RETELL AI</div>
-          <div class="tierbar"></div>
-          <div class="tierlab"><span>Emerging</span><span>Pioneering</span></div>
+        <div class="desc">Judged in the same field as PolyAI, NiCE Cognigy, Genesys, and Google.</div>
+        <div class="foot"><div class="tierladder">
+          <div class="lab">LEADING</div>
+          <div class="segs"><i></i><i></i><i></i><i class="on"></i><i></i></div>
+          <div class="ends"><span>1 of 5 tiers</span><span>20 providers evaluated</span></div>
         </div></div>
       </div>
 
@@ -347,7 +355,10 @@ p{font-size:11.7px;line-height:1.5}
           </div>
         </div>
         <hr style="margin-top:14px">
-        <div class="desc">Out of 3,751 eligible products, on verified customer reviews. A vendor gaining customers, not losing them.</div>
+        <div class="desc">Out of 3,751 eligible products, on verified customer reviews.</div>
+        <div class="foot"><div class="minibox red">
+          <b>Only voice AI in the top three</b><span>Synthflow is fourth</span>
+        </div></div>
       </div>
     </div>
 
